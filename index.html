@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>OmegaSim</title>
+<title>HybridDash 2.0</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <!-- ALS APP INSTALLIERBAR. Rein zusaetzlich: im Browser laeuft alles unveraendert weiter.
      Der Nutzen ist Vollbild ohne Adresszeile, ein Symbol im Startmenue und - mit dem
@@ -388,6 +388,18 @@
   /* v1.0.23 BESTELLT: "denselben Effekt beim Omega im Hintergrund und das Omega etwas
      deutlicher (aktuell sehr schwach und kaum erkennbar)". Vorher ::before mit 4,5 % Deckkraft;
      jetzt ein eigenes Element (die zwei Glitch-Ebenen brauchen ::before und ::after) mit 13 %. */
+  /* HybridDash 2.0 */
+  .hd-tag { display: inline-block; margin-left: .5em; padding: 0 .45em; border-radius: 3px; font-size: .68em;
+            font-weight: 800; letter-spacing: .06em; text-transform: uppercase; vertical-align: middle;
+            background: linear-gradient(90deg, #00a3e0, #ff2a60); color: #fff; }
+  .hd-status { color: #ffd23f; }
+  .hd-slider { display: inline-flex; align-items: center; gap: .6em; }
+  .hd-slider b { min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; }
+  .hd-avatar-knopf { all: unset; cursor: pointer; display: inline-flex; vertical-align: middle; margin-right: .45em;
+                     border-radius: 50%; line-height: 0; }
+  .hd-avatar-knopf:focus-visible { outline: 2px solid #00d6ff; outline-offset: 2px; }
+  .hd-avatar { display: block; }
+  .hd-wuerfel { margin-left: .4em; }
   .home-omega { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     font-size: clamp(110px, min(34vw, 50vh), 480px); font-weight: 700; line-height: 1;
     /* Eine normal breite Schrift: die schmale Titelschrift zog das Omega in die Laenge
@@ -5222,13 +5234,13 @@
          Jede Taste, jeder Klick ausserhalb von Sprache und Links fuehrt ins Hauptmenue
          (51-konsole.js). #lang-toggle, #app-version und #home-install behalten ihre ids. -->
     <div class="k-titel">
-    <div class="home-titel" aria-label="OMEGA SIM" data-i18n-skip>
-      <span class="home-omega" data-t="&Omega;" aria-hidden="true">&Omega;</span>
+    <div class="home-titel" aria-label="HYBRIDDASH 2.0" data-i18n-skip>
+      <span class="home-omega hd-omega" data-t="2.0" aria-hidden="true">2.0</span>
       <!-- BESTELLT: "OMEGA blaue glitches und SIM rote (links blau, rechts rot, wie die
            Strecke). Sonst sieht es aus wie die Niederländische Flagge" - vorher lag oben ein
            blauer und unten ein roter Streifen quer ueber beiden Woertern. -->
-      <span class="home-titel-text k-glitch-blau" data-text="OMEGA">OMEGA</span><span
-        class="home-titel-text k-glitch-rot" data-text="SIM">SIM</span>
+      <span class="home-titel-text k-glitch-blau" data-text="HYBRID">HYBRID</span><span
+        class="home-titel-text k-glitch-rot" data-text="DASH">DASH</span>
     </div>
       <h2 class="k-slogan">Vollst&auml;ndige Gestaltungsfreiheit f&uuml;r deine Carrera Hybrid&nbsp;Bahn</h2>
       <button type="button" id="lang-toggle" aria-label="Sprache wechseln / switch language / cambiar idioma">
@@ -5257,7 +5269,7 @@
            geoeffnet ist, mit direktem Download der neuesten APK". Sichtbar nur im Browser und
            nicht auf iPhone/iPad (97b-app.js). Die Adresse zeigt auf die feste Datei OmegaSim.apk
            der neuesten Release; auf der luuke42-Kopie auf die APK im eigenen Repo. -->
-      <a class="k-apk" id="home-apk" href="https://github.com/LukasRoeseler/btsr/releases/latest/download/OmegaSim.apk" hidden>
+      <a class="k-apk" id="home-apk" href="https://github.com/YOUR-GITHUB-USER/hybriddash/releases/latest/download/HybridDash.apk" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
              stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
         <span>Installiere die Android App f&uuml;r Mehrspieler</span></a>
@@ -5282,8 +5294,8 @@
       </div>
       <div class="k-titel-fuss">
         <span class="foot-ver">v<span id="app-version">1.3.65</span></span>
-        <span data-i18n-skip>OmegaSim &middot; MIT</span>
-        <a class="foot-code" href="https://github.com/Luuke42/omegasim"
+        <span data-i18n-skip>HybridDash 2.0 &middot; MIT &middot; based on <a href="https://github.com/Luuke42/omegasim" target="_blank" rel="noopener noreferrer">OmegaSim</a> by Luuke</span>
+        <a class="foot-code" href="https://github.com/YOUR-GITHUB-USER/hybriddash"
            target="_blank" rel="noopener noreferrer">Code auf GitHub</a>
         <button id="home-install" hidden>Als App installieren</button>
       </div>
@@ -6283,7 +6295,7 @@
       <div class="row" style="gap:10px; flex-wrap:wrap">
         <button type="button" class="primary" id="app-pruefen">Nach Update suchen</button>
         <button type="button" id="app-eingebaut">Mitgelieferte Fassung verwenden</button>
-        <a class="mp-datei" id="app-apk-link" href="https://github.com/LukasRoeseler/btsr/releases/latest"
+        <a class="mp-datei" id="app-apk-link" href="https://github.com/YOUR-GITHUB-USER/hybriddash/releases/latest"
            target="_blank" rel="noopener noreferrer">Neueste APK auf GitHub</a>
       </div>
       <div class="opt-row"><div class="opt-label">Beim Start nach Updates suchen
@@ -9653,7 +9665,7 @@
        Position mit. Geoeffnet ueber "Als Info-Screen" oder direkt mit /?info in der Adresse. -->
   <div class="mp-info" id="mp-info" hidden>
     <div class="mpi-kopf">
-      <h1 data-i18n-skip>OMEGA SIM</h1>
+      <h1 data-i18n-skip>HYBRIDDASH 2.0</h1>
       <div class="mpi-wert"><span id="mpi-uhr-label">Laufzeit</span><b id="mpi-uhr" data-i18n-skip>&ndash;</b></div>
       <div class="mpi-wert"><span>Rennl&auml;nge</span><b id="mpi-laenge" data-i18n-skip>&ndash;</b></div>
       <div class="mpi-wert"><span>Fahrer</span><b id="mpi-anzahl" data-i18n-skip>0</b></div>
@@ -9820,6 +9832,15 @@
       <div class="opt-row"><div class="opt-label">Gelbe Flagge deaktivieren<small>An: Der Knopf
           &bdquo;Gelbe Flagge&ldquo; und das Halten der Boxentaste rufen kein Gelb mehr aus.</small></div>
         <label class="tgl"><input type="checkbox" id="race-gelb-aus"><span></span></label></div>
+      <!-- HybridDash 2.0 (98i-hybriddash.js) -->
+      <div class="opt-row hd-row"><div class="opt-label">Automatisches Safety Car<span class="hd-tag">HybridDash</span><small>Steht ein Auto im Rennen neben der Strecke oder kommt es nicht mehr voran, ruft die App nach dieser Zeit automatisch Gelb aus und schickt das Safety Car los. Nur auf der Bahn.</small><small id="hd-auto-sc-status" class="hd-status" data-i18n-skip></small></div>
+        <label class="tgl"><input type="checkbox" id="hd-auto-sc" checked><span></span></label></div>
+      <div class="opt-row hd-row"><div class="opt-label">Safety Car nach<small>Wie lange ein Auto neben der Strecke stehen oder stillstehen muss.</small></div>
+        <span class="hd-slider"><input type="range" id="hd-auto-sc-sek" min="1" max="10" step="0.5" value="3"><b id="hd-auto-sc-sek-wert" data-i18n-skip>3.0 s</b></span></div>
+      <div class="opt-row hd-row"><div class="opt-label">Zuf&auml;llige NPC-Fahrernamen<span class="hd-tag">HybridDash</span><small>Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zuf&auml;lligen Fahrernamen.</small></div>
+        <label class="tgl"><input type="checkbox" id="hd-npc-namen" checked><span></span></label></div>
+      <div class="opt-row hd-row"><div class="opt-label">Neue Fahrer ansagen<small>Die Stimme nennt den neuen Fahrer und sein Auto.</small></div>
+        <label class="tgl"><input type="checkbox" id="hd-npc-ansage" checked><span></span></label></div>
       <div class="opt-row"><div class="opt-label">Weiche Reifen verboten<span class="wip-tag">WIP</span><small>An: In diesem
           Rennen gibt es keine weichen Reifen. Die Reifenwahl im Boxenschirm &uuml;berspringt &bdquo;weich&ldquo;, und wer
           beim Start weiche Reifen drauf hat, bekommt mittlere &ndash; auch Spieler&nbsp;2 und 3. Aus (Standard): alle
@@ -18291,6 +18312,22 @@
     "Alle Challenges und Strecken mit Zeiten.": "All challenges and tracks with times.",
     "Aus der Strecke im Editor": "From the track in the editor",
     "← Community": "← Community",
+    // ---- HybridDash 2.0 (98i-hybriddash.js) ----
+    "HD: neben der Strecke": "off track for {s} s",
+    "HD: steht": "not moving for {s} s",
+    "SAFETY CAR": "SAFETY CAR",
+    "Neuer Fahrer": "New driver",
+    "Avatar ändern": "Change avatar",
+    "Zuletzt": "Last",
+    "Zufälliger Name": "Random name",
+    "Automatisches Safety Car": "Automatic safety car",
+    "Steht ein Auto im Rennen neben der Strecke oder kommt es nicht mehr voran, ruft die App nach dieser Zeit automatisch Gelb aus und schickt das Safety Car los. Nur auf der Bahn.": "If a car in the race is off the track or stops making progress, the app automatically calls a yellow flag after this time and sends out the safety car. Track mode only.",
+    "Safety Car nach": "Safety car after",
+    "Wie lange ein Auto neben der Strecke stehen oder stillstehen muss.": "How long a car must be off track or standing still.",
+    "Zufällige NPC-Fahrernamen": "Random NPC driver names",
+    "Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zufälligen Fahrernamen.": "A car without a name gets a random driver name the first time it becomes an NPC.",
+    "Neue Fahrer ansagen": "Announce new drivers",
+    "Die Stimme nennt den neuen Fahrer und sein Auto.": "The voice announces the new driver and their car.",
   };
 
   // Spanisches Woerterbuch. Gleiche Schluessel (der deutsche Text) wie I18N_EN, aber nur die
@@ -19716,6 +19753,14 @@
     "Noch keine Community Challenges. Reiche deine Strecke ein.": "Todavía no hay retos de la comunidad. Envía tu circuito.",
     "Strecke einreichen": "Enviar circuito",
     "Eigene Strecken mit Abstimmung einreichen und Bestzeiten teilen.": "Envía tus propios circuitos con su ajuste y comparte mejores tiempos.",
+    // ---- HybridDash 2.0 (98i-hybriddash.js) ----
+    "HD: neben der Strecke": "fuera de pista durante {s} s",
+    "HD: steht": "detenido durante {s} s",
+    "SAFETY CAR": "COCHE DE SEGURIDAD",
+    "Neuer Fahrer": "Nuevo piloto",
+    "Avatar ändern": "Cambiar avatar",
+    "Zuletzt": "Último",
+    "Zufälliger Name": "Nombre aleatorio",
   };
 
   // ============================================================================
@@ -19922,7 +19967,7 @@
   // Gemerkte Sprache. Erst NACH dem Aufbau, damit der Beobachter alles sieht, was die App
   // beim Laden selbst eingefuegt hat.
   try {
-    const saved = localStorage.getItem('omegasim-lang');
+    const saved = localStorage.getItem('omegasim-lang') || 'en'; // HybridDash: English by default
     if (saved && saved !== lang) setLang(saved);
   } catch (e) { /* privater Modus */ }
 
@@ -39125,7 +39170,7 @@
       // Kopf: Name links, Marke rechts, darunter eine Linie in Carrera-Blau.
       const name = (($('track-name') || {}).value || '').trim() || t('Eigene Strecke');
       streckenbildText(ctx, name.toUpperCase(), 60, 86, streckenbildPassend(ctx, name.toUpperCase(), 52, 20, BILD_W - 120 - 320, 800), '#f3f4f6', 800);
-      streckenbildText(ctx, 'OMEGA SIM', BILD_W - 60, 86, 40, '#00a3e0', 800, 'right');
+      streckenbildText(ctx, 'HYBRIDDASH 2.0', BILD_W - 60, 86, 40, '#00a3e0', 800, 'right');
       ctx.fillStyle = '#00a3e0';
       ctx.fillRect(60, 108, BILD_W - 120, 4);
       // Die Strecke, eingepasst, auf der Kartenflaeche des Editors.
@@ -60841,6 +60886,7 @@
     const name = role === 'player' ? 'Spieler 1' : zNeu ? 'Spieler ' + zNeu.nr
                : role === 'ghost' ? 'NPC' : role === 'challenger' ? 'Challenger' : role === 'safetycar' ? 'Safety Car' : role === 'reinig' ? 'Reinigungsfahrzeug' : 'keine';
     log(`${garageLabel(car)}: Rolle ${name}`, 'info');
+    if (typeof hdRolleGesetzt === 'function') hdRolleGesetzt(car, role);   // HybridDash 2.0
   }
 
   // ---- Der Fahrercharakter als Zeile in der Garage --------------------------------
@@ -61321,7 +61367,7 @@
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
         <div class="gk-bild${foto ? ' mit-foto' : ''}" style='${bild}'>${foto ? '' : `<span class="gk-zeichen">${car.tagChar || ''}</span>`}</div>
-        <div class="gk-text"><b data-i18n-skip>${esc(name)}</b>
+        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 30) : ''}${esc(name)}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
           <b>${t(rolle.name)}</b>
@@ -61396,7 +61442,7 @@
         <span class="gk-w car-tag"><button class="car-chip" data-act="color" style="background:${carColor(car).hex};color:${carColor(car).ink}"
           title="${t('Farbe wählen')}">${car.tagChar || ''}</button>
         <input class="car-name-in" data-act="alias" type="text" maxlength="18" placeholder="${esc(car.tag || 'Name')}"
-          value="${esc(car.alias || '')}" aria-label="${t('Name für die Rundenübersicht')}"></span>`;
+          value="${esc(car.alias || '')}" aria-label="${t('Name für die Rundenübersicht')}"><button type="button" class="hd-wuerfel" data-act="hd-name" title="${t('Zufälliger Name')}" aria-label="${t('Zufälliger Name')}">&#x1F3B2;</button></span>`;
       rechts.appendChild(zn);
       const nf = zn.querySelector('input[data-act="alias"]');
       nf.addEventListener('input', () => { car.alias = nf.value.trim(); carRemember(car); });
@@ -61404,6 +61450,7 @@
         if (document.activeElement === nf) nf.blur();
         renderGarage(); renderRaceGrid();
       });
+      zn.querySelector('button[data-act="hd-name"]').onclick = (e) => { e.stopPropagation(); if (typeof hdNeuerName === 'function') hdNeuerName(car); };
       zn.querySelector('button[data-act="color"]').onclick = (e) => { e.stopPropagation(); garFarbWahl(e.currentTarget, car); };
       // Farbe, Ghost-Tempo, Charakter, Motorsound: die bisherigen Wertzeilen.
       rechts.appendChild(garageAufZeile(car));
@@ -96519,7 +96566,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (/\[object/.test(host.textContent)) f.push('"[object" in der Zeile: ' + host.textContent);
     if (host.textContent.indexOf('Testauto') < 0) f.push('Name fehlt');
     const b = [...document.querySelectorAll('.home-titel .gl-b')];
-    if (b.map((x) => x.textContent).join('') !== 'OMEGASIM') f.push('Titel nicht in Buchstaben zerlegt: ' + b.map((x) => x.textContent).join(''));
+    if (b.map((x) => x.textContent).join('') !== 'HYBRIDDASH') f.push('Titel nicht in Buchstaben zerlegt: ' + b.map((x) => x.textContent).join(''));
     if (b.some((x) => !/glitch-[cr]/.test(x.style.getPropertyValue('--gl-o') + x.style.getPropertyValue('--gl-u')))) f.push('Buchstabe ohne Farbe');
     return { ok: !f.length, mass: f.length ? f.join('; ') : 'Knoten als Beschriftung, 8 Buchstaben mit Zufallsfarben' };
   });
@@ -110620,10 +110667,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // 60 Abfragen je Stunde und Adresse (ein Uni- oder Firmennetz ist schnell darueber), und
     // wer klickte, bevor die Antwort da war, bekam ebenfalls die Datei. Releases gibt es seit
     // v0.9.6, der Rueckfall wird also nicht mehr gebraucht.
-    if (/(^|\.)luuke42\.github\.io$/i.test(location.hostname)) {
+    {
       const info = $('app-apk-link');
-      a.href = 'https://github.com/Luuke42/omegasim/releases/latest/download/OmegaSim.apk';
-      if (info) info.href = 'https://github.com/Luuke42/omegasim/releases/latest';
+      a.href = 'https://github.com/YOUR-GITHUB-USER/hybriddash/releases/latest/download/HybridDash.apk';
+      if (info) info.href = 'https://github.com/YOUR-GITHUB-USER/hybriddash/releases/latest';
     }
     a.hidden = false;
   })();
@@ -114934,6 +114981,393 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   });
   i18nOnLangChange(rennPauseMalen);
   rennPauseMalen();
+  // =========================================================================
+  // HybridDash 2.0 additions
+  // =========================================================================
+  // Everything HybridDash adds on top of OmegaSim lives in this one file, so upstream
+  // OmegaSim changes can still be merged with few conflicts. The original code only gets
+  // tiny, guarded hooks (`typeof hdX === 'function'`).
+  //
+  //   1. AUTO SAFETY CAR   Any racing car that is off track, or has not advanced a single
+  //                        track tile, for HD_AUTO_SC_MS (3 s) raises the yellow flag, which
+  //                        deploys the safety car (setFlag -> safetyCarRaus).
+  //   2. NPC DRIVER NAMES  The first time a car becomes an NPC and has no name yet, it gets a
+  //                        random, unique driver name. The name is stored with the car
+  //                        profile (carRemember), so it stays the same when the car reconnects.
+  //   3. VOICE CALLOUT     The race announcer reads the new driver out together with the car
+  //                        they are assigned to ("Mara Kovac takes the red Porsche 911").
+  //   4. DRIVER AVATARS    A generated helmet avatar (car colour + initials) per driver,
+  //                        shown in the garage. Tap it to restyle.
+
+  const HD_STORE = 'hybriddash.v1';
+  const HD_AUTO_SC_MS = 3000;
+  const HD_AUTO_SC_COOLDOWN_MS = 8000;
+
+  function hdLaden() {
+    try { return Object.assign({ autoSc: true, autoScMs: HD_AUTO_SC_MS, npcNamen: true, npcAnsage: true, avatare: {} },
+      JSON.parse(localStorage.getItem(HD_STORE) || '{}')); }
+    catch (e) { return { autoSc: true, autoScMs: HD_AUTO_SC_MS, npcNamen: true, npcAnsage: true, avatare: {} }; }
+  }
+  const hd = hdLaden();
+  function hdSpeichern() {
+    try { localStorage.setItem(HD_STORE, JSON.stringify(hd)); } catch (e) { /* private mode */ }
+  }
+
+  // ---- 1. AUTO SAFETY CAR -----------------------------------------------------------------
+  //
+  // Checked on its own slow clock (200 ms): we wait for seconds, not milliseconds, and the
+  // drive loop must never pay for this.
+  //
+  // WHO COUNTS: every car that races - player 1-3 and NPCs (and the challenger). Not the
+  // safety car or the cleaning car, not a car in the pit lane, not an NPC that is pitting,
+  // finishing or deliberately stopped.
+  //
+  // WHAT COUNTS:
+  //   off track  byte 12 reads 0x00 (TILE_OFFTRACK) for the whole window, or an NPC was
+  //              parked by the ghost logic because it left the track.
+  //   stagnant   the tile counter has not moved for the whole window. The window starts no
+  //              earlier than the green light (start or restart), so a grid of standing cars
+  //              does not trigger it.
+  //
+  // Only on the track (trackMode 'on'): in printout mode byte 12 is almost always 0x00.
+  const hdSc = { offSeit: new Map(), gruenSeit: 0, letzterStatus: '', sperreBis: 0, letzterFlag: 'green' };
+
+  function hdAutoScAn() { return !!hd.autoSc; }
+  function hdAutoScFenster() { return Math.max(1000, Math.min(15000, Number(hd.autoScMs) || HD_AUTO_SC_MS)); }
+
+  function hdRenntAuto(car) {
+    if (!car || !car.device) return false;
+    if (car.role === 'player') return pitState === 'off';
+    const z = zusatzPlatzVonRolle(car.role);
+    if (z) return !(z.box && z.box.lage && z.box.lage !== 'aus');
+    if (car.role === 'ghost' || car.role === 'challenger') {
+      const g = car.ghost;
+      if (!g || !g.running) return false;
+      if (g.pit || g.nachZiel || g.auslauf) return false;
+      if (g.aufstellZiel !== undefined && g.aufstellZiel !== null) return false;
+      return true;
+    }
+    return false;
+  }
+
+  function hdAutoScGrund(car, now) {
+    const fenster = hdAutoScFenster();
+    const key = car;
+    // Off track: byte 12 = 0x00 without a break.
+    if (car.tileCode === TILE_OFFTRACK || car.parked === 'Bahn verlassen') {
+      if (!hdSc.offSeit.has(key)) hdSc.offSeit.set(key, now);
+      if (now - hdSc.offSeit.get(key) >= fenster) return 'off';
+    } else {
+      hdSc.offSeit.delete(key);
+    }
+    // Stagnant: no tile change since max(last tile change, green).
+    const seit = Math.max(car.tileAt || 0, hdSc.gruenSeit);
+    if (seit && now - seit >= fenster) return 'stuck';
+    return null;
+  }
+
+  function hdAutoScTick() {
+    let now;
+    try { now = rennZeitJetzt(); } catch (e) { return; }
+    // Watch the flag so the stagnation window restarts at every green.
+    if (flagState === 'green' && hdSc.letzterFlag !== 'green') {
+      hdSc.gruenSeit = now; hdSc.offSeit.clear();
+      hdSc.sperreBis = now + HD_AUTO_SC_COOLDOWN_MS;
+    }
+    hdSc.letzterFlag = flagState;
+    if (raceState !== 'racing') { hdSc.gruenSeit = 0; hdSc.offSeit.clear(); return; }
+    if (!hdSc.gruenSeit) hdSc.gruenSeit = now;
+    if (!hdAutoScAn() || flagState !== 'green' || trackMode !== 'on' || raceFormationLap) return;
+    if (rennPauseAktiv() || gelbDeaktiviert() || now < hdSc.sperreBis) return;
+    for (const car of garage) {
+      if (!hdRenntAuto(car)) { hdSc.offSeit.delete(car); continue; }
+      const grund = hdAutoScGrund(car, now);
+      if (!grund) continue;
+      hdAutoScAusloesen(car, grund, now);
+      return;
+    }
+  }
+
+  function hdAutoScAusloesen(car, grund, now) {
+    hdSc.sperreBis = now + HD_AUTO_SC_COOLDOWN_MS;
+    hdSc.offSeit.clear();
+    const name = garageLabel(car);
+    const sek = (hdAutoScFenster() / 1000).toLocaleString(lang === 'de' ? 'de-DE' : 'en-US');
+    const warum = grund === 'off'
+      ? t('HD: neben der Strecke').replace('{s}', sek)
+      : t('HD: steht').replace('{s}', sek);
+    hdSc.letzterStatus = name + ' – ' + warum;
+    log('HybridDash: automatic safety car – ' + name + ' (' + grund + ', ' + sek + ' s).', 'err');
+    setFlag('yellow');
+    if (flagState !== 'yellow') return;           // yellow disabled or refused
+    showHudToast(t('SAFETY CAR') + ' · ' + name);
+    hdSprechen(hdSatz('sc', { name, grund }), 30);
+    hdEinstellungenMalen();
+  }
+
+  setInterval(hdAutoScTick, 200);
+
+  // ---- 2. NPC DRIVER NAMES ----------------------------------------------------------------
+  //
+  // Invented first/last name pairs. The lists deliberately avoid the surnames of famous
+  // racing drivers, so a random pair does not accidentally name a real person.
+  // Every combination is at most 18 characters (the name field's maxlength).
+  const HD_VORNAMEN = [
+    'Mara', 'Jonas', 'Aiko', 'Luca', 'Noor', 'Mateo', 'Freya', 'Kofi', 'Ines', 'Ravi',
+    'Sofia', 'Emil', 'Yara', 'Tariq', 'Lena', 'Diego', 'Hana', 'Felix', 'Zuri', 'Oskar',
+    'Priya', 'Nico', 'Elif', 'Bruno', 'Maya', 'Kenji', 'Alba', 'Theo', 'Nadia', 'Rafael',
+    'Ivy', 'Malik', 'Clara', 'Sven', 'Amara', 'Leo', 'Rosa', 'Dario', 'Kaia', 'Milan',
+  ];
+  const HD_NACHNAMEN = [
+    'Kovac', 'Lindqvist', 'Moreau', 'Okafor', 'Tanaka', 'Brandt', 'Castell', 'Novak',
+    'Reyes', 'Halvorsen', 'Duval', 'Mensah', 'Petrov', 'Sandoval', 'Whitlock', 'Ferreira',
+    'Kaplan', 'Ishikawa', 'Varga', 'Delacroix', 'Osei', 'Marchetti', 'Nyberg', 'Quinn',
+    'Rahimi', 'Solberg', 'Thorne', 'Adeyemi', 'Calloway', 'Bianchi', 'Strand', 'Morales',
+    'Hartmann', 'Zielinski', 'Achebe', 'Lund', 'Navarro', 'Castro', 'Fontaine', 'Mbeki',
+  ];
+
+  function hdZufallsName(belegt) {
+    for (let i = 0; i < 200; i++) {
+      const n = HD_VORNAMEN[Math.floor(Math.random() * HD_VORNAMEN.length)] + ' '
+              + HD_NACHNAMEN[Math.floor(Math.random() * HD_NACHNAMEN.length)];
+      if (n.length <= 18 && !belegt.has(n.toLowerCase())) return n;
+    }
+    return 'Driver ' + Math.floor(100 + Math.random() * 900);
+  }
+  function hdBelegteNamen(ausser) {
+    const s = new Set();
+    garage.forEach(c => { if (c !== ausser && c.alias) s.add(c.alias.toLowerCase()); });
+    try { Object.values(carStore()).forEach(e => { if (e && e.alias) s.add(String(e.alias).toLowerCase()); }); }
+    catch (e) { /* no store */ }
+    return s;
+  }
+
+  const HD_FARBEN = {
+    en: { weiss: 'white', schwarz: 'black', rot: 'red', blau: 'blue', gruen: 'green', gelb: 'yellow', lila: 'purple', orange: 'orange' },
+    de: { weiss: 'weißen', schwarz: 'schwarzen', rot: 'roten', blau: 'blauen', gruen: 'grünen', gelb: 'gelben', lila: 'lila', orange: 'orangen' },
+    es: { weiss: 'blanco', schwarz: 'negro', rot: 'rojo', blau: 'azul', gruen: 'verde', gelb: 'amarillo', lila: 'morado', orange: 'naranja' },
+  };
+  function hdFarbName(id) { return (HD_FARBEN[lang] || HD_FARBEN.en)[id] || ''; }
+  // What the announcer calls the car: colour + model if a model is set, else colour + tag.
+  function hdAutoBeschreibung(car) {
+    const farbe = carColor(car);
+    const farbName = farbe && farbe.auto !== false ? hdFarbName(farbe.id) : '';
+    const modell = carModellWert(car.modellId) ? carModellName(car.modellId) : '';
+    if (modell) return (farbName ? farbName + ' ' : '') + modell;
+    return (farbName ? farbName + ' ' : '') + (lang === 'de' ? 'Auto ' : lang === 'es' ? 'coche ' : 'car ') + (car.tag || '');
+  }
+
+  // Hook, called at the end of setCarRole() in 90-ghosts.js.
+  function hdRolleGesetzt(car, role) {
+    if (role !== 'ghost' || !hd.npcNamen || !car || car.alias) return;
+    car.alias = hdZufallsName(hdBelegteNamen(car));
+    carRemember(car);
+    log('HybridDash: new NPC driver ' + car.alias + ' in ' + hdAutoBeschreibung(car) + '.', 'info');
+    showHudToast(t('Neuer Fahrer') + ': ' + car.alias);
+    if (hd.npcAnsage) hdSprechen(hdSatz('fahrer', { name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
+    if (typeof renderGarage === 'function') renderGarage();
+    if (typeof renderRaceGrid === 'function') renderRaceGrid();
+  }
+
+  // Give a car a fresh random name (the dice button in the garage).
+  function hdNeuerName(car) {
+    car.alias = hdZufallsName(hdBelegteNamen(car));
+    carRemember(car);
+    if (hd.npcAnsage && car.role === 'ghost') hdSprechen(hdSatz('fahrer', { name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
+    renderGarage();
+    if (typeof renderRaceGrid === 'function') renderRaceGrid();
+  }
+
+  // ---- 3. VOICE ---------------------------------------------------------------------------
+  // Through the app's announcement queue (80a-ansagen.js), so it never talks over a lap time
+  // or the race intro, and obeys the sound switch and the pause.
+  function hdSatz(art, x) {
+    if (lang === 'de') {
+      if (art === 'fahrer') return 'Neu im Feld: ' + x.name + ', im ' + x.auto + '.';
+      return 'Safety Car! ' + x.name + (x.grund === 'off' ? ' ist von der Strecke abgekommen.' : ' steht auf der Strecke.');
+    }
+    if (lang === 'es') {
+      if (art === 'fahrer') return 'Nuevo piloto: ' + x.name + ', en el ' + x.auto + '.';
+      return '¡Coche de seguridad! ' + x.name + (x.grund === 'off' ? ' se ha salido de la pista.' : ' está detenido en la pista.');
+    }
+    if (art === 'fahrer') return 'New driver: ' + x.name + ', driving the ' + x.auto + '.';
+    return 'Safety car deployed! ' + x.name + (x.grund === 'off' ? ' has gone off track.' : ' has stopped on track.');
+  }
+  function hdSprechen(text, prioritaet) {
+    if (!text || typeof rennAnsagen === 'undefined') return;
+    const spr = lang;
+    rennAnsagen.einreihen('hybriddash', prioritaet || 10, async (gueltig) => {
+      if (!gueltig()) return;
+      await ansagenTextSpielen(text, spr === 'es' ? 'en' : spr);
+    }, () => soundEnabled && lang === spr, 20000);
+  }
+
+  // ---- 4. DRIVER AVATARS ------------------------------------------------------------------
+  // A small inline SVG helmet: shell in the car colour, a visor, an accent stripe and the
+  // initials. Deterministic from name + style number, so it looks the same everywhere.
+  const HD_AKZENTE = ['#ffd23f', '#00d6ff', '#ff2a60', '#7cff6b', '#ffffff', '#ff8a00', '#b18cff', '#14161c'];
+  function hdHash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function hdInitialen(name) {
+    const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+    return ((w[0] || '?')[0] + (w.length > 1 ? w[w.length - 1][0] : '')).toUpperCase();
+  }
+  function hdAvatarSvg(name, farbeHex, stil, px) {
+    const h = hdHash(String(name) + '#' + (stil || 0));
+    const akzent = HD_AKZENTE[h % HD_AKZENTE.length];
+    const muster = (h >>> 3) % 3;
+    const schale = farbeHex || '#3b7fe2';
+    const ini = hdInitialen(name).replace(/[&<>"]/g, '');
+    const streifen = muster === 0
+      ? `<path d="M32 6v26" stroke="${akzent}" stroke-width="6"/>`
+      : muster === 1
+        ? `<path d="M10 30 Q32 14 54 30" stroke="${akzent}" stroke-width="5" fill="none"/>`
+        : `<circle cx="20" cy="20" r="5" fill="${akzent}"/><circle cx="44" cy="20" r="5" fill="${akzent}"/>`;
+    return `<svg class="hd-avatar" width="${px}" height="${px}" viewBox="0 0 64 64" aria-hidden="true">`
+      + `<circle cx="32" cy="32" r="31" fill="#0d1015"/>`
+      + `<path d="M8 40 C8 18 20 6 34 6 C50 6 58 20 58 36 L58 46 Q58 52 52 52 L14 52 Q8 52 8 46 Z" fill="${schale}" stroke="rgba(0,0,0,.35)" stroke-width="1.5"/>`
+      + streifen
+      + `<path d="M22 34 H56 V44 Q56 46 54 46 H26 Q22 46 22 42 Z" fill="#14161c" opacity=".88"/>`
+      + `<text x="39" y="43.5" font-family="Inter,system-ui,sans-serif" font-size="10" font-weight="800" fill="${akzent}" text-anchor="middle">${ini}</text>`
+      + `</svg>`;
+  }
+  function hdAvatarStil(car) { return (hd.avatare && hd.avatare[String(car.device.id)]) || 0; }
+  // Hook used by the garage card (90-ghosts.js).
+  function hdAvatarHtml(car, px) {
+    if (!car || !car.device) return '';
+    const name = car.alias || car.tag || garageLabel(car);
+    return `<button type="button" class="hd-avatar-knopf" data-hd-avatar="${String(car.device.id).replace(/"/g, '')}" `
+      + `title="${t('Avatar ändern')}">${hdAvatarSvg(name, carColor(car).hex, hdAvatarStil(car), px || 34)}</button>`;
+  }
+  // One delegated listener: garage cards are re-rendered often.
+  document.addEventListener('click', (e) => {
+    const k = e.target && e.target.closest && e.target.closest('[data-hd-avatar]');
+    if (!k) return;
+    e.preventDefault(); e.stopPropagation();
+    const id = k.getAttribute('data-hd-avatar');
+    hd.avatare = hd.avatare || {};
+    hd.avatare[id] = (hd.avatare[id] || 0) + 1;
+    hdSpeichern();
+    if (typeof renderGarage === 'function') renderGarage();
+  }, true);
+
+  // ---- SETTINGS (Race settings > HybridDash) ----------------------------------------------
+  function hdEinstellungenMalen() {
+    const a = $('hd-auto-sc'); if (a) a.checked = !!hd.autoSc;
+    const s = $('hd-auto-sc-sek'); if (s) s.value = String(hdAutoScFenster() / 1000);
+    const sw = $('hd-auto-sc-sek-wert'); if (sw) sw.textContent = (hdAutoScFenster() / 1000).toFixed(1) + ' s';
+    const n = $('hd-npc-namen'); if (n) n.checked = !!hd.npcNamen;
+    const v = $('hd-npc-ansage'); if (v) v.checked = !!hd.npcAnsage;
+    const st = $('hd-auto-sc-status'); if (st) st.textContent = hdSc.letzterStatus ? t('Zuletzt') + ': ' + hdSc.letzterStatus : '';
+  }
+  (function hdEinstellungenAnbinden() {
+    const an = (id, fn) => { const el = $(id); if (el) el.addEventListener('change', () => { fn(el); hdSpeichern(); hdEinstellungenMalen(); }); };
+    an('hd-auto-sc', el => { hd.autoSc = el.checked; });
+    an('hd-npc-namen', el => { hd.npcNamen = el.checked; });
+    an('hd-npc-ansage', el => { hd.npcAnsage = el.checked; });
+    const s = $('hd-auto-sc-sek');
+    if (s) s.addEventListener('input', () => { hd.autoScMs = Math.round(Number(s.value) * 1000); hdSpeichern(); hdEinstellungenMalen(); });
+    hdEinstellungenMalen();
+  })();
+
+  // Strings this file adds live in I18N_EN / I18N_ES (10-ble-explorer.js, 'HybridDash 2.0' block).
+
+  // ---- SELF-TEST (window.HYBRIDDASH.selbsttest()) ----------------------------------------
+  // Works on stand-in cars, like the app's own self-tests, and puts every touched state back.
+  function hdSelbsttest() {
+    const out = [];
+    const merk = { raceState, flagState, trackMode, raceFormationLap, pitState,
+                   garage: garage.slice(), hd: JSON.stringify(hd), sc: Object.assign({}, hdSc),
+                   store: JSON.stringify(carStore()) };
+    const fake = (id, role, extra) => Object.assign({ role, alias: '', device: { id, name: id },
+      colorId: 'rot', tag: 'Alpha', tileCode: 0x02, tileAt: 0, parked: null }, extra || {});
+    const prüfen = (name, ok, mass) => out.push({ name, ok: !!ok, mass });
+    const zurueck = () => {
+      if (flagState !== 'green') gelbBeenden();
+      raceState = merk.raceState; flagState = merk.flagState; trackMode = merk.trackMode;
+      raceFormationLap = merk.raceFormationLap; pitState = merk.pitState;
+      garage.length = 0; merk.garage.forEach(c => garage.push(c));
+      Object.assign(hd, JSON.parse(merk.hd)); Object.assign(hdSc, merk.sc); hdSc.offSeit = new Map();
+      carStoreSchreiben(JSON.parse(merk.store));
+    };
+    try {
+      const now = rennZeitJetzt();
+      garage.length = 0; hd.autoSc = true; hd.autoScMs = 3000;
+      raceState = 'racing'; flagState = 'green'; trackMode = 'on'; raceFormationLap = false; pitState = 'off';
+      hdSc.letzterFlag = 'green'; hdSc.sperreBis = 0; hdSc.offSeit = new Map();
+
+      // A: a car that keeps moving does not trigger anything.
+      const a = fake('hd-a', 'player', { tileAt: now - 500 });
+      garage.push(a); hdSc.gruenSeit = now - 10000;
+      hdAutoScTick();
+      prüfen('moving car: no safety car', flagState === 'green', 'flag ' + flagState);
+
+      // B: stagnant 2.5 s -> nothing yet; 3.5 s -> yellow.
+      a.tileAt = now - 2500; hdAutoScTick();
+      const vorher = flagState;
+      a.tileAt = now - 3500; hdAutoScTick();
+      prüfen('stagnant > 3 s: safety car', vorher === 'green' && flagState === 'yellow',
+             'at 2.5 s ' + vorher + ', at 3.5 s ' + flagState);
+      gelbBeenden(); hdSc.letzterFlag = 'green'; hdSc.sperreBis = 0;
+
+      // C: the stagnation window never starts before green (grid start).
+      a.tileAt = 0; hdSc.gruenSeit = now - 1000; hdAutoScTick();
+      prüfen('standing grid right after green: no safety car', flagState === 'green', 'flag ' + flagState);
+
+      // D: off track for 3 s (byte 12 = 0x00) -> yellow, even though tiles were counting.
+      a.tileAt = now; a.tileCode = TILE_OFFTRACK; hdSc.gruenSeit = now - 10000;
+      hdSc.offSeit.set(a, now - 3100); hdAutoScTick();
+      prüfen('off track > 3 s: safety car', flagState === 'yellow', 'flag ' + flagState);
+      gelbBeenden(); hdSc.letzterFlag = 'green'; hdSc.sperreBis = 0; a.tileCode = 0x02;
+
+      // E: switched off -> nothing.
+      hd.autoSc = false; a.tileAt = now - 5000; hdAutoScTick();
+      prüfen('setting off: no safety car', flagState === 'green', 'flag ' + flagState);
+      hd.autoSc = true;
+
+      // F: player in the pit lane is ignored; safety car itself is ignored.
+      pitState = 'servicing'; hdAutoScTick();
+      const imPit = flagState;
+      pitState = 'off'; a.role = 'safetycar'; hdAutoScTick();
+      prüfen('pit lane and the safety car itself are ignored', imPit === 'green' && flagState === 'green',
+             'pit ' + imPit + ', sc ' + flagState);
+      a.role = 'player';
+
+      // G: NPC driver name on first NPC assignment, unique, kept when set again, announced.
+      hd.npcNamen = true; hd.npcAnsage = true;
+      const merkSound = soundEnabled; soundEnabled = true;
+      const jobsVorher = rennAnsagen.jobs.filter(j => j.art === 'hybriddash').length;
+      const b = fake('hd-b', 'ghost'), c = fake('hd-c', 'ghost');
+      garage.push(b, c);
+      hdRolleGesetzt(b, 'ghost'); hdRolleGesetzt(c, 'ghost');
+      const nameB = b.alias;
+      hdRolleGesetzt(b, 'ghost');
+      const jobs = rennAnsagen.jobs.filter(j => j.art === 'hybriddash').length - jobsVorher;
+      rennAnsagen.jobs = rennAnsagen.jobs.filter(j => j.art !== 'hybriddash');
+      soundEnabled = merkSound;
+      prüfen('NPC gets a random driver name', /^\S+ \S+$/.test(nameB) && nameB.length <= 18, nameB);
+      prüfen('names are unique and stay', b.alias === nameB && c.alias && c.alias !== b.alias, b.alias + ' / ' + c.alias);
+      prüfen('new drivers are announced', jobs === 2, jobs + ' announcements queued');
+      const satz = lang === 'en' ? hdSatz('fahrer', { name: b.alias, auto: hdAutoBeschreibung(b) }) : '';
+      prüfen('announcement names the car', !satz || satz === 'New driver: ' + b.alias + ', driving the red car ' + b.tag + '.', satz);
+
+      // H: avatar.
+      const svg = hdAvatarSvg('Mara Kovac', '#e23b3b', 0, 30);
+      prüfen('avatar renders with initials', /<svg[\s\S]*>MK<\/text>/.test(svg), svg.length + ' chars');
+    } catch (e) {
+      prüfen('self-test ran', false, String(e && e.stack || e));
+    } finally { zurueck(); }
+    return out;
+  }
+
+  // Diagnostics / tests.
+  window.HYBRIDDASH = Object.freeze({
+    status: () => ({ autoSc: hd.autoSc, fensterMs: hdAutoScFenster(), letzter: hdSc.letzterStatus,
+                     gruenSeit: hdSc.gruenSeit, sperreBis: hdSc.sperreBis }),
+    zufallsName: () => hdZufallsName(hdBelegteNamen(null)),
+    avatarSvg: hdAvatarSvg,
+    tick: hdAutoScTick,
+    selbsttest: hdSelbsttest,
+  });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------
   //

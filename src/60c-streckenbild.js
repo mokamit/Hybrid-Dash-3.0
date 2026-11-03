@@ -101,7 +101,7 @@
       // Kopf: Name links, Marke rechts, darunter eine Linie in Carrera-Blau.
       const name = (($('track-name') || {}).value || '').trim() || t('Eigene Strecke');
       streckenbildText(ctx, name.toUpperCase(), 60, 86, streckenbildPassend(ctx, name.toUpperCase(), 52, 20, BILD_W - 120 - 320, 800), '#f3f4f6', 800);
-      streckenbildText(ctx, 'OMEGA SIM', BILD_W - 60, 86, 40, '#00a3e0', 800, 'right');
+      streckenbildText(ctx, 'HYBRIDDASH 2.0', BILD_W - 60, 86, 40, '#00a3e0', 800, 'right');
       ctx.fillStyle = '#00a3e0';
       ctx.fillRect(60, 108, BILD_W - 120, 4);
       // Die Strecke, eingepasst, auf der Kartenflaeche des Editors.

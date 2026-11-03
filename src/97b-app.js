@@ -27,10 +27,10 @@
     // 60 Abfragen je Stunde und Adresse (ein Uni- oder Firmennetz ist schnell darueber), und
     // wer klickte, bevor die Antwort da war, bekam ebenfalls die Datei. Releases gibt es seit
     // v0.9.6, der Rueckfall wird also nicht mehr gebraucht.
-    if (/(^|\.)luuke42\.github\.io$/i.test(location.hostname)) {
+    {
       const info = $('app-apk-link');
-      a.href = 'https://github.com/Luuke42/omegasim/releases/latest/download/OmegaSim.apk';
-      if (info) info.href = 'https://github.com/Luuke42/omegasim/releases/latest';
+      a.href = 'https://github.com/YOUR-GITHUB-USER/hybriddash/releases/latest/download/HybridDash.apk';
+      if (info) info.href = 'https://github.com/YOUR-GITHUB-USER/hybriddash/releases/latest';
     }
     a.hidden = false;
   })();

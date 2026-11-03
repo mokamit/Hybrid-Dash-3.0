@@ -4079,6 +4079,22 @@
     "Alle Challenges und Strecken mit Zeiten.": "All challenges and tracks with times.",
     "Aus der Strecke im Editor": "From the track in the editor",
     "← Community": "← Community",
+    // ---- HybridDash 2.0 (98i-hybriddash.js) ----
+    "HD: neben der Strecke": "off track for {s} s",
+    "HD: steht": "not moving for {s} s",
+    "SAFETY CAR": "SAFETY CAR",
+    "Neuer Fahrer": "New driver",
+    "Avatar ändern": "Change avatar",
+    "Zuletzt": "Last",
+    "Zufälliger Name": "Random name",
+    "Automatisches Safety Car": "Automatic safety car",
+    "Steht ein Auto im Rennen neben der Strecke oder kommt es nicht mehr voran, ruft die App nach dieser Zeit automatisch Gelb aus und schickt das Safety Car los. Nur auf der Bahn.": "If a car in the race is off the track or stops making progress, the app automatically calls a yellow flag after this time and sends out the safety car. Track mode only.",
+    "Safety Car nach": "Safety car after",
+    "Wie lange ein Auto neben der Strecke stehen oder stillstehen muss.": "How long a car must be off track or standing still.",
+    "Zufällige NPC-Fahrernamen": "Random NPC driver names",
+    "Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zufälligen Fahrernamen.": "A car without a name gets a random driver name the first time it becomes an NPC.",
+    "Neue Fahrer ansagen": "Announce new drivers",
+    "Die Stimme nennt den neuen Fahrer und sein Auto.": "The voice announces the new driver and their car.",
   };
 
   // Spanisches Woerterbuch. Gleiche Schluessel (der deutsche Text) wie I18N_EN, aber nur die
@@ -5504,6 +5520,14 @@
     "Noch keine Community Challenges. Reiche deine Strecke ein.": "Todavía no hay retos de la comunidad. Envía tu circuito.",
     "Strecke einreichen": "Enviar circuito",
     "Eigene Strecken mit Abstimmung einreichen und Bestzeiten teilen.": "Envía tus propios circuitos con su ajuste y comparte mejores tiempos.",
+    // ---- HybridDash 2.0 (98i-hybriddash.js) ----
+    "HD: neben der Strecke": "fuera de pista durante {s} s",
+    "HD: steht": "detenido durante {s} s",
+    "SAFETY CAR": "COCHE DE SEGURIDAD",
+    "Neuer Fahrer": "Nuevo piloto",
+    "Avatar ändern": "Cambiar avatar",
+    "Zuletzt": "Último",
+    "Zufälliger Name": "Nombre aleatorio",
   };
 
   // ============================================================================
@@ -5710,7 +5734,7 @@
   // Gemerkte Sprache. Erst NACH dem Aufbau, damit der Beobachter alles sieht, was die App
   // beim Laden selbst eingefuegt hat.
   try {
-    const saved = localStorage.getItem('omegasim-lang');
+    const saved = localStorage.getItem('omegasim-lang') || 'en'; // HybridDash: English by default
     if (saved && saved !== lang) setLang(saved);
   } catch (e) { /* privater Modus */ }
 

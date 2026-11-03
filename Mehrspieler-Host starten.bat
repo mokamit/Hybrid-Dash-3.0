@@ -1,6 +1,6 @@
 @echo off
 rem ====================================================================================
-rem  Startet den Mehrspieler-Host von OmegaSim.
+rem  Startet den Mehrspieler-Host von HybridDash.
 rem
 rem  WARUM ES DIESE DATEI GIBT, und nicht einen Knopf in der App: eine Webseite darf kein
 rem  Programm auf dem Rechner starten. Das ist keine fehlende Schnittstelle, sondern die
@@ -10,7 +10,7 @@ rem  was man dem Knopf bringen kann.
 rem ====================================================================================
 
 cd /d "%~dp0"
-title OmegaSim Mehrspieler-Host  (dieses Fenster schliessen beendet ihn)
+title HybridDash Mehrspieler-Host  (dieses Fenster schliessen beendet ihn)
 
 rem Python finden. Der Startumschalter "py" ist unter Windows der zuverlaessigste Weg;
 rem "python" ist der Rueckfall, und wenn beides fehlt, wird es gesagt statt still zu enden.
@@ -41,7 +41,7 @@ if not exist "tools\omegasim_host.py" (
 )
 
 echo.
-echo   OmegaSim Mehrspieler-Host
+echo   HybridDash Mehrspieler-Host
 echo   -------------------------
 echo   Die Adresse steht gleich darunter. Sie gehoert in jedem Telefon in das Feld
 echo   "Host-Adresse" im Reiter Mehrspieler. Alle muessen im selben WLAN sein.

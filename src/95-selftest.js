@@ -13164,7 +13164,7 @@
     if (/\[object/.test(host.textContent)) f.push('"[object" in der Zeile: ' + host.textContent);
     if (host.textContent.indexOf('Testauto') < 0) f.push('Name fehlt');
     const b = [...document.querySelectorAll('.home-titel .gl-b')];
-    if (b.map((x) => x.textContent).join('') !== 'OMEGASIM') f.push('Titel nicht in Buchstaben zerlegt: ' + b.map((x) => x.textContent).join(''));
+    if (b.map((x) => x.textContent).join('') !== 'HYBRIDDASH') f.push('Titel nicht in Buchstaben zerlegt: ' + b.map((x) => x.textContent).join(''));
     if (b.some((x) => !/glitch-[cr]/.test(x.style.getPropertyValue('--gl-o') + x.style.getPropertyValue('--gl-u')))) f.push('Buchstabe ohne Farbe');
     return { ok: !f.length, mass: f.length ? f.join('; ') : 'Knoten als Beschriftung, 8 Buchstaben mit Zufallsfarben' };
   });

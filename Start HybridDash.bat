@@ -1,7 +1,7 @@
 @echo off
 cd /d "%~dp0"
 
-start "CH Control Server (schliessen zum Beenden)" /min powershell -NoLogo -ExecutionPolicy Bypass -File "serve.ps1"
+start "HybridDash Server (schliessen zum Beenden)" /min powershell -NoLogo -ExecutionPolicy Bypass -File "serve.ps1"
 
 timeout /t 1 /nobreak >nul
 

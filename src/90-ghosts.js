@@ -1651,6 +1651,7 @@
     const name = role === 'player' ? 'Spieler 1' : zNeu ? 'Spieler ' + zNeu.nr
                : role === 'ghost' ? 'NPC' : role === 'challenger' ? 'Challenger' : role === 'safetycar' ? 'Safety Car' : role === 'reinig' ? 'Reinigungsfahrzeug' : 'keine';
     log(`${garageLabel(car)}: Rolle ${name}`, 'info');
+    if (typeof hdRolleGesetzt === 'function') hdRolleGesetzt(car, role);   // HybridDash 2.0
   }
 
   // ---- Der Fahrercharakter als Zeile in der Garage --------------------------------
@@ -2131,7 +2132,7 @@
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
         <div class="gk-bild${foto ? ' mit-foto' : ''}" style='${bild}'>${foto ? '' : `<span class="gk-zeichen">${car.tagChar || ''}</span>`}</div>
-        <div class="gk-text"><b data-i18n-skip>${esc(name)}</b>
+        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 30) : ''}${esc(name)}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
           <b>${t(rolle.name)}</b>
@@ -2206,7 +2207,7 @@
         <span class="gk-w car-tag"><button class="car-chip" data-act="color" style="background:${carColor(car).hex};color:${carColor(car).ink}"
           title="${t('Farbe wählen')}">${car.tagChar || ''}</button>
         <input class="car-name-in" data-act="alias" type="text" maxlength="18" placeholder="${esc(car.tag || 'Name')}"
-          value="${esc(car.alias || '')}" aria-label="${t('Name für die Rundenübersicht')}"></span>`;
+          value="${esc(car.alias || '')}" aria-label="${t('Name für die Rundenübersicht')}"><button type="button" class="hd-wuerfel" data-act="hd-name" title="${t('Zufälliger Name')}" aria-label="${t('Zufälliger Name')}">&#x1F3B2;</button></span>`;
       rechts.appendChild(zn);
       const nf = zn.querySelector('input[data-act="alias"]');
       nf.addEventListener('input', () => { car.alias = nf.value.trim(); carRemember(car); });
@@ -2214,6 +2215,7 @@
         if (document.activeElement === nf) nf.blur();
         renderGarage(); renderRaceGrid();
       });
+      zn.querySelector('button[data-act="hd-name"]').onclick = (e) => { e.stopPropagation(); if (typeof hdNeuerName === 'function') hdNeuerName(car); };
       zn.querySelector('button[data-act="color"]').onclick = (e) => { e.stopPropagation(); garFarbWahl(e.currentTarget, car); };
       // Farbe, Ghost-Tempo, Charakter, Motorsound: die bisherigen Wertzeilen.
       rechts.appendChild(garageAufZeile(car));
