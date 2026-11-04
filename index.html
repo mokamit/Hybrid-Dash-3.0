@@ -400,8 +400,7 @@
   .hdr-manuell summary { cursor: pointer; color: #9aa1b0; font-size: 13px; }
   .hdr-autos-schritt { list-style: none; padding-left: 0; }
   .hdr-paar-status { color: #7cd8ff; }
-  .hd-relay-chip { font-size: inherit; padding: 1px 7px; border-radius: 3px; border: 1px solid rgba(255,255,255,.25);
-                   background: transparent; color: var(--k-dim); cursor: pointer; letter-spacing: .06em; min-height: 0; line-height: 1.4; }
+  .hd-relay-chip { cursor: pointer; }
   .hd-relay-chip.an { border-color: #35b45a; color: #7cff9b; }
   .hd-relay-chip.gelb { border-color: #ffd23f; color: #ffd23f; }
   .hd-relay-chip.rot { border-color: #ff5a7a; color: #ff8aa0; }
@@ -412,10 +411,30 @@
   body.hd-helper-seite #hd-relay { visibility: visible; background: #05070c; }
   body.hd-helper-seite #hdr-zu, body.hd-helper-seite .hdr-wahl, body.hd-helper-seite .hdr-tipp { display: none; }
   /* v2.1: main tabs and sub tabs further apart, with a subtle neon red line between them. */
-  header#k-kopf .k-leiste2 { position: relative; margin-top: 9px; padding-top: 5px; }
-  header#k-kopf .k-leiste2::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, #ff2a4f 12%, #ff2a4f 88%, transparent);
+  /* v2.1b: the neon red line sits under the main tab bar on EVERY tab (not only when sub tabs show). */
+  header#k-kopf { position: relative; padding-bottom: 6px; }
+  body header#k-kopf::after { content: ''; display: block; position: absolute; left: 0; right: 0; bottom: 0; top: auto; height: 1px; opacity: 1;
+    background: linear-gradient(90deg, transparent, #ff2a4f 8%, #ff2a4f 92%, transparent);
     box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  header#k-kopf .k-leiste2 { position: relative; margin-top: 9px; padding-top: 5px; order: 9; }
+  header#k-kopf .k-leiste2 + * { }
+  /* With sub tabs the line belongs between main and sub tabs: draw it there instead. */
+  body header#k-kopf:has(.k-leiste2:not([hidden]))::after { display: none; }
+  header#k-kopf .k-leiste2::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, #ff2a4f 8%, #ff2a4f 92%, transparent);
+    box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  .hd-top-knopf { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 28px;
+    padding: 0 6px; border-radius: 5px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.04);
+    color: var(--k-dim); cursor: pointer; line-height: 0; }
+  .hd-top-knopf:hover { color: #fff; border-color: rgba(255,255,255,.45); }
+  .hd-top-knopf:focus-visible { outline: 2px solid #00d6ff; outline-offset: 2px; }
+  body.hd-stumm .hd-stumm-knopf { color: #ff8aa0; border-color: #ff5a7a; }
+  @media (max-height: 480px) { .hd-top-knopf { min-width: 24px; height: 20px; } .hd-top-knopf svg { width: 15px; height: 13px; } }
+  body.hd-pad-xbox .pad-svg .pad-mark { display: none; }
+  .pad-svg .hd-xbox-buchstabe { display: none; font: 800 17px Inter, system-ui, sans-serif; }
+  body.hd-pad-xbox .pad-svg .hd-xbox-buchstabe { display: inline; }
+  .hd-padstil { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 4px 0 12px; }
+  .hd-padstil button.sel { outline: 2px solid #00a3e0; }
   @media (max-height: 480px) { header#k-kopf .k-leiste2 { margin-top: 5px; padding-top: 3px; } }
   .hd-logo-svg { fill: currentColor; }
   header#k-kopf .hdr-logo svg.hd-logo-svg { width: 22px; height: 22px; }
@@ -12534,6 +12553,11 @@
         <button type="button" class="bind-player-btn" data-spieler="2">Spieler 2</button>
         <button type="button" class="bind-player-btn" data-spieler="3">Spieler 3</button>
       </div>
+      <div class="hd-padstil" data-i18n-skip><b>Controller layout</b>
+        <button type="button" data-hd-padstil="auto">Auto</button>
+        <button type="button" data-hd-padstil="ps">PlayStation</button>
+        <button type="button" data-hd-padstil="xbox">Xbox</button>
+        <span class="muted" id="hd-padstil-erkannt"></span></div>
       <table class="bind-table">
         <thead><tr><th>Aktion</th><th>Belegung</th><th></th></tr></thead>
         <tbody id="bind-table-body"></tbody>
@@ -15410,7 +15434,7 @@
     "Spieler 3": "Player 3",
     "Raum anzeigen": "Show room",
     "Größe der Haupttabs": "Size of the main tabs",
-    "FAHREN, CHALLENGES, WLAN MEHRSPIELER, OPTIONEN. 100 % ist die bisherige Größe.": "DRIVE, CHALLENGES, WIFI MULTIPLAYER, OPTIONS. 100 % is the previous size.",
+    "FAHREN, CHALLENGES, WLAN MEHRSPIELER, OPTIONEN. 100 % ist die bisherige Größe.": "RACE CONTROL, CHALLENGES, WIFI MULTIPLAYER, OPTIONS. 100 % is the previous size.",
     "Größe der Unter-Tabs": "Size of the sub-tabs",
     "Die zweite Leiste je Menü, z. B. Allgemein, Fahrgefühl, Ton in den Optionen. 100 % ist die bisherige Größe.": "The second bar of each menu, e.g. General, Driving feel, Sound in the options. 100 % is the previous size.",
     "Nur der Rammer bremst": "Only the rammer brakes",
@@ -17623,7 +17647,7 @@
     "Leseart: Bahn oder Ausdruck": "Reading mode: rail or printout",
     "Getriebe: Automatik oder von Hand": "Gearbox: automatic or manual",
     "Boxenstopp (tippen), gelbe Flagge (1 s halten)": "Pit stop (tap), yellow flag (hold 1 s)",
-    "Menü (Cockpit ↔ Fahren)": "Menu (cockpit ↔ drive)",
+    "Menü (Cockpit ↔ Fahren)": "Menu (cockpit ↔ race control)",
     "Kreuz (PS) / A (Xbox), 1 s halten": "Cross (PS) / A (Xbox), hold 1 s",
     "Select / Share (PS) / Back (Xbox)": "Select / Share (PS) / Back (Xbox)",
     // Lenkmessung (v0.5): Absaetze ohne inneres Markup, damit sie EIN Knoten sind.
@@ -18410,7 +18434,7 @@
     "Ansagen, Tastenbelegung, Fahrverhalten und vieles mehr stellst du im Optionenmenü ein.": "Announcements, button mapping, handling and much more are set in the options menu.",
     "Du hast die Einführung abgeschlossen. Herzlich willkommen bei OmegaSim!": "You have completed the tutorial. A warm welcome to OmegaSim!",
     "Bereit machen": "Get ready",
-    "Auto: unter FAHREN in der Kachel AUTOS verbinden.": "Car: connect it under DRIVE in the CARS tile.",
+    "Auto: unter FAHREN in der Kachel AUTOS verbinden.": "Car: connect it under RACE CONTROL in the CARS tile.",
     "Gamepad: einschalten und eine Taste drücken.": "Gamepad: switch it on and press a button.",
     "Abbrechen: Kreis oder Esc": "Cancel: Circle or Esc",
     "Beenden: Options oder Esc": "Quit: Options or Esc",
@@ -18424,7 +18448,7 @@
     "Schalte das Licht mit {taste} aus und wieder ein.": "Switch the lights off and on again with {taste}.",
     "Drücke {taste}, bis als Reifenwahl „Regen“ angezeigt wird.": "Press {taste} until the tyre choice shows “Rain”.",
     "Licht-Schalter im Cockpit": "light switch in the cockpit",
-    "Auto: verbunden, aber nicht Spieler 1. Unter FAHREN, AUTOS, GARAGE die Rolle auf Spieler 1 stellen.": "Car: connected, but not Player 1. Set its role to Player 1 under DRIVE, CARS, GARAGE.",
+    "Auto: verbunden, aber nicht Spieler 1. Unter FAHREN, AUTOS, GARAGE die Rolle auf Spieler 1 stellen.": "Car: connected, but not Player 1. Set its role to Player 1 under RACE CONTROL, CARS, GARAGE.",
     "Dein Auto ist verbunden, hat aber nicht die Rolle Spieler 1. Stelle sie in der Garage auf Spieler 1.": "Your car is connected but does not have the role Player 1. Set it to Player 1 in the garage.",
     "Fährst du auf der Bahn oder auf dem Boden? Wähle mit dem Steuerkreuz und bestätige.": "Are you driving on the track or on the floor? Choose with the D-pad and confirm.",
     "Gut, wir fahren auf der Bahn.": "Good, we drive on the track.",
@@ -18646,6 +18670,7 @@
     "TESTRUNDE: {n} AUTO(S)": "TEST LAP: {n} CAR(S)",
     "Reifen gewechselt": "Tyres changed",
     "Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt": "Reset, fuel {l} l, damage 0 %, tyres cold",
+    "Rennleitung": "Race Control",
   };
 
   // Spanisches Woerterbuch. Gleiche Schluessel (der deutsche Text) wie I18N_EN, aber nur die
@@ -20085,6 +20110,7 @@
     "Avatar ändern": "Cambiar avatar",
     "Zuletzt": "Último",
     "Zufälliger Name": "Nombre aleatorio",
+    "Rennleitung": "Dirección de carrera",
   };
 
   // ============================================================================
@@ -30201,7 +30227,7 @@
   // FAHREN -> Garage-Kachel" - mp ist jetzt eine tiefe Seite unter Fahren (#fa-mp).
   const K_EBENE1 = ['fahren', 'challenges', 'options', 'misc'];
   const K_NAME = {
-    home: 'Titel', fahren: 'Fahren', garage: 'Garage', race: 'Cockpit',
+    home: 'Titel', fahren: 'Rennleitung', garage: 'Garage', race: 'Cockpit',
     options: 'Optionen', control: 'Renneinstellungen', track: 'Strecke', mp: 'WLAN Mehrspieler',
     info: 'Info', challenges: 'Challenges', misc: 'Entwickler', doc: 'Doku', school: 'Programmierschule',
     dev: 'BLE-Werkbank', selftest: 'Selbsttest', probe: 'Code-Sonde', numtrain: 'Zahlensysteme',
@@ -30838,6 +30864,7 @@
       a.textContent = n ? '● ' + n + ' ' + t(n === 1 ? 'Auto' : 'Autos') : '○ ' + t('kein Auto');
       st.appendChild(a);
       if (typeof hdRelayChip === 'function') hdRelayChip(st);   // HybridDash: two-laptop chip
+      if (typeof hdStummKnopf === 'function') hdStummKnopf(st);  // HybridDash: mute
       // Kein Etikett "Neues Menü" mehr daneben - BESTELLT: "Mach das 'Neues Menü' Label oben
       // rechts weg". Als WIP gekennzeichnet bleibt das Menue in den Patchnotes.
     }
@@ -60015,6 +60042,9 @@
     // zu belegen"). readBindingValue() gibt fuer eine leere Belegung schon immer 0 zurueck -
     // nur die Beschreibung fehlte, und ein b.label auf null wirft.
     if (!b) return t('nicht belegt');
+    // HybridDash 2.1: button names of the chosen controller style (98l-hd-ui.js).
+    const hdName = typeof hdPadLabel === 'function' ? hdPadLabel(b) : null;
+    if (hdName) return hdName;
     if (b.label) return b.label;
     return b.type === 'axis' ? `Achse ${b.index}${b.invert ? ' (invertiert)' : ''}` : `Knopf ${b.index}`;
   }
@@ -60161,6 +60191,7 @@
     // Zuweisung laeuft; sie an sieben Aufrufstellen einzeln nachzuziehen waere die
     // Gelegenheit, eine zu vergessen.
     padDiagramRender();
+    if (typeof hdPadBildAnwenden === 'function') hdPadBildAnwenden();
     bindPlayerRowZeichnen();
     const ab = activeBindings();
     const body = $('bind-table-body');
@@ -95244,7 +95275,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (kAktiverTab() !== 'fahren') f.push('Kreis in der Garage fuehrt nach ' + kAktiverTab() + ' statt nach Fahren');
       showTab('garage');
       const r1 = konsoleReiterEbene1() || [];
-      if (!r1.some((x) => x.an && x.text === t('Fahren'))) f.push('in der Garage ist oben nicht FAHREN hervorgehoben');
+      if (!r1.some((x) => x.an && x.text === t(K_NAME.fahren))) f.push('in der Garage ist oben nicht FAHREN hervorgehoben');
       if (konsoleReiterInnen()) f.push('die Garage hat eine zweite Leiste');
       showTab('options');
       showSubpage('opt-feel');
@@ -98249,7 +98280,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (!menuNavRows().some((r) => r.el === kn)) f.push('Steuerkreuz erreicht den Knopf nicht');
       if (kn) kn.click();
       if (kAktiverTab() !== 'mp') f.push('Knopf fuehrt nach ' + kAktiverTab());
-      if (!(konsoleReiterEbene1() || []).some((x) => x.an && x.text === t('Fahren'))) f.push('im Mehrspieler ist oben nicht FAHREN hervorgehoben');
+      if (!(konsoleReiterEbene1() || []).some((x) => x.an && x.text === t(K_NAME.fahren))) f.push('im Mehrspieler ist oben nicht FAHREN hervorgehoben');
       konsoleZurueck();
       if (kAktiverTab() !== 'fahren') f.push('Kreis im Mehrspieler fuehrt nach ' + kAktiverTab());
       // Stand: nichts, beigetreten, Host, Info-Screen.
@@ -116414,13 +116445,17 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // screen. REPORTED: "have a tab or button to prompt the Helper window". Closing the panel
   // never closes the link - only "Unlink" or closing the browser tab does.
   function hdRelayChip(st) {
+    try { if (!hdRelay) return; } catch (e) { return; }   // called before this file ran (start-up)
     const b = document.createElement('button');
     b.type = 'button';
     b.id = 'hd-relay-chip';
     b.className = 'hd-relay-chip' + (hdRelay.offen ? (hdRelay.warStill ? ' gelb' : ' an') : hdRelay.rolle ? ' rot' : '');
     const n = hdRelay.rolle === 'host' ? [...hdRelay.fremd.values()].filter((d) => d.gatt.connected).length : hdRelay.eigen.size;
-    b.textContent = '⇄ ' + (hdRelay.rolle === 'helper' ? 'HELPER' : '2 LAPTOPS') + (hdRelay.offen ? ' · ' + n : '');
-    b.title = 'Two-laptop mode';
+    // v2.1 REQUESTED: bigger, icon only. The colour says the state; the tooltip says the rest.
+    b.innerHTML = '<svg viewBox="0 0 28 20" width="26" height="18" aria-hidden="true"><rect x="1" y="3" width="11" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M0 13.5 H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="16" y="3" width="11" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 13.5 H28" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 17.5 H18 M16 15.8 L18 17.5 L16 19.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+    b.title = 'Two-laptop mode' + (hdRelay.offen ? ' – linked' + (hdRelay.rolle === 'host' ? ', ' + n + ' car(s) via helper' : ' (helper)') : hdRelay.rolle ? ' – not linked' : '');
+    b.setAttribute('aria-label', b.title);
+    b.classList.add('hd-top-knopf');
     b.setAttribute('data-i18n-skip', '');
     b.addEventListener('click', (e) => { e.stopPropagation(); hdRelayOeffnen(); });
     st.appendChild(b);
@@ -116780,6 +116815,165 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     starten: hdPaarStarten, stoppen: () => hdPaarStoppen(), vergessen: hdPaarVergessen, neuerCode: hdCodeNeu,
     status: () => ({ code: hdPaar.code, rolle: hdPaar.rolle, aktiv: hdPaar.aktiv, beigetreten: hdPaar.beigetreten,
                      status: hdPaar.status, topic: hdPaar.topic }),
+  });
+  // =========================================================================
+  // HybridDash 2.1: top-bar mute, controller presets (PlayStation / Xbox)
+  // =========================================================================
+
+  // ---- MUTE (top bar, right) --------------------------------------------------------------
+  // REQUESTED: "Option in the main tab, on the right side to mute the sound."
+  // One tap silences EVERYTHING - engine, announcements, effects - without touching the saved
+  // "Engine sound" setting: the audio context is suspended, announcements are stopped and
+  // blocked (soundEnabled false). Unmute restores soundEnabled from that setting.
+  const HD_UI_STORE = 'hybriddash.ui.v1';
+  const hdUi = (() => { try { return Object.assign({ stumm: false, padStil: 'auto' }, JSON.parse(localStorage.getItem(HD_UI_STORE) || '{}')); } catch (e) { return { stumm: false, padStil: 'auto' }; } })();
+  function hdUiSpeichern() { try { localStorage.setItem(HD_UI_STORE, JSON.stringify(hdUi)); } catch (e) { /* private */ } }
+
+  function hdStummAnwenden() {
+    if (!hdUiBereit()) return;
+    if (hdUi.stumm) {
+      soundEnabled = false;
+      try { if (typeof ansagenReset === 'function') ansagenReset(); } catch (e) { /* not ready */ }
+      try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) { /* none */ }
+      try { if (audioCtx && audioCtx.state === 'running') audioCtx.suspend(); } catch (e) { /* none */ }
+    } else {
+      const el = $('sound-enable');
+      soundEnabled = el ? !!el.checked : true;
+      try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) { /* none */ }
+    }
+    document.body.classList.toggle('hd-stumm', !!hdUi.stumm);
+    const b = $('hd-stumm-knopf');
+    if (b) { b.innerHTML = hdStummIcon(); b.setAttribute('aria-pressed', hdUi.stumm ? 'true' : 'false'); b.title = hdUi.stumm ? 'Sound off – tap to unmute' : 'Mute all sound'; }
+  }
+  function hdStummIcon() {
+    const welle = hdUi.stumm
+      ? '<path d="M16 9 L22 15 M22 9 L16 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+      : '<path d="M16 8.5 C18 10.5 18 13.5 16 15.5 M18.8 6 C22.2 9.5 22.2 14.5 18.8 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 9 H7 L12 4.5 V19.5 L7 15 H3 Z" fill="currentColor"/>' + welle + '</svg>';
+  }
+  function hdStummUmschalten() { hdUi.stumm = !hdUi.stumm; hdUiSpeichern(); hdStummAnwenden(); if (!hdUi.stumm && typeof showHudToast === 'function') showHudToast('Sound on'); }
+  // The first tap anywhere unlocks (resumes) the audio context in 80-sound.js - and the guard
+  // below keeps a muted app muted through that and anything else that resumes it.
+  setInterval(() => { if (hdUi.stumm) { soundEnabled = false; try { if (audioCtx && audioCtx.state === 'running') audioCtx.suspend(); } catch (e) { /* none */ } } }, 500);
+  // Hook, called from the top-bar renderer (51-konsole.js) after the car count.
+  function hdStummKnopf(st) {
+    if (!hdUiBereit()) return;
+    const b = document.createElement('button');
+    b.type = 'button'; b.id = 'hd-stumm-knopf'; b.className = 'hd-top-knopf hd-stumm-knopf';
+    b.setAttribute('data-i18n-skip', '');
+    b.addEventListener('click', (e) => { e.stopPropagation(); hdStummUmschalten(); });
+    st.appendChild(b);
+    hdStummAnwenden();
+  }
+  // M on the keyboard toggles it too (not while typing).
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey && !e.altKey
+        && !(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))) hdStummUmschalten();
+  });
+  hdStummAnwenden();
+
+  // ---- CONTROLLER PRESETS: PlayStation / Xbox ---------------------------------------------
+  // REQUESTED: "Have preset controller layouts for PS and Xbox controller layouts."
+  // In the browser's Standard Gamepad mapping both controllers use the SAME button numbers
+  // (0 = Cross/A, 1 = Circle/B, ...), so the factory mapping fits both. What differs is what
+  // you see: the names of the buttons. A preset sets the style - every button name in the
+  // bindings table, the controller picture and the safety-car prompt uses your controller's
+  // own names (Cross or A, R2 or RT) - and offers to reset the mapping to the factory layout.
+  // "Auto" picks the style from the connected controller.
+  const HD_PAD_NAMEN = {
+    ps:   ['Cross', 'Circle', 'Square', 'Triangle', 'L1', 'R1', 'L2', 'R2', 'Create / Share', 'Options', 'L3', 'R3',
+           'D-pad up', 'D-pad down', 'D-pad left', 'D-pad right', 'PS button', 'Touchpad'],
+    xbox: ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'LS (press)', 'RS (press)',
+           'D-pad up', 'D-pad down', 'D-pad left', 'D-pad right', 'Xbox button', 'Share'],
+  };
+  const HD_PAD_ACHSEN = { 0: 'Left stick', 1: 'Left stick (vertical)', 2: 'Right stick', 3: 'Right stick (vertical)' };
+  function hdPadErkannt() {
+    try {
+      for (const p of (navigator.getGamepads ? navigator.getGamepads() : [])) {
+        if (!p || !p.id) continue;
+        if (/054c|dualsense|dualshock|playstation|wireless controller/i.test(p.id)) return 'ps';
+        if (/045e|xbox|xinput/i.test(p.id)) return 'xbox';
+      }
+    } catch (e) { /* no API */ }
+    return null;
+  }
+  // Hooks below can be called while the app is still loading, before this file has run (the
+  // bindings table renders early). Then hdUi is not initialised yet: answer 'not yet' instead of
+  // throwing - an exception here would abort the whole app's start-up.
+  function hdUiBereit() { try { return !!hdUi; } catch (e) { return false; } }
+  function hdPadStil() { if (!hdUiBereit()) return null; return hdUi.padStil === 'ps' || hdUi.padStil === 'xbox' ? hdUi.padStil : hdPadErkannt(); }
+  // Hook used by bindingDescription() (90-ghosts.js). Returns null to keep the original label.
+  function hdPadLabel(b) {
+    const stil = hdPadStil();
+    if (!stil || !b || b.type === 'none' || b.index < 0) return null;
+    let name = b.type === 'axis' ? HD_PAD_ACHSEN[b.index] : HD_PAD_NAMEN[stil][b.index];
+    if (!name) return null;
+    if (b.type === 'axis' && b.invert) name += ' (inverted)';
+    if (b.label && /halten|hold/i.test(b.label)) name += ', hold 1 s';
+    return name;
+  }
+
+  // The controller picture: face-button symbols and the key captions follow the style.
+  const HD_PAD_KEYS = {
+    ps:   { 'L2 · LT': 'L2', 'L1 · LB': 'L1', 'Select · Share': 'Create / Share', 'Options · Start': 'Options',
+            'L3 · Stick drücken': 'L3 · press stick', 'R3 · Stick drücken': 'R3 · press stick', 'R2 · RT': 'R2', 'R1 · RB': 'R1',
+            'PS-Taste': 'PS button', 'Touchpad': 'Touchpad' },
+    xbox: { 'L2 · LT': 'LT', 'L1 · LB': 'LB', 'Select · Share': 'View', 'Options · Start': 'Menu',
+            'L3 · Stick drücken': 'LS · press stick', 'R3 · Stick drücken': 'RS · press stick', 'R2 · RT': 'RT', 'R1 · RB': 'RB',
+            'PS-Taste': 'Xbox button', 'Touchpad': 'Share' },
+  };
+  const HD_PAD_SYM = { ps: { tri: '△', circ: '◯', cross: '✕', sq: '□' }, xbox: { tri: 'Y', circ: 'B', cross: 'A', sq: 'X' } };
+  function hdPadBildAnwenden() {
+    if (!hdUiBereit()) return;
+    const stil = hdPadStil() || 'ps';
+    document.body.classList.toggle('hd-pad-xbox', stil === 'xbox');
+    document.querySelectorAll('.pad-svg .pad-key').forEach((el) => {
+      if (!el.dataset.hdOrig) el.dataset.hdOrig = (i18nOrig.get(el.firstChild) || el.textContent).replace(/\s+/g, ' ').trim();
+      const neu = HD_PAD_KEYS[stil][el.dataset.hdOrig];
+      if (neu) { el.setAttribute('data-i18n-skip', ''); el.textContent = neu; }
+    });
+    for (const k of ['tri', 'circ', 'cross', 'sq']) {
+      const act = $('pad-a-' + k);
+      const sym = act && act.previousElementSibling;
+      if (sym && sym.classList.contains('pad-sym')) { sym.setAttribute('data-i18n-skip', ''); sym.textContent = HD_PAD_SYM[stil][k]; }
+    }
+    // Xbox letters on the drawn face buttons (the PS symbols are hidden by CSS).
+    const gruppe = document.querySelector('.pad-svg polygon.pad-mark') && document.querySelector('.pad-svg polygon.pad-mark').parentNode;
+    if (gruppe && !gruppe.querySelector('.hd-xbox-buchstabe')) {
+      const NS = 'http://www.w3.org/2000/svg';
+      [['Y', 0, -30, '#e8c72a'], ['X', -30, 0, '#3b7fe2'], ['B', 30, 0, '#e23b3b'], ['A', 0, 30, '#35b45a']].forEach(([z, x, y, f]) => {
+        const tx = document.createElementNS(NS, 'text');
+        tx.setAttribute('x', x); tx.setAttribute('y', y + 6); tx.setAttribute('text-anchor', 'middle');
+        tx.setAttribute('class', 'hd-xbox-buchstabe'); tx.setAttribute('fill', f); tx.textContent = z;
+        gruppe.appendChild(tx);
+      });
+    }
+    const wahl = document.querySelectorAll('[data-hd-padstil]');
+    wahl.forEach((b) => b.classList.toggle('sel', b.dataset.hdPadstil === hdUi.padStil));
+    const erk = $('hd-padstil-erkannt');
+    if (erk) { const e = hdPadErkannt(); erk.textContent = hdUi.padStil === 'auto' ? (e ? 'Detected: ' + (e === 'ps' ? 'PlayStation' : 'Xbox') : 'No controller detected – showing PlayStation names') : ''; }
+  }
+  function hdPadStilSetzen(stil) {
+    hdUi.padStil = stil; hdUiSpeichern();
+    if (typeof renderBindTable === 'function') renderBindTable();
+    hdPadBildAnwenden();
+    if (stil === 'ps' || stil === 'xbox') {
+      const name = stil === 'ps' ? 'PlayStation' : 'Xbox';
+      if (window.confirm('Use the ' + name + ' preset?\n\nThis resets the button mapping to the factory layout (you can still change single buttons afterwards). Press "Apply" below the table to keep it.')) {
+        const r = $('bind-reset'); if (r) r.click();
+      }
+    }
+  }
+  (function hdPadAnbinden() {
+    document.querySelectorAll('[data-hd-padstil]').forEach((b) => b.addEventListener('click', () => hdPadStilSetzen(b.dataset.hdPadstil)));
+    window.addEventListener('gamepadconnected', () => { if (hdUi.padStil === 'auto') { if (typeof renderBindTable === 'function') renderBindTable(); hdPadBildAnwenden(); } });
+    hdPadBildAnwenden();
+  })();
+
+  window.HYBRIDDASH_UI = Object.freeze({
+    stumm: (an) => { if (an !== undefined) { hdUi.stumm = !!an; hdUiSpeichern(); hdStummAnwenden(); } return hdUi.stumm; },
+    padStil: (s) => { if (s) { hdUi.padStil = s; hdUiSpeichern(); if (typeof renderBindTable === 'function') renderBindTable(); hdPadBildAnwenden(); } return hdPadStil(); },
+    label: (b) => bindingDescription(b),
   });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------

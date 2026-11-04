@@ -400,8 +400,7 @@
   .hdr-manuell summary { cursor: pointer; color: #9aa1b0; font-size: 13px; }
   .hdr-autos-schritt { list-style: none; padding-left: 0; }
   .hdr-paar-status { color: #7cd8ff; }
-  .hd-relay-chip { font-size: inherit; padding: 1px 7px; border-radius: 3px; border: 1px solid rgba(255,255,255,.25);
-                   background: transparent; color: var(--k-dim); cursor: pointer; letter-spacing: .06em; min-height: 0; line-height: 1.4; }
+  .hd-relay-chip { cursor: pointer; }
   .hd-relay-chip.an { border-color: #35b45a; color: #7cff9b; }
   .hd-relay-chip.gelb { border-color: #ffd23f; color: #ffd23f; }
   .hd-relay-chip.rot { border-color: #ff5a7a; color: #ff8aa0; }
@@ -412,10 +411,30 @@
   body.hd-helper-seite #hd-relay { visibility: visible; background: #05070c; }
   body.hd-helper-seite #hdr-zu, body.hd-helper-seite .hdr-wahl, body.hd-helper-seite .hdr-tipp { display: none; }
   /* v2.1: main tabs and sub tabs further apart, with a subtle neon red line between them. */
-  header#k-kopf .k-leiste2 { position: relative; margin-top: 9px; padding-top: 5px; }
-  header#k-kopf .k-leiste2::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, #ff2a4f 12%, #ff2a4f 88%, transparent);
+  /* v2.1b: the neon red line sits under the main tab bar on EVERY tab (not only when sub tabs show). */
+  header#k-kopf { position: relative; padding-bottom: 6px; }
+  body header#k-kopf::after { content: ''; display: block; position: absolute; left: 0; right: 0; bottom: 0; top: auto; height: 1px; opacity: 1;
+    background: linear-gradient(90deg, transparent, #ff2a4f 8%, #ff2a4f 92%, transparent);
     box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  header#k-kopf .k-leiste2 { position: relative; margin-top: 9px; padding-top: 5px; order: 9; }
+  header#k-kopf .k-leiste2 + * { }
+  /* With sub tabs the line belongs between main and sub tabs: draw it there instead. */
+  body header#k-kopf:has(.k-leiste2:not([hidden]))::after { display: none; }
+  header#k-kopf .k-leiste2::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, #ff2a4f 8%, #ff2a4f 92%, transparent);
+    box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  .hd-top-knopf { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 28px;
+    padding: 0 6px; border-radius: 5px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.04);
+    color: var(--k-dim); cursor: pointer; line-height: 0; }
+  .hd-top-knopf:hover { color: #fff; border-color: rgba(255,255,255,.45); }
+  .hd-top-knopf:focus-visible { outline: 2px solid #00d6ff; outline-offset: 2px; }
+  body.hd-stumm .hd-stumm-knopf { color: #ff8aa0; border-color: #ff5a7a; }
+  @media (max-height: 480px) { .hd-top-knopf { min-width: 24px; height: 20px; } .hd-top-knopf svg { width: 15px; height: 13px; } }
+  body.hd-pad-xbox .pad-svg .pad-mark { display: none; }
+  .pad-svg .hd-xbox-buchstabe { display: none; font: 800 17px Inter, system-ui, sans-serif; }
+  body.hd-pad-xbox .pad-svg .hd-xbox-buchstabe { display: inline; }
+  .hd-padstil { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 4px 0 12px; }
+  .hd-padstil button.sel { outline: 2px solid #00a3e0; }
   @media (max-height: 480px) { header#k-kopf .k-leiste2 { margin-top: 5px; padding-top: 3px; } }
   .hd-logo-svg { fill: currentColor; }
   header#k-kopf .hdr-logo svg.hd-logo-svg { width: 22px; height: 22px; }
@@ -12534,6 +12553,11 @@
         <button type="button" class="bind-player-btn" data-spieler="2">Spieler 2</button>
         <button type="button" class="bind-player-btn" data-spieler="3">Spieler 3</button>
       </div>
+      <div class="hd-padstil" data-i18n-skip><b>Controller layout</b>
+        <button type="button" data-hd-padstil="auto">Auto</button>
+        <button type="button" data-hd-padstil="ps">PlayStation</button>
+        <button type="button" data-hd-padstil="xbox">Xbox</button>
+        <span class="muted" id="hd-padstil-erkannt"></span></div>
       <table class="bind-table">
         <thead><tr><th>Aktion</th><th>Belegung</th><th></th></tr></thead>
         <tbody id="bind-table-body"></tbody>

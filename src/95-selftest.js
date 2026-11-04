@@ -11495,7 +11495,7 @@
       if (kAktiverTab() !== 'fahren') f.push('Kreis in der Garage fuehrt nach ' + kAktiverTab() + ' statt nach Fahren');
       showTab('garage');
       const r1 = konsoleReiterEbene1() || [];
-      if (!r1.some((x) => x.an && x.text === t('Fahren'))) f.push('in der Garage ist oben nicht FAHREN hervorgehoben');
+      if (!r1.some((x) => x.an && x.text === t(K_NAME.fahren))) f.push('in der Garage ist oben nicht FAHREN hervorgehoben');
       if (konsoleReiterInnen()) f.push('die Garage hat eine zweite Leiste');
       showTab('options');
       showSubpage('opt-feel');
@@ -14500,7 +14500,7 @@
       if (!menuNavRows().some((r) => r.el === kn)) f.push('Steuerkreuz erreicht den Knopf nicht');
       if (kn) kn.click();
       if (kAktiverTab() !== 'mp') f.push('Knopf fuehrt nach ' + kAktiverTab());
-      if (!(konsoleReiterEbene1() || []).some((x) => x.an && x.text === t('Fahren'))) f.push('im Mehrspieler ist oben nicht FAHREN hervorgehoben');
+      if (!(konsoleReiterEbene1() || []).some((x) => x.an && x.text === t(K_NAME.fahren))) f.push('im Mehrspieler ist oben nicht FAHREN hervorgehoben');
       konsoleZurueck();
       if (kAktiverTab() !== 'fahren') f.push('Kreis im Mehrspieler fuehrt nach ' + kAktiverTab());
       // Stand: nichts, beigetreten, Host, Info-Screen.

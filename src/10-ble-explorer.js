@@ -1022,7 +1022,7 @@
     "Spieler 3": "Player 3",
     "Raum anzeigen": "Show room",
     "Größe der Haupttabs": "Size of the main tabs",
-    "FAHREN, CHALLENGES, WLAN MEHRSPIELER, OPTIONEN. 100 % ist die bisherige Größe.": "DRIVE, CHALLENGES, WIFI MULTIPLAYER, OPTIONS. 100 % is the previous size.",
+    "FAHREN, CHALLENGES, WLAN MEHRSPIELER, OPTIONEN. 100 % ist die bisherige Größe.": "RACE CONTROL, CHALLENGES, WIFI MULTIPLAYER, OPTIONS. 100 % is the previous size.",
     "Größe der Unter-Tabs": "Size of the sub-tabs",
     "Die zweite Leiste je Menü, z. B. Allgemein, Fahrgefühl, Ton in den Optionen. 100 % ist die bisherige Größe.": "The second bar of each menu, e.g. General, Driving feel, Sound in the options. 100 % is the previous size.",
     "Nur der Rammer bremst": "Only the rammer brakes",
@@ -3235,7 +3235,7 @@
     "Leseart: Bahn oder Ausdruck": "Reading mode: rail or printout",
     "Getriebe: Automatik oder von Hand": "Gearbox: automatic or manual",
     "Boxenstopp (tippen), gelbe Flagge (1 s halten)": "Pit stop (tap), yellow flag (hold 1 s)",
-    "Menü (Cockpit ↔ Fahren)": "Menu (cockpit ↔ drive)",
+    "Menü (Cockpit ↔ Fahren)": "Menu (cockpit ↔ race control)",
     "Kreuz (PS) / A (Xbox), 1 s halten": "Cross (PS) / A (Xbox), hold 1 s",
     "Select / Share (PS) / Back (Xbox)": "Select / Share (PS) / Back (Xbox)",
     // Lenkmessung (v0.5): Absaetze ohne inneres Markup, damit sie EIN Knoten sind.
@@ -4022,7 +4022,7 @@
     "Ansagen, Tastenbelegung, Fahrverhalten und vieles mehr stellst du im Optionenmenü ein.": "Announcements, button mapping, handling and much more are set in the options menu.",
     "Du hast die Einführung abgeschlossen. Herzlich willkommen bei OmegaSim!": "You have completed the tutorial. A warm welcome to OmegaSim!",
     "Bereit machen": "Get ready",
-    "Auto: unter FAHREN in der Kachel AUTOS verbinden.": "Car: connect it under DRIVE in the CARS tile.",
+    "Auto: unter FAHREN in der Kachel AUTOS verbinden.": "Car: connect it under RACE CONTROL in the CARS tile.",
     "Gamepad: einschalten und eine Taste drücken.": "Gamepad: switch it on and press a button.",
     "Abbrechen: Kreis oder Esc": "Cancel: Circle or Esc",
     "Beenden: Options oder Esc": "Quit: Options or Esc",
@@ -4036,7 +4036,7 @@
     "Schalte das Licht mit {taste} aus und wieder ein.": "Switch the lights off and on again with {taste}.",
     "Drücke {taste}, bis als Reifenwahl „Regen“ angezeigt wird.": "Press {taste} until the tyre choice shows “Rain”.",
     "Licht-Schalter im Cockpit": "light switch in the cockpit",
-    "Auto: verbunden, aber nicht Spieler 1. Unter FAHREN, AUTOS, GARAGE die Rolle auf Spieler 1 stellen.": "Car: connected, but not Player 1. Set its role to Player 1 under DRIVE, CARS, GARAGE.",
+    "Auto: verbunden, aber nicht Spieler 1. Unter FAHREN, AUTOS, GARAGE die Rolle auf Spieler 1 stellen.": "Car: connected, but not Player 1. Set its role to Player 1 under RACE CONTROL, CARS, GARAGE.",
     "Dein Auto ist verbunden, hat aber nicht die Rolle Spieler 1. Stelle sie in der Garage auf Spieler 1.": "Your car is connected but does not have the role Player 1. Set it to Player 1 in the garage.",
     "Fährst du auf der Bahn oder auf dem Boden? Wähle mit dem Steuerkreuz und bestätige.": "Are you driving on the track or on the floor? Choose with the D-pad and confirm.",
     "Gut, wir fahren auf der Bahn.": "Good, we drive on the track.",
@@ -4258,6 +4258,7 @@
     "TESTRUNDE: {n} AUTO(S)": "TEST LAP: {n} CAR(S)",
     "Reifen gewechselt": "Tyres changed",
     "Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt": "Reset, fuel {l} l, damage 0 %, tyres cold",
+    "Rennleitung": "Race Control",
   };
 
   // Spanisches Woerterbuch. Gleiche Schluessel (der deutsche Text) wie I18N_EN, aber nur die
@@ -5697,6 +5698,7 @@
     "Avatar ändern": "Cambiar avatar",
     "Zuletzt": "Último",
     "Zufälliger Name": "Nombre aleatorio",
+    "Rennleitung": "Dirección de carrera",
   };
 
   // ============================================================================

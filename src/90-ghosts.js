@@ -444,6 +444,9 @@
     // zu belegen"). readBindingValue() gibt fuer eine leere Belegung schon immer 0 zurueck -
     // nur die Beschreibung fehlte, und ein b.label auf null wirft.
     if (!b) return t('nicht belegt');
+    // HybridDash 2.1: button names of the chosen controller style (98l-hd-ui.js).
+    const hdName = typeof hdPadLabel === 'function' ? hdPadLabel(b) : null;
+    if (hdName) return hdName;
     if (b.label) return b.label;
     return b.type === 'axis' ? `Achse ${b.index}${b.invert ? ' (invertiert)' : ''}` : `Knopf ${b.index}`;
   }
@@ -590,6 +593,7 @@
     // Zuweisung laeuft; sie an sieben Aufrufstellen einzeln nachzuziehen waere die
     // Gelegenheit, eine zu vergessen.
     padDiagramRender();
+    if (typeof hdPadBildAnwenden === 'function') hdPadBildAnwenden();
     bindPlayerRowZeichnen();
     const ab = activeBindings();
     const body = $('bind-table-body');

@@ -456,13 +456,17 @@
   // screen. REPORTED: "have a tab or button to prompt the Helper window". Closing the panel
   // never closes the link - only "Unlink" or closing the browser tab does.
   function hdRelayChip(st) {
+    try { if (!hdRelay) return; } catch (e) { return; }   // called before this file ran (start-up)
     const b = document.createElement('button');
     b.type = 'button';
     b.id = 'hd-relay-chip';
     b.className = 'hd-relay-chip' + (hdRelay.offen ? (hdRelay.warStill ? ' gelb' : ' an') : hdRelay.rolle ? ' rot' : '');
     const n = hdRelay.rolle === 'host' ? [...hdRelay.fremd.values()].filter((d) => d.gatt.connected).length : hdRelay.eigen.size;
-    b.textContent = '⇄ ' + (hdRelay.rolle === 'helper' ? 'HELPER' : '2 LAPTOPS') + (hdRelay.offen ? ' · ' + n : '');
-    b.title = 'Two-laptop mode';
+    // v2.1 REQUESTED: bigger, icon only. The colour says the state; the tooltip says the rest.
+    b.innerHTML = '<svg viewBox="0 0 28 20" width="26" height="18" aria-hidden="true"><rect x="1" y="3" width="11" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M0 13.5 H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="16" y="3" width="11" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 13.5 H28" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 17.5 H18 M16 15.8 L18 17.5 L16 19.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+    b.title = 'Two-laptop mode' + (hdRelay.offen ? ' – linked' + (hdRelay.rolle === 'host' ? ', ' + n + ' car(s) via helper' : ' (helper)') : hdRelay.rolle ? ' – not linked' : '');
+    b.setAttribute('aria-label', b.title);
+    b.classList.add('hd-top-knopf');
     b.setAttribute('data-i18n-skip', '');
     b.addEventListener('click', (e) => { e.stopPropagation(); hdRelayOeffnen(); });
     st.appendChild(b);

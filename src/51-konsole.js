@@ -35,7 +35,7 @@
   // FAHREN -> Garage-Kachel" - mp ist jetzt eine tiefe Seite unter Fahren (#fa-mp).
   const K_EBENE1 = ['fahren', 'challenges', 'options', 'misc'];
   const K_NAME = {
-    home: 'Titel', fahren: 'Fahren', garage: 'Garage', race: 'Cockpit',
+    home: 'Titel', fahren: 'Rennleitung', garage: 'Garage', race: 'Cockpit',
     options: 'Optionen', control: 'Renneinstellungen', track: 'Strecke', mp: 'WLAN Mehrspieler',
     info: 'Info', challenges: 'Challenges', misc: 'Entwickler', doc: 'Doku', school: 'Programmierschule',
     dev: 'BLE-Werkbank', selftest: 'Selbsttest', probe: 'Code-Sonde', numtrain: 'Zahlensysteme',
@@ -672,6 +672,7 @@
       a.textContent = n ? '● ' + n + ' ' + t(n === 1 ? 'Auto' : 'Autos') : '○ ' + t('kein Auto');
       st.appendChild(a);
       if (typeof hdRelayChip === 'function') hdRelayChip(st);   // HybridDash: two-laptop chip
+      if (typeof hdStummKnopf === 'function') hdStummKnopf(st);  // HybridDash: mute
       // Kein Etikett "Neues Menü" mehr daneben - BESTELLT: "Mach das 'Neues Menü' Label oben
       // rechts weg". Als WIP gekennzeichnet bleibt das Menue in den Patchnotes.
     }
