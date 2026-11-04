@@ -27,6 +27,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           V="${{ steps.v.outputs.v }}"
-          cp apk/OmegaSim.apk "OmegaSim-$V.apk"
-          gh release create "v$V" apk/OmegaSim.apk "OmegaSim-$V.apk" \
-            --title "OmegaSim $V" --notes "Android app (APK). Open it on your phone and install it." --latest
+          test -f apk/HybridDash.apk || { echo "apk/HybridDash.apk missing: build it from android-app/ first (apk/OmegaSim.apk is the upstream build)"; exit 1; }
+          cp apk/HybridDash.apk "HybridDash-$V.apk"
+          gh release create "v$V" apk/HybridDash.apk "HybridDash-$V.apk" \
+            --title "HybridDash $V" --notes "Android app (APK). Open it on your phone and install it." --latest

@@ -1,8 +1,8 @@
 {
-  "name": "OmegaSim",
-  "short_name": "OmegaSim",
-  "description": "Cockpit, Physik und Rennleitung für Carrera-Hybrid-Autos, im Browser.",
-  "lang": "de",
+  "name": "HybridDash 2.0",
+  "short_name": "HybridDash",
+  "description": "Cockpit, physics and race control for Carrera Hybrid cars, in the browser.",
+  "lang": "en",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

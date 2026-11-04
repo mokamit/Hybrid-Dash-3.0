@@ -1,6 +1,6 @@
 {
-  "appId": "de.lroeseler.omegasim",
-  "appName": "OmegaSim",
+  "appId": "com.hybriddash.app",
+  "appName": "HybridDash",
   "webDir": "www",
   "server": {
     "androidScheme": "https"
@@ -12,10 +12,10 @@
   "plugins": {
     "BluetoothLe": {
       "displayStrings": {
-        "scanning": "Suche Autos ...",
-        "cancel": "Abbrechen",
-        "availableDevices": "Gefundene Autos",
-        "noDeviceFound": "Kein Auto gefunden"
+        "scanning": "Searching for cars ...",
+        "cancel": "Cancel",
+        "availableDevices": "Cars found",
+        "noDeviceFound": "No car found"
       }
     },
     "SystemBars": {

@@ -36,7 +36,7 @@ public class OmegaHostService extends Service {
             Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, KANAL) : new Notification.Builder(this);
             String adr = OmegaHostPlugin.adressen().isEmpty() ? "" : " · http://" + OmegaHostPlugin.adressen().get(0) + ":8080";
             Notification n = b
-                .setContentTitle("OmegaSim-Host läuft")
+                .setContentTitle("HybridDash host running")
                 .setContentText("Andere Geräte im WLAN können beitreten" + adr)
                 .setSmallIcon(android.R.drawable.stat_sys_upload)
                 .setContentIntent(pi)

@@ -51,8 +51,8 @@ import java.nio.charset.StandardCharsets;
 )
 public class OmegaSicherungPlugin extends Plugin {
 
-    static final String NAME = "OmegaSim-Sicherung.json";
-    static final String ORDNER = "OmegaSim";
+    static final String NAME = "HybridDash-Backup.json";
+    static final String ORDNER = "HybridDash";
     private static final String PREFS = "omegasim-sicherung";
 
     @PluginMethod

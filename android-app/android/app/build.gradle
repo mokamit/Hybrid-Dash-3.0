@@ -4,7 +4,7 @@ android {
     namespace = "de.lroeseler.omegasim"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "de.lroeseler.omegasim"
+        applicationId "com.hybriddash.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Aus dem Tag, siehe .github/workflows/android.yml (apk-v1.0.7 -> 1.0.7, 100007).
