@@ -304,7 +304,7 @@
     document.head.appendChild(css);
     hdRlBauen();
     // The screen's name when you flip to it (toast) follows its new job.
-    try { const e = COCKPIT_SCREENS.find((x) => x.id === 'uebersicht'); if (e) e.name = 'Rennleitung'; } catch (e) { /* not ready */ }
+    try { const e = COCKPIT_SCREENS.find((x) => x.id === 'uebersicht'); if (e) e.name = 'Race Director'; } catch (e) { /* not ready */ }
     setInterval(hdRlTick, 250);
   })();
 

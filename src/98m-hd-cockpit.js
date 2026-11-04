@@ -318,12 +318,67 @@
     // A fourth cockpit screen, after Cockpit, Pit and Race - reached with the screen dots or
     // the D-pad like the others. COCKPIT_SCREENS (50-drive.js) is the one list they come from.
     if (typeof COCKPIT_SCREENS !== 'undefined' && !COCKPIT_SCREENS.some((x) => x.id === 'hybriddash')) {
-      COCKPIT_SCREENS.push({ id: 'hybriddash', name: 'Dashboard', malen: () => { hdCockpitBauen(); hdCockpitMalen(); } });
+      COCKPIT_SCREENS.push({ id: 'hybriddash', name: 'Digital Dash', malen: () => { hdCockpitBauen(); hdCockpitMalen(); } });
       if (typeof cockpitPunkteMalen === 'function') cockpitPunkteMalen();
     }
     hdCockpitBauen();
     window.addEventListener('resize', hdCockpitEinpassen);
     hdCp.uhr = setInterval(hdCockpitMalen, 100);
+  })();
+
+  // ---- NAMED COCKPIT TABS -----------------------------------------------------------------
+  // REQUESTED: "Tab names, and a menu style like on the main screen for the cockpit tabs":
+  // OmegaSim (the original cockpit), Pit Wall, Race Director, Digital Dash. They replace the
+  // dots next to the arrow button; a click jumps straight to that screen, the arrow, the
+  // D-pad and swiping still step through them, and the toast on switching uses the same names.
+  const HD_SCHIRM_NAMEN = { main: 'OmegaSim', pit: 'Pit Wall', uebersicht: 'Race Director', hybriddash: 'Digital Dash' };
+  // Called by cockpitPunkteMalen() - also WHILE THE APP IS STILL LOADING, before this file ran.
+  // Then the name list is not initialised yet: draw nothing (the dots), never throw - an
+  // exception here would abort the whole start-up.
+  function hdCockpitReiter(host) {
+    try { if (!HD_SCHIRM_NAMEN) return false; } catch (e) { return false; }
+    let liste; try { liste = COCKPIT_SCREENS; } catch (e) { return false; }
+    if (!liste || !liste.length) return false;
+    host.classList.add('hd-reiter');
+    host.removeAttribute('aria-hidden');
+    host.setAttribute('role', 'tablist');
+    host.setAttribute('data-i18n-skip', '');
+    if (host.children.length !== liste.length || host.dataset.hd !== '1') {
+      host.dataset.hd = '1';
+      host.innerHTML = '';
+      liste.forEach((s, i) => {
+        if (HD_SCHIRM_NAMEN[s.id]) s.name = HD_SCHIRM_NAMEN[s.id];
+        const b = document.createElement('button');
+        b.type = 'button'; b.setAttribute('role', 'tab');
+        b.textContent = HD_SCHIRM_NAMEN[s.id] || s.name;
+        b.addEventListener('click', (e) => { e.stopPropagation(); cockpitScreenSet(i); });
+        host.appendChild(b);
+      });
+    }
+    let aktiv = 0; try { aktiv = cockpitScreen; } catch (e) { aktiv = 0; }
+    for (let i = 0; i < host.children.length; i++) {
+      host.children[i].classList.toggle('an', i === aktiv);
+      host.children[i].setAttribute('aria-selected', i === aktiv ? 'true' : 'false');
+    }
+    return true;
+  }
+  (function hdReiterCss() {
+    const css = document.createElement('style');
+    css.textContent = `
+      #race-dash .race-corner-links { right: clamp(96px, 9vw, 130px); }
+      #race-screen-dots.hd-reiter { flex: 1; min-width: 0; height: 34px; gap: 0; padding: 0; margin-left: 6px;
+        background: #0d1015; overflow: hidden; display: flex; align-items: stretch; }
+      #race-screen-dots.hd-reiter button { all: unset; box-sizing: border-box; flex: 1; min-width: 0; cursor: pointer; text-align: center;
+        display: grid; place-items: center; padding: 0 8px; color: #b4bccb; font-family: var(--k-font, Inter, sans-serif);
+        font-size: clamp(10px, 1.05vw, 14px); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis; clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%); }
+      #race-screen-dots.hd-reiter button:hover { color: #fff; background: rgba(255,255,255,.08); }
+      #race-screen-dots.hd-reiter button.an { background: var(--k-weiss, #f2f4f8); color: var(--k-tinte, #0d1015); font-weight: 800; }
+      #race-screen-dots.hd-reiter button:focus-visible { outline: 2px solid #00d6ff; outline-offset: -2px; }
+      @media (max-height: 480px) { #race-screen-dots.hd-reiter { height: 26px; } }
+    `;
+    document.head.appendChild(css);
+    try { cockpitPunkteMalen(); } catch (e) { /* not ready */ }
   })();
 
   window.HYBRIDDASH_COCKPIT = Object.freeze({ malen: hdCockpitMalen, eingabe: hdCockpitEingabe });

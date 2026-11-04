@@ -1276,6 +1276,8 @@
   function cockpitPunkteMalen() {
     const host = $('race-screen-dots');
     if (!host) return;
+    // HybridDash: named tabs instead of dots (98m-hd-cockpit.js).
+    if (typeof hdCockpitReiter === 'function' && hdCockpitReiter(host)) return;
     if (host.children.length !== COCKPIT_SCREENS.length) {
       host.innerHTML = COCKPIT_SCREENS.map(() => '<i></i>').join('');
     }
