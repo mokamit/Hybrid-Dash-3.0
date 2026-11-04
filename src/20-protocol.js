@@ -223,6 +223,8 @@
   }
   async function funkSchreiben(ziel, payload, notiz) {
     payload = rennPausePaket(payload);
+    // HybridDash race control: a car marked DNF gets a neutral packet (98n-hd-rennleitung.js).
+    if (typeof hdDnfZiel === 'function' && hdDnfZiel(ziel)) payload = hdDnfPaket();
     // v1.1.3: getrennt, Neuverbinden laeuft (reconnectCar) - nichts senden.
     if (ziel && ziel.verbindungWeg) return;
     const z = funkZustand(ziel);

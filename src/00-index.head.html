@@ -389,6 +389,92 @@
      deutlicher (aktuell sehr schwach und kaum erkennbar)". Vorher ::before mit 4,5 % Deckkraft;
      jetzt ein eigenes Element (die zwei Glitch-Ebenen brauchen ::before und ::after) mit 13 %. */
   /* HybridDash 2.0 */
+  .hdr-schnell { border: 1px solid rgba(0,163,224,.45); background: rgba(0,163,224,.07); border-radius: 8px; padding: 10px 12px; margin: 8px 0 10px; }
+  .hdr-schnell p { margin: 4px 0 8px; color: #c3c8d4; font-size: 13.5px; }
+  .hdr-schnell-titel { color: #6fd3ff; letter-spacing: .04em; }
+  .hdr-code-zeile { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .hdr-code { font: 800 30px/1 ui-monospace, monospace; letter-spacing: .12em; color: #fff; min-width: 7.2ch; }
+  .hdr-code-ein { font: 800 24px/1.1 ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; width: 11ch; box-sizing: content-box;
+                  background: #05070c; color: #fff; border: 1px solid rgba(255,255,255,.25); border-radius: 6px; padding: 6px 8px; }
+  .hdr-manuell { margin: 6px 0 10px; color: #c3c8d4; }
+  .hdr-manuell summary { cursor: pointer; color: #9aa1b0; font-size: 13px; }
+  .hdr-autos-schritt { list-style: none; padding-left: 0; }
+  .hdr-paar-status { color: #7cd8ff; }
+  .hd-relay-chip { cursor: pointer; }
+  .hd-relay-chip.an { border-color: #35b45a; color: #7cff9b; }
+  .hd-relay-chip.gelb { border-color: #ffd23f; color: #ffd23f; }
+  .hd-relay-chip.rot { border-color: #ff5a7a; color: #ff8aa0; }
+  .hdr-tipp { color: #9aa1b0; font-size: 12.5px; line-height: 1.45; margin: 0 0 4px; }
+  .hdr-tipp a, .hdr-link { color: #6fd3ff; }
+  .hdr-link { all: unset; cursor: pointer; text-decoration: underline; color: #6fd3ff; }
+  body.hd-helper-seite > *:not(#hd-relay):not(script) { visibility: hidden; }
+  body.hd-helper-seite #hd-relay { visibility: visible; background: #05070c; }
+  body.hd-helper-seite #hdr-zu, body.hd-helper-seite .hdr-wahl, body.hd-helper-seite .hdr-tipp { display: none; }
+  /* v2.1: main tabs and sub tabs further apart, with a subtle neon red line between them. */
+  /* v2.1b: the neon red line sits under the main tab bar on EVERY tab (not only when sub tabs show). */
+  header#k-kopf { position: relative; padding-bottom: 6px; }
+  body header#k-kopf::after { content: ''; display: block; position: absolute; left: 0; right: 0; bottom: 0; top: auto; height: 1px; opacity: 1;
+    background: linear-gradient(90deg, transparent, #ff2a4f 8%, #ff2a4f 92%, transparent);
+    box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  header#k-kopf .k-leiste2 { position: relative; margin-top: 9px; padding-top: 5px; order: 9; }
+  header#k-kopf .k-leiste2 + * { }
+  /* With sub tabs the line belongs between main and sub tabs: draw it there instead. */
+  body header#k-kopf:has(.k-leiste2:not([hidden]))::after { display: none; }
+  header#k-kopf .k-leiste2::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, #ff2a4f 8%, #ff2a4f 92%, transparent);
+    box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  /* v2.2: the white value bars on the main menu tiles read as BUTTONS: raised, rounded,
+     with a chevron, and they press in. */
+  #tab-fahren .k-kachel > .k-kt, #tab-fahren .k-kachel > .k-kopf { position: relative; margin: 7px 8px 2px; border-radius: 6px;
+    padding-left: 26px; padding-right: 26px; background: linear-gradient(#ffffff, #dfe4ec); border: 1px solid #fff;
+    box-shadow: 0 3px 0 #8a93a3, 0 5px 10px rgba(0,0,0,.45); transition: transform .08s, box-shadow .08s, background .12s; }
+  #tab-fahren .k-kachel > .k-kopf .k-kt { padding-left: 0; padding-right: 0; }
+  #tab-fahren .k-kachel > .k-kt::after, #tab-fahren .k-kachel > .k-kopf::after { content: '›'; position: absolute; right: 9px; top: 50%;
+    transform: translateY(-52%); font: 900 1.35em/1 var(--k-font, sans-serif); color: var(--k-blau, #00a6e8); }
+  #tab-fahren .k-kachel:hover > .k-kt, #tab-fahren .k-kachel:hover > .k-kopf,
+  #tab-fahren .k-kachel.menu-nav-sel > .k-kt, #tab-fahren .k-kachel.menu-nav-sel > .k-kopf {
+    background: linear-gradient(#ffffff, #cfeaff); border-color: var(--k-blau, #00a6e8);
+    box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
+  #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
+  #grid-start { text-transform: uppercase; letter-spacing: .06em; }
+  /* v2.2b: main menu panels light up on HOVER only; a selected (focused) panel keeps the plain look. */
+  body .k-kachel.menu-nav-sel:not(:hover), body .k-start.menu-nav-sel:not(:hover) { outline: 0; border-color: transparent; transform: none; box-shadow: none; }
+  body .k-kachel.menu-nav-sel:not(:hover) .k-kk { background: var(--k-grau); color: #fff; }
+  body .k-kachel.menu-nav-sel:not(:hover) .k-kb { filter: brightness(.42) saturate(.6) contrast(1.15); }
+  @media (orientation: landscape), (min-width: 761px) {
+    body .k-kachel.menu-nav-sel:not(:hover) > .k-kb { filter: brightness(.74) saturate(.95) contrast(1.05); } }
+  body #tab-fahren .k-kachel.menu-nav-sel:not(:hover) > .k-kt, body #tab-fahren .k-kachel.menu-nav-sel:not(:hover) > .k-kopf {
+    background: linear-gradient(#ffffff, #dfe4ec); border-color: #fff; box-shadow: 0 3px 0 #8a93a3, 0 5px 10px rgba(0,0,0,.45); transform: none; }
+  .hd-top-knopf { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 28px;
+    padding: 0 6px; border-radius: 5px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.04);
+    color: var(--k-dim); cursor: pointer; line-height: 0; }
+  .hd-top-knopf:hover { color: #fff; border-color: rgba(255,255,255,.45); }
+  .hd-top-knopf:focus-visible { outline: 2px solid #00d6ff; outline-offset: 2px; }
+  body.hd-stumm .hd-stumm-knopf { color: #ff8aa0; border-color: #ff5a7a; }
+  @media (max-height: 480px) { .hd-top-knopf { min-width: 24px; height: 20px; } .hd-top-knopf svg { width: 15px; height: 13px; } }
+  body.hd-pad-xbox .pad-svg .pad-mark { display: none; }
+  .pad-svg .hd-xbox-buchstabe { display: none; font: 800 17px Inter, system-ui, sans-serif; }
+  body.hd-pad-xbox .pad-svg .hd-xbox-buchstabe { display: inline; }
+  .hd-padstil { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 4px 0 12px; }
+  .hd-padstil button.sel { outline: 2px solid #00a3e0; }
+  @media (max-height: 480px) { header#k-kopf .k-leiste2 { margin-top: 5px; padding-top: 3px; } }
+  .hd-logo-svg { fill: currentColor; }
+  header#k-kopf .hdr-logo svg.hd-logo-svg { width: 22px; height: 22px; }
+  @media (max-height: 480px) { header#k-kopf .hdr-logo svg.hd-logo-svg { width: 14px; height: 14px; } }
+  .hd-sc-frage { position: fixed; left: 50%; top: 14%; transform: translateX(-50%); z-index: 9200;
+                 width: min(460px, calc(100vw - 32px)); }
+  .hd-sc-frage[hidden] { display: none; }
+  .hd-sc-frage-karte { background: #1a1405; color: #fff6d6; border: 2px solid #ffd23f; border-radius: 10px;
+                       padding: 14px 16px; display: grid; gap: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.6);
+                       animation: hd-sc-puls 1s ease-in-out infinite alternate; }
+  @keyframes hd-sc-puls { from { box-shadow: 0 0 0 rgba(255,210,63,.0), 0 10px 40px rgba(0,0,0,.6); }
+                          to { box-shadow: 0 0 24px rgba(255,210,63,.45), 0 10px 40px rgba(0,0,0,.6); } }
+  @media (prefers-reduced-motion: reduce) { .hd-sc-frage-karte { animation: none; } }
+  .hd-sc-frage-titel { font-size: 20px; letter-spacing: .04em; color: #ffd23f; }
+  .hd-sc-frage-wer { font-size: 15px; }
+  .hd-sc-frage-knoepfe { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hd-sc-frage-knoepfe button { flex: 1; min-width: 140px; }
+  .hd-sc-frage-knoepfe small { opacity: .75; margin-left: .4em; font-weight: 400; }
   .hd-relay { position: fixed; inset: 0; z-index: 9100; background: rgba(3,5,9,.82); display: grid; place-items: center;
               padding: 16px; box-sizing: border-box; overflow: auto; }
   .hd-relay[hidden] { display: none; }
@@ -5174,7 +5260,7 @@
      anderen Stellen, die per href darauf verweisen. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <path id="om" d="M 112 370 L 200 370 C 192 328, 172 290, 172 236 C 172 150, 210 102, 256 102 C 302 102, 340 150, 340 236 C 340 290, 320 328, 312 370 L 400 370 L 400 310 C 368 310, 350 286, 388 236 C 410 200, 412 160, 388 116 C 358 62, 308 42, 256 42 C 204 42, 154 62, 124 116 C 100 160, 102 200, 124 236 C 162 286, 144 310, 112 310 Z" fill-rule="evenodd"/>
+    <path id="om" d="M 52 104 L 116 104 L 116 222 L 196 222 L 196 104 L 260 104 L 260 408 L 196 408 L 196 284 L 116 284 L 116 408 L 52 408 Z M 296 104 L 368 104 C 486 104, 486 408, 368 408 L 296 408 Z M 360 166 L 360 346 C 412 346, 412 166, 360 166 Z" fill-rule="evenodd"/>
     <mask id="om-s1"><rect x="0" y="115" width="512" height="20" fill="#fff"/></mask>
     <mask id="om-s2"><rect x="0" y="210" width="512" height="35" fill="#fff"/></mask>
     <mask id="om-s3"><rect x="0" y="305" width="512" height="22" fill="#fff"/></mask>
@@ -5193,7 +5279,7 @@
 <header id="k-kopf">
   <!-- BESTELLT: "Per Klick auf das Omega oben links ... zurueck zum Startbildschirm". -->
   <button class="hdr-logo goto-tab" data-tab="home" title="Zum Startbildschirm" aria-label="Zum Startbildschirm">
-    <svg viewBox="0 0 512 512" aria-hidden="true"><use href="#om"/></svg>
+    <svg viewBox="0 0 512 512" aria-hidden="true" class="hd-logo-svg"><use href="#om"/></svg>
   </button>
   <!-- BESTELLT: "Tabs nach ganz oben und 'Hauptmenü' Zurückpfeil wegtun ... Oben links nur
        logo und rechts daneben alle tabs; ganz rechts oben Verbindungsstatus". -->
@@ -5344,7 +5430,7 @@
     <input type="file" id="fa-foto-datei" accept="image/*" hidden>
     <div class="k-gitter k-fahren">
       <div class="k-kachel " id="fa-auto" role="button" tabindex="0">
-        <span class="k-kk">Autos</span>
+        <span class="k-kk">Fahrzeugübersicht</span>
         <span class="k-kt" id="fa-auto-titel"></span>
         <span class="k-kb" id="fa-auto-bild" style="background-image:url(img/garage.jpg)"></span>
         <span class="k-ki" id="fa-auto-info"></span>
@@ -5731,9 +5817,9 @@
       </div>
       <div class="gt3-marke">
         <svg viewBox="0 0 512 512" aria-hidden="true"><use href="#om" fill="#e6ecf7"/></svg>
-        <a href="https://t1p.de/omegasim" target="_blank" rel="noopener noreferrer"
-           data-i18n-skip>t1p.de/omegasim</a>
-        <span data-i18n-skip>OmegaSim</span>
+        <a href="https://mokamit.github.io/hybriddash/" target="_blank" rel="noopener noreferrer"
+           data-i18n-skip>mokamit.github.io/hybriddash</a>
+        <span data-i18n-skip>HybridDash</span>
       </div>
       <!-- ZWEI ZUSAETZLICHE SCHIRME, im Markup und NICHT zur Malzeit erzeugt: der
            Selbsttest "Cockpit-Ansicht: sichtbar verschieden, funktional gleich" verlangt,
@@ -9694,6 +9780,17 @@
        Info-Screen fungiert (Streckenscreen, ohne eigenes Auto; zB ein Tablet)." Er meldet
        sich beim Host als Zuschauer an; solange einer zusieht, schicken die Fahrer ihre
        Position mit. Geoeffnet ueber "Als Info-Screen" oder direkt mit /?info in der Adresse. -->
+  <!-- HybridDash 2.1: safety-car confirmation (98i-hybriddash.js) -->
+  <div class="hd-sc-frage" id="hd-sc-frage" hidden role="alertdialog" aria-labelledby="hd-sc-frage-titel">
+    <div class="hd-sc-frage-karte">
+      <b class="hd-sc-frage-titel" id="hd-sc-frage-titel">Safety Car losschicken?</b>
+      <span class="hd-sc-frage-wer" id="hd-sc-frage-wer" data-i18n-skip></span>
+      <div class="hd-sc-frage-knoepfe">
+        <button type="button" class="primary" id="hd-sc-frage-ja">Losschicken <small id="hd-sc-frage-taste" data-i18n-skip></small></button>
+        <button type="button" id="hd-sc-frage-nein">Ignorieren <small data-i18n-skip>Esc</small></button>
+      </div>
+    </div>
+  </div>
   <!-- HybridDash 2.0: two-laptop mode (98j-hd-relay.js). English only, like the codes it shows. -->
   <div class="hd-relay" id="hd-relay" hidden data-i18n-skip role="dialog" aria-label="Two-laptop mode">
     <div class="hdr-karte">
@@ -9702,11 +9799,22 @@
       <p class="hdr-intro">Split the Bluetooth connections across two laptops on the same Wi-Fi. The <b>host</b> runs the race
         (race control, timing, standings, NPCs, your car, dashboard). The <b>helper</b> only connects the extra cars and relays
         their messages; those cars appear in the host&rsquo;s Garage and standings like every other car.</p>
+      <p class="hdr-tipp">On the helper laptop you can open the dedicated helper page: <a href="helper.html" target="_blank" rel="noopener">helper.html</a>
+        (or <button type="button" class="hdr-link" id="hdr-helper-seite">open it in a new tab</button>). It shows only this panel, so it can&rsquo;t be closed by accident.
+        Closing this panel never unlinks; reopen it any time from <b>&#8644;</b> at the top right.</p>
       <div class="hdr-wahl">
         <button type="button" id="hdr-wahl-host"><b>This laptop is the HOST</b><small>Laptop A &middot; runs the race</small></button>
         <button type="button" id="hdr-wahl-helper"><b>This laptop is a HELPER</b><small>Laptop B &middot; extra cars only</small></button>
       </div>
       <div class="hdr-teil hdr-host">
+        <div class="hdr-schnell">
+          <b class="hdr-schnell-titel">Quick pairing</b>
+          <p>Create a code here, type it on the helper laptop once. After that the two laptops find each other by themselves &ndash; after a reload, a dropped link or next race night.</p>
+          <div class="hdr-code-zeile"><span class="hdr-code" id="hdr-paar-code">&mdash;&mdash;</span>
+            <button type="button" class="primary" id="hdr-paar-host">Create pairing code</button>
+            <button type="button" id="hdr-paar-neu">New code</button></div>
+        </div>
+        <details class="hdr-manuell"><summary>Pair without internet (copy two codes)</summary>
         <ol>
           <li><button type="button" class="primary" id="hdr-host-code">Create pairing code</button>
             <div class="hdr-feld"><textarea id="hdr-host-code-text" readonly rows="3" placeholder="The code appears here"></textarea>
@@ -9716,22 +9824,35 @@
           <li><div class="hdr-feld"><textarea id="hdr-host-antwort" rows="3" placeholder="Paste the helper&rsquo;s answer code"></textarea>
             <button type="button" class="primary" id="hdr-host-verbinden">Connect</button></div></li>
         </ol>
+        </details>
       </div>
       <div class="hdr-teil hdr-helper">
+        <div class="hdr-schnell">
+          <b class="hdr-schnell-titel">Quick pairing</b>
+          <p>Type the code shown on the host laptop. This laptop remembers it and reconnects by itself.</p>
+          <div class="hdr-code-zeile"><input type="text" id="hdr-paar-eingabe" class="hdr-code-ein" maxlength="7" autocomplete="off" spellcheck="false" placeholder="K7Q-2XM" aria-label="Pairing code">
+            <button type="button" class="primary" id="hdr-paar-helper">Pair</button></div>
+        </div>
+        <details class="hdr-manuell"><summary>Pair without internet (copy two codes)</summary>
         <ol>
           <li><div class="hdr-feld"><textarea id="hdr-helper-angebot" rows="3" placeholder="Paste the host&rsquo;s pairing code"></textarea>
             <button type="button" class="primary" id="hdr-helper-antwort">Create answer</button></div></li>
           <li><div class="hdr-feld"><textarea id="hdr-helper-code-text" readonly rows="3" placeholder="The answer code appears here"></textarea>
             <button type="button" id="hdr-helper-kopieren">Copy</button></div>
             <small>Paste it on the host laptop and press <i>Connect</i>.</small></li>
+        </ol>
+        </details>
+        <ol class="hdr-autos-schritt">
           <li><button type="button" class="primary" id="hdr-helper-auto">Connect a car to this laptop</button>
+            <button type="button" id="hdr-helper-bekannte">Reconnect known cars</button>
             <small>One click per car (Web Bluetooth asks each time). Keep this tab open and in front while racing.
             If the link drops, this laptop stops its cars.</small></li>
         </ol>
       </div>
+      <p id="hdr-paar-status" class="hdr-status hdr-paar-status"></p>
       <p id="hdr-status" class="hdr-status"></p>
       <ul id="hdr-autos" class="hdr-autos"></ul>
-      <div class="hdr-fuss"><span id="hdr-zahlen" class="muted"></span><button type="button" id="hdr-trennen">Unlink</button></div>
+      <div class="hdr-fuss"><span id="hdr-zahlen" class="muted"></span><span><button type="button" id="hdr-paar-vergessen" hidden>Forget pairing</button> <button type="button" id="hdr-trennen">Unlink</button></span></div>
     </div>
   </div>
   <div class="mp-info" id="mp-info" hidden>
@@ -9906,12 +10027,16 @@
       <!-- HybridDash 2.0 (98i-hybriddash.js) -->
       <div class="opt-row hd-row"><div class="opt-label">Automatisches Safety Car<span class="hd-tag">HybridDash</span><small>Steht ein Auto im Rennen neben der Strecke oder kommt es nicht mehr voran, ruft die App nach dieser Zeit automatisch Gelb aus und schickt das Safety Car los. Nur auf der Bahn.</small><small id="hd-auto-sc-status" class="hd-status" data-i18n-skip></small></div>
         <label class="tgl"><input type="checkbox" id="hd-auto-sc" checked><span></span></label></div>
+      <div class="opt-row hd-row"><div class="opt-label">Vor dem Safety Car fragen<small>An: Die App fragt erst nach, und du best&auml;tigst mit der Best&auml;tigungstaste (Vorgabe A / Kreuz, oder Enter). Esc ignoriert den Vorfall. Aus: Das Safety Car f&auml;hrt sofort los.</small></div>
+        <label class="tgl"><input type="checkbox" id="hd-sc-fragen" checked><span></span></label></div>
       <div class="opt-row hd-row"><div class="opt-label">Safety Car nach<small>Wie lange ein Auto neben der Strecke stehen oder stillstehen muss.</small></div>
         <span class="hd-slider"><input type="range" id="hd-auto-sc-sek" min="1" max="10" step="0.5" value="3"><b id="hd-auto-sc-sek-wert" data-i18n-skip>3.0 s</b></span></div>
       <div class="opt-row hd-row"><div class="opt-label">Zuf&auml;llige NPC-Fahrernamen<span class="hd-tag">HybridDash</span><small>Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zuf&auml;lligen Fahrernamen.</small></div>
         <label class="tgl"><input type="checkbox" id="hd-npc-namen" checked><span></span></label></div>
       <div class="opt-row hd-row"><div class="opt-label">Neue Fahrer ansagen<small>Die Stimme nennt den neuen Fahrer und sein Auto.</small></div>
         <label class="tgl"><input type="checkbox" id="hd-npc-ansage" checked><span></span></label></div>
+      <div class="opt-row hd-row"><div class="opt-label">Alle Fahrer ansagen<small>Jedes Auto, das sich verbindet, wird angesagt: Fahrer, Auto und Farbe.</small></div>
+        <label class="tgl"><input type="checkbox" id="hd-alle-ansagen"><span></span></label></div>
       <div class="opt-row"><div class="opt-label">Weiche Reifen verboten<span class="wip-tag">WIP</span><small>An: In diesem
           Rennen gibt es keine weichen Reifen. Die Reifenwahl im Boxenschirm &uuml;berspringt &bdquo;weich&ldquo;, und wer
           beim Start weiche Reifen drauf hat, bekommt mittlere &ndash; auch Spieler&nbsp;2 und 3. Aus (Standard): alle
@@ -12450,6 +12575,11 @@
         <button type="button" class="bind-player-btn" data-spieler="2">Spieler 2</button>
         <button type="button" class="bind-player-btn" data-spieler="3">Spieler 3</button>
       </div>
+      <div class="hd-padstil" data-i18n-skip><b>Controller layout</b>
+        <button type="button" data-hd-padstil="auto">Auto</button>
+        <button type="button" data-hd-padstil="ps">PlayStation</button>
+        <button type="button" data-hd-padstil="xbox">Xbox</button>
+        <span class="muted" id="hd-padstil-erkannt"></span></div>
       <table class="bind-table">
         <thead><tr><th>Aktion</th><th>Belegung</th><th></th></tr></thead>
         <tbody id="bind-table-body"></tbody>

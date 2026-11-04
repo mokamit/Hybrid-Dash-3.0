@@ -575,18 +575,18 @@
     if (el) {
       if (!RACE_MODES[raceMode].timed) {
         const up = rennZeitJetzt() - raceStartedAt;
-        el.textContent = formatLapTime(up) + ' gefahren';
+        el.textContent = formatLapTime(up) + (lang === 'de' ? ' gefahren' : ' driven');
       } else if (raceMode === 'laps') {
         const best = Math.max(0, ...raceAllCars().map(c => c.laps.length));
-        el.textContent = `Runde ${best} / ${raceLimit}`;   // best = vollendete Runden
+        el.textContent = (lang === 'de' ? 'Runde ' : 'Lap ') + `${best} / ${raceLimit}`;   // best = vollendete Runden
       } else {
         const left = Math.max(0, raceLimit * 60000 - (rennZeitJetzt() - raceStartedAt));
-        el.textContent = formatLapTime(left) + ' übrig';
+        el.textContent = formatLapTime(left) + (lang === 'de' ? ' übrig' : ' left');
       }
     }
     if (raceLimitReached()) {
       raceState = 'finishing';
-      $('race-status').textContent = 'Zeit/Runden erreicht, laufende Runde zählt noch';
+      $('race-status').textContent = lang === 'de' ? 'Zeit/Runden erreicht, laufende Runde zählt noch' : 'Time/laps reached, the current lap still counts';
       showHudToast('Letzte Runde');
       // v1.1.3 BESTELLT: "einen Ton fuer 'Zeit abgelaufen, jetzt letzte Runde'".
       playLetzteRundeGlocke();
@@ -837,8 +837,8 @@
     // nicht fallen, weil ein Ghost zuerst ueber die Linie kommt - sonst waere die
     // angefangene Runde des Fahrers abgeschnitten. Mit zwei Fahrern gilt dasselbe zweimal,
     // und ohne diese Zeile waere die abgeschnittene Runde die von Auto 2.
-    const fahrer = (c) => c.role === 'player'
-                          || (zweiSpieler && /^player[2-9]$/.test(c.role));
+    const fahrer = (c) => !(typeof hdDnfAuto === 'function' && hdDnfAuto(c)) && (c.role === 'player'
+                          || (zweiSpieler && /^player[2-9]$/.test(c.role)));
     if (warFinishing && !garage.some(fahrer)) finishRace();
   }
 
@@ -857,7 +857,7 @@
       cars.forEach(c => { if (c !== playerCar) carLapCrossed(c); });
       if (playerCar) carLapCrossed(playerCar);
       playerLapCrossed();
-      showHudToast('TESTRUNDE: ' + (cars.length || 1) + ' AUTO(S)');
+      showHudToast(t('TESTRUNDE: {n} AUTO(S)').replace('{n}', cars.length || 1));
       log('Testtaste: eine Runde fuer alle ' + cars.length + ' Autos im Rennen gezaehlt.', 'info');
       return;
     }
@@ -909,7 +909,12 @@
                                    // sectorHistory, alle anderen aus car.race.sek.
                                    sektoren: c.role === 'player'
                                      ? sectorHistory
-                                     : ((c.race && c.race.sek && c.race.sek.hist) || []) }));
+                                     : ((c.race && c.race.sek && c.race.sek.hist) || []),
+                                   // HybridDash race control: did not finish.
+                                   dnf: typeof hdDnfAuto === 'function' && hdDnfAuto(c),
+                                   // HybridDash race control: disqualified (black flag) and time penalties.
+                                   dsq: typeof hdDsqAuto === 'function' && hdDsqAuto(c),
+                                   strafeMs: typeof hdStrafeMs === 'function' ? hdStrafeMs(String(c.device && c.device.id)) : 0 }));
     if (!garage.some(c => c === playerCar) && raceLapTimes.length) {
       // Ohne Garage gibt es kein Geraet und damit keine Farbe: dann bleibt das Feld leer,
       // statt eine zu erfinden.
@@ -1235,16 +1240,19 @@
     // Ranking depends on the mode. Endurance and Runden: most laps, then quickest to get
     // there. Qualifying: the single fastest lap, nothing else.
     const scored = cars.map(c => ({ c, st: raceStats(c.laps) }));
-    scored.sort((a, b) => raceMode === 'qualifying'
+    // HybridDash race control: time penalties count on the total; DNF, then DSQ at the bottom.
+    for (const x of scored) x.st.total += x.c.strafeMs || 0;
+    const aus = (c) => (c.dsq ? 2 : c.dnf ? 1 : 0);
+    scored.sort((a, b) => (aus(a.c) - aus(b.c)) || (raceMode === 'qualifying'
       ? a.st.best - b.st.best
-      : (b.st.n - a.st.n) || (a.st.total - b.st.total));
+      : (b.st.n - a.st.n) || (a.st.total - b.st.total)));
 
     const fastest = Math.min(...scored.map(x => x.st.best));
     $('race-results-body').innerHTML = scored.map((x, i) => {
       const st = x.st, isBest = st.best === fastest;
       return `<tr>
-        <td style="${td}">${i + 1}</td>
-        <td style="${td}">${ergDot(x.c)}${x.c.name}${x.c.role === 'ghost' ? ' <span class="muted">(NPC)</span>' : ''}${rammerLabel(x.c)}</td>
+        <td style="${td}">${x.c.dsq ? '<b style="color:#ff6b7f">DSQ</b>' : x.c.dnf ? '<b style="color:#ff6b7f">DNF</b>' : i + 1}</td>
+        <td style="${td}">${ergDot(x.c)}${x.c.name}${x.c.strafeMs ? ' <b style="color:#e8b400">+' + Math.round(x.c.strafeMs / 1000) + ' s</b>' : ''}${x.c.role === 'ghost' ? ' <span class="muted">(NPC)</span>' : ''}${rammerLabel(x.c)}</td>
         <td style="${tdr}">${st.n}</td>
         <td style="${tdr}${isBest ? '; color:var(--good); font-weight:700' : ''}">${formatLapTime(st.best)}</td>
         <td style="${tdr}">${formatLapTime(Math.round(st.mean))}</td>
@@ -1609,7 +1617,7 @@
     if (!host) return;
     const cars = raceGridCars();
     if (!cars.length) {
-      host.innerHTML = '<p class="muted" style="margin:0">Keine Autos verbunden.</p>';
+      host.innerHTML = '<p class="muted" style="margin:0">' + t('Keine Autos verbunden.') + '</p>';
       return;
     }
     const alt = bewegt ? gridLagenMerken(host) : null;
@@ -2307,7 +2315,7 @@
     if (raceClockTimer) clearInterval(raceClockTimer);
     raceClockTimer = setInterval(raceClockTick, 250);
     $('race-status').textContent = raceFormationLap
-      ? 'Einführungsrunde, Limit bis Start/Ziel'
+      ? (lang === 'de' ? 'Einführungsrunde, Limit bis Start/Ziel' : 'Formation lap, limiter to start/finish')
       : t('{m} läuft').replace('{m}', t(RACE_MODES[raceMode].label));
     $('race-stop-btn').disabled = false;
     updateRaceActButtons();
@@ -2459,16 +2467,27 @@
       zusatzAktiv().forEach(z => rennEreignisStrafe(z.nr, strafeMsVon(z.nr) / 1000));
     }
     const missed = Math.max(0, racePitRequired - racePitDone);
-    $('race-status').textContent =
-      `Beendet (${raceLapTimes.length} Runde${raceLapTimes.length === 1 ? '' : 'n'})`
-      + (racePartialMs !== null
-         ? `, letzte Runde unvollendet nach ${formatLapTime(racePartialMs)}` : '')
-      + (missed > 0 ? `, ${missed} Pflichtstopp${missed === 1 ? '' : 's'} verpasst, `
-                      + `+${missed * racePitPenaltyS} s Strafe` : '')
-      + ((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => {
-        const s = strafeMsVon(z.nr) / 1000;
-        return s > 0 ? `, P${z.nr}: +${s} s Strafe` : '';
-      }).join(''));
+    const n = raceLapTimes.length;
+    $('race-status').textContent = lang === 'de'
+      ? `Beendet (${n} Runde${n === 1 ? '' : 'n'})`
+        + (racePartialMs !== null
+           ? `, letzte Runde unvollendet nach ${formatLapTime(racePartialMs)}` : '')
+        + (missed > 0 ? `, ${missed} Pflichtstopp${missed === 1 ? '' : 's'} verpasst, `
+                        + `+${missed * racePitPenaltyS} s Strafe` : '')
+        + ((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => {
+          const s = strafeMsVon(z.nr) / 1000;
+          return s > 0 ? `, P${z.nr}: +${s} s Strafe` : '';
+        }).join(''))
+      // HybridDash: the same in English.
+      : `Finished (${n} lap${n === 1 ? '' : 's'})`
+        + (racePartialMs !== null
+           ? `, last lap unfinished after ${formatLapTime(racePartialMs)}` : '')
+        + (missed > 0 ? `, ${missed} mandatory stop${missed === 1 ? '' : 's'} missed, `
+                        + `+${missed * racePitPenaltyS} s penalty` : '')
+        + ((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => {
+          const s = strafeMsVon(z.nr) / 1000;
+          return s > 0 ? `, P${z.nr}: +${s} s penalty` : '';
+        }).join(''));
     // DER RUNDENZAEHLER, aber nur bei einer echten Zielflagge. Wer von Hand abbricht,
     // bekommt keine Fanfare - dieselbe Ueberlegung, mit der die Ghosts dann auch nicht
     // auslaufen: ein Abbruch ist kein Zieleinlauf.
@@ -2578,7 +2597,8 @@
     const m = RACE_MODES[raceMode];
     $('race-limit-label').textContent = t(m.unit);
     $('race-mode-hint').textContent = t(m.hint);
-    $('race-start-btn').textContent = `\u{1F3C1} ${m.label} starten`;
+    $('race-start-btn').textContent = lang === 'de' ? `\u{1F3C1} ${m.label} starten`
+      : '\u{1F3C1} ' + (raceMode === 'laps' ? t('Rennen starten') : 'Start ' + t(m.label).toLowerCase());
     // Free practice has no limit, so the field would be a lie. Disabled, not hidden:
     // a control that vanishes makes people wonder whether they broke something.
     // DERBY (v0.8.126): das Limit ist das KILLS-ZIEL und wird deshalb aktiviert - sonst
@@ -2909,7 +2929,7 @@
     fuel = 100;
     resetTyres();
     updateDamageFuelUI();
-    showHudToast(`Zurückgesetzt, Tank ${fuelLiters(100)} l, Schaden 0 %, Reifen kalt`);
+    showHudToast(t('Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt').replace('{l}', fuelLiters(100)));
     log('Auto zurückgesetzt: Schaden 0, Tank voll, Reifen kalt.', 'info');
   }
 
@@ -2957,7 +2977,13 @@
   }
   setInterval(updateRaceActButtons, 400);
 
-  $('race-start-btn').onclick = () => raceGridAnzeigen(startRaceCountdown);
+  // HybridDash: the starting grid lives in the cockpit (tab-race). Pressed from the race
+  // settings, the button opened it in a hidden tab and seemed to do nothing: go there first.
+  $('race-start-btn').onclick = () => {
+    const tp = $('tab-race');
+    if (tp && !tp.classList.contains('active') && getComputedStyle(tp).display === 'none') showTab('race');
+    raceGridAnzeigen(startRaceCountdown);
+  };
   $('race-stop-btn').onclick = requestRaceStop;
   $('race-export-csv').onclick = () => {
     // Semicolon delimiter + comma decimals: opens directly (no import wizard) in a
@@ -4676,7 +4702,7 @@
         playTone(880, 0.12, 'square', 0.16);
         rennZeitTimeout(() => playTone(880, 0.12, 'square', 0.16), 180);
       }
-      showHudToast('BOXENGASSE AKTIV, ' + PIT_DOUBLE_KMH + ' KM/H');
+      showHudToast(t('BOXENGASSE AKTIV') + ', ' + PIT_DOUBLE_KMH + ' KM/H');
       log('Boxengasse per doppeltem Ausdruck: zweiter Kontakt nach ' + seit
           + ' ms, Tempolimit ' + PIT_DOUBLE_KMH + ' km/h fuer '
           + (PIT_DOUBLE_LIMIT_MS / 1000) + ' s. Anhalten startet den Service.', 'info');
@@ -4783,7 +4809,7 @@
         pitTyreElapsed += dt;
         if (pitTyreElapsed >= pitTyreTarget) {
           pitDone.tyres = true; setPitLoop('wrench', false); pitChimeTyres();
-          showHudToast(`Reifen gewechselt, ${pitTyreElapsed.toFixed(1)} s`);
+          showHudToast(t('Reifen gewechselt') + `, ${pitTyreElapsed.toFixed(1)} s`);
         }
       }
       // The pad keeps buzzing while anything is still being worked on.
@@ -5273,7 +5299,7 @@
 
   function boxAnfordernVon(z) {
     if (!zweiSpieler || !z.car) {
-      showHudToast('P' + z.nr + ': KEIN AUTO ZUGETEILT');
+      showHudToast('P' + z.nr + ': ' + t('KEIN AUTO ZUGETEILT'));
       return false;
     }
     if (z.box.lage !== 'aus') {
@@ -5290,7 +5316,7 @@
     z.box.reparaturFertig = false;
     z.box.gemeldet = false;
     z.box.letzterTick = null;
-    showHudToast('P' + z.nr + ': BOXENSTOPP \u2013 ANHALTEN');
+    showHudToast('P' + z.nr + ': ' + t('BOXENSTOPP \u2013 ANHALTEN'));
     log('P' + z.nr + ': Boxenstopp angefordert, Tempolimit '
         + Math.round(PIT_SPEED_FACTOR * 100) + ' %. Zum Beginnen anhalten.', 'info');
     return true;
@@ -5305,7 +5331,7 @@
     z.box.letzterTick = null;
     stopPitLoopsFuer(z.nr);
     if (warum === 'abgebrochen') {
-      showHudToast('P' + z.nr + ': BOXENSTOPP ABGEBROCHEN');
+      showHudToast('P' + z.nr + ': ' + t('BOXENSTOPP ABGEBROCHEN'));
       log('P' + z.nr + ': Boxenstopp abgebrochen.', 'info');
       return;
     }
@@ -5340,7 +5366,7 @@
         rennEreignisBox(z.nr);
         z.box.strafeBis = null;
         const strafe = rammStrafeOffen(z.car);
-        showHudToast('P' + z.nr + ': ' + (strafe > 0 ? t('STRAFE') + ' ' + strafe + ' s' : 'SERVICE LAEUFT'));
+        showHudToast('P' + z.nr + ': ' + (strafe > 0 ? t('STRAFE') + ' ' + strafe + ' s' : t('SERVICE LÄUFT')));
         // Reifen wie bei Auto 1: die gewaehlte Mischung, frisch und ungebraucht.
         const neu = mischungErlaubt(pitMischungWahlVon(z));
         if (neu !== z.reifen) {
@@ -5417,7 +5443,7 @@
       z.box.fertig = true;
       stopPitLoopsFuer(z.nr);
       rammStrafeAbsitzen(z.car);
-      showHudToast('P' + z.nr + ': FERTIG, LOSFAHREN!');
+      showHudToast('P' + z.nr + ': ' + t('FERTIG, LOSFAHREN!'));
       pitChimeReady();
       padRumble(0.35, 0.2, 200, 'box', z.nr);
       log('P' + z.nr + ': Boxenstopp fertig nach ' + z.box.standS.toFixed(1) + ' s.', 'info');
@@ -5862,7 +5888,7 @@
   function flashVon(z) {
     if (rennZeitJetzt() < z.flashBis) return;
     z.flashBis = rennZeitJetzt() + FLASH_MS;
-    showHudToast('P' + z.nr + ': Lichthupe');
+    showHudToast('P' + z.nr + ': ' + t('Lichthupe'));
     playFlashSound();
   }
   function triggerHeadlightFlash2() { flashVon(zusatzPlatz(2)); }
@@ -6779,8 +6805,8 @@
     const fuss = $('pit-fuss');
     if (fuss) {
       const b = (typeof bindings === 'object' && bindings && bindings.yellowflag)
-        ? bindingDescription(bindings.yellowflag) : 'nicht belegt';
-      fuss.textContent = 'Steuerkreuz hoch/runter waehlt \u00b7 ' + b + ' schaltet';
+        ? bindingDescription(bindings.yellowflag) : t('nicht belegt');
+      fuss.textContent = lang === 'de' ? 'Steuerkreuz hoch/runter waehlt \u00b7 ' + b + ' schaltet' : 'D-pad up/down selects \u00b7 ' + b + ' switches';
     }
   }
 
@@ -7017,9 +7043,10 @@
     const fuss = $('rs-fuss');
     if (fuss) {
       const b = (typeof bindings === 'object' && bindings && bindings.yellowflag)
-        ? bindingDescription(bindings.yellowflag) : 'nicht belegt';
-      fuss.textContent = 'Steuerkreuz hoch/runter waehlt · ' + b + ' schaltet'
-        + (raceScreenLimitArmed ? ' · links/rechts einstellen' : '');
+        ? bindingDescription(bindings.yellowflag) : t('nicht belegt');
+      fuss.textContent = lang === 'de'
+        ? 'Steuerkreuz hoch/runter waehlt · ' + b + ' schaltet' + (raceScreenLimitArmed ? ' · links/rechts einstellen' : '')
+        : 'D-pad up/down selects · ' + b + ' switches' + (raceScreenLimitArmed ? ' · left/right adjusts' : '');
     }
   }
 
@@ -7038,7 +7065,7 @@
     // Rennens und das Ergebnis danach nicht verschiedene Sieger nennen.
     const mit = cars.map((c) => {
       const ms = c.laps.map((l) => l.ms);
-      return { c, n: ms.length, summe: ms.reduce((a, b) => a + b, 0),
+      return { c, n: ms.length, summe: ms.reduce((a, b) => a + b, 0) + (c.strafeMs || 0),
                letzte: ms.length ? ms[ms.length - 1] : null,
                beste: ms.length ? Math.min.apply(null, ms) : null };
     });
@@ -7047,11 +7074,15 @@
     // nennen - sie greifen aber erst, wenn eine Runde abgeschlossen ist. Davor entschied die
     // Garagenreihenfolge.
     const ortVon = (x) => (typeof x.c.ort === 'number' ? x.c.ort : -Infinity);
-    mit.sort((a, b) => (b.n - a.n) || (a.summe - b.summe) || (ortVon(b) - ortVon(a)));
+    // HybridDash: DNF cars at the bottom, in the order they retired (more laps first).
+    const aus = (c) => (c.dsq ? 2 : c.dnf ? 1 : 0);
+    mit.sort((a, b) => (aus(a.c) - aus(b.c)) || (b.n - a.n) || (a.summe - b.summe) || (ortVon(b) - ortVon(a)));
     const fuehrer = mit.length ? mit[0] : null;
     return mit.map((x, i) => {
       let luecke = '';
-      if (fuehrer && x !== fuehrer) {
+      if (x.c.dsq) luecke = 'DSQ';
+      else if (x.c.dnf) luecke = 'DNF';
+      else if (fuehrer && x !== fuehrer) {
         const zurueck = fuehrer.n - x.n;
         if (zurueck > 0) {
           // UEBERRUNDET: eine Sekundenzahl waere hier sinnlos, weil sie eine andere Runde
@@ -7067,7 +7098,7 @@
       } else if (fuehrer && x === fuehrer) {
         luecke = '\u2014';
       }
-      return { pos: i + 1, name: x.c.name, farbe: x.c.farbe, rolle: x.c.role, id: x.c.id,
+      return { pos: i + 1, name: x.c.name, farbe: x.c.farbe, rolle: x.c.role, id: x.c.id, dnf: !!x.c.dnf, dsq: !!x.c.dsq, strafeMs: x.c.strafeMs || 0,
                runden: x.n, summe: x.summe, luecke, letzte: x.letzte, beste: x.beste,
                // Die schnellste Runde des ganzen Feldes wird hervorgehoben, wie auf einer
                // Zeittafel. Verglichen wird SPAETER, wenn alle Zeilen vorliegen.
@@ -7270,7 +7301,7 @@
       const mix = eigen
         ? '<span class="ov-mix" style="background:' + mischungFarbe(tyres) + '"></span>'
         : '<span class="ov-mix ov-mix-leer"></span>';
-      return '<div class="ov-zeile' + (eigen ? ' ov-ich' : '') + '">'
+      return '<div class="ov-zeile' + (eigen ? ' ov-ich' : '') + (z.dnf ? ' ov-dnf' : '') + (z.dsq ? ' ov-dsq' : '') + '">'
         + '<span class="ov-pos">' + z.pos + '</span>'
         + '<span class="ov-farbe" style="background:' + (z.farbe || 'transparent') + '"></span>'
         + '<span class="ov-name" data-i18n-skip>' + z.name + '</span>'
@@ -7281,6 +7312,7 @@
         + '<span class="ov-zeit' + (z.istBeste ? ' ov-feldbeste' : '') + '">'
         + (z.beste === null ? '&ndash;' : formatLapTime(z.beste)) + '</span>'
         + '<span class="ov-luecke">' + z.luecke + '</span>'
+        + (typeof hdDnfZelle === 'function' ? hdDnfZelle(z) : '')
         + '</div>';
     }).join('');
     // BESTELLT: "im Mehrspieler alle Spieler mit ihren Zeiten und Positionen zeigen". Die
@@ -7325,10 +7357,9 @@
     if (tab.innerHTML !== zusammen) tab.innerHTML = zusammen;
     const fuss = $('ov-fuss');
     if (fuss) {
-      fuss.textContent = 'Platz \u00b7 Runden \u00b7 Stopps \u00b7 Mischung'
-        + (raceState === 'finished' ? '' : ' \u00b7 letzte')
-        + ' \u00b7 beste \u00b7 R\u00fcckstand \u2014 Reifen und Stopps nur f\u00fcr das'
-        + ' eigene Auto simuliert';
+      fuss.textContent = t(raceState === 'finished'
+        ? 'Platz · Runden · Stopps · Mischung · beste · Rückstand — Reifen und Stopps nur für das eigene Auto simuliert'
+        : 'Platz · Runden · Stopps · Mischung · letzte · beste · Rückstand — Reifen und Stopps nur für das eigene Auto simuliert');
     }
   }
 
@@ -7614,7 +7645,7 @@
     }
     if (which === 'repair' && !next) setPitLoop('repair', false);
     const after = describePitPlan(pitPlan);
-    if (after !== before) showHudToast(`Boxenstopp: ${after}`);
+    if (after !== before) showHudToast(t('Boxenstopp') + `: ${after}`);
     updatePitUI();
     return true;
   }

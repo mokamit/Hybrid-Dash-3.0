@@ -144,7 +144,11 @@
     clearInterval(hdRelay.pingUhr); hdRelay.pingUhr = null;
     if (hdRelay.rolle === 'helper') hdAlleAnhalten();
     if (hdRelay.rolle === 'host') hdRelay.fremd.forEach((d) => d._weg());
-    if (war) { hdStatus(grund + ' Pair again to continue.'); log('HybridDash two-laptop mode: ' + grund, 'warn'); }
+    if (war) {
+      const auto = typeof hdPaar !== 'undefined' && hdPaar.aktiv;
+      hdStatus(grund + (auto ? ' Reconnecting automatically …' : ' Pair again to continue.'));
+      log('HybridDash two-laptop mode: ' + grund, 'warn');
+    }
     hdRelayMalen();
   }
   function hdRelaySchliessen(still) {
@@ -444,8 +448,34 @@
         liste.querySelectorAll('[data-hdr-dazu]').forEach((b) => { b.onclick = () => { const d = hdRelay.fremd.get(Number(b.dataset.hdrDazu)); if (d) hdFremdesAuto(d._k, d.id.slice(HD_RELAY_ID.length), d.name); }; });
       } else liste.innerHTML = '';
     }
+    hdChipAuffrischen();
     const z = $('hdr-zahlen');
     if (z) z.textContent = hdRelay.offen ? hdRelay.gesendet + ' sent · ' + hdRelay.empfangen + ' received' : '';
+  }
+  // v2.1: a chip in the header (top right, next to the car count) reopens the panel from any
+  // screen. REPORTED: "have a tab or button to prompt the Helper window". Closing the panel
+  // never closes the link - only "Unlink" or closing the browser tab does.
+  function hdRelayChip(st) {
+    try { if (!hdRelay) return; } catch (e) { return; }   // called before this file ran (start-up)
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'hd-relay-chip';
+    b.className = 'hd-relay-chip' + (hdRelay.offen ? (hdRelay.warStill ? ' gelb' : ' an') : hdRelay.rolle ? ' rot' : '');
+    const n = hdRelay.rolle === 'host' ? [...hdRelay.fremd.values()].filter((d) => d.gatt.connected).length : hdRelay.eigen.size;
+    // v2.1 REQUESTED: bigger, icon only. The colour says the state; the tooltip says the rest.
+    b.innerHTML = '<svg viewBox="0 0 28 20" width="26" height="18" aria-hidden="true"><rect x="1" y="3" width="11" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M0 13.5 H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="16" y="3" width="11" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 13.5 H28" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 17.5 H18 M16 15.8 L18 17.5 L16 19.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+    b.title = 'Two-laptop mode' + (hdRelay.offen ? ' – linked' + (hdRelay.rolle === 'host' ? ', ' + n + ' car(s) via helper' : ' (helper)') : hdRelay.rolle ? ' – not linked' : '');
+    b.setAttribute('aria-label', b.title);
+    b.classList.add('hd-top-knopf');
+    b.setAttribute('data-i18n-skip', '');
+    b.addEventListener('click', (e) => { e.stopPropagation(); hdRelayOeffnen(); });
+    st.appendChild(b);
+  }
+  function hdChipAuffrischen() {
+    const st = $('k-status'), alt = $('hd-relay-chip');
+    if (!st) return;
+    if (alt) alt.remove();
+    hdRelayChip(st);
   }
   function hdRelayOeffnen(rolle) {
     const box = $('hd-relay');
@@ -484,8 +514,23 @@
       catch (e) { if (!(e && e.name === 'NotFoundError')) fehler(e); }
     });
     an('hdr-trennen', () => { hdRelaySchliessen(false); hdStatus('Link closed.'); });
-    // ?helper in the address opens straight into helper mode.
-    try { if (new URLSearchParams(location.search).has('helper')) hdRelayOeffnen('helper'); } catch (e) { /* no URL */ }
+    // ?helper in the address (or helper.html, which forwards here) is the DEDICATED HELPER
+    // PAGE: the panel fills the screen, cannot be closed, and nothing else of the app shows -
+    // so it cannot be closed by accident in the middle of a race.
+    let helperSeite = false;
+    try { helperSeite = new URLSearchParams(location.search).has('helper'); } catch (e) { /* no URL */ }
+    if (helperSeite) {
+      document.body.classList.add('hd-helper-seite');
+      document.title = 'HybridDash Helper';
+      hdRelayOeffnen('helper');
+    }
+    // While linked, closing or reloading the tab asks first (it would drop the link and stop
+    // the helper's cars).
+    window.addEventListener('beforeunload', (e) => {
+      if (!hdRelay.offen && !(hdRelay.rolle === 'helper' && hdRelay.eigen.size)) return;
+      e.preventDefault(); e.returnValue = '';
+    });
+    an('hdr-helper-seite', () => { window.open(location.pathname + '?helper', '_blank', 'noopener'); });
     setInterval(() => { if ($('hd-relay') && !$('hd-relay').hidden) hdRelayMalen(); }, 1000);
     hdRelayMalen();
   })();

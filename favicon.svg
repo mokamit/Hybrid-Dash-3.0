@@ -6,23 +6,8 @@
       <stop offset="100%" stop-color="#000000" />
     </radialGradient>
 
-    <!-- PERFECT, INSTANTLY RECOGNIZABLE GREEK OMEGA (Ω) PATH -->
-    <path id="classic-omega" d="
-      M 112 370 
-      L 200 370 
-      C 192 328, 172 290, 172 236 
-      C 172 150, 210 102, 256 102 
-      C 302 102, 340 150, 340 236 
-      C 340 290, 320 328, 312 370 
-      L 400 370 
-      L 400 310 
-      C 368 310, 350 286, 388 236 
-      C 410 200, 412 160, 388 116 
-      C 358 62, 308 42, 256 42 
-      C 204 42, 154 62, 124 116 
-      C 100 160, 102 200, 124 236 
-      C 162 286, 144 310, 112 310 
-      Z" 
+    <!-- HYBRIDDASH "HD" MONOGRAM -->
+    <path id="classic-omega" d="M 52 104 L 116 104 L 116 222 L 196 222 L 196 104 L 260 104 L 260 408 L 196 408 L 196 284 L 116 284 L 116 408 L 52 408 Z M 296 104 L 368 104 C 486 104, 486 408, 368 408 L 296 408 Z M 360 166 L 360 346 C 412 346, 412 166, 360 166 Z" 
       fill-rule="evenodd" />
 
     <!-- Displaced Cutout Slice Masks -->

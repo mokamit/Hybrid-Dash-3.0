@@ -118,7 +118,7 @@
       window.__applyPreset(key);
       const txt = $('race-act-mode-txt');
       if (txt) txt.textContent = window.__presetLabel(key);
-      showHudToast('ABSTIMMUNG ' + window.__presetLabel(key).toUpperCase());
+      showHudToast(t('ABSTIMMUNG') + ' ' + window.__presetLabel(key).toUpperCase());
     });
   }
 
@@ -354,6 +354,8 @@
       }
     } catch (e) { /* privater Modus */ }
     try {
+      // HybridDash 2.1b: the tile dashboard was briefly a look; it is now a cockpit screen.
+      if (localStorage.getItem(COCKPIT_STORE) === 'hybriddash') localStorage.setItem(COCKPIT_STORE, 'acc');
       const gespeichert = localStorage.getItem(COCKPIT_STORE);
       if (gespeichert) $('setting-cockpit').value = gespeichert;
     } catch (e) { /* privater Modus */ }
@@ -825,8 +827,8 @@
   // sehen koennen.
   const ACCEL_REF_S = 3.2;   // Bezugswert = 100 %
   function accelLabel(s) {
-    return Math.round(ACCEL_REF_S / s * 100) + ' % ('
-         + s.toFixed(1).replace('.', ',') + ' s auf 100)';
+    return t('{p} % ({s} s auf 100)').replace('{p}', Math.round(ACCEL_REF_S / s * 100))
+         .replace('{s}', lang === 'de' ? s.toFixed(1).replace('.', ',') : s.toFixed(1));
   }
   $('setting-zero-to-top').addEventListener('input', (e) => {
     physEngine.config.launchAnchorTimeS = parseFloat(e.target.value);
@@ -923,7 +925,7 @@
     const el = $('vib-trigger-lage');
     if (!el) return;
     const lage = vibrationLage();
-    if (!lage.pads.length) { el.textContent = 'noch kein Controller gemeldet'; return; }
+    if (!lage.pads.length) { el.textContent = t('noch kein Controller gemeldet'); return; }
     el.textContent = lage.pads.map((p) => {
       if (!p.ruettler) return p.name + ': kein R\u00fcttler';
       const kann = p.arten.indexOf('trigger-rumble') >= 0;
@@ -1274,6 +1276,8 @@
   function cockpitPunkteMalen() {
     const host = $('race-screen-dots');
     if (!host) return;
+    // HybridDash: named tabs instead of dots (98m-hd-cockpit.js).
+    if (typeof hdCockpitReiter === 'function' && hdCockpitReiter(host)) return;
     if (host.children.length !== COCKPIT_SCREENS.length) {
       host.innerHTML = COCKPIT_SCREENS.map(() => '<i></i>').join('');
     }
@@ -1542,7 +1546,7 @@
   $('setting-brakebias').addEventListener('input', (e) => {
     const pct = parseInt(e.target.value, 10);
     physEngine.config.brakeBias = pct / 100;
-    $('setting-brakebias-val').textContent = pct + '% vorn';
+    $('setting-brakebias-val').textContent = t('{p}% vorn').replace('{p}', pct);
   });
 
   // BESTELLT (GT7-Fahrmodus): "mehr Traegheit/Gewichtsverlagerung." transferK/loadTau
@@ -2114,7 +2118,7 @@
       if (!zweiSpieler) {
         fuss.textContent = 'Der 2-Spieler-Modus ist aus \u2013 rechts steht nichts.';
       } else if (!car2) {
-        fuss.textContent = 'In der Garage einem Auto die Rolle "Spieler 2" geben.';
+        fuss.textContent = t('In der Garage einem Auto die Rolle "Spieler 2" geben.');
       } else if (lage === 'angefordert') {
         const kmh = Math.abs(physEngine2.state.speedKmh) * REAL_SCALE;
         const schwelle = PIT_STANDSTILL_KMH * REAL_SCALE;
@@ -2238,7 +2242,7 @@
       sel.value = naechste.value;
       sel.dispatchEvent(new Event('change', { bubbles: true }));
       p2ScreenRender();
-      showHudToast('AUTO ' + nr + ': ' + motorNamen(naechste).toUpperCase());
+      showHudToast(t('AUTO') + ' ' + nr + ': ' + motorNamen(naechste).toUpperCase());
     }
   }
   // setzen. 80 ms, dann zurueck: eine Anzeige mit Masse setzt sich kurz, ein Textfeld nicht.
@@ -3183,7 +3187,10 @@
     const zielSc = (grund === 'yellow' && typeof scFolgeDeckel === 'function')
       ? Math.min(zielBasis, scFolgeDeckel(meinAuto)) : zielBasis;
     // v1.1.39: unter Gelb Mindesttempo und Haarnadel-Obergrenze wie die NPCs (autopilotGelbGrenzen).
-    const ziel = grund === 'yellow' && typeof autopilotGelbGrenzen === 'function' ? autopilotGelbGrenzen(meinAuto, zielSc) : zielSc;
+    const zielGrenzen = grund === 'yellow' && typeof autopilotGelbGrenzen === 'function' ? autopilotGelbGrenzen(meinAuto, zielSc) : zielSc;
+    // HybridDash 2.1: the last word under yellow - never faster than the car ahead when close.
+    const ziel = grund === 'yellow' && typeof hdGelbFolge === 'function' ? hdGelbFolge(meinAuto, zielGrenzen, rennZeitJetzt()) : zielGrenzen;
+    if (meinAuto) { meinAuto.hdZiel = ziel; meinAuto.hdZielAt = rennZeitJetzt(); }
     const v = Math.abs(st.speedKmh) / motor.config.topSpeedKmh;
     const dtA = Math.max(0.01, Math.min(0.25,
       (rennZeitJetzt() - (regler.at || rennZeitJetzt())) / 1000));
@@ -3493,6 +3500,7 @@
     ps.dirtyAir += (ziel - ps.dirtyAir) * Math.min(1, dt * 4);
     const out = physEngine.update({ steering: steer, throttle: rawThrottle, brake: rawBrake,
                                     headlights: headlightsOn, apFaehrt: !!ap }, dt);
+    if (typeof hdCockpitEingabe === 'function') hdCockpitEingabe(rawThrottle, rawBrake);   // HybridDash cockpit bar
     pacejkaRueckmeldung(physEngine, 1);
     // Telemetrie: etwa 10 Proben je Sekunde (Tempo, Gas, Bremse, Gang, Lenkung).
     if (typeof teleProbe === 'function') teleProbe(rawThrottle, rawBrake);

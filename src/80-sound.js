@@ -2929,7 +2929,9 @@
   function showHudToast(msg) {
     const el = $('hud-toast');
     if (!el) return;
-    el.textContent = msg;
+    // HybridDash 2.1: every toast through the translator (literal German toasts slipped
+    // through in English mode). t() returns the text unchanged when it has no entry.
+    el.textContent = msg ? t(String(msg)) : msg;
     clearTimeout(hudToastTimer);
     if (msg) hudToastTimer = setTimeout(() => { el.textContent = ''; }, 1500);
   }

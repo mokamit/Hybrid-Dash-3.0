@@ -1,0 +1,444 @@
+  // =========================================================================
+  // HybridDash 2.1: the "HybridDash" cockpit look (tile dashboard)
+  // =========================================================================
+  //
+  // REQUESTED (with a screenshot): a tile dashboard - status and setting chips on the left,
+  // speed / gear / tyres in the middle, lap times on the right, a throttle/brake bar at the far
+  // right. v2.1b: the FOURTH COCKPIT SCREEN (after Cockpit, Pit and Race; screen dots / D-pad),
+  // scaled as a whole to the window. (First built as a cockpit look; moved, as requested.)
+  //
+  // ONE SOURCE OF TRUTH: every number is read from the standard cockpit's own elements
+  // (#race-speed, #race-gear, #race-lap-now, ...), which the app keeps updating while they are
+  // hidden. So this dashboard can never disagree with the other looks - it shows the same values
+  // in a different arrangement. Only throttle/brake input comes from a hook in the drive loop
+  // (hdCockpitEingabe, 50-drive.js), because the standard cockpit does not show it as a number.
+  //
+  //   chips   AST driving aid · STR driving feel · THR throttle curve · TOP top speed
+  //           LCK steering calibration · EXPO steering expo · BRK brake power
+  //   rows    Battery · Position · Fuel · Off track
+  //   middle  speed · gear · TYRES % (four corners)
+  //   right   Lap · Lap time / Δ best / best · Last lap · Condition · flag box · THR/BRK bar
+
+  const HD_CP_SEG = 6;            // segments for throttle (up) and brake (down)
+  const hdCp = { gas: 0, bremse: 0, an: false, el: null, uhr: null };
+
+  // Hook from the drive loop (50-drive.js), every tick.
+  function hdCockpitEingabe(gas, bremse) {
+    hdCp.gas = Math.max(0, Math.min(1, gas || 0));
+    hdCp.bremse = Math.max(0, Math.min(1, bremse || 0));
+  }
+
+  const hdTxt = (id) => { const el = $(id); return el ? el.textContent.replace(/\s+/g, ' ').trim() : ''; };
+  const hdZahl = (s) => { const m = String(s || '').match(/-?\d+(?:[.,]\d+)?/); return m ? m[0].replace(',', '.') : ''; };
+  const hdLeer = (s) => (s && s !== '–' && s !== '-' && s !== '—' ? s : '—');
+
+  function hdCockpitBauen() {
+    if (hdCp.el) return hdCp.el;
+    const dash = $('race-dash');
+    if (!dash) return null;
+    // Outer element: a cockpit screen overlay like the pit and race screens (.gt3-schirm covers
+    // the dashboard area). Inner element: the dashboard at its DESIGN SIZE, scaled as a whole
+    // to fit (hdCockpitEinpassen) - REPORTED: "not scaling or fitting the window correctly".
+    const el = document.createElement('div');
+    el.id = 'hd-cockpit';
+    el.className = 'gt3-schirm hd-cp-schirm';
+    el.setAttribute('data-i18n-skip', '');
+    const innen = document.createElement('div');
+    innen.className = 'hd-cp';
+    const chip = (k, farbe, id) => `<div class="hd-cp-chip" style="--c:${farbe}"><span>${k}</span><b id="hd-cp-${id}">—</b></div>`;
+    const zeile = (k, id) => `<div class="hd-cp-zeile"><span class="hd-cp-taste">${k}</span><b id="hd-cp-${id}">—</b></div>`;
+    innen.innerHTML = `
+      <div class="hd-cp-links">
+        <div class="hd-cp-kopf"><b id="hd-cp-status">No session</b>
+          <svg id="hd-cp-licht" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M13 5 C7 5 6 9 6 12 C6 15 7 19 13 19 Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8 H21 M16 12 H21 M16 16 H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <div class="hd-cp-raster">
+          <div class="hd-cp-chips">${chip('AST', '#35d07f', 'ast')}${chip('STR', '#29c4e8', 'str')}${chip('THR', '#f2a01c', 'thr')}${chip('TOP', '#e9ecf1', 'top')}</div>
+          <div class="hd-cp-zeilen">${zeile('Battery', 'akku')}${zeile('Position', 'pos')}${zeile('Fuel', 'tank')}${zeile('Off track', 'abseits')}</div>
+        </div>
+        <div class="hd-cp-chips2">${chip('LCK', '#ff5a5a', 'lck')}${chip('EXPO', '#35d07f', 'expo')}${chip('BRK', '#3b7fe2', 'brk')}</div>
+        <div class="hd-cp-steuer">
+          <div class="hd-cp-box hd-cp-g" title="G-force: green = measured on the car, red = simulated">
+            <svg viewBox="0 0 100 100" aria-label="G-force"><circle cx="50" cy="50" r="46" fill="#04060b" stroke="#2a3346"/>
+              <circle cx="50" cy="50" r="31" fill="none" stroke="#1e2634"/><circle cx="50" cy="50" r="16" fill="none" stroke="#1e2634"/>
+              <path d="M50 4V96M4 50H96" stroke="#1e2634"/>
+              <circle id="hd-cp-g-real" cx="50" cy="50" r="5" fill="#2ee06a" opacity=".85"/><circle id="hd-cp-g-sim" cx="50" cy="50" r="5.5" fill="#ff4d4d"/></svg>
+            <span>G</span></div>
+          <button type="button" class="hd-cp-knopf" id="hd-cp-licht-knopf" title="Lights on/off">
+            <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M13 5 C7 5 6 9 6 12 C6 15 7 19 13 19 Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8 H21 M16 12 H21 M16 16 H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span id="hd-cp-licht-txt">Lights</span></button>
+          <button type="button" class="hd-cp-knopf" id="hd-cp-wetter-knopf" title="Change weather: dry, rain, changeable">
+            <svg id="hd-cp-wetter-ico" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"></svg>
+            <span id="hd-cp-wetter-txt">Dry</span></button>
+        </div>
+      </div>
+      <div class="hd-cp-mitte">
+        <div class="hd-cp-box hd-cp-tempo"><b id="hd-cp-kmh">0</b><small>km/h</small></div>
+        <div class="hd-cp-box hd-cp-gang"><b id="hd-cp-gang">N</b></div>
+        <div class="hd-cp-reifen"><div class="hd-cp-reifen-kopf">TYRES %</div>
+          <div class="hd-cp-reifen-raster"><b id="hd-cp-fl">—</b><b id="hd-cp-fr">—</b><b id="hd-cp-rl">—</b><b id="hd-cp-rr">—</b></div></div>
+      </div>
+      <div class="hd-cp-rechts">
+        <div class="hd-cp-runde"><span>Lap</span><b id="hd-cp-runde">—</b></div>
+        <div class="hd-cp-box hd-cp-zeiten"><div class="hd-cp-zt-kopf">Lap time</div><b id="hd-cp-jetzt">--</b>
+          <div class="hd-cp-zt-fuss"><div><span>Δ Best</span><b id="hd-cp-delta">--</b></div><div><span>Best</span><b id="hd-cp-best">--</b></div></div></div>
+        <div class="hd-cp-box hd-cp-reihe"><span>Last lap</span><b id="hd-cp-letzte">—</b></div>
+        <div class="hd-cp-box hd-cp-reihe"><span>Condition</span><b id="hd-cp-schaden" class="hd-cp-blau">—</b></div>
+        <div class="hd-cp-aktionen">
+          <button type="button" class="hd-cp-aktion" id="hd-cp-box-knopf">PIT STOP</button>
+          <button type="button" class="hd-cp-aktion hd-cp-gelb" id="hd-cp-flagge-knopf">YELLOW FLAG</button>
+        </div>
+      </div>
+      <div class="hd-cp-aussen">
+        <div class="hd-cp-flagge" id="hd-cp-flagge">—</div>
+        <div class="hd-cp-balken"><span>THR</span><div class="hd-cp-seg" id="hd-cp-seg">
+          ${Array.from({ length: HD_CP_SEG }, (_, i) => `<i class="hd-g" data-i="${HD_CP_SEG - 1 - i}"></i>`).join('')}
+          <i class="hd-cp-pfeil" id="hd-cp-pfeil">⬆</i>
+          ${Array.from({ length: HD_CP_SEG }, (_, i) => `<i class="hd-b" data-i="${i}"></i>`).join('')}
+        </div><span>BRK</span></div>
+      </div>`;
+    el.appendChild(innen);
+    dash.appendChild(el);
+    // The controls press the standard cockpit's own buttons, so every rule (pit lane, 1 s
+    // hold for the flag on the pad, pause, two-player) stays exactly as it is there.
+    const druecke = (id) => () => { const k = $(id); if (k && !k.disabled) k.click(); setTimeout(hdCockpitMalen, 60); };
+    innen.querySelector('#hd-cp-box-knopf').addEventListener('click', druecke('race-act-pit'));
+    innen.querySelector('#hd-cp-flagge-knopf').addEventListener('click', druecke('race-act-flag'));
+    innen.querySelector('#hd-cp-licht-knopf').addEventListener('click', druecke('race-light-box'));
+    innen.querySelector('#hd-cp-wetter-knopf').addEventListener('click', druecke('race-wx-box'));
+    hdCp.el = el;
+    if (window.ResizeObserver) new ResizeObserver(hdCockpitEinpassen).observe(el);
+    return el;
+  }
+
+  // Scale the dashboard (design size HD_CP_B x HD_CP_H) to the space the screen has, keeping
+  // its proportions, centred. transform and not zoom: the screen is an overlay with a fixed
+  // box, nothing below it has to move.
+  const HD_CP_B = 1040, HD_CP_H = 560, HD_CP_B_MAX = 1700;
+  function hdCockpitEinpassen() {
+    const el = hdCp.el; if (!el) return;
+    const innen = el.firstElementChild;
+    const w = el.clientWidth, h = el.clientHeight;
+    if (!w || !h) return;
+    // Wide windows: the layout first stretches sideways to the window's shape (up to
+    // HD_CP_B_MAX), so it fills the width instead of sitting small in the middle.
+    const breite = Math.max(HD_CP_B, Math.min(HD_CP_B_MAX, HD_CP_H * w / h));
+    innen.style.width = breite + 'px';
+    const f = Math.min(w / breite, h / HD_CP_H);
+    innen.style.transform = 'translate(' + Math.max(0, (w - breite * f) / 2) + 'px,' + Math.max(0, (h - HD_CP_H * f) / 2) + 'px) scale(' + f + ')';
+  }
+
+  function hdSetz(id, v) { const el = $('hd-cp-' + id); if (el && el.textContent !== v) el.textContent = v; }
+
+  function hdCockpitMalen() {
+    const dash = $('race-dash');
+    if (!dash || dash.dataset.screen !== 'hybriddash') return;
+    const el = hdCockpitBauen();
+    if (!el || !el.offsetParent) return;
+    hdCockpitEinpassen();
+    // Status
+    let status = 'No session', farbe = '#ff4d4d';
+    try {
+      if (raceState === 'countdown') { status = 'Start lights'; farbe = '#ffd23f'; }
+      else if (raceState === 'racing' || raceState === 'finishing') {
+        status = flagState === 'yellow' ? 'Yellow flag' : flagState === 'restart' ? 'Restart' : (raceMode === 'practice' ? 'Practice' : 'Racing');
+        farbe = flagState === 'green' ? '#35d07f' : '#ffd23f';
+      } else if (raceState === 'finished') { status = 'Finished'; farbe = '#e9ecf1'; }
+    } catch (e) { /* not ready */ }
+    hdSetz('status', status);
+    $('hd-cp-status').style.color = farbe;
+    try { $('hd-cp-licht').style.color = headlightsOn ? '#29c4e8' : '#55606e'; } catch (e) { /* not ready */ }
+    // Chips
+    const assist = ($('driver-assist') || {}).value;
+    hdSetz('ast', assist === 'voll' ? 'FULL' : assist === 'quer' ? 'LANE' : 'OFF');
+    const gefuehl = hdTxt('race-act-mode-txt');
+    const kurz = { arcade: 'ARC', pro: 'PRO', 'sim+': 'SIM+', sim: 'SIM', pacejka: 'PAC', omega: 'OMG', gt3: 'GT3', rc: 'RC' };
+    const w = gefuehl.toLowerCase().split(/[\s·(]/)[0];
+    hdSetz('str', gefuehl ? (kurz[w] || w.replace(/[^a-z0-9+]/g, '').slice(0, 4).toUpperCase()) : '—');
+    hdSetz('thr', hdLeer(hdZahl(hdTxt('setting-throttle-gamma-val'))));
+    hdSetz('top', hdLeer(hdZahl(hdTxt('setting-topspeed-val'))));
+    hdSetz('lck', hdLeer(hdZahl(hdTxt('setting-steer-calib-val'))));
+    hdSetz('expo', hdLeer(hdZahl(hdTxt('setting-steer-expo-val'))));
+    hdSetz('brk', hdLeer(hdZahl(hdTxt('setting-brakepower-val'))));
+    // Rows
+    hdSetz('akku', hdLeer(hdTxt('race-batt')));
+    const posEl = $('race-pos');
+    hdSetz('pos', posEl && !posEl.hidden ? hdLeer(posEl.textContent.trim()) : '—');
+    hdSetz('tank', hdLeer(hdTxt('race-fuel')));
+    let ab = 0; try { ab = abseitsZaehlerFuer(1); } catch (e) { ab = 0; }
+    hdSetz('abseits', String(ab));
+    // Middle
+    hdSetz('kmh', hdZahl(hdTxt('race-speed')) || '0');
+    hdSetz('gang', hdTxt('race-gear') || 'N');
+    for (const k of ['fl', 'fr', 'rl', 'rr']) {
+      const t4 = $('race-tyre-' + k), b = t4 && t4.querySelector('b');
+      let v = '—';
+      if (b) {
+        const h = b.style.height || b.style.getPropertyValue('--fill') || '';
+        const m = String(h).match(/[\d.]+/);
+        if (m) v = String(Math.round(parseFloat(m[0])));
+      }
+      hdSetz(k, v);
+    }
+    // Right
+    hdSetz('runde', hdLeer(hdTxt('race-lap-count')));
+    hdSetz('jetzt', hdLeer(hdTxt('race-lap-now')).replace('—', '--'));
+    hdSetz('delta', hdLeer(hdTxt('race-lap-delta')).replace('—', '--'));
+    hdSetz('best', hdLeer(hdTxt('race-lap-best')).replace('—', '--'));
+    hdSetz('letzte', hdLeer(hdTxt('race-lap-last')));
+    hdSetz('schaden', hdLeer(hdTxt('race-dmg')));
+    // G-force: the same two dots as the standard cockpit's G plot.
+    for (const k of ['real', 'sim']) {
+      const q = $('race-g-' + k), z = $('hd-cp-g-' + k);
+      if (q && z) { z.setAttribute('cx', q.getAttribute('cx')); z.setAttribute('cy', q.getAttribute('cy')); }
+    }
+    // Lights
+    let licht = true; try { licht = !!headlightsOn; } catch (e) { /* not ready */ }
+    const lk = $('hd-cp-licht-knopf');
+    lk.classList.toggle('an', licht); hdSetz('licht-txt', licht ? 'Lights on' : 'Lights off');
+    // Weather
+    // The weather MODE the tile cycles (dry -> rain -> changeable), plus rain right now.
+    let modus = 'dry', nass = false;
+    try { modus = raceWxStart; nass = weather === 'wet'; } catch (e) { /* not ready */ }
+    const wechsel = modus === 'wechsel';
+    if (modus === 'rain') nass = true;
+    const wetterTxt = wechsel ? 'Changeable' : nass ? 'Rain' : 'Dry';
+    if ($('hd-cp-wetter-txt').textContent !== wetterTxt) {
+      hdSetz('wetter-txt', wetterTxt);
+      $('hd-cp-wetter-ico').innerHTML = nass || wechsel
+        ? '<path d="M7 15 C4 15 3 12.5 4.5 10.8 C5 8 8 7 10 8.3 C11.3 5.5 16.5 5.5 17.3 9.4 C20 9.6 21 12 20 13.8 C19.5 14.7 18.6 15 17.6 15 Z" fill="none" stroke="#5aa9ff" stroke-width="1.8"/><path d="M8 18 L7 20.5 M12 18 L11 20.5 M16 18 L15 20.5" stroke="#5aa9ff" stroke-width="1.8" stroke-linecap="round"/>'
+        : '<circle cx="12" cy="12" r="4.5" fill="none" stroke="#ffd23f" stroke-width="1.8"/><path d="M12 2.5V5 M12 19V21.5 M2.5 12H5 M19 12H21.5 M5.3 5.3L7 7 M17 17L18.7 18.7 M5.3 18.7L7 17 M17 7L18.7 5.3" stroke="#ffd23f" stroke-width="1.8" stroke-linecap="round"/>';
+    }
+    // Pit stop and yellow flag: label and state from the standard buttons.
+    const bp = $('race-act-pit'), bf = $('hd-cp-box-knopf');
+    if (bp && bf) { const tx = bp.textContent.replace(/\s+/g, ' ').trim() || 'PIT STOP'; if (bf.textContent !== tx) bf.textContent = tx;
+      bf.disabled = !!bp.disabled; bf.classList.toggle('an', bp.classList.contains('flagged') || bp.classList.contains('an') || bp.classList.contains('aktiv')); }
+    const ff = $('race-act-flag'), ffk = $('hd-cp-flagge-knopf');
+    if (ff && ffk) { const tx = ff.textContent.replace(/\s+/g, ' ').trim() || 'YELLOW FLAG'; if (ffk.textContent !== tx) ffk.textContent = tx;
+      ffk.disabled = !!ff.disabled; ffk.classList.toggle('an', ff.classList.contains('flagged')); }
+    // Flag box
+    const fl = $('hd-cp-flagge');
+    let f = 'GREEN', fc = '#35d07f';
+    try {
+      if (raceState !== 'racing' && raceState !== 'finishing') { f = '—'; fc = '#2bd1c0'; }
+      else if (flagState === 'yellow') { f = typeof safetyCarFaehrt === 'function' && safetyCarFaehrt() ? 'SC' : 'YELLOW'; fc = '#ffd23f'; }
+      else if (flagState === 'restart') { f = 'RESTART'; fc = '#ffd23f'; }
+    } catch (e) { /* not ready */ }
+    if (fl.textContent !== f) fl.textContent = f;
+    fl.style.setProperty('--c', fc);
+    // Throttle / brake bar (6 segments each way) and the shift arrow.
+    const g = Math.round(hdCp.gas * HD_CP_SEG), br = Math.round(hdCp.bremse * HD_CP_SEG);
+    el.querySelectorAll('.hd-g').forEach((s) => s.classList.toggle('an', Number(s.dataset.i) < g));
+    el.querySelectorAll('.hd-b').forEach((s) => s.classList.toggle('an', Number(s.dataset.i) < br));
+    const shift = $('race-shift');
+    const voll = shift ? shift.querySelectorAll('span.on, span.an, span.lit').length : 0;
+    $('hd-cp-pfeil').classList.toggle('an', voll >= 8);
+  }
+
+  (function hdCockpitStart() {
+    const css = document.createElement('style');
+    css.textContent = `
+      #race-dash[data-screen="hybriddash"] #hd-cockpit { display: block; }
+      .hd-cp-schirm { background: #000 !important; padding: 0 !important; overflow: hidden; z-index: 6 !important; }
+      .hd-cp { position: absolute; left: 0; top: 0; width: ${HD_CP_B}px; height: ${HD_CP_H}px; transform-origin: 0 0;
+        display: grid; grid-template-columns: minmax(395px, 1.55fr) minmax(230px, 1fr) minmax(250px, 1.1fr) minmax(105px, .42fr); gap: 14px; padding: 16px; box-sizing: border-box;
+        background: #000; color: #f4f6fb; font-family: Inter, system-ui, sans-serif; align-content: start; }
+      .hd-cp b { font-weight: 800; font-variant-numeric: tabular-nums; }
+      .hd-cp-box { border: 2px solid #2a2e35; border-radius: 8px; background: #08090b; }
+      .hd-cp-links { display: grid; gap: 12px; align-content: start; }
+      .hd-cp-kopf { display: flex; align-items: center; gap: 14px; font-size: 20px; height: 26px; }
+      .hd-cp-raster { display: grid; grid-template-columns: minmax(120px, .42fr) 1fr; gap: 12px; }
+      .hd-cp-chips, .hd-cp-zeilen { display: grid; gap: 10px; grid-auto-rows: 54px; }
+      .hd-cp-chip { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 11px;
+        border: 2px solid var(--c); border-radius: 8px; background: #08090b; height: 54px; box-sizing: border-box; }
+      .hd-cp-chip span { font-size: 13px; font-weight: 800; letter-spacing: .03em; }
+      .hd-cp-chip b { font-size: 24px; white-space: nowrap; }
+      .hd-cp-chips2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .hd-cp-zeile { display: flex; align-items: center; gap: 12px; }
+      .hd-cp-taste { flex: 0 0 104px; text-align: center; background: #3a3f49; border-radius: 6px; padding: 14px 4px; font-weight: 700; font-size: 15px; }
+      .hd-cp-zeile b { flex: 1; text-align: right; font-size: 24px; white-space: nowrap; }
+      .hd-cp-mitte { display: grid; gap: 12px; grid-template-rows: 62px 1fr 150px; height: ${HD_CP_H - 32}px; }
+      .hd-cp-tempo { display: flex; align-items: baseline; justify-content: center; gap: 6px; padding-top: 8px; box-sizing: border-box; }
+      .hd-cp-tempo b { font-size: 38px; }
+      .hd-cp-tempo small { font-size: 12px; color: #c3c8d4; }
+      .hd-cp-gang { display: grid; place-items: center; }
+      .hd-cp-gang b { font-size: 190px; line-height: 1; font-weight: 500; }
+      .hd-cp-reifen { border: 2px solid #f2a01c; border-radius: 8px; overflow: hidden; background: #08090b; }
+      .hd-cp-reifen-kopf { background: #f2a01c; color: #14161c; text-align: center; font-weight: 800; padding: 6px; font-size: 15px; }
+      .hd-cp-reifen-raster { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 7px; }
+      .hd-cp-reifen-raster b { background: #1a1d22; border-radius: 4px; text-align: center; padding: 9px 0; font-size: 28px; }
+      .hd-cp-rechts { display: grid; gap: 12px; align-content: start; }
+      .hd-cp-runde { display: flex; align-items: center; gap: 10px; width: max-content; min-width: 45%; border: 2px solid #2a2e35; border-radius: 8px; background: #3a3f49; padding: 4px 4px 4px 14px; }
+      .hd-cp-runde span { font-size: 20px; font-weight: 700; }
+      .hd-cp-runde b { background: #000; border-radius: 6px; padding: 5px 18px; font-size: 20px; min-width: 2.5em; text-align: center; }
+      .hd-cp-zeiten { overflow: hidden; }
+      .hd-cp-zt-kopf { background: #3a3f49; text-align: center; padding: 6px; font-weight: 700; font-size: 16px; }
+      .hd-cp-zeiten > b { display: block; text-align: center; font-size: 40px; padding: 22px 0; }
+      .hd-cp-zt-fuss { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid #2a2e35; }
+      .hd-cp-zt-fuss div { display: grid; text-align: center; }
+      .hd-cp-zt-fuss div + div { border-left: 2px solid #2a2e35; }
+      .hd-cp-zt-fuss span { background: #2a2e35; font-size: 13px; font-weight: 700; padding: 4px; }
+      .hd-cp-zt-fuss b { padding: 9px 0; font-size: 19px; }
+      .hd-cp-reihe { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #24272d; }
+      .hd-cp-reihe span { font-weight: 700; font-size: 15px; }
+      .hd-cp-reihe b { font-size: 20px; }
+      .hd-cp-blau { background: #1f56d6; border-radius: 4px; padding: 3px 10px; }
+      .hd-cp-aussen { display: grid; gap: 12px; grid-template-rows: 56px 1fr; height: ${HD_CP_H - 32}px; }
+      .hd-cp-flagge { border: 2px solid var(--c, #2bd1c0); color: var(--c, #2bd1c0); border-radius: 8px; display: grid; place-items: center; font-weight: 800; font-size: 16px; }
+      .hd-cp-balken { border: 2px solid #2a2e35; border-radius: 8px; display: grid; grid-template-rows: auto 1fr auto; text-align: center; padding: 8px; gap: 6px; }
+      .hd-cp-balken span { font-size: 13px; font-weight: 700; color: #c3c8d4; }
+      .hd-cp-seg { display: grid; grid-auto-rows: 1fr; gap: 4px; }
+      .hd-cp-seg i { display: block; background: #15181c; border: 1px solid #2a2e35; border-radius: 2px; font-style: normal; }
+      .hd-cp-seg i.hd-g.an { background: #35d07f; border-color: #35d07f; }
+      .hd-cp-seg i.hd-b.an { background: #ff4d4d; border-color: #ff4d4d; }
+      .hd-cp-pfeil { display: grid !important; place-items: center; color: #8a93a3; font-size: 22px; background: transparent !important; border: 0 !important; }
+      .hd-cp-pfeil.an { color: #ffd23f; }
+      .hd-cp-steuer { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 4px; }
+      .hd-cp-g { position: relative; height: 112px; display: grid; place-items: center; }
+      .hd-cp-g svg { width: 100px; height: 100px; }
+      .hd-cp-g span { position: absolute; left: 7px; top: 4px; font-size: 12px; font-weight: 800; color: #8a93a3; }
+      .hd-cp-knopf { all: unset; box-sizing: border-box; cursor: pointer; height: 112px; display: grid; place-items: center; align-content: center; gap: 6px;
+        border: 2px solid #2a2e35; border-radius: 8px; background: #121418; color: #8a93a3; font: 700 14px Inter, system-ui, sans-serif; text-align: center; }
+      .hd-cp-knopf:hover { border-color: #4a5160; }
+      .hd-cp-knopf:focus-visible, .hd-cp-aktion:focus-visible { outline: 2px solid #00d6ff; outline-offset: 2px; }
+      #hd-cp-licht-knopf.an { color: #35d07f; border-color: #35d07f; }
+      .hd-cp-aktionen { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+      .hd-cp-aktion { all: unset; box-sizing: border-box; cursor: pointer; height: 96px; display: grid; place-items: center; text-align: center;
+        border: 2px solid #2a2e35; border-bottom: 3px solid #00a3e0; border-radius: 8px; background: #1a1d24; color: #f4f6fb;
+        font: 800 16px Inter, system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; padding: 0 8px; }
+      .hd-cp-aktion:hover { background: #232733; }
+      .hd-cp-aktion.an { background: #00a3e0; color: #05070c; }
+      .hd-cp-aktion.hd-cp-gelb.an { background: #ffd23f; border-bottom-color: #ffd23f; color: #14161c; }
+      .hd-cp-aktion:disabled { opacity: .45; cursor: default; }
+      /* The standard cockpit's weather tile draws its accent above the screen overlays (seen as a
+         stray blue line on the Pit, Race and Dashboard screens). Hidden while another screen shows. */
+      #race-dash:not([data-screen="main"]):not([data-screen="auto2"]) #race-wx-box { visibility: hidden; }
+    `;
+    document.head.appendChild(css);
+    // REQUESTED: "Keep the original 3 cockpit windows, but add the new one as a 4th option."
+    // A fourth cockpit screen, after Cockpit, Pit and Race - reached with the screen dots or
+    // the D-pad like the others. COCKPIT_SCREENS (50-drive.js) is the one list they come from.
+    if (typeof COCKPIT_SCREENS !== 'undefined' && !COCKPIT_SCREENS.some((x) => x.id === 'hybriddash')) {
+      COCKPIT_SCREENS.push({ id: 'hybriddash', name: 'Digital Dash', malen: () => { hdCockpitBauen(); hdCockpitMalen(); } });
+      if (typeof cockpitPunkteMalen === 'function') cockpitPunkteMalen();
+    }
+    hdCockpitBauen();
+    window.addEventListener('resize', hdCockpitEinpassen);
+    hdCp.uhr = setInterval(hdCockpitMalen, 100);
+  })();
+
+  // ---- NAMED COCKPIT TABS -----------------------------------------------------------------
+  // REQUESTED: named tabs in the main menu's style. v2.2: THREE tabs - Dashboard, Pit Wall,
+  // Race Director. Dashboard holds the two driving screens, OmegaSim (the original cockpit)
+  // and Digital Dash, switched with a sub menu under the tab bar; the Dashboard tab returns to
+  // whichever of the two was used last. The arrow, the D-pad and swiping still step through
+  // all four screens, and the toast on switching uses the screen names.
+  const HD_SCHIRM_NAMEN = { main: 'OmegaSim', pit: 'Pit Wall', uebersicht: 'Race Director', hybriddash: 'Digital Dash' };
+  const HD_REITER = [
+    { name: 'Dashboard', ids: ['main', 'hybriddash'] },
+    { name: 'Pit Wall', ids: ['pit'] },
+    { name: 'Race Director', ids: ['uebersicht'] },
+  ];
+  let hdDashLetzte = 'main';
+  function hdSchirmIndex(id) { try { return COCKPIT_SCREENS.findIndex((x) => x.id === id); } catch (e) { return -1; } }
+  // Called by cockpitPunkteMalen() - also WHILE THE APP IS STILL LOADING, before this file ran.
+  // Then the lists are not initialised yet: draw nothing (the dots), never throw - an
+  // exception here would abort the whole start-up.
+  function hdCockpitReiter(host) {
+    try { if (!HD_SCHIRM_NAMEN || !HD_REITER) return false; } catch (e) { return false; }
+    let liste; try { liste = COCKPIT_SCREENS; } catch (e) { return false; }
+    if (!liste || !liste.length) return false;
+    liste.forEach((s) => { if (HD_SCHIRM_NAMEN[s.id]) s.name = HD_SCHIRM_NAMEN[s.id]; });
+    const reiter = HD_REITER.map((r) => ({ name: r.name, ids: r.ids.filter((id) => liste.some((x) => x.id === id)) })).filter((r) => r.ids.length);
+    // screens nobody grouped (added later) keep a tab of their own
+    liste.forEach((s) => { if (!reiter.some((r) => r.ids.includes(s.id))) reiter.push({ name: s.name, ids: [s.id] }); });
+    host.classList.add('hd-reiter');
+    host.removeAttribute('aria-hidden');
+    host.setAttribute('role', 'tablist');
+    host.setAttribute('data-i18n-skip', '');
+    const sig = reiter.map((r) => r.ids.join('+')).join('|');
+    if (host.dataset.hd !== sig) {
+      host.dataset.hd = sig;
+      host.innerHTML = '';
+      reiter.forEach((r) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.setAttribute('role', 'tab'); b.dataset.ids = r.ids.join(' ');
+        b.textContent = r.name;
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const ziel = r.ids.length > 1 && r.ids.includes(hdDashLetzte) ? hdDashLetzte : r.ids[0];
+          const i = hdSchirmIndex(ziel); if (i >= 0) cockpitScreenSet(i);
+        });
+        host.appendChild(b);
+      });
+    }
+    let aktivId = 'main'; try { aktivId = liste[cockpitScreen].id; } catch (e) { aktivId = 'main'; }
+    let aktivReiter = null;
+    for (const b of host.children) {
+      const an = b.dataset.ids.split(' ').includes(aktivId);
+      if (an) aktivReiter = b.dataset.ids.split(' ');
+      b.classList.toggle('an', an);
+      b.setAttribute('aria-selected', an ? 'true' : 'false');
+    }
+    // the sub menu: only for a tab with more than one screen
+    const ecke = host.parentElement;
+    let unter = document.getElementById('hd-unterreiter');
+    if (!unter && ecke) {
+      unter = document.createElement('div');
+      unter.id = 'hd-unterreiter'; unter.className = 'hd-unterreiter'; unter.setAttribute('role', 'tablist'); unter.setAttribute('data-i18n-skip', '');
+      ecke.appendChild(unter);
+    }
+    if (unter) {
+      const zeigen = aktivReiter && aktivReiter.length > 1;
+      unter.hidden = !zeigen;
+      if (zeigen) {
+        if (aktivReiter.includes(aktivId)) hdDashLetzte = aktivId;
+        if (unter.dataset.ids !== aktivReiter.join(' ')) {
+          unter.dataset.ids = aktivReiter.join(' ');
+          unter.innerHTML = '';
+          aktivReiter.forEach((id) => {
+            const b = document.createElement('button');
+            b.type = 'button'; b.setAttribute('role', 'tab'); b.dataset.id = id;
+            b.textContent = HD_SCHIRM_NAMEN[id] || id;
+            b.addEventListener('click', (e) => { e.stopPropagation(); const i = hdSchirmIndex(id); if (i >= 0) cockpitScreenSet(i); });
+            unter.appendChild(b);
+          });
+        }
+        for (const b of unter.children) { const an = b.dataset.id === aktivId; b.classList.toggle('an', an); b.setAttribute('aria-selected', an ? 'true' : 'false'); }
+      }
+    }
+    return true;
+  }
+  (function hdReiterCss() {
+    const css = document.createElement('style');
+    css.textContent = `
+      #race-dash .race-corner-links { right: clamp(96px, 9vw, 130px); }
+      /* The same glowing line as under the main menu, in neon green, under the cockpit tabs. */
+      #race-dash .race-corner-links:has(.hd-reiter)::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px;
+        background: linear-gradient(90deg, transparent, #39ff88 8%, #39ff88 92%, transparent);
+        box-shadow: 0 0 4px rgba(57,255,136,.9), 0 0 12px rgba(57,255,136,.45); pointer-events: none; z-index: 1; }
+      #race-screen-dots.hd-reiter { flex: 1; min-width: 0; height: 34px; gap: 0; padding: 0; margin-left: 6px;
+        background: #0d1015; overflow: hidden; display: flex; align-items: stretch; }
+      #race-screen-dots.hd-reiter button { all: unset; box-sizing: border-box; flex: 1; min-width: 0; cursor: pointer; text-align: center;
+        display: grid; place-items: center; padding: 0 8px; color: #b4bccb; font-family: var(--k-font, Inter, sans-serif);
+        font-size: clamp(10px, 1.05vw, 14px); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis; clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%); }
+      #race-screen-dots.hd-reiter button:hover { color: #fff; background: rgba(255,255,255,.08); }
+      #race-screen-dots.hd-reiter button.an { background: var(--k-weiss, #f2f4f8); color: var(--k-tinte, #0d1015); font-weight: 800; }
+      #race-screen-dots.hd-reiter button:focus-visible { outline: 2px solid #00d6ff; outline-offset: -2px; }
+      @media (max-height: 480px) { #race-screen-dots.hd-reiter { height: 26px; } }
+      /* Dashboard sub menu: OmegaSim | Digital Dash, under the tab bar on the left. */
+      .hd-unterreiter { position: absolute; left: 0; top: calc(100% + 12px); display: inline-flex; gap: 0; z-index: 30;
+        border: 1px solid #2c3442; border-radius: 6px; overflow: hidden; background: #0d1015; }
+      .hd-unterreiter[hidden] { display: none; }
+      .hd-unterreiter button { all: unset; cursor: pointer; padding: 5px 14px; font: 700 clamp(9.5px, .85vw, 12px)/1.2 var(--k-font, Inter, sans-serif);
+        letter-spacing: .1em; text-transform: uppercase; color: #b4bccb; }
+      .hd-unterreiter button + button { border-left: 1px solid #2c3442; }
+      .hd-unterreiter button:hover { color: #fff; background: rgba(255,255,255,.08); }
+      .hd-unterreiter button.an { color: #04140a; background: #39ff88; }
+      .hd-unterreiter button:focus-visible { outline: 2px solid #00d6ff; outline-offset: -2px; }
+    `;
+    document.head.appendChild(css);
+    try { cockpitPunkteMalen(); } catch (e) { /* not ready */ }
+  })();
+
+  window.HYBRIDDASH_COCKPIT = Object.freeze({ malen: hdCockpitMalen, eingabe: hdCockpitEingabe });

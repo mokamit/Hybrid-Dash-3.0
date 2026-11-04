@@ -107,6 +107,11 @@
     // gleichzeitig einen Klick irgendwo in der Seite aus - eine Belegung darauf kaempft mit
     // dem Cursor. Frei zuweisbar bleibt es, nur eben nicht ab Werk.
     resetcar: { type: 'none', index: -1, label: 'nicht belegt' },
+    // HybridDash 2.1: confirms the safety-car prompt. A / Cross is the industry-standard
+    // confirm button. It shares the button with pit stop / yellow flag ON PURPOSE (defaults
+    // may share, see resolveBindingCollisions): while the prompt is open, flagTasteTick()
+    // hands the button to the prompt only.
+    confirm: { type: 'button', index: 0, label: 'Kreuz (PS) / A (Xbox)' },
   };
   const BIND_ACTION_LABELS = {
     pause: 'Pause / Fortsetzen',
@@ -122,6 +127,7 @@
     trackview: 'Streckenansicht',
     fullscreenToggle: 'Vollbild umschalten',
     resetcar: 'Auto zurücksetzen',
+    confirm: 'Bestätigungstaste',
   };
 
   // Boxenstopp und Streckenansicht haben die Knoepfe getauscht. Gespeichertes liegt UEBER
@@ -438,6 +444,9 @@
     // zu belegen"). readBindingValue() gibt fuer eine leere Belegung schon immer 0 zurueck -
     // nur die Beschreibung fehlte, und ein b.label auf null wirft.
     if (!b) return t('nicht belegt');
+    // HybridDash 2.1: button names of the chosen controller style (98l-hd-ui.js).
+    const hdName = typeof hdPadLabel === 'function' ? hdPadLabel(b) : null;
+    if (hdName) return hdName;
     if (b.label) return b.label;
     return b.type === 'axis' ? `Achse ${b.index}${b.invert ? ' (invertiert)' : ''}` : `Knopf ${b.index}`;
   }
@@ -584,6 +593,7 @@
     // Zuweisung laeuft; sie an sieben Aufrufstellen einzeln nachzuziehen waere die
     // Gelegenheit, eine zu vergessen.
     padDiagramRender();
+    if (typeof hdPadBildAnwenden === 'function') hdPadBildAnwenden();
     bindPlayerRowZeichnen();
     const ab = activeBindings();
     const body = $('bind-table-body');
@@ -869,7 +879,7 @@
   window.addEventListener('gamepadconnected', (e) => {
     padConnected = true;
     $('pad-dot').classList.add('on');
-    $('pad-status-text').textContent = `Verbunden: ${e.gamepad.id}`
+    $('pad-status-text').textContent = (lang === 'de' ? 'Verbunden: ' : 'Connected: ') + e.gamepad.id
       + (e.gamepad.mapping === 'standard' ? '' : ' · ' + t('ohne Standardbelegung'));
     log(`Gamepad verbunden: ${e.gamepad.id}`, 'info');
     startPadLoop();
@@ -893,7 +903,7 @@
     padConnected = Array.from(pads).some(p => p);
     if (!padConnected) {
       $('pad-dot').classList.remove('on');
-      $('pad-status-text').textContent = 'kein Controller erkannt';
+      $('pad-status-text').textContent = t('kein Controller erkannt');
     }
   });
 
@@ -1358,7 +1368,7 @@
   function latStop(why) {
     if (lat.timer) { clearInterval(lat.timer); lat.timer = null; }
     lat.on = false;
-    $('lat-start').textContent = 'Messung starten';
+    $('lat-start').textContent = t('Messung starten');
     $('lat-start').classList.remove('warn');
     if (lat.car) writeToCar(lat.car, 0, 0, trackModeBit() | LIGHT_HEAD);
     latRender();
@@ -1410,6 +1420,8 @@
   }
 
   async function writeToCar(car, steer, throttle, lightBits, modeBytes) {
+    // HybridDash race control: a car marked DNF stays stopped, whoever drives it.
+    if (typeof hdDnfAuto === 'function' && hdDnfAuto(car)) { steer = 0; throttle = 0; modeBytes = undefined; }
     if (rennPauseAktiv()) {
       steer = 0; throttle = 0; lightBits = (lightBits || 0) | LIGHT_BRAKE;
       if (car.rx && !car.testSenke) {
@@ -2132,7 +2144,7 @@
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
         <div class="gk-bild${foto ? ' mit-foto' : ''}" style='${bild}'>${foto ? '' : `<span class="gk-zeichen">${car.tagChar || ''}</span>`}</div>
-        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 30) : ''}${esc(name)}</b>
+        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
           <b>${t(rolle.name)}</b>
@@ -2322,9 +2334,9 @@
     // genau das ein sinnvoller Fall: zusehen, wie sie fahren.
     btn.disabled = !player && !ghosts;
     btn.title = !player && !ghosts
-      ? (garage.length ? 'Erst ein Auto auf "Steuern" oder "NPC" stellen'
-                       : 'Erst ein Auto verbinden')
-      : (player ? 'Ins Cockpit' : 'NPCs starten')
+      ? (garage.length ? t('Erst ein Auto auf "Steuern" oder "NPC" stellen')
+                       : t('Erst ein Auto verbinden'))
+      : t(player ? 'Ins Cockpit' : 'NPCs starten')
         + (ghosts ? ', ' + ghosts + ' NPC' + (ghosts === 1 ? '' : 's') : '');
     btn.textContent = player ? 'Losfahren' : (ghosts ? 'NPCs starten' : 'Losfahren');
     // Anhalten ist nur scharf, wenn wirklich einer faehrt. Gepruefte Bedingung ist der
@@ -2340,10 +2352,9 @@
       stop.dataset.lage = fahren.length ? 'anhalten' : 'starten';
       if (typeof garAktionenAbgleichen === 'function') setTimeout(garAktionenAbgleichen, 0);
       stop.title = fahren.length
-        ? fahren.length + ' NPC' + (fahren.length === 1 ? '' : 's')
-          + ' ausrollen lassen und anhalten'
-        : (ghosts ? ghosts + ' NPC' + (ghosts === 1 ? '' : 's') + ' losfahren lassen'
-                  : 'Erst ein Auto auf "NPC" stellen');
+        ? t('{n} NPC(s) ausrollen lassen und anhalten').replace('{n}', fahren.length)
+        : (ghosts ? t('{n} NPC(s) losfahren lassen').replace('{n}', ghosts)
+                  : t('Erst ein Auto auf "NPC" stellen'));
     }
   }
 
@@ -2409,7 +2420,7 @@
     if (!el) return;
     const lage = await bluetoothLageGenau();
     if (lage === 'ok') { el.hidden = true; el.textContent = ''; return; }
-    el.textContent = bluetoothLageText(lage);
+    el.textContent = t(bluetoothLageText(lage));
     el.hidden = false;
   }
   garageLageZeigen();
@@ -2579,6 +2590,7 @@
       else if (!playerCar) setCarRole(car, 'player');
       else setCarRole(car, 'ghost');
       log(`${garageLabel(car)} verbunden (${garage.length} insgesamt)` + (opt && opt.auto ? ' - automatisch beim Start.' : '.'), 'info');
+      if (typeof hdAutoVerbunden === 'function') hdAutoVerbunden(car);   // HybridDash 2.1
       playStartFx();
     } finally {
       garVerbindetGerade.delete(String(dev.id));
@@ -6190,6 +6202,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // Prozent stehenzubleiben.
   let padKreuzSeit = null;
   function flagTasteTick(flagNow) {
+    // HybridDash 2.1: while the safety-car prompt is open, this button is the Confirmation
+    // Button only (98i-hybriddash.js) - no pit stop, no yellow flag.
+    if (typeof hdScFrageOffen === 'function' && hdScFrageOffen()) { prevYellowFlag = flagNow; return; }
     // ALLERERSTE STUFE: ist das Autos-in-Position-Fenster offen (70-race.js), startet dieselbe
     // Taste das Rennen (X statt Touch). Alles dahinter bleibt unberuehrt.
     if (typeof raceGridOffen === 'function' && raceGridOffen()) {
@@ -7122,6 +7137,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // dem Anteil 0,85 (0,342) lag es unter seinem Mindesttempo 0,37 und fuhr ueberall 0,37 - auf der Geraden
     // langsamer als das Feld (0,4025), in der Haarnadel schneller (0,35). SC_TEMPO_ANTEIL ist damit 1.
     if (car && car.role === 'safetycar') return gelbGrenze() * SC_TEMPO_ANTEIL;
+    // HybridDash race control: a local yellow runs at a caution pace above the SC pace.
+    const hdRlZiel = typeof hdRlGelbZiel === 'function' ? hdRlGelbZiel(car) : null;
+    if (hdRlZiel !== null) return hdRlZiel;
     if (car && scAufschliessenAn() && safetyCarFaehrt() && !nahAmSafetyCar(car)) {
       return Math.max(SC_AUFSCHLUSS, gelbGrenze());
     }
@@ -7231,7 +7249,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // v1.0.9 BESTELLT: "~35 % Geschwindigkeit bei allen ohne Messung der Naehe zum
       // Safetycar und keine Ueberholmanoever" - mit und ohne Safety Car dieselbe Grenze.
       limitYellow = (safetyCar() && scAufschliessenAn()) ? Math.max(SC_AUFSCHLUSS, gelbGrenze()) : gelbGrenze();
-      safetyCarRaus();
+      // HybridDash race control: yellow flag and VSC run WITHOUT the safety car (98n-hd-rennleitung.js).
+      if (!(typeof hdRlOhneSafetyCar === 'function' && hdRlOhneSafetyCar())) safetyCarRaus();
       applySpeedLimit();
       // Angriffe abbrechen: waehrend Gelb wird nicht ueberholt.
       garage.forEach(c => { if (c.ghost) { c.ghost.attackUntil = 0; c.ghost.attackSide = 0; } });
@@ -7289,6 +7308,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
                      : grund === 'aufstellen' ? 'AUFSTELLUNG · AUTOPILOT'
                      : raceFormationLap ? 'EINFÜHRUNGSRUNDE' : '';
       el.textContent = flaggenText ? t(flaggenText) : '';
+      // HybridDash race control: the banner names the actual flag (yellow, VSC, safety car).
+      if (typeof hdRlBanner === 'function') el.textContent = hdRlBanner(el.textContent);
       el.style.display = el.textContent ? '' : 'none';
     }
   }
@@ -10982,6 +11003,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Herausgegeben fuer den Prueflauf: das ZIEL ist, was die Kurvenlogik entscheidet. Das
       // erreichte Tempo haengt zusaetzlich an der Physik, und ein Prueflauf mit kuenstlicher
       // Kacheluhr verfaelscht es - dann prueft man seinen Prueflauf.
+      // HybridDash 2.1: under yellow, never faster than the car ahead when close (98i-hybriddash.js).
+      if (flagState !== 'green' && typeof hdGelbFolge === 'function') target = hdGelbFolge(car, target, now);
       g.lastTarget = target;
       const st2 = ghostSpeedControl(g, target, v, dtG);
       g.lastFF = g.iTerm || 0;

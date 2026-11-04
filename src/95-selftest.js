@@ -1677,6 +1677,9 @@
     //    unbeabsichtigte Doppelbelegung ab Werk waere derselbe Fehler, nur von Anfang an.
     const zaehler = new Map();
     for (const n of Object.keys(vorgabe)) {
+      // HybridDash 2.1: the Confirmation Button only acts while the safety-car prompt is open
+      // (a modal, like the grid confirm on the same button), so it may share A / Cross.
+      if (n === 'confirm') continue;
       const k = schluessel(vorgabe[n]);
       if (!k) continue;
       zaehler.set(k, (zaehler.get(k) || []).concat(n));
@@ -8179,7 +8182,8 @@
     if (a.length) {
       const h = a[0].getAttribute('href');
       if (h.indexOf('https://') !== 0) schlecht.push('Kurzlink nicht https: ' + h);
-      if (h.indexOf('t1p.de') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
+      // HybridDash: the cockpit link points to this fork's own page instead of OmegaSim's short link.
+      if (h.indexOf('mokamit.github.io/hybriddash') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
       if ((a[0].getAttribute('rel') || '').indexOf('noopener') < 0) schlecht.push('rel ohne noopener');
       if (a[0].getAttribute('target') !== '_blank') schlecht.push('kein target=_blank');
       // Das Omega kommt per <use> aus dem Kopfzeilen-Logo. Fehlt der Pfad, bleibt ein
@@ -11492,7 +11496,7 @@
       if (kAktiverTab() !== 'fahren') f.push('Kreis in der Garage fuehrt nach ' + kAktiverTab() + ' statt nach Fahren');
       showTab('garage');
       const r1 = konsoleReiterEbene1() || [];
-      if (!r1.some((x) => x.an && x.text === t('Fahren'))) f.push('in der Garage ist oben nicht FAHREN hervorgehoben');
+      if (!r1.some((x) => x.an && x.text === t(K_NAME.fahren))) f.push('in der Garage ist oben nicht FAHREN hervorgehoben');
       if (konsoleReiterInnen()) f.push('die Garage hat eine zweite Leiste');
       showTab('options');
       showSubpage('opt-feel');
@@ -14497,7 +14501,7 @@
       if (!menuNavRows().some((r) => r.el === kn)) f.push('Steuerkreuz erreicht den Knopf nicht');
       if (kn) kn.click();
       if (kAktiverTab() !== 'mp') f.push('Knopf fuehrt nach ' + kAktiverTab());
-      if (!(konsoleReiterEbene1() || []).some((x) => x.an && x.text === t('Fahren'))) f.push('im Mehrspieler ist oben nicht FAHREN hervorgehoben');
+      if (!(konsoleReiterEbene1() || []).some((x) => x.an && x.text === t(K_NAME.fahren))) f.push('im Mehrspieler ist oben nicht FAHREN hervorgehoben');
       konsoleZurueck();
       if (kAktiverTab() !== 'fahren') f.push('Kreis im Mehrspieler fuehrt nach ' + kAktiverTab());
       // Stand: nichts, beigetreten, Host, Info-Screen.

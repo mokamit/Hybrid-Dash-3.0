@@ -4441,9 +4441,9 @@
           || '<svg class="teile-ic" viewBox="0 0 24 24" aria-hidden="true">' + (TILE_ICON[typ] || '') + '</svg>')
           + '<span class="teile-name"></span>'
           + '<span class="teile-steuer">'
-          + '<button class="teile-minus" type="button" aria-label="' + name + ' weniger">&#8722;</button>'
+          + '<button class="teile-minus" type="button" aria-label="' + t('{n} weniger').replace('{n}', name) + '">&#8722;</button>'
           + '<span class="teile-zahl"></span>'
-          + '<button class="teile-plus" type="button" aria-label="' + name + ' mehr">+</button>'
+          + '<button class="teile-plus" type="button" aria-label="' + t('{n} mehr').replace('{n}', name) + '">+</button>'
           + '</span>';
       z.querySelector('.teile-name').textContent = name;
       z.querySelector('.teile-zahl').textContent = wert;
@@ -6108,7 +6108,7 @@
     log('Strecke beim Fahren gelernt: ' + got.length + ' Teile, '
         + got.filter(t => tileIsCurve(t.type)).length + ' davon Kurven. NPCs haben ab '
         + 'jetzt Vorausblick.', 'info');
-    showHudToast('STRECKE GELERNT: ' + got.length + ' TEILE');
+    showHudToast(t('STRECKE GELERNT: {n} TEILE').replace('{n}', got.length));
   }
   // v0.9.64: der Live-Scan-Knopf ist aus der Scan-Unterseite entfernt (nur der automatische
   // Streckenscan bleibt). Der Live-Scan (mitlesen waehrend man selbst faehrt) ist damit aus
@@ -6229,7 +6229,7 @@
         garageScanAbbrechen('Fertig: ' + garageScan.seq.length + ' Teile, Rundkurs '
           + 'geschlossen (' + wie + ').');
         if (typeof scanAnhalten === 'function') scanAnhalten(gescannt);
-        showHudToast('STRECKE GESCANNT: ' + garageScan.seq.length + ' TEILE');
+        showHudToast(t('STRECKE GESCANNT: {n} TEILE').replace('{n}', garageScan.seq.length));
         log('Garagenscan fertig: ' + garageScan.seq.length + ' Teile, geschlossen (' + wie
             + ') nach ' + garageScan.versuch + ' Versuch(en).', 'info');
         return;
