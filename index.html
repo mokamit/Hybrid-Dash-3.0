@@ -437,16 +437,14 @@
     box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
   #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
   #grid-start { text-transform: uppercase; letter-spacing: .06em; }
-  /* v2.2: hover stays blue; the SELECTED panel (controller/keyboard focus) is neon green. */
-  body .k-kachel.menu-nav-sel { border-color: #39ff88; box-shadow: 0 0 0 1px #39ff88, 0 0 18px rgba(57,255,136,.45); }
-  body .k-kachel.menu-nav-sel .k-kk { background: #39ff88; color: #04140a; }
-  body .k-kachel.menu-nav-sel .k-quad-punkte i { border-color: #12a64f; }
-  body .k-kachel.menu-nav-sel .k-quad-punkte i.an { background: #12a64f; }
-  body #tab-fahren .k-kachel.menu-nav-sel > .k-kt, body #tab-fahren .k-kachel.menu-nav-sel > .k-kopf {
-    background: linear-gradient(#ffffff, #d4ffe5); border-color: #39ff88;
-    box-shadow: 0 3px 0 #1fbf63, 0 0 12px rgba(57,255,136,.55), 0 5px 10px rgba(0,0,0,.45); }
-  body #tab-fahren .k-kachel.menu-nav-sel > .k-kt::after, body #tab-fahren .k-kachel.menu-nav-sel > .k-kopf::after { color: #12a64f; }
-  body .k-start.menu-nav-sel { box-shadow: 0 0 0 3px #39ff88, 0 0 22px rgba(57,255,136,.45), 0 12px 36px rgba(0,0,0,.6); }
+  /* v2.2b: main menu panels light up on HOVER only; a selected (focused) panel keeps the plain look. */
+  body .k-kachel.menu-nav-sel:not(:hover), body .k-start.menu-nav-sel:not(:hover) { outline: 0; border-color: transparent; transform: none; box-shadow: none; }
+  body .k-kachel.menu-nav-sel:not(:hover) .k-kk { background: var(--k-grau); color: #fff; }
+  body .k-kachel.menu-nav-sel:not(:hover) .k-kb { filter: brightness(.42) saturate(.6) contrast(1.15); }
+  @media (orientation: landscape), (min-width: 761px) {
+    body .k-kachel.menu-nav-sel:not(:hover) > .k-kb { filter: brightness(.74) saturate(.95) contrast(1.05); } }
+  body #tab-fahren .k-kachel.menu-nav-sel:not(:hover) > .k-kt, body #tab-fahren .k-kachel.menu-nav-sel:not(:hover) > .k-kopf {
+    background: linear-gradient(#ffffff, #dfe4ec); border-color: #fff; box-shadow: 0 3px 0 #8a93a3, 0 5px 10px rgba(0,0,0,.45); transform: none; }
   .hd-top-knopf { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 28px;
     padding: 0 6px; border-radius: 5px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.04);
     color: var(--k-dim); cursor: pointer; line-height: 0; }
