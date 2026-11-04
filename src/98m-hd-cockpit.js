@@ -434,7 +434,7 @@
         letter-spacing: .1em; text-transform: uppercase; color: #b4bccb; }
       .hd-unterreiter button + button { border-left: 1px solid #2c3442; }
       .hd-unterreiter button:hover { color: #fff; background: rgba(255,255,255,.08); }
-      .hd-unterreiter button.an { color: var(--k-tinte, #0d1015); background: var(--k-weiss, #f2f4f8); }
+      .hd-unterreiter button.an { color: #04140a; background: #39ff88; }
       .hd-unterreiter button:focus-visible { outline: 2px solid #00d6ff; outline-offset: -2px; }
     `;
     document.head.appendChild(css);
