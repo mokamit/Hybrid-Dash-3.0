@@ -67,6 +67,7 @@
 
   function hdRenntAuto(car) {
     if (!car || !car.device) return false;
+    if (typeof hdDnfAuto === 'function' && hdDnfAuto(car)) return false;   // retired by race control
     if (car.role === 'player') return pitState === 'off';
     const z = zusatzPlatzVonRolle(car.role);
     if (z) return !(z.box && z.box.lage && z.box.lage !== 'aus');
@@ -261,6 +262,7 @@
     if (car.ghost && (car.ghost.pit || car.ghost.randHalt)) return target;
     const v = gelbVordermann(car);
     if (!v || v.gap >= hdFolge.voll) return target;
+    if (typeof hdDnfAuto === 'function' && hdDnfAuto(v.car)) return target;   // a retired car is not a leader
     const lt = hdFuehrTempo(v.car, now);
     if (!(lt > 0)) return target;
     const x = Math.max(0, Math.min(1, (v.gap - hdFolge.eng) / (hdFolge.voll - hdFolge.eng)));

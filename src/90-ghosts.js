@@ -1420,6 +1420,8 @@
   }
 
   async function writeToCar(car, steer, throttle, lightBits, modeBytes) {
+    // HybridDash race control: a car marked DNF stays stopped, whoever drives it.
+    if (typeof hdDnfAuto === 'function' && hdDnfAuto(car)) { steer = 0; throttle = 0; modeBytes = undefined; }
     if (rennPauseAktiv()) {
       steer = 0; throttle = 0; lightBits = (lightBits || 0) | LIGHT_BRAKE;
       if (car.rx && !car.testSenke) {
@@ -7135,6 +7137,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // dem Anteil 0,85 (0,342) lag es unter seinem Mindesttempo 0,37 und fuhr ueberall 0,37 - auf der Geraden
     // langsamer als das Feld (0,4025), in der Haarnadel schneller (0,35). SC_TEMPO_ANTEIL ist damit 1.
     if (car && car.role === 'safetycar') return gelbGrenze() * SC_TEMPO_ANTEIL;
+    // HybridDash race control: a local yellow runs at a caution pace above the SC pace.
+    const hdRlZiel = typeof hdRlGelbZiel === 'function' ? hdRlGelbZiel(car) : null;
+    if (hdRlZiel !== null) return hdRlZiel;
     if (car && scAufschliessenAn() && safetyCarFaehrt() && !nahAmSafetyCar(car)) {
       return Math.max(SC_AUFSCHLUSS, gelbGrenze());
     }
@@ -7244,7 +7249,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // v1.0.9 BESTELLT: "~35 % Geschwindigkeit bei allen ohne Messung der Naehe zum
       // Safetycar und keine Ueberholmanoever" - mit und ohne Safety Car dieselbe Grenze.
       limitYellow = (safetyCar() && scAufschliessenAn()) ? Math.max(SC_AUFSCHLUSS, gelbGrenze()) : gelbGrenze();
-      safetyCarRaus();
+      // HybridDash race control: yellow flag and VSC run WITHOUT the safety car (98n-hd-rennleitung.js).
+      if (!(typeof hdRlOhneSafetyCar === 'function' && hdRlOhneSafetyCar())) safetyCarRaus();
       applySpeedLimit();
       // Angriffe abbrechen: waehrend Gelb wird nicht ueberholt.
       garage.forEach(c => { if (c.ghost) { c.ghost.attackUntil = 0; c.ghost.attackSide = 0; } });
@@ -7302,6 +7308,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
                      : grund === 'aufstellen' ? 'AUFSTELLUNG · AUTOPILOT'
                      : raceFormationLap ? 'EINFÜHRUNGSRUNDE' : '';
       el.textContent = flaggenText ? t(flaggenText) : '';
+      // HybridDash race control: the banner names the actual flag (yellow, VSC, safety car).
+      if (typeof hdRlBanner === 'function') el.textContent = hdRlBanner(el.textContent);
       el.style.display = el.textContent ? '' : 'none';
     }
   }

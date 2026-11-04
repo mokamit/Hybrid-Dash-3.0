@@ -4259,6 +4259,9 @@
     "Reifen gewechselt": "Tyres changed",
     "Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt": "Reset, fuel {l} l, damage 0 %, tyres cold",
     "Rennleitung": "Race Control",
+    "Platz · Runden · Stopps · Mischung · beste · Rückstand — Reifen und Stopps nur für das eigene Auto simuliert": "Position · laps · stops · compound · best · gap — tyres and stops simulated for your own car only",
+    "Platz · Runden · Stopps · Mischung · letzte · beste · Rückstand — Reifen und Stopps nur für das eigene Auto simuliert": "Position · laps · stops · compound · last · best · gap — tyres and stops simulated for your own car only",
+    "VIRTUELLES SAFETY CAR": "VIRTUAL SAFETY CAR",
   };
 
   // Spanisches Woerterbuch. Gleiche Schluessel (der deutsche Text) wie I18N_EN, aber nur die

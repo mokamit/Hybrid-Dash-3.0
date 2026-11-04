@@ -837,8 +837,8 @@
     // nicht fallen, weil ein Ghost zuerst ueber die Linie kommt - sonst waere die
     // angefangene Runde des Fahrers abgeschnitten. Mit zwei Fahrern gilt dasselbe zweimal,
     // und ohne diese Zeile waere die abgeschnittene Runde die von Auto 2.
-    const fahrer = (c) => c.role === 'player'
-                          || (zweiSpieler && /^player[2-9]$/.test(c.role));
+    const fahrer = (c) => !(typeof hdDnfAuto === 'function' && hdDnfAuto(c)) && (c.role === 'player'
+                          || (zweiSpieler && /^player[2-9]$/.test(c.role)));
     if (warFinishing && !garage.some(fahrer)) finishRace();
   }
 
@@ -909,7 +909,9 @@
                                    // sectorHistory, alle anderen aus car.race.sek.
                                    sektoren: c.role === 'player'
                                      ? sectorHistory
-                                     : ((c.race && c.race.sek && c.race.sek.hist) || []) }));
+                                     : ((c.race && c.race.sek && c.race.sek.hist) || []),
+                                   // HybridDash race control: did not finish.
+                                   dnf: typeof hdDnfAuto === 'function' && hdDnfAuto(c) }));
     if (!garage.some(c => c === playerCar) && raceLapTimes.length) {
       // Ohne Garage gibt es kein Geraet und damit keine Farbe: dann bleibt das Feld leer,
       // statt eine zu erfinden.
@@ -1235,15 +1237,15 @@
     // Ranking depends on the mode. Endurance and Runden: most laps, then quickest to get
     // there. Qualifying: the single fastest lap, nothing else.
     const scored = cars.map(c => ({ c, st: raceStats(c.laps) }));
-    scored.sort((a, b) => raceMode === 'qualifying'
+    scored.sort((a, b) => ((a.c.dnf ? 1 : 0) - (b.c.dnf ? 1 : 0)) || (raceMode === 'qualifying'
       ? a.st.best - b.st.best
-      : (b.st.n - a.st.n) || (a.st.total - b.st.total));
+      : (b.st.n - a.st.n) || (a.st.total - b.st.total)));
 
     const fastest = Math.min(...scored.map(x => x.st.best));
     $('race-results-body').innerHTML = scored.map((x, i) => {
       const st = x.st, isBest = st.best === fastest;
       return `<tr>
-        <td style="${td}">${i + 1}</td>
+        <td style="${td}">${x.c.dnf ? '<b style="color:#ff6b7f">DNF</b>' : i + 1}</td>
         <td style="${td}">${ergDot(x.c)}${x.c.name}${x.c.role === 'ghost' ? ' <span class="muted">(NPC)</span>' : ''}${rammerLabel(x.c)}</td>
         <td style="${tdr}">${st.n}</td>
         <td style="${tdr}${isBest ? '; color:var(--good); font-weight:700' : ''}">${formatLapTime(st.best)}</td>
@@ -7047,11 +7049,13 @@
     // nennen - sie greifen aber erst, wenn eine Runde abgeschlossen ist. Davor entschied die
     // Garagenreihenfolge.
     const ortVon = (x) => (typeof x.c.ort === 'number' ? x.c.ort : -Infinity);
-    mit.sort((a, b) => (b.n - a.n) || (a.summe - b.summe) || (ortVon(b) - ortVon(a)));
+    // HybridDash: DNF cars at the bottom, in the order they retired (more laps first).
+    mit.sort((a, b) => ((a.c.dnf ? 1 : 0) - (b.c.dnf ? 1 : 0)) || (b.n - a.n) || (a.summe - b.summe) || (ortVon(b) - ortVon(a)));
     const fuehrer = mit.length ? mit[0] : null;
     return mit.map((x, i) => {
       let luecke = '';
-      if (fuehrer && x !== fuehrer) {
+      if (x.c.dnf) luecke = 'DNF';
+      else if (fuehrer && x !== fuehrer) {
         const zurueck = fuehrer.n - x.n;
         if (zurueck > 0) {
           // UEBERRUNDET: eine Sekundenzahl waere hier sinnlos, weil sie eine andere Runde
@@ -7067,7 +7071,7 @@
       } else if (fuehrer && x === fuehrer) {
         luecke = '\u2014';
       }
-      return { pos: i + 1, name: x.c.name, farbe: x.c.farbe, rolle: x.c.role, id: x.c.id,
+      return { pos: i + 1, name: x.c.name, farbe: x.c.farbe, rolle: x.c.role, id: x.c.id, dnf: !!x.c.dnf,
                runden: x.n, summe: x.summe, luecke, letzte: x.letzte, beste: x.beste,
                // Die schnellste Runde des ganzen Feldes wird hervorgehoben, wie auf einer
                // Zeittafel. Verglichen wird SPAETER, wenn alle Zeilen vorliegen.
@@ -7270,7 +7274,7 @@
       const mix = eigen
         ? '<span class="ov-mix" style="background:' + mischungFarbe(tyres) + '"></span>'
         : '<span class="ov-mix ov-mix-leer"></span>';
-      return '<div class="ov-zeile' + (eigen ? ' ov-ich' : '') + '">'
+      return '<div class="ov-zeile' + (eigen ? ' ov-ich' : '') + (z.dnf ? ' ov-dnf' : '') + '">'
         + '<span class="ov-pos">' + z.pos + '</span>'
         + '<span class="ov-farbe" style="background:' + (z.farbe || 'transparent') + '"></span>'
         + '<span class="ov-name" data-i18n-skip>' + z.name + '</span>'
@@ -7281,6 +7285,7 @@
         + '<span class="ov-zeit' + (z.istBeste ? ' ov-feldbeste' : '') + '">'
         + (z.beste === null ? '&ndash;' : formatLapTime(z.beste)) + '</span>'
         + '<span class="ov-luecke">' + z.luecke + '</span>'
+        + (typeof hdDnfZelle === 'function' ? hdDnfZelle(z) : '')
         + '</div>';
     }).join('');
     // BESTELLT: "im Mehrspieler alle Spieler mit ihren Zeiten und Positionen zeigen". Die
@@ -7325,10 +7330,9 @@
     if (tab.innerHTML !== zusammen) tab.innerHTML = zusammen;
     const fuss = $('ov-fuss');
     if (fuss) {
-      fuss.textContent = 'Platz \u00b7 Runden \u00b7 Stopps \u00b7 Mischung'
-        + (raceState === 'finished' ? '' : ' \u00b7 letzte')
-        + ' \u00b7 beste \u00b7 R\u00fcckstand \u2014 Reifen und Stopps nur f\u00fcr das'
-        + ' eigene Auto simuliert';
+      fuss.textContent = t(raceState === 'finished'
+        ? 'Platz · Runden · Stopps · Mischung · beste · Rückstand — Reifen und Stopps nur für das eigene Auto simuliert'
+        : 'Platz · Runden · Stopps · Mischung · letzte · beste · Rückstand — Reifen und Stopps nur für das eigene Auto simuliert');
     }
   }
 
