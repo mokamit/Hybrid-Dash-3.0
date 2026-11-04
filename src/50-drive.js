@@ -925,7 +925,7 @@
     const el = $('vib-trigger-lage');
     if (!el) return;
     const lage = vibrationLage();
-    if (!lage.pads.length) { el.textContent = 'noch kein Controller gemeldet'; return; }
+    if (!lage.pads.length) { el.textContent = t('noch kein Controller gemeldet'); return; }
     el.textContent = lage.pads.map((p) => {
       if (!p.ruettler) return p.name + ': kein R\u00fcttler';
       const kann = p.arten.indexOf('trigger-rumble') >= 0;
@@ -2118,7 +2118,7 @@
       if (!zweiSpieler) {
         fuss.textContent = 'Der 2-Spieler-Modus ist aus \u2013 rechts steht nichts.';
       } else if (!car2) {
-        fuss.textContent = 'In der Garage einem Auto die Rolle "Spieler 2" geben.';
+        fuss.textContent = t('In der Garage einem Auto die Rolle "Spieler 2" geben.');
       } else if (lage === 'angefordert') {
         const kmh = Math.abs(physEngine2.state.speedKmh) * REAL_SCALE;
         const schwelle = PIT_STANDSTILL_KMH * REAL_SCALE;

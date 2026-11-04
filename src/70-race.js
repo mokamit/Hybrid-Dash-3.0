@@ -575,18 +575,18 @@
     if (el) {
       if (!RACE_MODES[raceMode].timed) {
         const up = rennZeitJetzt() - raceStartedAt;
-        el.textContent = formatLapTime(up) + ' gefahren';
+        el.textContent = formatLapTime(up) + (lang === 'de' ? ' gefahren' : ' driven');
       } else if (raceMode === 'laps') {
         const best = Math.max(0, ...raceAllCars().map(c => c.laps.length));
-        el.textContent = `Runde ${best} / ${raceLimit}`;   // best = vollendete Runden
+        el.textContent = (lang === 'de' ? 'Runde ' : 'Lap ') + `${best} / ${raceLimit}`;   // best = vollendete Runden
       } else {
         const left = Math.max(0, raceLimit * 60000 - (rennZeitJetzt() - raceStartedAt));
-        el.textContent = formatLapTime(left) + ' übrig';
+        el.textContent = formatLapTime(left) + (lang === 'de' ? ' übrig' : ' left');
       }
     }
     if (raceLimitReached()) {
       raceState = 'finishing';
-      $('race-status').textContent = 'Zeit/Runden erreicht, laufende Runde zählt noch';
+      $('race-status').textContent = lang === 'de' ? 'Zeit/Runden erreicht, laufende Runde zählt noch' : 'Time/laps reached, the current lap still counts';
       showHudToast('Letzte Runde');
       // v1.1.3 BESTELLT: "einen Ton fuer 'Zeit abgelaufen, jetzt letzte Runde'".
       playLetzteRundeGlocke();
@@ -2315,7 +2315,7 @@
     if (raceClockTimer) clearInterval(raceClockTimer);
     raceClockTimer = setInterval(raceClockTick, 250);
     $('race-status').textContent = raceFormationLap
-      ? 'Einführungsrunde, Limit bis Start/Ziel'
+      ? (lang === 'de' ? 'Einführungsrunde, Limit bis Start/Ziel' : 'Formation lap, limiter to start/finish')
       : t('{m} läuft').replace('{m}', t(RACE_MODES[raceMode].label));
     $('race-stop-btn').disabled = false;
     updateRaceActButtons();
@@ -2467,16 +2467,27 @@
       zusatzAktiv().forEach(z => rennEreignisStrafe(z.nr, strafeMsVon(z.nr) / 1000));
     }
     const missed = Math.max(0, racePitRequired - racePitDone);
-    $('race-status').textContent =
-      `Beendet (${raceLapTimes.length} Runde${raceLapTimes.length === 1 ? '' : 'n'})`
-      + (racePartialMs !== null
-         ? `, letzte Runde unvollendet nach ${formatLapTime(racePartialMs)}` : '')
-      + (missed > 0 ? `, ${missed} Pflichtstopp${missed === 1 ? '' : 's'} verpasst, `
-                      + `+${missed * racePitPenaltyS} s Strafe` : '')
-      + ((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => {
-        const s = strafeMsVon(z.nr) / 1000;
-        return s > 0 ? `, P${z.nr}: +${s} s Strafe` : '';
-      }).join(''));
+    const n = raceLapTimes.length;
+    $('race-status').textContent = lang === 'de'
+      ? `Beendet (${n} Runde${n === 1 ? '' : 'n'})`
+        + (racePartialMs !== null
+           ? `, letzte Runde unvollendet nach ${formatLapTime(racePartialMs)}` : '')
+        + (missed > 0 ? `, ${missed} Pflichtstopp${missed === 1 ? '' : 's'} verpasst, `
+                        + `+${missed * racePitPenaltyS} s Strafe` : '')
+        + ((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => {
+          const s = strafeMsVon(z.nr) / 1000;
+          return s > 0 ? `, P${z.nr}: +${s} s Strafe` : '';
+        }).join(''))
+      // HybridDash: the same in English.
+      : `Finished (${n} lap${n === 1 ? '' : 's'})`
+        + (racePartialMs !== null
+           ? `, last lap unfinished after ${formatLapTime(racePartialMs)}` : '')
+        + (missed > 0 ? `, ${missed} mandatory stop${missed === 1 ? '' : 's'} missed, `
+                        + `+${missed * racePitPenaltyS} s penalty` : '')
+        + ((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => {
+          const s = strafeMsVon(z.nr) / 1000;
+          return s > 0 ? `, P${z.nr}: +${s} s penalty` : '';
+        }).join(''));
     // DER RUNDENZAEHLER, aber nur bei einer echten Zielflagge. Wer von Hand abbricht,
     // bekommt keine Fanfare - dieselbe Ueberlegung, mit der die Ghosts dann auch nicht
     // auslaufen: ein Abbruch ist kein Zieleinlauf.
@@ -2586,7 +2597,8 @@
     const m = RACE_MODES[raceMode];
     $('race-limit-label').textContent = t(m.unit);
     $('race-mode-hint').textContent = t(m.hint);
-    $('race-start-btn').textContent = `\u{1F3C1} ${m.label} starten`;
+    $('race-start-btn').textContent = lang === 'de' ? `\u{1F3C1} ${m.label} starten`
+      : '\u{1F3C1} ' + (raceMode === 'laps' ? t('Rennen starten') : 'Start ' + t(m.label).toLowerCase());
     // Free practice has no limit, so the field would be a lie. Disabled, not hidden:
     // a control that vanishes makes people wonder whether they broke something.
     // DERBY (v0.8.126): das Limit ist das KILLS-ZIEL und wird deshalb aktiviert - sonst
@@ -6787,8 +6799,8 @@
     const fuss = $('pit-fuss');
     if (fuss) {
       const b = (typeof bindings === 'object' && bindings && bindings.yellowflag)
-        ? bindingDescription(bindings.yellowflag) : 'nicht belegt';
-      fuss.textContent = 'Steuerkreuz hoch/runter waehlt \u00b7 ' + b + ' schaltet';
+        ? bindingDescription(bindings.yellowflag) : t('nicht belegt');
+      fuss.textContent = lang === 'de' ? 'Steuerkreuz hoch/runter waehlt \u00b7 ' + b + ' schaltet' : 'D-pad up/down selects \u00b7 ' + b + ' switches';
     }
   }
 
@@ -7025,9 +7037,10 @@
     const fuss = $('rs-fuss');
     if (fuss) {
       const b = (typeof bindings === 'object' && bindings && bindings.yellowflag)
-        ? bindingDescription(bindings.yellowflag) : 'nicht belegt';
-      fuss.textContent = 'Steuerkreuz hoch/runter waehlt · ' + b + ' schaltet'
-        + (raceScreenLimitArmed ? ' · links/rechts einstellen' : '');
+        ? bindingDescription(bindings.yellowflag) : t('nicht belegt');
+      fuss.textContent = lang === 'de'
+        ? 'Steuerkreuz hoch/runter waehlt · ' + b + ' schaltet' + (raceScreenLimitArmed ? ' · links/rechts einstellen' : '')
+        : 'D-pad up/down selects · ' + b + ' switches' + (raceScreenLimitArmed ? ' · left/right adjusts' : '');
     }
   }
 

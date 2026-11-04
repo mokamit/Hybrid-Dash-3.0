@@ -427,6 +427,11 @@
     // The screen's name when you flip to it (toast) follows its new job.
     try { const e = COCKPIT_SCREENS.find((x) => x.id === 'uebersicht'); if (e) e.name = 'Race Director'; } catch (e) { /* not ready */ }
     setInterval(hdRlTick, 250);
+    // The race status starts as the markup's German "Bereit" (the element is skipped by the
+    // translator because code rewrites it): show it in the current language.
+    const bereit = () => { const e = $('race-status'); if (e && /^(Bereit|Ready|Listo)$/.test(e.textContent.trim())) e.textContent = t('Bereit'); };
+    bereit();
+    try { i18nOnLangChange(bereit); } catch (e) { /* not ready */ }
   })();
 
   // ---- SELF-TEST (window.HYBRIDDASH_RL.selbsttest()) - stand-in cars, state put back --------

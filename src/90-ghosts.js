@@ -879,7 +879,7 @@
   window.addEventListener('gamepadconnected', (e) => {
     padConnected = true;
     $('pad-dot').classList.add('on');
-    $('pad-status-text').textContent = `Verbunden: ${e.gamepad.id}`
+    $('pad-status-text').textContent = (lang === 'de' ? 'Verbunden: ' : 'Connected: ') + e.gamepad.id
       + (e.gamepad.mapping === 'standard' ? '' : ' · ' + t('ohne Standardbelegung'));
     log(`Gamepad verbunden: ${e.gamepad.id}`, 'info');
     startPadLoop();
@@ -903,7 +903,7 @@
     padConnected = Array.from(pads).some(p => p);
     if (!padConnected) {
       $('pad-dot').classList.remove('on');
-      $('pad-status-text').textContent = 'kein Controller erkannt';
+      $('pad-status-text').textContent = t('kein Controller erkannt');
     }
   });
 
@@ -1368,7 +1368,7 @@
   function latStop(why) {
     if (lat.timer) { clearInterval(lat.timer); lat.timer = null; }
     lat.on = false;
-    $('lat-start').textContent = 'Messung starten';
+    $('lat-start').textContent = t('Messung starten');
     $('lat-start').classList.remove('warn');
     if (lat.car) writeToCar(lat.car, 0, 0, trackModeBit() | LIGHT_HEAD);
     latRender();
@@ -2420,7 +2420,7 @@
     if (!el) return;
     const lage = await bluetoothLageGenau();
     if (lage === 'ok') { el.hidden = true; el.textContent = ''; return; }
-    el.textContent = bluetoothLageText(lage);
+    el.textContent = t(bluetoothLageText(lage));
     el.hidden = false;
   }
   garageLageZeigen();

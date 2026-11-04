@@ -423,6 +423,19 @@
   header#k-kopf .k-leiste2::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
     background: linear-gradient(90deg, transparent, #ff2a4f 8%, #ff2a4f 92%, transparent);
     box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  /* v2.2: the white value bars on the main menu tiles read as BUTTONS: raised, rounded,
+     with a chevron, and they press in. */
+  #tab-fahren .k-kachel > .k-kt, #tab-fahren .k-kachel > .k-kopf { position: relative; margin: 7px 8px 2px; border-radius: 6px;
+    padding-left: 26px; padding-right: 26px; background: linear-gradient(#ffffff, #dfe4ec); border: 1px solid #fff;
+    box-shadow: 0 3px 0 #8a93a3, 0 5px 10px rgba(0,0,0,.45); transition: transform .08s, box-shadow .08s, background .12s; }
+  #tab-fahren .k-kachel > .k-kopf .k-kt { padding-left: 0; padding-right: 0; }
+  #tab-fahren .k-kachel > .k-kt::after, #tab-fahren .k-kachel > .k-kopf::after { content: '›'; position: absolute; right: 9px; top: 50%;
+    transform: translateY(-52%); font: 900 1.35em/1 var(--k-font, sans-serif); color: var(--k-blau, #00a6e8); }
+  #tab-fahren .k-kachel:hover > .k-kt, #tab-fahren .k-kachel:hover > .k-kopf,
+  #tab-fahren .k-kachel.menu-nav-sel > .k-kt, #tab-fahren .k-kachel.menu-nav-sel > .k-kopf {
+    background: linear-gradient(#ffffff, #cfeaff); border-color: var(--k-blau, #00a6e8);
+    box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
+  #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
   .hd-top-knopf { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 28px;
     padding: 0 6px; border-radius: 5px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.04);
     color: var(--k-dim); cursor: pointer; line-height: 0; }
@@ -5408,7 +5421,7 @@
     <input type="file" id="fa-foto-datei" accept="image/*" hidden>
     <div class="k-gitter k-fahren">
       <div class="k-kachel " id="fa-auto" role="button" tabindex="0">
-        <span class="k-kk">Autos</span>
+        <span class="k-kk">Fahrzeugübersicht</span>
         <span class="k-kt" id="fa-auto-titel"></span>
         <span class="k-kb" id="fa-auto-bild" style="background-image:url(img/garage.jpg)"></span>
         <span class="k-ki" id="fa-auto-info"></span>

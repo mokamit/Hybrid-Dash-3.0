@@ -423,6 +423,19 @@
   header#k-kopf .k-leiste2::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
     background: linear-gradient(90deg, transparent, #ff2a4f 8%, #ff2a4f 92%, transparent);
     box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  /* v2.2: the white value bars on the main menu tiles read as BUTTONS: raised, rounded,
+     with a chevron, and they press in. */
+  #tab-fahren .k-kachel > .k-kt, #tab-fahren .k-kachel > .k-kopf { position: relative; margin: 7px 8px 2px; border-radius: 6px;
+    padding-left: 26px; padding-right: 26px; background: linear-gradient(#ffffff, #dfe4ec); border: 1px solid #fff;
+    box-shadow: 0 3px 0 #8a93a3, 0 5px 10px rgba(0,0,0,.45); transition: transform .08s, box-shadow .08s, background .12s; }
+  #tab-fahren .k-kachel > .k-kopf .k-kt { padding-left: 0; padding-right: 0; }
+  #tab-fahren .k-kachel > .k-kt::after, #tab-fahren .k-kachel > .k-kopf::after { content: '›'; position: absolute; right: 9px; top: 50%;
+    transform: translateY(-52%); font: 900 1.35em/1 var(--k-font, sans-serif); color: var(--k-blau, #00a6e8); }
+  #tab-fahren .k-kachel:hover > .k-kt, #tab-fahren .k-kachel:hover > .k-kopf,
+  #tab-fahren .k-kachel.menu-nav-sel > .k-kt, #tab-fahren .k-kachel.menu-nav-sel > .k-kopf {
+    background: linear-gradient(#ffffff, #cfeaff); border-color: var(--k-blau, #00a6e8);
+    box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
+  #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
   .hd-top-knopf { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 28px;
     padding: 0 6px; border-radius: 5px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.04);
     color: var(--k-dim); cursor: pointer; line-height: 0; }
@@ -5408,7 +5421,7 @@
     <input type="file" id="fa-foto-datei" accept="image/*" hidden>
     <div class="k-gitter k-fahren">
       <div class="k-kachel " id="fa-auto" role="button" tabindex="0">
-        <span class="k-kk">Autos</span>
+        <span class="k-kk">Fahrzeugübersicht</span>
         <span class="k-kt" id="fa-auto-titel"></span>
         <span class="k-kb" id="fa-auto-bild" style="background-image:url(img/garage.jpg)"></span>
         <span class="k-ki" id="fa-auto-info"></span>
@@ -16650,6 +16663,7 @@
     "Der Bluetooth-Adapter ist aus oder nicht verfuegbar. Auf Android ausserdem pruefen, ob Chrome die Berechtigung \"Geraete in der Naehe\" hat.": "The Bluetooth adapter is off or unavailable. On Android also check that Chrome has the \"Nearby devices\" permission.",
     "← Optionen": "← Options",
     "Autos verbinden": "Connect cars",
+    "Fahrzeugübersicht": "Car summary",
     "Über PC mit Python": "Via PC with Python",
     "Der PC trägt die Rangliste, die Telefone treten im WLAN bei.": "The PC holds the leaderboard, the phones join over Wi-Fi.",
     "Über Android-App": "Via Android app",
@@ -19721,6 +19735,7 @@
     "Der Bluetooth-Adapter ist aus oder nicht verfuegbar. Auf Android ausserdem pruefen, ob Chrome die Berechtigung \"Geraete in der Naehe\" hat.": "El adaptador Bluetooth está apagado o no disponible. En Android, comprueba también que Chrome tenga el permiso «Dispositivos cercanos».",
     "← Optionen": "← Opciones",
     "Autos verbinden": "Conectar coches",
+    "Fahrzeugübersicht": "Resumen de coches",
     "Über PC mit Python": "Vía PC con Python",
     "Der PC trägt die Rangliste, die Telefone treten im WLAN bei.": "El PC lleva la clasificación, los teléfonos se unen por WiFi.",
     "Über Android-App": "Vía app de Android",
@@ -26256,7 +26271,7 @@
     const el = $('vib-trigger-lage');
     if (!el) return;
     const lage = vibrationLage();
-    if (!lage.pads.length) { el.textContent = 'noch kein Controller gemeldet'; return; }
+    if (!lage.pads.length) { el.textContent = t('noch kein Controller gemeldet'); return; }
     el.textContent = lage.pads.map((p) => {
       if (!p.ruettler) return p.name + ': kein R\u00fcttler';
       const kann = p.arten.indexOf('trigger-rumble') >= 0;
@@ -27449,7 +27464,7 @@
       if (!zweiSpieler) {
         fuss.textContent = 'Der 2-Spieler-Modus ist aus \u2013 rechts steht nichts.';
       } else if (!car2) {
-        fuss.textContent = 'In der Garage einem Auto die Rolle "Spieler 2" geben.';
+        fuss.textContent = t('In der Garage einem Auto die Rolle "Spieler 2" geben.');
       } else if (lage === 'angefordert') {
         const kmh = Math.abs(physEngine2.state.speedKmh) * REAL_SCALE;
         const schwelle = PIT_STANDSTILL_KMH * REAL_SCALE;
@@ -43146,18 +43161,18 @@
     if (el) {
       if (!RACE_MODES[raceMode].timed) {
         const up = rennZeitJetzt() - raceStartedAt;
-        el.textContent = formatLapTime(up) + ' gefahren';
+        el.textContent = formatLapTime(up) + (lang === 'de' ? ' gefahren' : ' driven');
       } else if (raceMode === 'laps') {
         const best = Math.max(0, ...raceAllCars().map(c => c.laps.length));
-        el.textContent = `Runde ${best} / ${raceLimit}`;   // best = vollendete Runden
+        el.textContent = (lang === 'de' ? 'Runde ' : 'Lap ') + `${best} / ${raceLimit}`;   // best = vollendete Runden
       } else {
         const left = Math.max(0, raceLimit * 60000 - (rennZeitJetzt() - raceStartedAt));
-        el.textContent = formatLapTime(left) + ' übrig';
+        el.textContent = formatLapTime(left) + (lang === 'de' ? ' übrig' : ' left');
       }
     }
     if (raceLimitReached()) {
       raceState = 'finishing';
-      $('race-status').textContent = 'Zeit/Runden erreicht, laufende Runde zählt noch';
+      $('race-status').textContent = lang === 'de' ? 'Zeit/Runden erreicht, laufende Runde zählt noch' : 'Time/laps reached, the current lap still counts';
       showHudToast('Letzte Runde');
       // v1.1.3 BESTELLT: "einen Ton fuer 'Zeit abgelaufen, jetzt letzte Runde'".
       playLetzteRundeGlocke();
@@ -44886,7 +44901,7 @@
     if (raceClockTimer) clearInterval(raceClockTimer);
     raceClockTimer = setInterval(raceClockTick, 250);
     $('race-status').textContent = raceFormationLap
-      ? 'Einführungsrunde, Limit bis Start/Ziel'
+      ? (lang === 'de' ? 'Einführungsrunde, Limit bis Start/Ziel' : 'Formation lap, limiter to start/finish')
       : t('{m} läuft').replace('{m}', t(RACE_MODES[raceMode].label));
     $('race-stop-btn').disabled = false;
     updateRaceActButtons();
@@ -45038,16 +45053,27 @@
       zusatzAktiv().forEach(z => rennEreignisStrafe(z.nr, strafeMsVon(z.nr) / 1000));
     }
     const missed = Math.max(0, racePitRequired - racePitDone);
-    $('race-status').textContent =
-      `Beendet (${raceLapTimes.length} Runde${raceLapTimes.length === 1 ? '' : 'n'})`
-      + (racePartialMs !== null
-         ? `, letzte Runde unvollendet nach ${formatLapTime(racePartialMs)}` : '')
-      + (missed > 0 ? `, ${missed} Pflichtstopp${missed === 1 ? '' : 's'} verpasst, `
-                      + `+${missed * racePitPenaltyS} s Strafe` : '')
-      + ((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => {
-        const s = strafeMsVon(z.nr) / 1000;
-        return s > 0 ? `, P${z.nr}: +${s} s Strafe` : '';
-      }).join(''));
+    const n = raceLapTimes.length;
+    $('race-status').textContent = lang === 'de'
+      ? `Beendet (${n} Runde${n === 1 ? '' : 'n'})`
+        + (racePartialMs !== null
+           ? `, letzte Runde unvollendet nach ${formatLapTime(racePartialMs)}` : '')
+        + (missed > 0 ? `, ${missed} Pflichtstopp${missed === 1 ? '' : 's'} verpasst, `
+                        + `+${missed * racePitPenaltyS} s Strafe` : '')
+        + ((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => {
+          const s = strafeMsVon(z.nr) / 1000;
+          return s > 0 ? `, P${z.nr}: +${s} s Strafe` : '';
+        }).join(''))
+      // HybridDash: the same in English.
+      : `Finished (${n} lap${n === 1 ? '' : 's'})`
+        + (racePartialMs !== null
+           ? `, last lap unfinished after ${formatLapTime(racePartialMs)}` : '')
+        + (missed > 0 ? `, ${missed} mandatory stop${missed === 1 ? '' : 's'} missed, `
+                        + `+${missed * racePitPenaltyS} s penalty` : '')
+        + ((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => {
+          const s = strafeMsVon(z.nr) / 1000;
+          return s > 0 ? `, P${z.nr}: +${s} s penalty` : '';
+        }).join(''));
     // DER RUNDENZAEHLER, aber nur bei einer echten Zielflagge. Wer von Hand abbricht,
     // bekommt keine Fanfare - dieselbe Ueberlegung, mit der die Ghosts dann auch nicht
     // auslaufen: ein Abbruch ist kein Zieleinlauf.
@@ -45157,7 +45183,8 @@
     const m = RACE_MODES[raceMode];
     $('race-limit-label').textContent = t(m.unit);
     $('race-mode-hint').textContent = t(m.hint);
-    $('race-start-btn').textContent = `\u{1F3C1} ${m.label} starten`;
+    $('race-start-btn').textContent = lang === 'de' ? `\u{1F3C1} ${m.label} starten`
+      : '\u{1F3C1} ' + (raceMode === 'laps' ? t('Rennen starten') : 'Start ' + t(m.label).toLowerCase());
     // Free practice has no limit, so the field would be a lie. Disabled, not hidden:
     // a control that vanishes makes people wonder whether they broke something.
     // DERBY (v0.8.126): das Limit ist das KILLS-ZIEL und wird deshalb aktiviert - sonst
@@ -49358,8 +49385,8 @@
     const fuss = $('pit-fuss');
     if (fuss) {
       const b = (typeof bindings === 'object' && bindings && bindings.yellowflag)
-        ? bindingDescription(bindings.yellowflag) : 'nicht belegt';
-      fuss.textContent = 'Steuerkreuz hoch/runter waehlt \u00b7 ' + b + ' schaltet';
+        ? bindingDescription(bindings.yellowflag) : t('nicht belegt');
+      fuss.textContent = lang === 'de' ? 'Steuerkreuz hoch/runter waehlt \u00b7 ' + b + ' schaltet' : 'D-pad up/down selects \u00b7 ' + b + ' switches';
     }
   }
 
@@ -49596,9 +49623,10 @@
     const fuss = $('rs-fuss');
     if (fuss) {
       const b = (typeof bindings === 'object' && bindings && bindings.yellowflag)
-        ? bindingDescription(bindings.yellowflag) : 'nicht belegt';
-      fuss.textContent = 'Steuerkreuz hoch/runter waehlt · ' + b + ' schaltet'
-        + (raceScreenLimitArmed ? ' · links/rechts einstellen' : '');
+        ? bindingDescription(bindings.yellowflag) : t('nicht belegt');
+      fuss.textContent = lang === 'de'
+        ? 'Steuerkreuz hoch/runter waehlt · ' + b + ' schaltet' + (raceScreenLimitArmed ? ' · links/rechts einstellen' : '')
+        : 'D-pad up/down selects · ' + b + ' switches' + (raceScreenLimitArmed ? ' · left/right adjusts' : '');
     }
   }
 
@@ -60499,7 +60527,7 @@
   window.addEventListener('gamepadconnected', (e) => {
     padConnected = true;
     $('pad-dot').classList.add('on');
-    $('pad-status-text').textContent = `Verbunden: ${e.gamepad.id}`
+    $('pad-status-text').textContent = (lang === 'de' ? 'Verbunden: ' : 'Connected: ') + e.gamepad.id
       + (e.gamepad.mapping === 'standard' ? '' : ' · ' + t('ohne Standardbelegung'));
     log(`Gamepad verbunden: ${e.gamepad.id}`, 'info');
     startPadLoop();
@@ -60523,7 +60551,7 @@
     padConnected = Array.from(pads).some(p => p);
     if (!padConnected) {
       $('pad-dot').classList.remove('on');
-      $('pad-status-text').textContent = 'kein Controller erkannt';
+      $('pad-status-text').textContent = t('kein Controller erkannt');
     }
   });
 
@@ -60988,7 +61016,7 @@
   function latStop(why) {
     if (lat.timer) { clearInterval(lat.timer); lat.timer = null; }
     lat.on = false;
-    $('lat-start').textContent = 'Messung starten';
+    $('lat-start').textContent = t('Messung starten');
     $('lat-start').classList.remove('warn');
     if (lat.car) writeToCar(lat.car, 0, 0, trackModeBit() | LIGHT_HEAD);
     latRender();
@@ -62040,7 +62068,7 @@
     if (!el) return;
     const lage = await bluetoothLageGenau();
     if (lage === 'ok') { el.hidden = true; el.textContent = ''; return; }
-    el.textContent = bluetoothLageText(lage);
+    el.textContent = t(bluetoothLageText(lage));
     el.hidden = false;
   }
   garageLageZeigen();
@@ -117910,6 +117938,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // The screen's name when you flip to it (toast) follows its new job.
     try { const e = COCKPIT_SCREENS.find((x) => x.id === 'uebersicht'); if (e) e.name = 'Race Director'; } catch (e) { /* not ready */ }
     setInterval(hdRlTick, 250);
+    // The race status starts as the markup's German "Bereit" (the element is skipped by the
+    // translator because code rewrites it): show it in the current language.
+    const bereit = () => { const e = $('race-status'); if (e && /^(Bereit|Ready|Listo)$/.test(e.textContent.trim())) e.textContent = t('Bereit'); };
+    bereit();
+    try { i18nOnLangChange(bereit); } catch (e) { /* not ready */ }
   })();
 
   // ---- SELF-TEST (window.HYBRIDDASH_RL.selbsttest()) - stand-in cars, state put back --------
