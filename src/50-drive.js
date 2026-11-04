@@ -354,6 +354,8 @@
       }
     } catch (e) { /* privater Modus */ }
     try {
+      // HybridDash 2.1b: the tile dashboard was briefly a look; it is now a cockpit screen.
+      if (localStorage.getItem(COCKPIT_STORE) === 'hybriddash') localStorage.setItem(COCKPIT_STORE, 'acc');
       const gespeichert = localStorage.getItem(COCKPIT_STORE);
       if (gespeichert) $('setting-cockpit').value = gespeichert;
     } catch (e) { /* privater Modus */ }

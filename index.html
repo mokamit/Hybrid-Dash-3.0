@@ -5795,9 +5795,9 @@
       </div>
       <div class="gt3-marke">
         <svg viewBox="0 0 512 512" aria-hidden="true"><use href="#om" fill="#e6ecf7"/></svg>
-        <a href="https://t1p.de/omegasim" target="_blank" rel="noopener noreferrer"
-           data-i18n-skip>t1p.de/omegasim</a>
-        <span data-i18n-skip>OmegaSim</span>
+        <a href="https://mokamit.github.io/hybriddash/" target="_blank" rel="noopener noreferrer"
+           data-i18n-skip>mokamit.github.io/hybriddash</a>
+        <span data-i18n-skip>HybridDash</span>
       </div>
       <!-- ZWEI ZUSAETZLICHE SCHIRME, im Markup und NICHT zur Malzeit erzeugt: der
            Selbsttest "Cockpit-Ansicht: sichtbar verschieden, funktional gleich" verlangt,
@@ -10490,7 +10490,6 @@
           wie es aussieht, nicht was eine Farbe sagt. Die Voreinstellungen fassen die Ansicht
           nicht an.</small></div>
         <select id="setting-cockpit" data-preset-skip>
-          <option value="hybriddash">HybridDash (Kacheln)</option>
           <option value="acc" selected>ACC (Vorgabe)</option>
           <option value="omega">Omega</option>
           <option value="gt3">GT3: schwarze Kacheln (WIP)</option>
@@ -18672,7 +18671,6 @@
     "Reifen gewechselt": "Tyres changed",
     "Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt": "Reset, fuel {l} l, damage 0 %, tyres cold",
     "Rennleitung": "Race Control",
-    "HybridDash (Kacheln)": "HybridDash (tiles)",
   };
 
   // Spanisches Woerterbuch. Gleiche Schluessel (der deutsche Text) wie I18N_EN, aber nur die
@@ -20113,7 +20111,6 @@
     "Zuletzt": "Último",
     "Zufälliger Name": "Nombre aleatorio",
     "Rennleitung": "Dirección de carrera",
-    "HybridDash (Kacheln)": "HybridDash (mosaicos)",
   };
 
   // ============================================================================
@@ -25683,6 +25680,8 @@
       }
     } catch (e) { /* privater Modus */ }
     try {
+      // HybridDash 2.1b: the tile dashboard was briefly a look; it is now a cockpit screen.
+      if (localStorage.getItem(COCKPIT_STORE) === 'hybriddash') localStorage.setItem(COCKPIT_STORE, 'acc');
       const gespeichert = localStorage.getItem(COCKPIT_STORE);
       if (gespeichert) $('setting-cockpit').value = gespeichert;
     } catch (e) { /* privater Modus */ }
@@ -86045,9 +86044,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
         return Math.abs(A[0] - B[0]) + Math.abs(A[1] - B[1]) + Math.abs(A[2] - B[2]);
       };
 
-      // HybridDash 2.1: 'hybriddash' is its own LAYOUT (98m-hd-cockpit.js), not a colour theme over
-      // the shared one - the theme comparison below does not apply to it.
-      const werte = Array.prototype.map.call(sel.options, o => o.value).filter(v => v !== 'hybriddash');
+      const werte = Array.prototype.map.call(sel.options, o => o.value);
       if (werte.length < 3) schlecht.push('nur ' + werte.length + ' Ansichten');
       const proben = werte.map(messe);
 
@@ -91968,7 +91965,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (a.length) {
       const h = a[0].getAttribute('href');
       if (h.indexOf('https://') !== 0) schlecht.push('Kurzlink nicht https: ' + h);
-      if (h.indexOf('t1p.de') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
+      // HybridDash: the cockpit link points to this fork's own page instead of OmegaSim's short link.
+      if (h.indexOf('mokamit.github.io/hybriddash') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
       if ((a[0].getAttribute('rel') || '').indexOf('noopener') < 0) schlecht.push('rel ohne noopener');
       if (a[0].getAttribute('target') !== '_blank') schlecht.push('kein target=_blank');
       // Das Omega kommt per <use> aus dem Kopfzeilen-Logo. Fehlt der Pfad, bleibt ein
@@ -117072,8 +117070,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   //
   // REQUESTED (with a screenshot): a tile dashboard - status and setting chips on the left,
   // speed / gear / tyres in the middle, lap times on the right, a throttle/brake bar at the far
-  // right. It is a cockpit LOOK like ACC, GT3 or Oldschool (Options > General > Cockpit look),
-  // but unlike those it is its own layout, not a colour theme over the shared one.
+  // right. v2.1b: the FOURTH COCKPIT SCREEN (after Cockpit, Pit and Race; screen dots / D-pad),
+  // scaled as a whole to the window. (First built as a cockpit look; moved, as requested.)
   //
   // ONE SOURCE OF TRUTH: every number is read from the standard cockpit's own elements
   // (#race-speed, #race-gear, #race-lap-now, ...), which the app keeps updating while they are
@@ -117104,13 +117102,18 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (hdCp.el) return hdCp.el;
     const dash = $('race-dash');
     if (!dash) return null;
+    // Outer element: a cockpit screen overlay like the pit and race screens (.gt3-schirm covers
+    // the dashboard area). Inner element: the dashboard at its DESIGN SIZE, scaled as a whole
+    // to fit (hdCockpitEinpassen) - REPORTED: "not scaling or fitting the window correctly".
     const el = document.createElement('div');
     el.id = 'hd-cockpit';
-    el.className = 'hd-cp';
+    el.className = 'gt3-schirm hd-cp-schirm';
     el.setAttribute('data-i18n-skip', '');
+    const innen = document.createElement('div');
+    innen.className = 'hd-cp';
     const chip = (k, farbe, id) => `<div class="hd-cp-chip" style="--c:${farbe}"><span>${k}</span><b id="hd-cp-${id}">—</b></div>`;
     const zeile = (k, id) => `<div class="hd-cp-zeile"><span class="hd-cp-taste">${k}</span><b id="hd-cp-${id}">—</b></div>`;
-    el.innerHTML = `
+    innen.innerHTML = `
       <div class="hd-cp-links">
         <div class="hd-cp-kopf"><b id="hd-cp-status">No session</b>
           <svg id="hd-cp-licht" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M13 5 C7 5 6 9 6 12 C6 15 7 19 13 19 Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8 H21 M16 12 H21 M16 16 H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
@@ -117141,17 +117144,38 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
           ${Array.from({ length: HD_CP_SEG }, (_, i) => `<i class="hd-b" data-i="${i}"></i>`).join('')}
         </div><span>BRK</span></div>
       </div>`;
-    dash.insertBefore(el, dash.firstChild);
+    el.appendChild(innen);
+    dash.appendChild(el);
     hdCp.el = el;
+    if (window.ResizeObserver) new ResizeObserver(hdCockpitEinpassen).observe(el);
     return el;
+  }
+
+  // Scale the dashboard (design size HD_CP_B x HD_CP_H) to the space the screen has, keeping
+  // its proportions, centred. transform and not zoom: the screen is an overlay with a fixed
+  // box, nothing below it has to move.
+  const HD_CP_B = 1040, HD_CP_H = 560, HD_CP_B_MAX = 1700;
+  function hdCockpitEinpassen() {
+    const el = hdCp.el; if (!el) return;
+    const innen = el.firstElementChild;
+    const w = el.clientWidth, h = el.clientHeight;
+    if (!w || !h) return;
+    // Wide windows: the layout first stretches sideways to the window's shape (up to
+    // HD_CP_B_MAX), so it fills the width instead of sitting small in the middle.
+    const breite = Math.max(HD_CP_B, Math.min(HD_CP_B_MAX, HD_CP_H * w / h));
+    innen.style.width = breite + 'px';
+    const f = Math.min(w / breite, h / HD_CP_H);
+    innen.style.transform = 'translate(' + Math.max(0, (w - breite * f) / 2) + 'px,' + Math.max(0, (h - HD_CP_H * f) / 2) + 'px) scale(' + f + ')';
   }
 
   function hdSetz(id, v) { const el = $('hd-cp-' + id); if (el && el.textContent !== v) el.textContent = v; }
 
   function hdCockpitMalen() {
-    if (document.body.getAttribute('data-cockpit') !== 'hybriddash') return;
+    const dash = $('race-dash');
+    if (!dash || dash.dataset.screen !== 'hybriddash') return;
     const el = hdCockpitBauen();
     if (!el || !el.offsetParent) return;
+    hdCockpitEinpassen();
     // Status
     let status = 'No session', farbe = '#ff4d4d';
     try {
@@ -117225,81 +117249,72 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   (function hdCockpitStart() {
     const css = document.createElement('style');
     css.textContent = `
-      body[data-cockpit="hybriddash"] #race-dash > :not(.race-corner):not(#hd-cockpit):not(#gt3-flag):not(#gt3-offtrack):not(#gt3-pit):not(#race-flag):not(.race-pit) { display: none !important; }
-      #hd-cockpit { display: none; }
-      body[data-cockpit="hybriddash"] #race-dash { position: relative; }
-      body[data-cockpit="hybriddash"] #hd-cockpit { display: grid; position: absolute; inset: clamp(34px, 6vh, 52px) 0 0 0; overflow: auto; z-index: 1; }
-      body[data-cockpit="hybriddash"] #race-dash > .race-corner { z-index: 3; }
-      .hd-cp { --t: #3a3f49; grid-template-columns: 1.45fr 1fr 1.1fr .55fr; gap: clamp(6px, 1.2vw, 14px); padding: clamp(8px, 1.6vw, 18px);
-        background: #000; color: #f4f6fb; font-family: Inter, system-ui, sans-serif; width: 100%; box-sizing: border-box;
-        align-content: start; }
+      #race-dash[data-screen="hybriddash"] #hd-cockpit { display: block; }
+      .hd-cp-schirm { background: #000 !important; padding: 0 !important; overflow: hidden; z-index: 6 !important; }
+      .hd-cp { position: absolute; left: 0; top: 0; width: ${HD_CP_B}px; height: ${HD_CP_H}px; transform-origin: 0 0;
+        display: grid; grid-template-columns: minmax(395px, 1.55fr) minmax(230px, 1fr) minmax(250px, 1.1fr) minmax(105px, .42fr); gap: 14px; padding: 16px; box-sizing: border-box;
+        background: #000; color: #f4f6fb; font-family: Inter, system-ui, sans-serif; align-content: start; }
       .hd-cp b { font-weight: 800; font-variant-numeric: tabular-nums; }
       .hd-cp-box { border: 2px solid #2a2e35; border-radius: 8px; background: #08090b; }
-      .hd-cp-links { display: grid; gap: clamp(6px, 1vw, 12px); align-content: start; }
-      .hd-cp-kopf { display: flex; align-items: center; gap: 14px; font-size: clamp(13px, 1.6vw, 20px); }
-      .hd-cp-raster { display: grid; grid-template-columns: auto 1fr; gap: clamp(6px, 1vw, 12px); }
-      .hd-cp-chips, .hd-cp-zeilen { display: grid; gap: clamp(5px, .9vw, 10px); }
-      .hd-cp-chip { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: clamp(70px, 9vw, 120px);
-        padding: clamp(6px, .9vw, 10px) clamp(8px, 1vw, 12px); border: 2px solid var(--c); border-radius: 8px; background: #08090b; }
-      .hd-cp-chip span { font-size: clamp(10px, 1.1vw, 14px); font-weight: 800; letter-spacing: .03em; }
-      .hd-cp-chip b { font-size: clamp(15px, 2vw, 26px); }
-      .hd-cp-chips2 { display: flex; gap: clamp(6px, 1vw, 12px); flex-wrap: wrap; justify-content: center; }
+      .hd-cp-links { display: grid; gap: 12px; align-content: start; }
+      .hd-cp-kopf { display: flex; align-items: center; gap: 14px; font-size: 20px; height: 26px; }
+      .hd-cp-raster { display: grid; grid-template-columns: minmax(120px, .42fr) 1fr; gap: 12px; }
+      .hd-cp-chips, .hd-cp-zeilen { display: grid; gap: 10px; grid-auto-rows: 54px; }
+      .hd-cp-chip { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 11px;
+        border: 2px solid var(--c); border-radius: 8px; background: #08090b; height: 54px; box-sizing: border-box; }
+      .hd-cp-chip span { font-size: 13px; font-weight: 800; letter-spacing: .03em; }
+      .hd-cp-chip b { font-size: 24px; white-space: nowrap; }
+      .hd-cp-chips2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
       .hd-cp-zeile { display: flex; align-items: center; gap: 12px; }
-      .hd-cp-taste { flex: 0 0 clamp(80px, 8vw, 110px); text-align: center; background: #3a3f49; border-radius: 6px;
-        padding: clamp(8px, 1.1vw, 13px) 6px; font-weight: 700; font-size: clamp(11px, 1.15vw, 15px); }
-      .hd-cp-zeile b { flex: 1; text-align: right; font-size: clamp(14px, 1.8vw, 24px); white-space: nowrap; }
-      .hd-cp-mitte { display: grid; gap: clamp(6px, 1vw, 12px); grid-template-rows: auto 1fr auto; }
-      .hd-cp-tempo { display: flex; align-items: baseline; justify-content: center; gap: 6px; padding: 6px; }
-      .hd-cp-tempo b { font-size: clamp(22px, 3vw, 38px); }
-      .hd-cp-tempo small { font-size: clamp(9px, .9vw, 12px); color: #c3c8d4; }
-      .hd-cp-gang { display: grid; place-items: center; min-height: clamp(110px, 22vh, 220px); }
-      .hd-cp-gang b { font-size: clamp(70px, 14vh, 150px); line-height: 1; font-weight: 500; }
+      .hd-cp-taste { flex: 0 0 104px; text-align: center; background: #3a3f49; border-radius: 6px; padding: 14px 4px; font-weight: 700; font-size: 15px; }
+      .hd-cp-zeile b { flex: 1; text-align: right; font-size: 24px; white-space: nowrap; }
+      .hd-cp-mitte { display: grid; gap: 12px; grid-template-rows: 62px 1fr 150px; height: ${HD_CP_H - 32}px; }
+      .hd-cp-tempo { display: flex; align-items: baseline; justify-content: center; gap: 6px; padding-top: 8px; box-sizing: border-box; }
+      .hd-cp-tempo b { font-size: 38px; }
+      .hd-cp-tempo small { font-size: 12px; color: #c3c8d4; }
+      .hd-cp-gang { display: grid; place-items: center; }
+      .hd-cp-gang b { font-size: 190px; line-height: 1; font-weight: 500; }
       .hd-cp-reifen { border: 2px solid #f2a01c; border-radius: 8px; overflow: hidden; background: #08090b; }
-      .hd-cp-reifen-kopf { background: #f2a01c; color: #14161c; text-align: center; font-weight: 800; padding: 5px; font-size: clamp(11px, 1.1vw, 15px); }
-      .hd-cp-reifen-raster { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px; }
-      .hd-cp-reifen-raster b { background: #1a1d22; border-radius: 4px; text-align: center; padding: clamp(6px, 1vh, 12px) 0; font-size: clamp(16px, 2.2vw, 28px); }
-      .hd-cp-rechts { display: grid; gap: clamp(6px, 1vw, 12px); align-content: start; }
-      .hd-cp-runde { display: flex; align-items: center; gap: 10px; width: max-content; border: 2px solid #2a2e35; border-radius: 8px; background: #3a3f49; padding: 4px 4px 4px 12px; }
-      .hd-cp-runde span { font-size: clamp(14px, 1.6vw, 20px); font-weight: 700; }
-      .hd-cp-runde b { background: #000; border-radius: 6px; padding: 4px 16px; font-size: clamp(14px, 1.6vw, 20px); min-width: 2.5em; text-align: center; }
+      .hd-cp-reifen-kopf { background: #f2a01c; color: #14161c; text-align: center; font-weight: 800; padding: 6px; font-size: 15px; }
+      .hd-cp-reifen-raster { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 7px; }
+      .hd-cp-reifen-raster b { background: #1a1d22; border-radius: 4px; text-align: center; padding: 9px 0; font-size: 28px; }
+      .hd-cp-rechts { display: grid; gap: 12px; align-content: start; }
+      .hd-cp-runde { display: flex; align-items: center; gap: 10px; width: max-content; min-width: 45%; border: 2px solid #2a2e35; border-radius: 8px; background: #3a3f49; padding: 4px 4px 4px 14px; }
+      .hd-cp-runde span { font-size: 20px; font-weight: 700; }
+      .hd-cp-runde b { background: #000; border-radius: 6px; padding: 5px 18px; font-size: 20px; min-width: 2.5em; text-align: center; }
       .hd-cp-zeiten { overflow: hidden; }
-      .hd-cp-zt-kopf { background: #3a3f49; text-align: center; padding: 5px; font-weight: 700; font-size: clamp(12px, 1.2vw, 16px); }
-      .hd-cp-zeiten > b { display: block; text-align: center; font-size: clamp(22px, 3vw, 38px); padding: clamp(10px, 2vh, 22px) 0; }
+      .hd-cp-zt-kopf { background: #3a3f49; text-align: center; padding: 6px; font-weight: 700; font-size: 16px; }
+      .hd-cp-zeiten > b { display: block; text-align: center; font-size: 40px; padding: 22px 0; }
       .hd-cp-zt-fuss { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid #2a2e35; }
       .hd-cp-zt-fuss div { display: grid; text-align: center; }
       .hd-cp-zt-fuss div + div { border-left: 2px solid #2a2e35; }
-      .hd-cp-zt-fuss span { background: #2a2e35; font-size: clamp(10px, 1vw, 13px); font-weight: 700; padding: 3px; }
-      .hd-cp-zt-fuss b { padding: 8px 0; font-size: clamp(13px, 1.4vw, 18px); }
-      .hd-cp-reihe { display: flex; align-items: center; justify-content: space-between; padding: clamp(6px, 1vh, 10px) 12px; background: #24272d; }
-      .hd-cp-reihe span { font-weight: 700; font-size: clamp(11px, 1.15vw, 15px); }
-      .hd-cp-reihe b { font-size: clamp(14px, 1.6vw, 20px); }
+      .hd-cp-zt-fuss span { background: #2a2e35; font-size: 13px; font-weight: 700; padding: 4px; }
+      .hd-cp-zt-fuss b { padding: 9px 0; font-size: 19px; }
+      .hd-cp-reihe { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #24272d; }
+      .hd-cp-reihe span { font-weight: 700; font-size: 15px; }
+      .hd-cp-reihe b { font-size: 20px; }
       .hd-cp-blau { background: #1f56d6; border-radius: 4px; padding: 3px 10px; }
-      .hd-cp-aussen { display: grid; gap: clamp(6px, 1vw, 12px); grid-template-rows: auto 1fr; }
-      .hd-cp-flagge { border: 2px solid var(--c, #2bd1c0); color: var(--c, #2bd1c0); border-radius: 8px; text-align: center; font-weight: 800;
-        padding: clamp(8px, 1.4vh, 14px) 4px; font-size: clamp(11px, 1.2vw, 16px); }
-      .hd-cp-balken { border: 2px solid #2a2e35; border-radius: 8px; display: grid; grid-template-rows: auto 1fr auto; text-align: center; padding: 6px; gap: 6px; }
-      .hd-cp-balken span { font-size: clamp(10px, 1vw, 13px); font-weight: 700; color: #c3c8d4; }
-      .hd-cp-seg { display: grid; grid-auto-rows: 1fr; gap: 3px; }
-      .hd-cp-seg i { display: block; background: #15181c; border: 1px solid #2a2e35; border-radius: 2px; min-height: 8px; font-style: normal; }
+      .hd-cp-aussen { display: grid; gap: 12px; grid-template-rows: 56px 1fr; height: ${HD_CP_H - 32}px; }
+      .hd-cp-flagge { border: 2px solid var(--c, #2bd1c0); color: var(--c, #2bd1c0); border-radius: 8px; display: grid; place-items: center; font-weight: 800; font-size: 16px; }
+      .hd-cp-balken { border: 2px solid #2a2e35; border-radius: 8px; display: grid; grid-template-rows: auto 1fr auto; text-align: center; padding: 8px; gap: 6px; }
+      .hd-cp-balken span { font-size: 13px; font-weight: 700; color: #c3c8d4; }
+      .hd-cp-seg { display: grid; grid-auto-rows: 1fr; gap: 4px; }
+      .hd-cp-seg i { display: block; background: #15181c; border: 1px solid #2a2e35; border-radius: 2px; font-style: normal; }
       .hd-cp-seg i.hd-g.an { background: #35d07f; border-color: #35d07f; }
       .hd-cp-seg i.hd-b.an { background: #ff4d4d; border-color: #ff4d4d; }
-      .hd-cp-pfeil { display: grid !important; place-items: center; color: #8a93a3; font-size: clamp(14px, 1.6vw, 22px); background: transparent !important; border: 0 !important; }
+      .hd-cp-pfeil { display: grid !important; place-items: center; color: #8a93a3; font-size: 22px; background: transparent !important; border: 0 !important; }
       .hd-cp-pfeil.an { color: #ffd23f; }
-      @media (max-width: 760px) { .hd-cp { grid-template-columns: 1fr 1fr; } .hd-cp-aussen { grid-column: 1 / -1; grid-template-rows: auto; grid-template-columns: auto 1fr; } .hd-cp-balken { grid-template-rows: none; grid-template-columns: auto 1fr auto; } .hd-cp-seg { grid-auto-flow: column; grid-auto-columns: 1fr; grid-auto-rows: auto; } }
     `;
     document.head.appendChild(css);
-    // The look in the existing chooser (Options > General > Cockpit look).
-    // The option itself is in the markup (00-index.head.html), so a saved choice survives the
-    // start-up in 50-drive.js. ONE-TIME switch to the new look (like OmegaSim's switch to ACC):
-    // afterwards a choice of another look is kept.
-    const sel = $('setting-cockpit');
-    try {
-      if (sel && !localStorage.getItem('hybriddash.cockpit.v1')) {
-        localStorage.setItem('hybriddash.cockpit.v1', '1');
-        sel.value = 'hybriddash';
-        sel.dispatchEvent(new Event('change'));
-      }
-    } catch (e) { /* private mode */ }
+    // REQUESTED: "Keep the original 3 cockpit windows, but add the new one as a 4th option."
+    // A fourth cockpit screen, after Cockpit, Pit and Race - reached with the screen dots or
+    // the D-pad like the others. COCKPIT_SCREENS (50-drive.js) is the one list they come from.
+    if (typeof COCKPIT_SCREENS !== 'undefined' && !COCKPIT_SCREENS.some((x) => x.id === 'hybriddash')) {
+      COCKPIT_SCREENS.push({ id: 'hybriddash', name: 'Dashboard', malen: () => { hdCockpitBauen(); hdCockpitMalen(); } });
+      if (typeof cockpitPunkteMalen === 'function') cockpitPunkteMalen();
+    }
+    hdCockpitBauen();
+    window.addEventListener('resize', hdCockpitEinpassen);
     hdCp.uhr = setInterval(hdCockpitMalen, 100);
   })();
 

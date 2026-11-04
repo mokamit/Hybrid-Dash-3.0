@@ -2261,9 +2261,7 @@
         return Math.abs(A[0] - B[0]) + Math.abs(A[1] - B[1]) + Math.abs(A[2] - B[2]);
       };
 
-      // HybridDash 2.1: 'hybriddash' is its own LAYOUT (98m-hd-cockpit.js), not a colour theme over
-      // the shared one - the theme comparison below does not apply to it.
-      const werte = Array.prototype.map.call(sel.options, o => o.value).filter(v => v !== 'hybriddash');
+      const werte = Array.prototype.map.call(sel.options, o => o.value);
       if (werte.length < 3) schlecht.push('nur ' + werte.length + ' Ansichten');
       const proben = werte.map(messe);
 
@@ -8184,7 +8182,8 @@
     if (a.length) {
       const h = a[0].getAttribute('href');
       if (h.indexOf('https://') !== 0) schlecht.push('Kurzlink nicht https: ' + h);
-      if (h.indexOf('t1p.de') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
+      // HybridDash: the cockpit link points to this fork's own page instead of OmegaSim's short link.
+      if (h.indexOf('mokamit.github.io/hybriddash') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
       if ((a[0].getAttribute('rel') || '').indexOf('noopener') < 0) schlecht.push('rel ohne noopener');
       if (a[0].getAttribute('target') !== '_blank') schlecht.push('kein target=_blank');
       // Das Omega kommt per <use> aus dem Kopfzeilen-Logo. Fehlt der Pfad, bleibt ein

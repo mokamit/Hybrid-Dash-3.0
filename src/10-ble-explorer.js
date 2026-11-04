@@ -4259,7 +4259,6 @@
     "Reifen gewechselt": "Tyres changed",
     "Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt": "Reset, fuel {l} l, damage 0 %, tyres cold",
     "Rennleitung": "Race Control",
-    "HybridDash (Kacheln)": "HybridDash (tiles)",
   };
 
   // Spanisches Woerterbuch. Gleiche Schluessel (der deutsche Text) wie I18N_EN, aber nur die
@@ -5700,7 +5699,6 @@
     "Zuletzt": "Último",
     "Zufälliger Name": "Nombre aleatorio",
     "Rennleitung": "Dirección de carrera",
-    "HybridDash (Kacheln)": "HybridDash (mosaicos)",
   };
 
   // ============================================================================
