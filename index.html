@@ -436,6 +436,7 @@
     background: linear-gradient(#ffffff, #cfeaff); border-color: var(--k-blau, #00a6e8);
     box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
   #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
+  #grid-start { text-transform: uppercase; letter-spacing: .06em; }
   .hd-top-knopf { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 28px;
     padding: 0 6px; border-radius: 5px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.04);
     color: var(--k-dim); cursor: pointer; line-height: 0; }
@@ -16663,6 +16664,7 @@
     "Der Bluetooth-Adapter ist aus oder nicht verfuegbar. Auf Android ausserdem pruefen, ob Chrome die Berechtigung \"Geraete in der Naehe\" hat.": "The Bluetooth adapter is off or unavailable. On Android also check that Chrome has the \"Nearby devices\" permission.",
     "← Optionen": "← Options",
     "Autos verbinden": "Connect cars",
+    "Keine Autos verbunden.": "No cars connected.",
     "Fahrzeugübersicht": "Car summary",
     "Über PC mit Python": "Via PC with Python",
     "Der PC trägt die Rangliste, die Telefone treten im WLAN bei.": "The PC holds the leaderboard, the phones join over Wi-Fi.",
@@ -19735,6 +19737,7 @@
     "Der Bluetooth-Adapter ist aus oder nicht verfuegbar. Auf Android ausserdem pruefen, ob Chrome die Berechtigung \"Geraete in der Naehe\" hat.": "El adaptador Bluetooth está apagado o no disponible. En Android, comprueba también que Chrome tenga el permiso «Dispositivos cercanos».",
     "← Optionen": "← Opciones",
     "Autos verbinden": "Conectar coches",
+    "Keine Autos verbunden.": "No hay coches conectados.",
     "Fahrzeugübersicht": "Resumen de coches",
     "Über PC mit Python": "Vía PC con Python",
     "Der PC trägt die Rangliste, die Telefone treten im WLAN bei.": "El PC lleva la clasificación, los teléfonos se unen por WiFi.",
@@ -44203,7 +44206,7 @@
     if (!host) return;
     const cars = raceGridCars();
     if (!cars.length) {
-      host.innerHTML = '<p class="muted" style="margin:0">Keine Autos verbunden.</p>';
+      host.innerHTML = '<p class="muted" style="margin:0">' + t('Keine Autos verbunden.') + '</p>';
       return;
     }
     const alt = bewegt ? gridLagenMerken(host) : null;
@@ -45563,7 +45566,13 @@
   }
   setInterval(updateRaceActButtons, 400);
 
-  $('race-start-btn').onclick = () => raceGridAnzeigen(startRaceCountdown);
+  // HybridDash: the starting grid lives in the cockpit (tab-race). Pressed from the race
+  // settings, the button opened it in a hidden tab and seemed to do nothing: go there first.
+  $('race-start-btn').onclick = () => {
+    const tp = $('tab-race');
+    if (tp && !tp.classList.contains('active') && getComputedStyle(tp).display === 'none') showTab('race');
+    raceGridAnzeigen(startRaceCountdown);
+  };
   $('race-stop-btn').onclick = requestRaceStop;
   $('race-export-csv').onclick = () => {
     // Semicolon delimiter + comma decimals: opens directly (no import wizard) in a

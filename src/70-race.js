@@ -1617,7 +1617,7 @@
     if (!host) return;
     const cars = raceGridCars();
     if (!cars.length) {
-      host.innerHTML = '<p class="muted" style="margin:0">Keine Autos verbunden.</p>';
+      host.innerHTML = '<p class="muted" style="margin:0">' + t('Keine Autos verbunden.') + '</p>';
       return;
     }
     const alt = bewegt ? gridLagenMerken(host) : null;
@@ -2977,7 +2977,13 @@
   }
   setInterval(updateRaceActButtons, 400);
 
-  $('race-start-btn').onclick = () => raceGridAnzeigen(startRaceCountdown);
+  // HybridDash: the starting grid lives in the cockpit (tab-race). Pressed from the race
+  // settings, the button opened it in a hidden tab and seemed to do nothing: go there first.
+  $('race-start-btn').onclick = () => {
+    const tp = $('tab-race');
+    if (tp && !tp.classList.contains('active') && getComputedStyle(tp).display === 'none') showTab('race');
+    raceGridAnzeigen(startRaceCountdown);
+  };
   $('race-stop-btn').onclick = requestRaceStop;
   $('race-export-csv').onclick = () => {
     // Semicolon delimiter + comma decimals: opens directly (no import wizard) in a
