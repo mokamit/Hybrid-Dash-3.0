@@ -857,7 +857,7 @@
       cars.forEach(c => { if (c !== playerCar) carLapCrossed(c); });
       if (playerCar) carLapCrossed(playerCar);
       playerLapCrossed();
-      showHudToast('TESTRUNDE: ' + (cars.length || 1) + ' AUTO(S)');
+      showHudToast(t('TESTRUNDE: {n} AUTO(S)').replace('{n}', cars.length || 1));
       log('Testtaste: eine Runde fuer alle ' + cars.length + ' Autos im Rennen gezaehlt.', 'info');
       return;
     }
@@ -2909,7 +2909,7 @@
     fuel = 100;
     resetTyres();
     updateDamageFuelUI();
-    showHudToast(`Zurückgesetzt, Tank ${fuelLiters(100)} l, Schaden 0 %, Reifen kalt`);
+    showHudToast(t('Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt').replace('{l}', fuelLiters(100)));
     log('Auto zurückgesetzt: Schaden 0, Tank voll, Reifen kalt.', 'info');
   }
 
@@ -4676,7 +4676,7 @@
         playTone(880, 0.12, 'square', 0.16);
         rennZeitTimeout(() => playTone(880, 0.12, 'square', 0.16), 180);
       }
-      showHudToast('BOXENGASSE AKTIV, ' + PIT_DOUBLE_KMH + ' KM/H');
+      showHudToast(t('BOXENGASSE AKTIV') + ', ' + PIT_DOUBLE_KMH + ' KM/H');
       log('Boxengasse per doppeltem Ausdruck: zweiter Kontakt nach ' + seit
           + ' ms, Tempolimit ' + PIT_DOUBLE_KMH + ' km/h fuer '
           + (PIT_DOUBLE_LIMIT_MS / 1000) + ' s. Anhalten startet den Service.', 'info');
@@ -4783,7 +4783,7 @@
         pitTyreElapsed += dt;
         if (pitTyreElapsed >= pitTyreTarget) {
           pitDone.tyres = true; setPitLoop('wrench', false); pitChimeTyres();
-          showHudToast(`Reifen gewechselt, ${pitTyreElapsed.toFixed(1)} s`);
+          showHudToast(t('Reifen gewechselt') + `, ${pitTyreElapsed.toFixed(1)} s`);
         }
       }
       // The pad keeps buzzing while anything is still being worked on.
@@ -5273,7 +5273,7 @@
 
   function boxAnfordernVon(z) {
     if (!zweiSpieler || !z.car) {
-      showHudToast('P' + z.nr + ': KEIN AUTO ZUGETEILT');
+      showHudToast('P' + z.nr + ': ' + t('KEIN AUTO ZUGETEILT'));
       return false;
     }
     if (z.box.lage !== 'aus') {
@@ -5290,7 +5290,7 @@
     z.box.reparaturFertig = false;
     z.box.gemeldet = false;
     z.box.letzterTick = null;
-    showHudToast('P' + z.nr + ': BOXENSTOPP \u2013 ANHALTEN');
+    showHudToast('P' + z.nr + ': ' + t('BOXENSTOPP \u2013 ANHALTEN'));
     log('P' + z.nr + ': Boxenstopp angefordert, Tempolimit '
         + Math.round(PIT_SPEED_FACTOR * 100) + ' %. Zum Beginnen anhalten.', 'info');
     return true;
@@ -5305,7 +5305,7 @@
     z.box.letzterTick = null;
     stopPitLoopsFuer(z.nr);
     if (warum === 'abgebrochen') {
-      showHudToast('P' + z.nr + ': BOXENSTOPP ABGEBROCHEN');
+      showHudToast('P' + z.nr + ': ' + t('BOXENSTOPP ABGEBROCHEN'));
       log('P' + z.nr + ': Boxenstopp abgebrochen.', 'info');
       return;
     }
@@ -5340,7 +5340,7 @@
         rennEreignisBox(z.nr);
         z.box.strafeBis = null;
         const strafe = rammStrafeOffen(z.car);
-        showHudToast('P' + z.nr + ': ' + (strafe > 0 ? t('STRAFE') + ' ' + strafe + ' s' : 'SERVICE LAEUFT'));
+        showHudToast('P' + z.nr + ': ' + (strafe > 0 ? t('STRAFE') + ' ' + strafe + ' s' : t('SERVICE LÄUFT')));
         // Reifen wie bei Auto 1: die gewaehlte Mischung, frisch und ungebraucht.
         const neu = mischungErlaubt(pitMischungWahlVon(z));
         if (neu !== z.reifen) {
@@ -5417,7 +5417,7 @@
       z.box.fertig = true;
       stopPitLoopsFuer(z.nr);
       rammStrafeAbsitzen(z.car);
-      showHudToast('P' + z.nr + ': FERTIG, LOSFAHREN!');
+      showHudToast('P' + z.nr + ': ' + t('FERTIG, LOSFAHREN!'));
       pitChimeReady();
       padRumble(0.35, 0.2, 200, 'box', z.nr);
       log('P' + z.nr + ': Boxenstopp fertig nach ' + z.box.standS.toFixed(1) + ' s.', 'info');
@@ -5862,7 +5862,7 @@
   function flashVon(z) {
     if (rennZeitJetzt() < z.flashBis) return;
     z.flashBis = rennZeitJetzt() + FLASH_MS;
-    showHudToast('P' + z.nr + ': Lichthupe');
+    showHudToast('P' + z.nr + ': ' + t('Lichthupe'));
     playFlashSound();
   }
   function triggerHeadlightFlash2() { flashVon(zusatzPlatz(2)); }
@@ -7614,7 +7614,7 @@
     }
     if (which === 'repair' && !next) setPitLoop('repair', false);
     const after = describePitPlan(pitPlan);
-    if (after !== before) showHudToast(`Boxenstopp: ${after}`);
+    if (after !== before) showHudToast(t('Boxenstopp') + `: ${after}`);
     updatePitUI();
     return true;
   }

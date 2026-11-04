@@ -4080,6 +4080,14 @@
     "Aus der Strecke im Editor": "From the track in the editor",
     "← Community": "← Community",
     // ---- HybridDash 2.0 (98i-hybriddash.js) ----
+    "Bestätigungstaste": "Confirmation Button",
+    "Alle Fahrer ansagen": "Announce all drivers",
+    "Jedes Auto, das sich verbindet, wird angesagt: Fahrer, Auto und Farbe.": "Every car that connects is announced: driver, car and colour.",
+    "Vor dem Safety Car fragen": "Ask before deploying the safety car",
+    "An: Die App fragt erst nach, und du bestätigst mit der Bestätigungstaste (Vorgabe A / Kreuz, oder Enter). Esc ignoriert den Vorfall. Aus: Das Safety Car fährt sofort los.": "On: the app asks first, and you confirm with the Confirmation Button (default A / Cross, or Enter). Esc ignores the incident. Off: the safety car goes out straight away.",
+    "Safety Car losschicken?": "Deploy the safety car?",
+    "Losschicken": "Deploy",
+    "Ignorieren": "Ignore",
     "HD: neben der Strecke": "off track for {s} s",
     "HD: steht": "not moving for {s} s",
     "SAFETY CAR": "SAFETY CAR",
@@ -4095,6 +4103,161 @@
     "Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zufälligen Fahrernamen.": "A car without a name gets a random driver name the first time it becomes an NPC.",
     "Neue Fahrer ansagen": "Announce new drivers",
     "Die Stimme nennt den neuen Fahrer und sein Auto.": "The voice announces the new driver and their car.",
+    // ---- HybridDash 2.1 translation sweep ----
+    "Dauer/Runden": "Duration/laps",
+    "Rennen starten/abbrechen": "Start/abort race",
+    "★ Beliebteste Strecke": "★ Most popular track",
+    "Automatische oder manuelle Schaltung": "Automatic or manual gearbox",
+    "keine Variante aktiv": "no variant active",
+    "🏁 Rennen starten": "🏁 Start race",
+    "🏁 Training starten": "🏁 Start practice",
+    "Renntyp, Dauer, Wetter, Pflichtstopps, Rennen starten.": "Race type, duration, weather, mandatory stops, start the race.",
+    "GT3: schwarze Kacheln (WIP)": "GT3: black tiles (WIP)",
+    "Fahrhilfe": "Driving aid",
+    "Fahrhilfe: Auto lenkt selbst": "Driving aid: car steers itself",
+    "GT3, 6-Gang sequenziell": "GT3, 6-speed sequential",
+    "Formel 1, 8-Gang": "Formula 1, 8-speed",
+    "Ferrari 412P, 5-Gang Transaxle": "Ferrari 412P, 5-speed transaxle",
+    "Nächster Schirm": "Next screen",
+    "Boxenstopp anfordern": "Request pit stop",
+    "Leseart: Schienenkodierung oder gedruckte Muster": "Read mode: track coding or printed patterns",
+    "Abstimmung durchschalten, wirkt wie die Voreinstellungen": "Cycle the setup, works like the presets",
+    "Antippen: Automatik oder manuell schalten": "Tap: automatic or manual shifting",
+    "Gang, antippen wechselt Automatik und manuell": "Gear, tap to switch between automatic and manual",
+    "Health der Teilnehmer": "Health of the field",
+    "Tanksimulation an/aus, beim Boxenstopp: Tanken an/aus": "Fuel simulation on/off; at a pit stop: refuelling on/off",
+    "Schadenssimulation an/aus, beim Boxenstopp: Reparatur an/aus": "Damage simulation on/off; at a pit stop: repair on/off",
+    "Reifen: Füllhöhe ist Restprofil, Farbe die Temperatur, Rillen bedeuten Regenreifen. Links und rechts werden getrennt gerechnet, vorn und hinten nicht – die beiden einer Seite laufen deshalb gleich. Antippen schaltet die Reifensimulation aus, beim Boxenstopp den Reifenwechsel.": "Tyres: the fill level is the remaining tread, the colour the temperature, grooves mean rain tyres. Left and right are calculated separately, front and rear are not – so the two on one side wear the same. Tap to switch off the tyre simulation; at a pit stop, the tyre change.",
+    "Wetter umschalten: sonnig, Regen, wechselhaft": "Change weather: sunny, rain, changeable",
+    "Motorklang Auto 1: rechte Hälfte weiter, linke zurück": "Engine sound car 1: right half next, left half back",
+    "Motorklang Auto 2: rechte Hälfte weiter, linke zurück": "Engine sound car 2: right half next, left half back",
+    "Motorklang Auto 3: rechte Hälfte weiter, linke zurück": "Engine sound car 3: right half next, left half back",
+    "Vergrößern (X) / Verkleinern (X oder Kreis)": "Zoom in (X) / zoom out (X or Circle)",
+    "Streckenkarte vergrößern": "Enlarge track map",
+    "Tempo, Handling, Beschleunigung, Schaden und Reifenverschleiss auf alle setzen (Controller, Tasten, Empfindlichkeit, Rumble und Sound bleiben unberührt)": "Apply speed, handling, acceleration, damage and tyre wear to everyone (controller, buttons, sensitivity, rumble and sound stay as they are)",
+    "Minus eins": "Minus one",
+    "Plus eins": "Plus one",
+    "weiter links": "further left",
+    "weiter rechts": "further right",
+    "Controller-Belegung vergrößern": "Enlarge controller layout",
+    "Controller mit der aktuellen Tastenbelegung": "Controller with the current button mapping",
+    "Strecke speichern": "Save track",
+    "45° links drehen": "Rotate 45° left",
+    "45 Grad links drehen": "Rotate 45 degrees left",
+    "45° rechts drehen": "Rotate 45° right",
+    "45 Grad rechts drehen": "Rotate 45 degrees right",
+    "Zufaellige Strecke bauen": "Build a random track",
+    "Faehrt automatisch eine Runde und uebernimmt sie, sobald sie als geschlossener Rundkurs erkannt ist": "Drives one lap automatically and takes it over as soon as it is recognised as a closed circuit",
+    "Bahn-Lesemodus umschalten": "Toggle track read mode",
+    "Belegung entfernen": "Remove binding",
+    "Steuerkreuz links": "D-pad left",
+    "Steuerkreuz rechts": "D-pad right",
+    "Ein Zündimpuls": "One ignition pulse",
+    "(aufgeladen, ohne Ladermodell)": "(forced induction, no boost model)",
+    "Cross-Plane (hier nicht möglich)": "Cross-plane (not possible here)",
+    "Kurbelwinkel, Grad": "Crank angle, degrees",
+    "{n} Regler gesetzt": "{n} settings applied",
+    "nicht gefunden": "not found",
+    "{n} unbekannt übergangen": "{n} unknown skipped",
+    "{p} % ({s} s auf 100)": "{p} % ({s} s to 100)",
+    "{p}% vorn": "{p}% front",
+    "62% vorn": "62% front",
+    "{n} weniger": "Fewer: {n}",
+    "{n} mehr": "More: {n}",
+    "Erst ein Auto auf \"NPC\" stellen": "Set a car to \"NPC\" first",
+    "Erst ein Auto auf \"Steuern\" oder \"NPC\" stellen": "Set a car to \"Drive\" or \"NPC\" first",
+    "Ins Cockpit": "To the cockpit",
+    "{n} NPC(s) ausrollen lassen und anhalten": "Let {n} NPC(s) coast and stop",
+    "{n} NPC(s) losfahren lassen": "Let {n} NPC(s) drive off",
+    "Beste 3er-Serie": "Best 3-run series",
+    "Renneinstellungen erzwingen": "Enforce race settings",
+    "Sektorzeiten": "Sector times",
+    "Kein Schaden im Stand": "No damage at a standstill",
+    "Aerodynamik": "Aerodynamics",
+    "BMW M4 GT3: Reihen-6": "BMW M4 GT3: inline-6",
+    "Ford Mustang GT3: V8, Cross-Plane": "Ford Mustang GT3: V8, cross-plane",
+    "Ford Mustang GT3 v2: V8, Cross-Plane (Aufnahme)": "Ford Mustang GT3 v2: V8, cross-plane (recording)",
+    "Ferrari 296 GT3: V6, 120 Grad": "Ferrari 296 GT3: V6, 120 degrees",
+    "Mercedes-AMG GT3: V8, Cross-Plane": "Mercedes-AMG GT3: V8, cross-plane",
+    "Corvette C6.R: V8, Cross-Plane, OHV": "Corvette C6.R: V8, cross-plane, OHV",
+    "Corvette Z06 GT3.R: V8, Flat-Plane": "Corvette Z06 GT3.R: V8, flat-plane",
+    "Aston Martin Vantage GT3: V8, Cross-Plane": "Aston Martin Vantage GT3: V8, cross-plane",
+    "Huracan GT3 / R8 LMS: V10, Split-Pin": "Huracan GT3 / R8 LMS: V10, split-pin",
+    "Formel 1 2026: V6 Turbo-Hybrid, 1,6 l": "Formula 1 2026: V6 turbo hybrid, 1.6 l",
+    "Ford GT40 Mk I: V8, Cross-Plane, 4,7 l": "Ford GT40 Mk I: V8, cross-plane, 4.7 l",
+    "Lola T70 Mk3B: Chevrolet-V8, Cross-Plane": "Lola T70 Mk3B: Chevrolet V8, cross-plane",
+    "Ferrari 330 P4 / 412P: V12, 60 Grad": "Ferrari 330 P4 / 412P: V12, 60 degrees",
+    "Maserati MC12: V12, 65 Grad": "Maserati MC12: V12, 65 degrees",
+    "AMG GT3: V8, Cross-Plane (Aufnahme)": "AMG GT3: V8, cross-plane (recording)",
+    "Huracán GT3 Evo: V10, Split-Pin (Aufnahme)": "Huracán GT3 Evo: V10, split-pin (recording)",
+    "Autohupe": "Car horn",
+    "Schiffshupe": "Ship horn",
+    "Esel": "Donkey",
+    "Ziege": "Goat",
+    "Furz": "Fart",
+    "antippen": "tap",
+    "Testen": "Test",
+    "3-stufig": "3-step",
+    "Fahrbahnmitte": "Track centre",
+    "Innen (gemittelt)": "Inside (averaged)",
+    "Luuke-Linie": "Luuke line",
+    "nebeneinander": "side by side",
+    "Skalierung": "Scaling",
+    "Weiter ▶": "Next ▶",
+    "Vollbild verlassen": "Exit full screen",
+    "Gelbe Flagge halten": "Hold for yellow flag",
+    "Quadrat": "Square",
+    "Kreis": "Circle",
+    "Podest": "Podium",
+    "Sterne": "Stars",
+    "z. B. Luuke": "e.g. Luuke",
+    "Raum gestalten": "Design the room",
+    "Millisekunden": "Milliseconds",
+    "Druck": "Pressure",
+    "Pegel": "Level",
+    "Auspuffresonanz": "Exhaust resonance",
+    "Kreuz (PS) / A (Xbox)": "Cross (PS) / A (Xbox)",
+    "Was Auto 2": "What car 2",
+    "Auto repariert": "Car repaired",
+    "BOXENGASSE VORBEI": "PIT LANE OVER",
+    "Bitte manuell kopieren": "Please copy manually",
+    "Bitte von Hand kopieren": "Please copy by hand",
+    "Boxengasse verlassen": "Pit lane left",
+    "Boxengasse, Tempolimit": "Pit lane, speed limit",
+    "Code kopiert": "Code copied",
+    "Derby: kein Boxenstopp": "Derby: no pit stop",
+    "Fertig, losfahren!": "Done, go!",
+    "GELBE FLAGGE": "YELLOW FLAG",
+    "GRÜN": "GREEN",
+    "HUPE NICHT GELADEN": "HORN NOT LOADED",
+    "KEINE RUNDE, BOXENEINFAHRT": "NO LAP, PIT ENTRY",
+    "KEINE STRECKE": "NO TRACK",
+    "Keine Aufnahme läuft": "No recording running",
+    "Kopiert": "Copied",
+    "NEBEN DIE STRECKE FAHREN": "DRIVE OFF THE TRACK",
+    "NPC OHNE STRECKENCODE": "NPC WITHOUT TRACK CODE",
+    "NUR ÜBER DEN DOPPELTEN AUSDRUCK": "ONLY VIA THE DOUBLE PRINTOUT",
+    "SEKTOREN BRAUCHEN DEN AUSDRUCK-MODUS": "SECTORS NEED PRINTOUT MODE",
+    "SITZUNGEN GELÖSCHT": "SESSIONS DELETED",
+    "SPEICHER VOLL": "STORAGE FULL",
+    "STRECKE ANDERSHERUM": "TRACK REVERSED",
+    "Strecke übernommen": "Track applied",
+    "TESTRUNDE GEZAEHLT": "TEST LAP COUNTED",
+    "Tank und Zustand zurückgesetzt": "Fuel and condition reset",
+    "Testcrash": "Test crash",
+    "ABSTIMMUNG": "SETUP",
+    "AUTO": "CAR",
+    "BOXENGASSE AKTIV": "PIT LANE ACTIVE",
+    "Markiert": "Marked",
+    "SERVICE LÄUFT": "SERVICE RUNNING",
+    "BOXENSTOPP ABGEBROCHEN": "PIT STOP CANCELLED",
+    "BOXENSTOPP – ANHALTEN": "PIT STOP – STOP THE CAR",
+    "FERTIG, LOSFAHREN!": "DONE, GO!",
+    "KEIN AUTO ZUGETEILT": "NO CAR ASSIGNED",
+    "STRECKE GELERNT: {n} TEILE": "TRACK LEARNED: {n} PIECES",
+    "TESTRUNDE: {n} AUTO(S)": "TEST LAP: {n} CAR(S)",
+    "Reifen gewechselt": "Tyres changed",
+    "Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt": "Reset, fuel {l} l, damage 0 %, tyres cold",
   };
 
   // Spanisches Woerterbuch. Gleiche Schluessel (der deutsche Text) wie I18N_EN, aber nur die
@@ -5521,6 +5684,12 @@
     "Strecke einreichen": "Enviar circuito",
     "Eigene Strecken mit Abstimmung einreichen und Bestzeiten teilen.": "Envía tus propios circuitos con su ajuste y comparte mejores tiempos.",
     // ---- HybridDash 2.0 (98i-hybriddash.js) ----
+    "Bestätigungstaste": "Botón de confirmación",
+    "Alle Fahrer ansagen": "Anunciar a todos los pilotos",
+    "Vor dem Safety Car fragen": "Preguntar antes del coche de seguridad",
+    "Safety Car losschicken?": "¿Enviar el coche de seguridad?",
+    "Losschicken": "Enviar",
+    "Ignorieren": "Ignorar",
     "HD: neben der Strecke": "fuera de pista durante {s} s",
     "HD: steht": "detenido durante {s} s",
     "SAFETY CAR": "COCHE DE SEGURIDAD",
@@ -5563,6 +5732,8 @@
   let i18nBusy = false;
 
   function i18nNorm(t) { return t.replace(/\s+/g, ' ').trim(); }
+  const i18nFehlt = new Set();
+  window.HD_I18N_FEHLT = i18nFehlt;
 
   function i18nLookup(t) {
     const k = i18nNorm(t);
@@ -5613,7 +5784,7 @@
       const de = i18nOrig.get(node);
       if (lang === 'de') { if (node.nodeValue !== de) node.nodeValue = de; continue; }
       const en = i18nLookup(de);
-      if (en === null) continue;
+      if (en === null) { i18nFehlt.add(i18nNorm(de)); continue; }
       // Fuehrende und folgende Leerzeichen aus dem Original behalten: sie tragen im
       // Fliesstext den Abstand zum Nachbarelement, und ohne sie klebt "Taste" am <b>.
       const lead = de.match(/^\s*/)[0], tail = de.match(/\s*$/)[0];
@@ -5635,6 +5806,7 @@
         const de = store[key];
         if (lang === 'de') { if (cur !== de) el.setAttribute(a, de); continue; }
         const en = i18nLookup(de);
+        if (en === null) i18nFehlt.add(i18nNorm(de));
         if (en !== null && cur !== en) el.setAttribute(a, en);
       }
     }
@@ -5718,9 +5890,12 @@
 
   // Fuer Text, der im Code entsteht statt im Markup. Absichtlich dieselbe Tabelle: ein
   // zweites Woerterbuch waere ein zweiter Ort, an dem etwas fehlen kann.
+  // HybridDash 2.1: texts with no translation are recorded (window.HD_I18N_FEHLT), so a crawl
+  // can find German that slips through in English mode.
   function t(de) {
     if (lang === 'de') return de;
     const en = i18nLookup(de);
+    if (en === null && typeof de === 'string' && /[a-zäöüß]/i.test(de)) i18nFehlt.add(i18nNorm(de));
     return en === null ? de : en;
   }
 

@@ -528,8 +528,8 @@
     }
     setzeBrakeStealLast();
     setzeGran();
-    presetSay(p.label + ': ' + n + ' Regler gesetzt'
-              + (missing.length ? ', nicht gefunden: ' + missing.join(', ') : ''));
+    presetSay(t(p.label) + ': ' + t('{n} Regler gesetzt').replace('{n}', n)
+              + (missing.length ? ', ' + t('nicht gefunden') + ': ' + missing.join(', ') : ''));
     $('preset-json').value = JSON.stringify(presetRead());
   }
 
@@ -576,7 +576,7 @@
       b.id = klein ? '' : 'preset-' + key;
       b.textContent = p.label;
       if (p.wip) b.insertAdjacentHTML('beforeend', ' <span class="wip-tag">WIP</span>');
-      b.title = p.kurz + ' \u2013 ' + p.text;
+      b.title = t(p.kurz) + ' \u2013 ' + t(p.text);
       b.addEventListener('click', () => applyPreset(key));
       host.appendChild(b);
     }
@@ -767,8 +767,8 @@
     if (bad.length) { presetSay('Unbrauchbare Werte: ' + bad.join(', ')); return; }
     let n = 0;
     for (const [id, val] of Object.entries(cfg)) if (presetSet(id, val)) n++;
-    presetSay(n + ' Regler gesetzt'
-              + (unknown.length ? ', ' + unknown.length + ' unbekannt \u00fcbergangen' : ''));
+    presetSay(t('{n} Regler gesetzt').replace('{n}', n)
+              + (unknown.length ? ', ' + t('{n} unbekannt übergangen').replace('{n}', unknown.length) : ''));
   });
 
   $('preset-json').value = JSON.stringify(presetRead());

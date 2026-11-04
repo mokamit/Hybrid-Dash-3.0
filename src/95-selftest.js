@@ -1677,6 +1677,9 @@
     //    unbeabsichtigte Doppelbelegung ab Werk waere derselbe Fehler, nur von Anfang an.
     const zaehler = new Map();
     for (const n of Object.keys(vorgabe)) {
+      // HybridDash 2.1: the Confirmation Button only acts while the safety-car prompt is open
+      // (a modal, like the grid confirm on the same button), so it may share A / Cross.
+      if (n === 'confirm') continue;
       const k = schluessel(vorgabe[n]);
       if (!k) continue;
       zaehler.set(k, (zaehler.get(k) || []).concat(n));

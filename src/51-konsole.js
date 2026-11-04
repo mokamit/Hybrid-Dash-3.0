@@ -671,6 +671,7 @@
       a.className = n ? 'k-an' : '';
       a.textContent = n ? '● ' + n + ' ' + t(n === 1 ? 'Auto' : 'Autos') : '○ ' + t('kein Auto');
       st.appendChild(a);
+      if (typeof hdRelayChip === 'function') hdRelayChip(st);   // HybridDash: two-laptop chip
       // Kein Etikett "Neues Menü" mehr daneben - BESTELLT: "Mach das 'Neues Menü' Label oben
       // rechts weg". Als WIP gekennzeichnet bleibt das Menue in den Patchnotes.
     }

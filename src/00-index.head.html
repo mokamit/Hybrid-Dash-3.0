@@ -389,6 +389,40 @@
      deutlicher (aktuell sehr schwach und kaum erkennbar)". Vorher ::before mit 4,5 % Deckkraft;
      jetzt ein eigenes Element (die zwei Glitch-Ebenen brauchen ::before und ::after) mit 13 %. */
   /* HybridDash 2.0 */
+  .hd-relay-chip { font-size: inherit; padding: 1px 7px; border-radius: 3px; border: 1px solid rgba(255,255,255,.25);
+                   background: transparent; color: var(--k-dim); cursor: pointer; letter-spacing: .06em; min-height: 0; line-height: 1.4; }
+  .hd-relay-chip.an { border-color: #35b45a; color: #7cff9b; }
+  .hd-relay-chip.gelb { border-color: #ffd23f; color: #ffd23f; }
+  .hd-relay-chip.rot { border-color: #ff5a7a; color: #ff8aa0; }
+  .hdr-tipp { color: #9aa1b0; font-size: 12.5px; line-height: 1.45; margin: 0 0 4px; }
+  .hdr-tipp a, .hdr-link { color: #6fd3ff; }
+  .hdr-link { all: unset; cursor: pointer; text-decoration: underline; color: #6fd3ff; }
+  body.hd-helper-seite > *:not(#hd-relay):not(script) { visibility: hidden; }
+  body.hd-helper-seite #hd-relay { visibility: visible; background: #05070c; }
+  body.hd-helper-seite #hdr-zu, body.hd-helper-seite .hdr-wahl, body.hd-helper-seite .hdr-tipp { display: none; }
+  /* v2.1: main tabs and sub tabs further apart, with a subtle neon red line between them. */
+  header#k-kopf .k-leiste2 { position: relative; margin-top: 9px; padding-top: 5px; }
+  header#k-kopf .k-leiste2::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, #ff2a4f 12%, #ff2a4f 88%, transparent);
+    box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  @media (max-height: 480px) { header#k-kopf .k-leiste2 { margin-top: 5px; padding-top: 3px; } }
+  .hd-logo-svg { fill: currentColor; }
+  header#k-kopf .hdr-logo svg.hd-logo-svg { width: 22px; height: 22px; }
+  @media (max-height: 480px) { header#k-kopf .hdr-logo svg.hd-logo-svg { width: 14px; height: 14px; } }
+  .hd-sc-frage { position: fixed; left: 50%; top: 14%; transform: translateX(-50%); z-index: 9200;
+                 width: min(460px, calc(100vw - 32px)); }
+  .hd-sc-frage[hidden] { display: none; }
+  .hd-sc-frage-karte { background: #1a1405; color: #fff6d6; border: 2px solid #ffd23f; border-radius: 10px;
+                       padding: 14px 16px; display: grid; gap: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.6);
+                       animation: hd-sc-puls 1s ease-in-out infinite alternate; }
+  @keyframes hd-sc-puls { from { box-shadow: 0 0 0 rgba(255,210,63,.0), 0 10px 40px rgba(0,0,0,.6); }
+                          to { box-shadow: 0 0 24px rgba(255,210,63,.45), 0 10px 40px rgba(0,0,0,.6); } }
+  @media (prefers-reduced-motion: reduce) { .hd-sc-frage-karte { animation: none; } }
+  .hd-sc-frage-titel { font-size: 20px; letter-spacing: .04em; color: #ffd23f; }
+  .hd-sc-frage-wer { font-size: 15px; }
+  .hd-sc-frage-knoepfe { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hd-sc-frage-knoepfe button { flex: 1; min-width: 140px; }
+  .hd-sc-frage-knoepfe small { opacity: .75; margin-left: .4em; font-weight: 400; }
   .hd-relay { position: fixed; inset: 0; z-index: 9100; background: rgba(3,5,9,.82); display: grid; place-items: center;
               padding: 16px; box-sizing: border-box; overflow: auto; }
   .hd-relay[hidden] { display: none; }
@@ -5174,7 +5208,7 @@
      anderen Stellen, die per href darauf verweisen. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <path id="om" d="M 112 370 L 200 370 C 192 328, 172 290, 172 236 C 172 150, 210 102, 256 102 C 302 102, 340 150, 340 236 C 340 290, 320 328, 312 370 L 400 370 L 400 310 C 368 310, 350 286, 388 236 C 410 200, 412 160, 388 116 C 358 62, 308 42, 256 42 C 204 42, 154 62, 124 116 C 100 160, 102 200, 124 236 C 162 286, 144 310, 112 310 Z" fill-rule="evenodd"/>
+    <path id="om" d="M 52 104 L 116 104 L 116 222 L 196 222 L 196 104 L 260 104 L 260 408 L 196 408 L 196 284 L 116 284 L 116 408 L 52 408 Z M 296 104 L 368 104 C 486 104, 486 408, 368 408 L 296 408 Z M 360 166 L 360 346 C 412 346, 412 166, 360 166 Z" fill-rule="evenodd"/>
     <mask id="om-s1"><rect x="0" y="115" width="512" height="20" fill="#fff"/></mask>
     <mask id="om-s2"><rect x="0" y="210" width="512" height="35" fill="#fff"/></mask>
     <mask id="om-s3"><rect x="0" y="305" width="512" height="22" fill="#fff"/></mask>
@@ -5193,7 +5227,7 @@
 <header id="k-kopf">
   <!-- BESTELLT: "Per Klick auf das Omega oben links ... zurueck zum Startbildschirm". -->
   <button class="hdr-logo goto-tab" data-tab="home" title="Zum Startbildschirm" aria-label="Zum Startbildschirm">
-    <svg viewBox="0 0 512 512" aria-hidden="true"><use href="#om"/></svg>
+    <svg viewBox="0 0 512 512" aria-hidden="true" class="hd-logo-svg"><use href="#om"/></svg>
   </button>
   <!-- BESTELLT: "Tabs nach ganz oben und 'Hauptmenü' Zurückpfeil wegtun ... Oben links nur
        logo und rechts daneben alle tabs; ganz rechts oben Verbindungsstatus". -->
@@ -9694,6 +9728,17 @@
        Info-Screen fungiert (Streckenscreen, ohne eigenes Auto; zB ein Tablet)." Er meldet
        sich beim Host als Zuschauer an; solange einer zusieht, schicken die Fahrer ihre
        Position mit. Geoeffnet ueber "Als Info-Screen" oder direkt mit /?info in der Adresse. -->
+  <!-- HybridDash 2.1: safety-car confirmation (98i-hybriddash.js) -->
+  <div class="hd-sc-frage" id="hd-sc-frage" hidden role="alertdialog" aria-labelledby="hd-sc-frage-titel">
+    <div class="hd-sc-frage-karte">
+      <b class="hd-sc-frage-titel" id="hd-sc-frage-titel">Safety Car losschicken?</b>
+      <span class="hd-sc-frage-wer" id="hd-sc-frage-wer" data-i18n-skip></span>
+      <div class="hd-sc-frage-knoepfe">
+        <button type="button" class="primary" id="hd-sc-frage-ja">Losschicken <small id="hd-sc-frage-taste" data-i18n-skip></small></button>
+        <button type="button" id="hd-sc-frage-nein">Ignorieren <small data-i18n-skip>Esc</small></button>
+      </div>
+    </div>
+  </div>
   <!-- HybridDash 2.0: two-laptop mode (98j-hd-relay.js). English only, like the codes it shows. -->
   <div class="hd-relay" id="hd-relay" hidden data-i18n-skip role="dialog" aria-label="Two-laptop mode">
     <div class="hdr-karte">
@@ -9702,6 +9747,9 @@
       <p class="hdr-intro">Split the Bluetooth connections across two laptops on the same Wi-Fi. The <b>host</b> runs the race
         (race control, timing, standings, NPCs, your car, dashboard). The <b>helper</b> only connects the extra cars and relays
         their messages; those cars appear in the host&rsquo;s Garage and standings like every other car.</p>
+      <p class="hdr-tipp">On the helper laptop you can open the dedicated helper page: <a href="helper.html" target="_blank" rel="noopener">helper.html</a>
+        (or <button type="button" class="hdr-link" id="hdr-helper-seite">open it in a new tab</button>). It shows only this panel, so it can&rsquo;t be closed by accident.
+        Closing this panel never unlinks; reopen it any time from <b>&#8644;</b> at the top right.</p>
       <div class="hdr-wahl">
         <button type="button" id="hdr-wahl-host"><b>This laptop is the HOST</b><small>Laptop A &middot; runs the race</small></button>
         <button type="button" id="hdr-wahl-helper"><b>This laptop is a HELPER</b><small>Laptop B &middot; extra cars only</small></button>
@@ -9906,12 +9954,16 @@
       <!-- HybridDash 2.0 (98i-hybriddash.js) -->
       <div class="opt-row hd-row"><div class="opt-label">Automatisches Safety Car<span class="hd-tag">HybridDash</span><small>Steht ein Auto im Rennen neben der Strecke oder kommt es nicht mehr voran, ruft die App nach dieser Zeit automatisch Gelb aus und schickt das Safety Car los. Nur auf der Bahn.</small><small id="hd-auto-sc-status" class="hd-status" data-i18n-skip></small></div>
         <label class="tgl"><input type="checkbox" id="hd-auto-sc" checked><span></span></label></div>
+      <div class="opt-row hd-row"><div class="opt-label">Vor dem Safety Car fragen<small>An: Die App fragt erst nach, und du best&auml;tigst mit der Best&auml;tigungstaste (Vorgabe A / Kreuz, oder Enter). Esc ignoriert den Vorfall. Aus: Das Safety Car f&auml;hrt sofort los.</small></div>
+        <label class="tgl"><input type="checkbox" id="hd-sc-fragen" checked><span></span></label></div>
       <div class="opt-row hd-row"><div class="opt-label">Safety Car nach<small>Wie lange ein Auto neben der Strecke stehen oder stillstehen muss.</small></div>
         <span class="hd-slider"><input type="range" id="hd-auto-sc-sek" min="1" max="10" step="0.5" value="3"><b id="hd-auto-sc-sek-wert" data-i18n-skip>3.0 s</b></span></div>
       <div class="opt-row hd-row"><div class="opt-label">Zuf&auml;llige NPC-Fahrernamen<span class="hd-tag">HybridDash</span><small>Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zuf&auml;lligen Fahrernamen.</small></div>
         <label class="tgl"><input type="checkbox" id="hd-npc-namen" checked><span></span></label></div>
       <div class="opt-row hd-row"><div class="opt-label">Neue Fahrer ansagen<small>Die Stimme nennt den neuen Fahrer und sein Auto.</small></div>
         <label class="tgl"><input type="checkbox" id="hd-npc-ansage" checked><span></span></label></div>
+      <div class="opt-row hd-row"><div class="opt-label">Alle Fahrer ansagen<small>Jedes Auto, das sich verbindet, wird angesagt: Fahrer, Auto und Farbe.</small></div>
+        <label class="tgl"><input type="checkbox" id="hd-alle-ansagen"><span></span></label></div>
       <div class="opt-row"><div class="opt-label">Weiche Reifen verboten<span class="wip-tag">WIP</span><small>An: In diesem
           Rennen gibt es keine weichen Reifen. Die Reifenwahl im Boxenschirm &uuml;berspringt &bdquo;weich&ldquo;, und wer
           beim Start weiche Reifen drauf hat, bekommt mittlere &ndash; auch Spieler&nbsp;2 und 3. Aus (Standard): alle

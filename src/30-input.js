@@ -241,7 +241,7 @@
     if (!rec.on) { showHudToast('Keine Aufnahme läuft'); return; }
     recRow('mark', '', null, label);
     log(`Aufnahme-Markierung: ${label}`, 'info');
-    showHudToast('Markiert: ' + label);
+    showHudToast(t('Markiert') + ': ' + label);
     renderRecMarks();
     recStatus();
   }

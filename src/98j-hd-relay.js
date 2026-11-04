@@ -444,8 +444,30 @@
         liste.querySelectorAll('[data-hdr-dazu]').forEach((b) => { b.onclick = () => { const d = hdRelay.fremd.get(Number(b.dataset.hdrDazu)); if (d) hdFremdesAuto(d._k, d.id.slice(HD_RELAY_ID.length), d.name); }; });
       } else liste.innerHTML = '';
     }
+    hdChipAuffrischen();
     const z = $('hdr-zahlen');
     if (z) z.textContent = hdRelay.offen ? hdRelay.gesendet + ' sent · ' + hdRelay.empfangen + ' received' : '';
+  }
+  // v2.1: a chip in the header (top right, next to the car count) reopens the panel from any
+  // screen. REPORTED: "have a tab or button to prompt the Helper window". Closing the panel
+  // never closes the link - only "Unlink" or closing the browser tab does.
+  function hdRelayChip(st) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'hd-relay-chip';
+    b.className = 'hd-relay-chip' + (hdRelay.offen ? (hdRelay.warStill ? ' gelb' : ' an') : hdRelay.rolle ? ' rot' : '');
+    const n = hdRelay.rolle === 'host' ? [...hdRelay.fremd.values()].filter((d) => d.gatt.connected).length : hdRelay.eigen.size;
+    b.textContent = '⇄ ' + (hdRelay.rolle === 'helper' ? 'HELPER' : '2 LAPTOPS') + (hdRelay.offen ? ' · ' + n : '');
+    b.title = 'Two-laptop mode';
+    b.setAttribute('data-i18n-skip', '');
+    b.addEventListener('click', (e) => { e.stopPropagation(); hdRelayOeffnen(); });
+    st.appendChild(b);
+  }
+  function hdChipAuffrischen() {
+    const st = $('k-status'), alt = $('hd-relay-chip');
+    if (!st) return;
+    if (alt) alt.remove();
+    hdRelayChip(st);
   }
   function hdRelayOeffnen(rolle) {
     const box = $('hd-relay');
@@ -484,8 +506,23 @@
       catch (e) { if (!(e && e.name === 'NotFoundError')) fehler(e); }
     });
     an('hdr-trennen', () => { hdRelaySchliessen(false); hdStatus('Link closed.'); });
-    // ?helper in the address opens straight into helper mode.
-    try { if (new URLSearchParams(location.search).has('helper')) hdRelayOeffnen('helper'); } catch (e) { /* no URL */ }
+    // ?helper in the address (or helper.html, which forwards here) is the DEDICATED HELPER
+    // PAGE: the panel fills the screen, cannot be closed, and nothing else of the app shows -
+    // so it cannot be closed by accident in the middle of a race.
+    let helperSeite = false;
+    try { helperSeite = new URLSearchParams(location.search).has('helper'); } catch (e) { /* no URL */ }
+    if (helperSeite) {
+      document.body.classList.add('hd-helper-seite');
+      document.title = 'HybridDash Helper';
+      hdRelayOeffnen('helper');
+    }
+    // While linked, closing or reloading the tab asks first (it would drop the link and stop
+    // the helper's cars).
+    window.addEventListener('beforeunload', (e) => {
+      if (!hdRelay.offen && !(hdRelay.rolle === 'helper' && hdRelay.eigen.size)) return;
+      e.preventDefault(); e.returnValue = '';
+    });
+    an('hdr-helper-seite', () => { window.open(location.pathname + '?helper', '_blank', 'noopener'); });
     setInterval(() => { if ($('hd-relay') && !$('hd-relay').hidden) hdRelayMalen(); }, 1000);
     hdRelayMalen();
   })();

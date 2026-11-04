@@ -107,6 +107,11 @@
     // gleichzeitig einen Klick irgendwo in der Seite aus - eine Belegung darauf kaempft mit
     // dem Cursor. Frei zuweisbar bleibt es, nur eben nicht ab Werk.
     resetcar: { type: 'none', index: -1, label: 'nicht belegt' },
+    // HybridDash 2.1: confirms the safety-car prompt. A / Cross is the industry-standard
+    // confirm button. It shares the button with pit stop / yellow flag ON PURPOSE (defaults
+    // may share, see resolveBindingCollisions): while the prompt is open, flagTasteTick()
+    // hands the button to the prompt only.
+    confirm: { type: 'button', index: 0, label: 'Kreuz (PS) / A (Xbox)' },
   };
   const BIND_ACTION_LABELS = {
     pause: 'Pause / Fortsetzen',
@@ -122,6 +127,7 @@
     trackview: 'Streckenansicht',
     fullscreenToggle: 'Vollbild umschalten',
     resetcar: 'Auto zurücksetzen',
+    confirm: 'Bestätigungstaste',
   };
 
   // Boxenstopp und Streckenansicht haben die Knoepfe getauscht. Gespeichertes liegt UEBER
@@ -2322,9 +2328,9 @@
     // genau das ein sinnvoller Fall: zusehen, wie sie fahren.
     btn.disabled = !player && !ghosts;
     btn.title = !player && !ghosts
-      ? (garage.length ? 'Erst ein Auto auf "Steuern" oder "NPC" stellen'
-                       : 'Erst ein Auto verbinden')
-      : (player ? 'Ins Cockpit' : 'NPCs starten')
+      ? (garage.length ? t('Erst ein Auto auf "Steuern" oder "NPC" stellen')
+                       : t('Erst ein Auto verbinden'))
+      : t(player ? 'Ins Cockpit' : 'NPCs starten')
         + (ghosts ? ', ' + ghosts + ' NPC' + (ghosts === 1 ? '' : 's') : '');
     btn.textContent = player ? 'Losfahren' : (ghosts ? 'NPCs starten' : 'Losfahren');
     // Anhalten ist nur scharf, wenn wirklich einer faehrt. Gepruefte Bedingung ist der
@@ -2340,10 +2346,9 @@
       stop.dataset.lage = fahren.length ? 'anhalten' : 'starten';
       if (typeof garAktionenAbgleichen === 'function') setTimeout(garAktionenAbgleichen, 0);
       stop.title = fahren.length
-        ? fahren.length + ' NPC' + (fahren.length === 1 ? '' : 's')
-          + ' ausrollen lassen und anhalten'
-        : (ghosts ? ghosts + ' NPC' + (ghosts === 1 ? '' : 's') + ' losfahren lassen'
-                  : 'Erst ein Auto auf "NPC" stellen');
+        ? t('{n} NPC(s) ausrollen lassen und anhalten').replace('{n}', fahren.length)
+        : (ghosts ? t('{n} NPC(s) losfahren lassen').replace('{n}', ghosts)
+                  : t('Erst ein Auto auf "NPC" stellen'));
     }
   }
 
@@ -2579,6 +2584,7 @@
       else if (!playerCar) setCarRole(car, 'player');
       else setCarRole(car, 'ghost');
       log(`${garageLabel(car)} verbunden (${garage.length} insgesamt)` + (opt && opt.auto ? ' - automatisch beim Start.' : '.'), 'info');
+      if (typeof hdAutoVerbunden === 'function') hdAutoVerbunden(car);   // HybridDash 2.1
       playStartFx();
     } finally {
       garVerbindetGerade.delete(String(dev.id));
@@ -6190,6 +6196,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // Prozent stehenzubleiben.
   let padKreuzSeit = null;
   function flagTasteTick(flagNow) {
+    // HybridDash 2.1: while the safety-car prompt is open, this button is the Confirmation
+    // Button only (98i-hybriddash.js) - no pit stop, no yellow flag.
+    if (typeof hdScFrageOffen === 'function' && hdScFrageOffen()) { prevYellowFlag = flagNow; return; }
     // ALLERERSTE STUFE: ist das Autos-in-Position-Fenster offen (70-race.js), startet dieselbe
     // Taste das Rennen (X statt Touch). Alles dahinter bleibt unberuehrt.
     if (typeof raceGridOffen === 'function' && raceGridOffen()) {
@@ -10982,6 +10991,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Herausgegeben fuer den Prueflauf: das ZIEL ist, was die Kurvenlogik entscheidet. Das
       // erreichte Tempo haengt zusaetzlich an der Physik, und ein Prueflauf mit kuenstlicher
       // Kacheluhr verfaelscht es - dann prueft man seinen Prueflauf.
+      // HybridDash 2.1: under yellow, never faster than the car ahead when close (98i-hybriddash.js).
+      if (flagState !== 'green' && typeof hdGelbFolge === 'function') target = hdGelbFolge(car, target, now);
       g.lastTarget = target;
       const st2 = ghostSpeedControl(g, target, v, dtG);
       g.lastFF = g.iTerm || 0;

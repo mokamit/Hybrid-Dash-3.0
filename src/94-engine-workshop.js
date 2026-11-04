@@ -166,8 +166,8 @@
     const opt = mwEl('crank').querySelector('option[value=cross]');
     if (opt) {
       opt.disabled = noCross;
-      opt.textContent = noCross ? 'Cross-Plane (hier nicht moeglich)'
-                                : 'Cross-Plane (ungleiche Baenke)';
+      opt.textContent = noCross ? t('Cross-Plane (hier nicht möglich)')
+                                : t('Cross-Plane (ungleiche Bänke)');
     }
     mwEl('crank').disabled = false;
     // Steht Cross-Plane und wird gerade unmoeglich, muss der Wert mit: ein Auswahlfeld, das
@@ -464,7 +464,7 @@
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" aria-label="Z\u00fcndfolge">'
          + '<rect x="' + L + '" y="' + T + '" width="' + (W - L - R) + '" height="'
          + (H - T - 22) + '" fill="#14161c"/>' + out
-         + '<text x="' + L + '" y="12" font-size="9.5" fill="#f4f6fb">Kurbelwinkel, Grad'
+         + '<text x="' + L + '" y="12" font-size="9.5" fill="#f4f6fb">' + t('Kurbelwinkel, Grad')
          + '</text></svg>';
   }
 
@@ -712,8 +712,8 @@
       b.className = 'mw-preset'
         + (mwPreset && mwPreset.id === p.id && mwOrderActive(mwRead()) ? ' sel' : '');
       b.textContent = p.name;
-      b.title = p.motor + ', ' + p.rpm + '/min, Zuendfolge ' + p.order.join('-')
-              + (p.lader ? ' (aufgeladen, ohne Ladermodell)' : '');
+      b.title = (lang === 'de' ? p.motor : p.motor.replace(/ Grad\b/g, '°')) + ', ' + p.rpm + (lang === 'de' ? '/min, ' : ' rpm, ') + t('Zündfolge') + ' ' + p.order.join('-')
+              + (p.lader ? ' ' + t('(aufgeladen, ohne Ladermodell)') : '');
       b.addEventListener('click', () => mwPresetLoad(p));
       row.appendChild(b);
     }

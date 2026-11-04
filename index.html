@@ -389,6 +389,40 @@
      deutlicher (aktuell sehr schwach und kaum erkennbar)". Vorher ::before mit 4,5 % Deckkraft;
      jetzt ein eigenes Element (die zwei Glitch-Ebenen brauchen ::before und ::after) mit 13 %. */
   /* HybridDash 2.0 */
+  .hd-relay-chip { font-size: inherit; padding: 1px 7px; border-radius: 3px; border: 1px solid rgba(255,255,255,.25);
+                   background: transparent; color: var(--k-dim); cursor: pointer; letter-spacing: .06em; min-height: 0; line-height: 1.4; }
+  .hd-relay-chip.an { border-color: #35b45a; color: #7cff9b; }
+  .hd-relay-chip.gelb { border-color: #ffd23f; color: #ffd23f; }
+  .hd-relay-chip.rot { border-color: #ff5a7a; color: #ff8aa0; }
+  .hdr-tipp { color: #9aa1b0; font-size: 12.5px; line-height: 1.45; margin: 0 0 4px; }
+  .hdr-tipp a, .hdr-link { color: #6fd3ff; }
+  .hdr-link { all: unset; cursor: pointer; text-decoration: underline; color: #6fd3ff; }
+  body.hd-helper-seite > *:not(#hd-relay):not(script) { visibility: hidden; }
+  body.hd-helper-seite #hd-relay { visibility: visible; background: #05070c; }
+  body.hd-helper-seite #hdr-zu, body.hd-helper-seite .hdr-wahl, body.hd-helper-seite .hdr-tipp { display: none; }
+  /* v2.1: main tabs and sub tabs further apart, with a subtle neon red line between them. */
+  header#k-kopf .k-leiste2 { position: relative; margin-top: 9px; padding-top: 5px; }
+  header#k-kopf .k-leiste2::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, #ff2a4f 12%, #ff2a4f 88%, transparent);
+    box-shadow: 0 0 4px rgba(255,42,79,.9), 0 0 12px rgba(255,42,79,.45); pointer-events: none; }
+  @media (max-height: 480px) { header#k-kopf .k-leiste2 { margin-top: 5px; padding-top: 3px; } }
+  .hd-logo-svg { fill: currentColor; }
+  header#k-kopf .hdr-logo svg.hd-logo-svg { width: 22px; height: 22px; }
+  @media (max-height: 480px) { header#k-kopf .hdr-logo svg.hd-logo-svg { width: 14px; height: 14px; } }
+  .hd-sc-frage { position: fixed; left: 50%; top: 14%; transform: translateX(-50%); z-index: 9200;
+                 width: min(460px, calc(100vw - 32px)); }
+  .hd-sc-frage[hidden] { display: none; }
+  .hd-sc-frage-karte { background: #1a1405; color: #fff6d6; border: 2px solid #ffd23f; border-radius: 10px;
+                       padding: 14px 16px; display: grid; gap: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.6);
+                       animation: hd-sc-puls 1s ease-in-out infinite alternate; }
+  @keyframes hd-sc-puls { from { box-shadow: 0 0 0 rgba(255,210,63,.0), 0 10px 40px rgba(0,0,0,.6); }
+                          to { box-shadow: 0 0 24px rgba(255,210,63,.45), 0 10px 40px rgba(0,0,0,.6); } }
+  @media (prefers-reduced-motion: reduce) { .hd-sc-frage-karte { animation: none; } }
+  .hd-sc-frage-titel { font-size: 20px; letter-spacing: .04em; color: #ffd23f; }
+  .hd-sc-frage-wer { font-size: 15px; }
+  .hd-sc-frage-knoepfe { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hd-sc-frage-knoepfe button { flex: 1; min-width: 140px; }
+  .hd-sc-frage-knoepfe small { opacity: .75; margin-left: .4em; font-weight: 400; }
   .hd-relay { position: fixed; inset: 0; z-index: 9100; background: rgba(3,5,9,.82); display: grid; place-items: center;
               padding: 16px; box-sizing: border-box; overflow: auto; }
   .hd-relay[hidden] { display: none; }
@@ -5174,7 +5208,7 @@
      anderen Stellen, die per href darauf verweisen. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <path id="om" d="M 112 370 L 200 370 C 192 328, 172 290, 172 236 C 172 150, 210 102, 256 102 C 302 102, 340 150, 340 236 C 340 290, 320 328, 312 370 L 400 370 L 400 310 C 368 310, 350 286, 388 236 C 410 200, 412 160, 388 116 C 358 62, 308 42, 256 42 C 204 42, 154 62, 124 116 C 100 160, 102 200, 124 236 C 162 286, 144 310, 112 310 Z" fill-rule="evenodd"/>
+    <path id="om" d="M 52 104 L 116 104 L 116 222 L 196 222 L 196 104 L 260 104 L 260 408 L 196 408 L 196 284 L 116 284 L 116 408 L 52 408 Z M 296 104 L 368 104 C 486 104, 486 408, 368 408 L 296 408 Z M 360 166 L 360 346 C 412 346, 412 166, 360 166 Z" fill-rule="evenodd"/>
     <mask id="om-s1"><rect x="0" y="115" width="512" height="20" fill="#fff"/></mask>
     <mask id="om-s2"><rect x="0" y="210" width="512" height="35" fill="#fff"/></mask>
     <mask id="om-s3"><rect x="0" y="305" width="512" height="22" fill="#fff"/></mask>
@@ -5193,7 +5227,7 @@
 <header id="k-kopf">
   <!-- BESTELLT: "Per Klick auf das Omega oben links ... zurueck zum Startbildschirm". -->
   <button class="hdr-logo goto-tab" data-tab="home" title="Zum Startbildschirm" aria-label="Zum Startbildschirm">
-    <svg viewBox="0 0 512 512" aria-hidden="true"><use href="#om"/></svg>
+    <svg viewBox="0 0 512 512" aria-hidden="true" class="hd-logo-svg"><use href="#om"/></svg>
   </button>
   <!-- BESTELLT: "Tabs nach ganz oben und 'Hauptmenü' Zurückpfeil wegtun ... Oben links nur
        logo und rechts daneben alle tabs; ganz rechts oben Verbindungsstatus". -->
@@ -9694,6 +9728,17 @@
        Info-Screen fungiert (Streckenscreen, ohne eigenes Auto; zB ein Tablet)." Er meldet
        sich beim Host als Zuschauer an; solange einer zusieht, schicken die Fahrer ihre
        Position mit. Geoeffnet ueber "Als Info-Screen" oder direkt mit /?info in der Adresse. -->
+  <!-- HybridDash 2.1: safety-car confirmation (98i-hybriddash.js) -->
+  <div class="hd-sc-frage" id="hd-sc-frage" hidden role="alertdialog" aria-labelledby="hd-sc-frage-titel">
+    <div class="hd-sc-frage-karte">
+      <b class="hd-sc-frage-titel" id="hd-sc-frage-titel">Safety Car losschicken?</b>
+      <span class="hd-sc-frage-wer" id="hd-sc-frage-wer" data-i18n-skip></span>
+      <div class="hd-sc-frage-knoepfe">
+        <button type="button" class="primary" id="hd-sc-frage-ja">Losschicken <small id="hd-sc-frage-taste" data-i18n-skip></small></button>
+        <button type="button" id="hd-sc-frage-nein">Ignorieren <small data-i18n-skip>Esc</small></button>
+      </div>
+    </div>
+  </div>
   <!-- HybridDash 2.0: two-laptop mode (98j-hd-relay.js). English only, like the codes it shows. -->
   <div class="hd-relay" id="hd-relay" hidden data-i18n-skip role="dialog" aria-label="Two-laptop mode">
     <div class="hdr-karte">
@@ -9702,6 +9747,9 @@
       <p class="hdr-intro">Split the Bluetooth connections across two laptops on the same Wi-Fi. The <b>host</b> runs the race
         (race control, timing, standings, NPCs, your car, dashboard). The <b>helper</b> only connects the extra cars and relays
         their messages; those cars appear in the host&rsquo;s Garage and standings like every other car.</p>
+      <p class="hdr-tipp">On the helper laptop you can open the dedicated helper page: <a href="helper.html" target="_blank" rel="noopener">helper.html</a>
+        (or <button type="button" class="hdr-link" id="hdr-helper-seite">open it in a new tab</button>). It shows only this panel, so it can&rsquo;t be closed by accident.
+        Closing this panel never unlinks; reopen it any time from <b>&#8644;</b> at the top right.</p>
       <div class="hdr-wahl">
         <button type="button" id="hdr-wahl-host"><b>This laptop is the HOST</b><small>Laptop A &middot; runs the race</small></button>
         <button type="button" id="hdr-wahl-helper"><b>This laptop is a HELPER</b><small>Laptop B &middot; extra cars only</small></button>
@@ -9906,12 +9954,16 @@
       <!-- HybridDash 2.0 (98i-hybriddash.js) -->
       <div class="opt-row hd-row"><div class="opt-label">Automatisches Safety Car<span class="hd-tag">HybridDash</span><small>Steht ein Auto im Rennen neben der Strecke oder kommt es nicht mehr voran, ruft die App nach dieser Zeit automatisch Gelb aus und schickt das Safety Car los. Nur auf der Bahn.</small><small id="hd-auto-sc-status" class="hd-status" data-i18n-skip></small></div>
         <label class="tgl"><input type="checkbox" id="hd-auto-sc" checked><span></span></label></div>
+      <div class="opt-row hd-row"><div class="opt-label">Vor dem Safety Car fragen<small>An: Die App fragt erst nach, und du best&auml;tigst mit der Best&auml;tigungstaste (Vorgabe A / Kreuz, oder Enter). Esc ignoriert den Vorfall. Aus: Das Safety Car f&auml;hrt sofort los.</small></div>
+        <label class="tgl"><input type="checkbox" id="hd-sc-fragen" checked><span></span></label></div>
       <div class="opt-row hd-row"><div class="opt-label">Safety Car nach<small>Wie lange ein Auto neben der Strecke stehen oder stillstehen muss.</small></div>
         <span class="hd-slider"><input type="range" id="hd-auto-sc-sek" min="1" max="10" step="0.5" value="3"><b id="hd-auto-sc-sek-wert" data-i18n-skip>3.0 s</b></span></div>
       <div class="opt-row hd-row"><div class="opt-label">Zuf&auml;llige NPC-Fahrernamen<span class="hd-tag">HybridDash</span><small>Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zuf&auml;lligen Fahrernamen.</small></div>
         <label class="tgl"><input type="checkbox" id="hd-npc-namen" checked><span></span></label></div>
       <div class="opt-row hd-row"><div class="opt-label">Neue Fahrer ansagen<small>Die Stimme nennt den neuen Fahrer und sein Auto.</small></div>
         <label class="tgl"><input type="checkbox" id="hd-npc-ansage" checked><span></span></label></div>
+      <div class="opt-row hd-row"><div class="opt-label">Alle Fahrer ansagen<small>Jedes Auto, das sich verbindet, wird angesagt: Fahrer, Auto und Farbe.</small></div>
+        <label class="tgl"><input type="checkbox" id="hd-alle-ansagen"><span></span></label></div>
       <div class="opt-row"><div class="opt-label">Weiche Reifen verboten<span class="wip-tag">WIP</span><small>An: In diesem
           Rennen gibt es keine weichen Reifen. Die Reifenwahl im Boxenschirm &uuml;berspringt &bdquo;weich&ldquo;, und wer
           beim Start weiche Reifen drauf hat, bekommt mittlere &ndash; auch Spieler&nbsp;2 und 3. Aus (Standard): alle
@@ -18384,6 +18436,14 @@
     "Aus der Strecke im Editor": "From the track in the editor",
     "← Community": "← Community",
     // ---- HybridDash 2.0 (98i-hybriddash.js) ----
+    "Bestätigungstaste": "Confirmation Button",
+    "Alle Fahrer ansagen": "Announce all drivers",
+    "Jedes Auto, das sich verbindet, wird angesagt: Fahrer, Auto und Farbe.": "Every car that connects is announced: driver, car and colour.",
+    "Vor dem Safety Car fragen": "Ask before deploying the safety car",
+    "An: Die App fragt erst nach, und du bestätigst mit der Bestätigungstaste (Vorgabe A / Kreuz, oder Enter). Esc ignoriert den Vorfall. Aus: Das Safety Car fährt sofort los.": "On: the app asks first, and you confirm with the Confirmation Button (default A / Cross, or Enter). Esc ignores the incident. Off: the safety car goes out straight away.",
+    "Safety Car losschicken?": "Deploy the safety car?",
+    "Losschicken": "Deploy",
+    "Ignorieren": "Ignore",
     "HD: neben der Strecke": "off track for {s} s",
     "HD: steht": "not moving for {s} s",
     "SAFETY CAR": "SAFETY CAR",
@@ -18399,6 +18459,161 @@
     "Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zufälligen Fahrernamen.": "A car without a name gets a random driver name the first time it becomes an NPC.",
     "Neue Fahrer ansagen": "Announce new drivers",
     "Die Stimme nennt den neuen Fahrer und sein Auto.": "The voice announces the new driver and their car.",
+    // ---- HybridDash 2.1 translation sweep ----
+    "Dauer/Runden": "Duration/laps",
+    "Rennen starten/abbrechen": "Start/abort race",
+    "★ Beliebteste Strecke": "★ Most popular track",
+    "Automatische oder manuelle Schaltung": "Automatic or manual gearbox",
+    "keine Variante aktiv": "no variant active",
+    "🏁 Rennen starten": "🏁 Start race",
+    "🏁 Training starten": "🏁 Start practice",
+    "Renntyp, Dauer, Wetter, Pflichtstopps, Rennen starten.": "Race type, duration, weather, mandatory stops, start the race.",
+    "GT3: schwarze Kacheln (WIP)": "GT3: black tiles (WIP)",
+    "Fahrhilfe": "Driving aid",
+    "Fahrhilfe: Auto lenkt selbst": "Driving aid: car steers itself",
+    "GT3, 6-Gang sequenziell": "GT3, 6-speed sequential",
+    "Formel 1, 8-Gang": "Formula 1, 8-speed",
+    "Ferrari 412P, 5-Gang Transaxle": "Ferrari 412P, 5-speed transaxle",
+    "Nächster Schirm": "Next screen",
+    "Boxenstopp anfordern": "Request pit stop",
+    "Leseart: Schienenkodierung oder gedruckte Muster": "Read mode: track coding or printed patterns",
+    "Abstimmung durchschalten, wirkt wie die Voreinstellungen": "Cycle the setup, works like the presets",
+    "Antippen: Automatik oder manuell schalten": "Tap: automatic or manual shifting",
+    "Gang, antippen wechselt Automatik und manuell": "Gear, tap to switch between automatic and manual",
+    "Health der Teilnehmer": "Health of the field",
+    "Tanksimulation an/aus, beim Boxenstopp: Tanken an/aus": "Fuel simulation on/off; at a pit stop: refuelling on/off",
+    "Schadenssimulation an/aus, beim Boxenstopp: Reparatur an/aus": "Damage simulation on/off; at a pit stop: repair on/off",
+    "Reifen: Füllhöhe ist Restprofil, Farbe die Temperatur, Rillen bedeuten Regenreifen. Links und rechts werden getrennt gerechnet, vorn und hinten nicht – die beiden einer Seite laufen deshalb gleich. Antippen schaltet die Reifensimulation aus, beim Boxenstopp den Reifenwechsel.": "Tyres: the fill level is the remaining tread, the colour the temperature, grooves mean rain tyres. Left and right are calculated separately, front and rear are not – so the two on one side wear the same. Tap to switch off the tyre simulation; at a pit stop, the tyre change.",
+    "Wetter umschalten: sonnig, Regen, wechselhaft": "Change weather: sunny, rain, changeable",
+    "Motorklang Auto 1: rechte Hälfte weiter, linke zurück": "Engine sound car 1: right half next, left half back",
+    "Motorklang Auto 2: rechte Hälfte weiter, linke zurück": "Engine sound car 2: right half next, left half back",
+    "Motorklang Auto 3: rechte Hälfte weiter, linke zurück": "Engine sound car 3: right half next, left half back",
+    "Vergrößern (X) / Verkleinern (X oder Kreis)": "Zoom in (X) / zoom out (X or Circle)",
+    "Streckenkarte vergrößern": "Enlarge track map",
+    "Tempo, Handling, Beschleunigung, Schaden und Reifenverschleiss auf alle setzen (Controller, Tasten, Empfindlichkeit, Rumble und Sound bleiben unberührt)": "Apply speed, handling, acceleration, damage and tyre wear to everyone (controller, buttons, sensitivity, rumble and sound stay as they are)",
+    "Minus eins": "Minus one",
+    "Plus eins": "Plus one",
+    "weiter links": "further left",
+    "weiter rechts": "further right",
+    "Controller-Belegung vergrößern": "Enlarge controller layout",
+    "Controller mit der aktuellen Tastenbelegung": "Controller with the current button mapping",
+    "Strecke speichern": "Save track",
+    "45° links drehen": "Rotate 45° left",
+    "45 Grad links drehen": "Rotate 45 degrees left",
+    "45° rechts drehen": "Rotate 45° right",
+    "45 Grad rechts drehen": "Rotate 45 degrees right",
+    "Zufaellige Strecke bauen": "Build a random track",
+    "Faehrt automatisch eine Runde und uebernimmt sie, sobald sie als geschlossener Rundkurs erkannt ist": "Drives one lap automatically and takes it over as soon as it is recognised as a closed circuit",
+    "Bahn-Lesemodus umschalten": "Toggle track read mode",
+    "Belegung entfernen": "Remove binding",
+    "Steuerkreuz links": "D-pad left",
+    "Steuerkreuz rechts": "D-pad right",
+    "Ein Zündimpuls": "One ignition pulse",
+    "(aufgeladen, ohne Ladermodell)": "(forced induction, no boost model)",
+    "Cross-Plane (hier nicht möglich)": "Cross-plane (not possible here)",
+    "Kurbelwinkel, Grad": "Crank angle, degrees",
+    "{n} Regler gesetzt": "{n} settings applied",
+    "nicht gefunden": "not found",
+    "{n} unbekannt übergangen": "{n} unknown skipped",
+    "{p} % ({s} s auf 100)": "{p} % ({s} s to 100)",
+    "{p}% vorn": "{p}% front",
+    "62% vorn": "62% front",
+    "{n} weniger": "Fewer: {n}",
+    "{n} mehr": "More: {n}",
+    "Erst ein Auto auf \"NPC\" stellen": "Set a car to \"NPC\" first",
+    "Erst ein Auto auf \"Steuern\" oder \"NPC\" stellen": "Set a car to \"Drive\" or \"NPC\" first",
+    "Ins Cockpit": "To the cockpit",
+    "{n} NPC(s) ausrollen lassen und anhalten": "Let {n} NPC(s) coast and stop",
+    "{n} NPC(s) losfahren lassen": "Let {n} NPC(s) drive off",
+    "Beste 3er-Serie": "Best 3-run series",
+    "Renneinstellungen erzwingen": "Enforce race settings",
+    "Sektorzeiten": "Sector times",
+    "Kein Schaden im Stand": "No damage at a standstill",
+    "Aerodynamik": "Aerodynamics",
+    "BMW M4 GT3: Reihen-6": "BMW M4 GT3: inline-6",
+    "Ford Mustang GT3: V8, Cross-Plane": "Ford Mustang GT3: V8, cross-plane",
+    "Ford Mustang GT3 v2: V8, Cross-Plane (Aufnahme)": "Ford Mustang GT3 v2: V8, cross-plane (recording)",
+    "Ferrari 296 GT3: V6, 120 Grad": "Ferrari 296 GT3: V6, 120 degrees",
+    "Mercedes-AMG GT3: V8, Cross-Plane": "Mercedes-AMG GT3: V8, cross-plane",
+    "Corvette C6.R: V8, Cross-Plane, OHV": "Corvette C6.R: V8, cross-plane, OHV",
+    "Corvette Z06 GT3.R: V8, Flat-Plane": "Corvette Z06 GT3.R: V8, flat-plane",
+    "Aston Martin Vantage GT3: V8, Cross-Plane": "Aston Martin Vantage GT3: V8, cross-plane",
+    "Huracan GT3 / R8 LMS: V10, Split-Pin": "Huracan GT3 / R8 LMS: V10, split-pin",
+    "Formel 1 2026: V6 Turbo-Hybrid, 1,6 l": "Formula 1 2026: V6 turbo hybrid, 1.6 l",
+    "Ford GT40 Mk I: V8, Cross-Plane, 4,7 l": "Ford GT40 Mk I: V8, cross-plane, 4.7 l",
+    "Lola T70 Mk3B: Chevrolet-V8, Cross-Plane": "Lola T70 Mk3B: Chevrolet V8, cross-plane",
+    "Ferrari 330 P4 / 412P: V12, 60 Grad": "Ferrari 330 P4 / 412P: V12, 60 degrees",
+    "Maserati MC12: V12, 65 Grad": "Maserati MC12: V12, 65 degrees",
+    "AMG GT3: V8, Cross-Plane (Aufnahme)": "AMG GT3: V8, cross-plane (recording)",
+    "Huracán GT3 Evo: V10, Split-Pin (Aufnahme)": "Huracán GT3 Evo: V10, split-pin (recording)",
+    "Autohupe": "Car horn",
+    "Schiffshupe": "Ship horn",
+    "Esel": "Donkey",
+    "Ziege": "Goat",
+    "Furz": "Fart",
+    "antippen": "tap",
+    "Testen": "Test",
+    "3-stufig": "3-step",
+    "Fahrbahnmitte": "Track centre",
+    "Innen (gemittelt)": "Inside (averaged)",
+    "Luuke-Linie": "Luuke line",
+    "nebeneinander": "side by side",
+    "Skalierung": "Scaling",
+    "Weiter ▶": "Next ▶",
+    "Vollbild verlassen": "Exit full screen",
+    "Gelbe Flagge halten": "Hold for yellow flag",
+    "Quadrat": "Square",
+    "Kreis": "Circle",
+    "Podest": "Podium",
+    "Sterne": "Stars",
+    "z. B. Luuke": "e.g. Luuke",
+    "Raum gestalten": "Design the room",
+    "Millisekunden": "Milliseconds",
+    "Druck": "Pressure",
+    "Pegel": "Level",
+    "Auspuffresonanz": "Exhaust resonance",
+    "Kreuz (PS) / A (Xbox)": "Cross (PS) / A (Xbox)",
+    "Was Auto 2": "What car 2",
+    "Auto repariert": "Car repaired",
+    "BOXENGASSE VORBEI": "PIT LANE OVER",
+    "Bitte manuell kopieren": "Please copy manually",
+    "Bitte von Hand kopieren": "Please copy by hand",
+    "Boxengasse verlassen": "Pit lane left",
+    "Boxengasse, Tempolimit": "Pit lane, speed limit",
+    "Code kopiert": "Code copied",
+    "Derby: kein Boxenstopp": "Derby: no pit stop",
+    "Fertig, losfahren!": "Done, go!",
+    "GELBE FLAGGE": "YELLOW FLAG",
+    "GRÜN": "GREEN",
+    "HUPE NICHT GELADEN": "HORN NOT LOADED",
+    "KEINE RUNDE, BOXENEINFAHRT": "NO LAP, PIT ENTRY",
+    "KEINE STRECKE": "NO TRACK",
+    "Keine Aufnahme läuft": "No recording running",
+    "Kopiert": "Copied",
+    "NEBEN DIE STRECKE FAHREN": "DRIVE OFF THE TRACK",
+    "NPC OHNE STRECKENCODE": "NPC WITHOUT TRACK CODE",
+    "NUR ÜBER DEN DOPPELTEN AUSDRUCK": "ONLY VIA THE DOUBLE PRINTOUT",
+    "SEKTOREN BRAUCHEN DEN AUSDRUCK-MODUS": "SECTORS NEED PRINTOUT MODE",
+    "SITZUNGEN GELÖSCHT": "SESSIONS DELETED",
+    "SPEICHER VOLL": "STORAGE FULL",
+    "STRECKE ANDERSHERUM": "TRACK REVERSED",
+    "Strecke übernommen": "Track applied",
+    "TESTRUNDE GEZAEHLT": "TEST LAP COUNTED",
+    "Tank und Zustand zurückgesetzt": "Fuel and condition reset",
+    "Testcrash": "Test crash",
+    "ABSTIMMUNG": "SETUP",
+    "AUTO": "CAR",
+    "BOXENGASSE AKTIV": "PIT LANE ACTIVE",
+    "Markiert": "Marked",
+    "SERVICE LÄUFT": "SERVICE RUNNING",
+    "BOXENSTOPP ABGEBROCHEN": "PIT STOP CANCELLED",
+    "BOXENSTOPP – ANHALTEN": "PIT STOP – STOP THE CAR",
+    "FERTIG, LOSFAHREN!": "DONE, GO!",
+    "KEIN AUTO ZUGETEILT": "NO CAR ASSIGNED",
+    "STRECKE GELERNT: {n} TEILE": "TRACK LEARNED: {n} PIECES",
+    "TESTRUNDE: {n} AUTO(S)": "TEST LAP: {n} CAR(S)",
+    "Reifen gewechselt": "Tyres changed",
+    "Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt": "Reset, fuel {l} l, damage 0 %, tyres cold",
   };
 
   // Spanisches Woerterbuch. Gleiche Schluessel (der deutsche Text) wie I18N_EN, aber nur die
@@ -19825,6 +20040,12 @@
     "Strecke einreichen": "Enviar circuito",
     "Eigene Strecken mit Abstimmung einreichen und Bestzeiten teilen.": "Envía tus propios circuitos con su ajuste y comparte mejores tiempos.",
     // ---- HybridDash 2.0 (98i-hybriddash.js) ----
+    "Bestätigungstaste": "Botón de confirmación",
+    "Alle Fahrer ansagen": "Anunciar a todos los pilotos",
+    "Vor dem Safety Car fragen": "Preguntar antes del coche de seguridad",
+    "Safety Car losschicken?": "¿Enviar el coche de seguridad?",
+    "Losschicken": "Enviar",
+    "Ignorieren": "Ignorar",
     "HD: neben der Strecke": "fuera de pista durante {s} s",
     "HD: steht": "detenido durante {s} s",
     "SAFETY CAR": "COCHE DE SEGURIDAD",
@@ -19867,6 +20088,8 @@
   let i18nBusy = false;
 
   function i18nNorm(t) { return t.replace(/\s+/g, ' ').trim(); }
+  const i18nFehlt = new Set();
+  window.HD_I18N_FEHLT = i18nFehlt;
 
   function i18nLookup(t) {
     const k = i18nNorm(t);
@@ -19917,7 +20140,7 @@
       const de = i18nOrig.get(node);
       if (lang === 'de') { if (node.nodeValue !== de) node.nodeValue = de; continue; }
       const en = i18nLookup(de);
-      if (en === null) continue;
+      if (en === null) { i18nFehlt.add(i18nNorm(de)); continue; }
       // Fuehrende und folgende Leerzeichen aus dem Original behalten: sie tragen im
       // Fliesstext den Abstand zum Nachbarelement, und ohne sie klebt "Taste" am <b>.
       const lead = de.match(/^\s*/)[0], tail = de.match(/\s*$/)[0];
@@ -19939,6 +20162,7 @@
         const de = store[key];
         if (lang === 'de') { if (cur !== de) el.setAttribute(a, de); continue; }
         const en = i18nLookup(de);
+        if (en === null) i18nFehlt.add(i18nNorm(de));
         if (en !== null && cur !== en) el.setAttribute(a, en);
       }
     }
@@ -20022,9 +20246,12 @@
 
   // Fuer Text, der im Code entsteht statt im Markup. Absichtlich dieselbe Tabelle: ein
   // zweites Woerterbuch waere ein zweiter Ort, an dem etwas fehlen kann.
+  // HybridDash 2.1: texts with no translation are recorded (window.HD_I18N_FEHLT), so a crawl
+  // can find German that slips through in English mode.
   function t(de) {
     if (lang === 'de') return de;
     const en = i18nLookup(de);
+    if (en === null && typeof de === 'string' && /[a-zäöüß]/i.test(de)) i18nFehlt.add(i18nNorm(de));
     return en === null ? de : en;
   }
 
@@ -21640,7 +21867,7 @@
     if (!rec.on) { showHudToast('Keine Aufnahme läuft'); return; }
     recRow('mark', '', null, label);
     log(`Aufnahme-Markierung: ${label}`, 'info');
-    showHudToast('Markiert: ' + label);
+    showHudToast(t('Markiert') + ': ' + label);
     renderRecMarks();
     recStatus();
   }
@@ -25159,7 +25386,7 @@
       window.__applyPreset(key);
       const txt = $('race-act-mode-txt');
       if (txt) txt.textContent = window.__presetLabel(key);
-      showHudToast('ABSTIMMUNG ' + window.__presetLabel(key).toUpperCase());
+      showHudToast(t('ABSTIMMUNG') + ' ' + window.__presetLabel(key).toUpperCase());
     });
   }
 
@@ -25866,8 +26093,8 @@
   // sehen koennen.
   const ACCEL_REF_S = 3.2;   // Bezugswert = 100 %
   function accelLabel(s) {
-    return Math.round(ACCEL_REF_S / s * 100) + ' % ('
-         + s.toFixed(1).replace('.', ',') + ' s auf 100)';
+    return t('{p} % ({s} s auf 100)').replace('{p}', Math.round(ACCEL_REF_S / s * 100))
+         .replace('{s}', lang === 'de' ? s.toFixed(1).replace('.', ',') : s.toFixed(1));
   }
   $('setting-zero-to-top').addEventListener('input', (e) => {
     physEngine.config.launchAnchorTimeS = parseFloat(e.target.value);
@@ -26583,7 +26810,7 @@
   $('setting-brakebias').addEventListener('input', (e) => {
     const pct = parseInt(e.target.value, 10);
     physEngine.config.brakeBias = pct / 100;
-    $('setting-brakebias-val').textContent = pct + '% vorn';
+    $('setting-brakebias-val').textContent = t('{p}% vorn').replace('{p}', pct);
   });
 
   // BESTELLT (GT7-Fahrmodus): "mehr Traegheit/Gewichtsverlagerung." transferK/loadTau
@@ -27279,7 +27506,7 @@
       sel.value = naechste.value;
       sel.dispatchEvent(new Event('change', { bubbles: true }));
       p2ScreenRender();
-      showHudToast('AUTO ' + nr + ': ' + motorNamen(naechste).toUpperCase());
+      showHudToast(t('AUTO') + ' ' + nr + ': ' + motorNamen(naechste).toUpperCase());
     }
   }
   // setzen. 80 ms, dann zurueck: eine Anzeige mit Masse setzt sich kurz, ein Textfeld nicht.
@@ -28224,7 +28451,10 @@
     const zielSc = (grund === 'yellow' && typeof scFolgeDeckel === 'function')
       ? Math.min(zielBasis, scFolgeDeckel(meinAuto)) : zielBasis;
     // v1.1.39: unter Gelb Mindesttempo und Haarnadel-Obergrenze wie die NPCs (autopilotGelbGrenzen).
-    const ziel = grund === 'yellow' && typeof autopilotGelbGrenzen === 'function' ? autopilotGelbGrenzen(meinAuto, zielSc) : zielSc;
+    const zielGrenzen = grund === 'yellow' && typeof autopilotGelbGrenzen === 'function' ? autopilotGelbGrenzen(meinAuto, zielSc) : zielSc;
+    // HybridDash 2.1: the last word under yellow - never faster than the car ahead when close.
+    const ziel = grund === 'yellow' && typeof hdGelbFolge === 'function' ? hdGelbFolge(meinAuto, zielGrenzen, rennZeitJetzt()) : zielGrenzen;
+    if (meinAuto) { meinAuto.hdZiel = ziel; meinAuto.hdZielAt = rennZeitJetzt(); }
     const v = Math.abs(st.speedKmh) / motor.config.topSpeedKmh;
     const dtA = Math.max(0.01, Math.min(0.25,
       (rennZeitJetzt() - (regler.at || rennZeitJetzt())) / 1000));
@@ -30575,6 +30805,7 @@
       a.className = n ? 'k-an' : '';
       a.textContent = n ? '● ' + n + ' ' + t(n === 1 ? 'Auto' : 'Autos') : '○ ' + t('kein Auto');
       st.appendChild(a);
+      if (typeof hdRelayChip === 'function') hdRelayChip(st);   // HybridDash: two-laptop chip
       // Kein Etikett "Neues Menü" mehr daneben - BESTELLT: "Mach das 'Neues Menü' Label oben
       // rechts weg". Als WIP gekennzeichnet bleibt das Menue in den Patchnotes.
     }
@@ -36603,9 +36834,9 @@
           || '<svg class="teile-ic" viewBox="0 0 24 24" aria-hidden="true">' + (TILE_ICON[typ] || '') + '</svg>')
           + '<span class="teile-name"></span>'
           + '<span class="teile-steuer">'
-          + '<button class="teile-minus" type="button" aria-label="' + name + ' weniger">&#8722;</button>'
+          + '<button class="teile-minus" type="button" aria-label="' + t('{n} weniger').replace('{n}', name) + '">&#8722;</button>'
           + '<span class="teile-zahl"></span>'
-          + '<button class="teile-plus" type="button" aria-label="' + name + ' mehr">+</button>'
+          + '<button class="teile-plus" type="button" aria-label="' + t('{n} mehr').replace('{n}', name) + '">+</button>'
           + '</span>';
       z.querySelector('.teile-name').textContent = name;
       z.querySelector('.teile-zahl').textContent = wert;
@@ -38270,7 +38501,7 @@
     log('Strecke beim Fahren gelernt: ' + got.length + ' Teile, '
         + got.filter(t => tileIsCurve(t.type)).length + ' davon Kurven. NPCs haben ab '
         + 'jetzt Vorausblick.', 'info');
-    showHudToast('STRECKE GELERNT: ' + got.length + ' TEILE');
+    showHudToast(t('STRECKE GELERNT: {n} TEILE').replace('{n}', got.length));
   }
   // v0.9.64: der Live-Scan-Knopf ist aus der Scan-Unterseite entfernt (nur der automatische
   // Streckenscan bleibt). Der Live-Scan (mitlesen waehrend man selbst faehrt) ist damit aus
@@ -38391,7 +38622,7 @@
         garageScanAbbrechen('Fertig: ' + garageScan.seq.length + ' Teile, Rundkurs '
           + 'geschlossen (' + wie + ').');
         if (typeof scanAnhalten === 'function') scanAnhalten(gescannt);
-        showHudToast('STRECKE GESCANNT: ' + garageScan.seq.length + ' TEILE');
+        showHudToast(t('STRECKE GESCANNT: {n} TEILE').replace('{n}', garageScan.seq.length));
         log('Garagenscan fertig: ' + garageScan.seq.length + ' Teile, geschlossen (' + wie
             + ') nach ' + garageScan.versuch + ' Versuch(en).', 'info');
         return;
@@ -43128,7 +43359,7 @@
       cars.forEach(c => { if (c !== playerCar) carLapCrossed(c); });
       if (playerCar) carLapCrossed(playerCar);
       playerLapCrossed();
-      showHudToast('TESTRUNDE: ' + (cars.length || 1) + ' AUTO(S)');
+      showHudToast(t('TESTRUNDE: {n} AUTO(S)').replace('{n}', cars.length || 1));
       log('Testtaste: eine Runde fuer alle ' + cars.length + ' Autos im Rennen gezaehlt.', 'info');
       return;
     }
@@ -45180,7 +45411,7 @@
     fuel = 100;
     resetTyres();
     updateDamageFuelUI();
-    showHudToast(`Zurückgesetzt, Tank ${fuelLiters(100)} l, Schaden 0 %, Reifen kalt`);
+    showHudToast(t('Zurückgesetzt, Tank {l} l, Schaden 0 %, Reifen kalt').replace('{l}', fuelLiters(100)));
     log('Auto zurückgesetzt: Schaden 0, Tank voll, Reifen kalt.', 'info');
   }
 
@@ -46947,7 +47178,7 @@
         playTone(880, 0.12, 'square', 0.16);
         rennZeitTimeout(() => playTone(880, 0.12, 'square', 0.16), 180);
       }
-      showHudToast('BOXENGASSE AKTIV, ' + PIT_DOUBLE_KMH + ' KM/H');
+      showHudToast(t('BOXENGASSE AKTIV') + ', ' + PIT_DOUBLE_KMH + ' KM/H');
       log('Boxengasse per doppeltem Ausdruck: zweiter Kontakt nach ' + seit
           + ' ms, Tempolimit ' + PIT_DOUBLE_KMH + ' km/h fuer '
           + (PIT_DOUBLE_LIMIT_MS / 1000) + ' s. Anhalten startet den Service.', 'info');
@@ -47054,7 +47285,7 @@
         pitTyreElapsed += dt;
         if (pitTyreElapsed >= pitTyreTarget) {
           pitDone.tyres = true; setPitLoop('wrench', false); pitChimeTyres();
-          showHudToast(`Reifen gewechselt, ${pitTyreElapsed.toFixed(1)} s`);
+          showHudToast(t('Reifen gewechselt') + `, ${pitTyreElapsed.toFixed(1)} s`);
         }
       }
       // The pad keeps buzzing while anything is still being worked on.
@@ -47544,7 +47775,7 @@
 
   function boxAnfordernVon(z) {
     if (!zweiSpieler || !z.car) {
-      showHudToast('P' + z.nr + ': KEIN AUTO ZUGETEILT');
+      showHudToast('P' + z.nr + ': ' + t('KEIN AUTO ZUGETEILT'));
       return false;
     }
     if (z.box.lage !== 'aus') {
@@ -47561,7 +47792,7 @@
     z.box.reparaturFertig = false;
     z.box.gemeldet = false;
     z.box.letzterTick = null;
-    showHudToast('P' + z.nr + ': BOXENSTOPP \u2013 ANHALTEN');
+    showHudToast('P' + z.nr + ': ' + t('BOXENSTOPP \u2013 ANHALTEN'));
     log('P' + z.nr + ': Boxenstopp angefordert, Tempolimit '
         + Math.round(PIT_SPEED_FACTOR * 100) + ' %. Zum Beginnen anhalten.', 'info');
     return true;
@@ -47576,7 +47807,7 @@
     z.box.letzterTick = null;
     stopPitLoopsFuer(z.nr);
     if (warum === 'abgebrochen') {
-      showHudToast('P' + z.nr + ': BOXENSTOPP ABGEBROCHEN');
+      showHudToast('P' + z.nr + ': ' + t('BOXENSTOPP ABGEBROCHEN'));
       log('P' + z.nr + ': Boxenstopp abgebrochen.', 'info');
       return;
     }
@@ -47611,7 +47842,7 @@
         rennEreignisBox(z.nr);
         z.box.strafeBis = null;
         const strafe = rammStrafeOffen(z.car);
-        showHudToast('P' + z.nr + ': ' + (strafe > 0 ? t('STRAFE') + ' ' + strafe + ' s' : 'SERVICE LAEUFT'));
+        showHudToast('P' + z.nr + ': ' + (strafe > 0 ? t('STRAFE') + ' ' + strafe + ' s' : t('SERVICE LÄUFT')));
         // Reifen wie bei Auto 1: die gewaehlte Mischung, frisch und ungebraucht.
         const neu = mischungErlaubt(pitMischungWahlVon(z));
         if (neu !== z.reifen) {
@@ -47688,7 +47919,7 @@
       z.box.fertig = true;
       stopPitLoopsFuer(z.nr);
       rammStrafeAbsitzen(z.car);
-      showHudToast('P' + z.nr + ': FERTIG, LOSFAHREN!');
+      showHudToast('P' + z.nr + ': ' + t('FERTIG, LOSFAHREN!'));
       pitChimeReady();
       padRumble(0.35, 0.2, 200, 'box', z.nr);
       log('P' + z.nr + ': Boxenstopp fertig nach ' + z.box.standS.toFixed(1) + ' s.', 'info');
@@ -48133,7 +48364,7 @@
   function flashVon(z) {
     if (rennZeitJetzt() < z.flashBis) return;
     z.flashBis = rennZeitJetzt() + FLASH_MS;
-    showHudToast('P' + z.nr + ': Lichthupe');
+    showHudToast('P' + z.nr + ': ' + t('Lichthupe'));
     playFlashSound();
   }
   function triggerHeadlightFlash2() { flashVon(zusatzPlatz(2)); }
@@ -49885,7 +50116,7 @@
     }
     if (which === 'repair' && !next) setPitLoop('repair', false);
     const after = describePitPlan(pitPlan);
-    if (after !== before) showHudToast(`Boxenstopp: ${after}`);
+    if (after !== before) showHudToast(t('Boxenstopp') + `: ${after}`);
     updatePitUI();
     return true;
   }
@@ -57447,7 +57678,9 @@
   function showHudToast(msg) {
     const el = $('hud-toast');
     if (!el) return;
-    el.textContent = msg;
+    // HybridDash 2.1: every toast through the translator (literal German toasts slipped
+    // through in English mode). t() returns the text unchanged when it has no entry.
+    el.textContent = msg ? t(String(msg)) : msg;
     clearTimeout(hudToastTimer);
     if (msg) hudToastTimer = setTimeout(() => { el.textContent = ''; }, 1500);
   }
@@ -59413,6 +59646,11 @@
     // gleichzeitig einen Klick irgendwo in der Seite aus - eine Belegung darauf kaempft mit
     // dem Cursor. Frei zuweisbar bleibt es, nur eben nicht ab Werk.
     resetcar: { type: 'none', index: -1, label: 'nicht belegt' },
+    // HybridDash 2.1: confirms the safety-car prompt. A / Cross is the industry-standard
+    // confirm button. It shares the button with pit stop / yellow flag ON PURPOSE (defaults
+    // may share, see resolveBindingCollisions): while the prompt is open, flagTasteTick()
+    // hands the button to the prompt only.
+    confirm: { type: 'button', index: 0, label: 'Kreuz (PS) / A (Xbox)' },
   };
   const BIND_ACTION_LABELS = {
     pause: 'Pause / Fortsetzen',
@@ -59428,6 +59666,7 @@
     trackview: 'Streckenansicht',
     fullscreenToggle: 'Vollbild umschalten',
     resetcar: 'Auto zurücksetzen',
+    confirm: 'Bestätigungstaste',
   };
 
   // Boxenstopp und Streckenansicht haben die Knoepfe getauscht. Gespeichertes liegt UEBER
@@ -61628,9 +61867,9 @@
     // genau das ein sinnvoller Fall: zusehen, wie sie fahren.
     btn.disabled = !player && !ghosts;
     btn.title = !player && !ghosts
-      ? (garage.length ? 'Erst ein Auto auf "Steuern" oder "NPC" stellen'
-                       : 'Erst ein Auto verbinden')
-      : (player ? 'Ins Cockpit' : 'NPCs starten')
+      ? (garage.length ? t('Erst ein Auto auf "Steuern" oder "NPC" stellen')
+                       : t('Erst ein Auto verbinden'))
+      : t(player ? 'Ins Cockpit' : 'NPCs starten')
         + (ghosts ? ', ' + ghosts + ' NPC' + (ghosts === 1 ? '' : 's') : '');
     btn.textContent = player ? 'Losfahren' : (ghosts ? 'NPCs starten' : 'Losfahren');
     // Anhalten ist nur scharf, wenn wirklich einer faehrt. Gepruefte Bedingung ist der
@@ -61646,10 +61885,9 @@
       stop.dataset.lage = fahren.length ? 'anhalten' : 'starten';
       if (typeof garAktionenAbgleichen === 'function') setTimeout(garAktionenAbgleichen, 0);
       stop.title = fahren.length
-        ? fahren.length + ' NPC' + (fahren.length === 1 ? '' : 's')
-          + ' ausrollen lassen und anhalten'
-        : (ghosts ? ghosts + ' NPC' + (ghosts === 1 ? '' : 's') + ' losfahren lassen'
-                  : 'Erst ein Auto auf "NPC" stellen');
+        ? t('{n} NPC(s) ausrollen lassen und anhalten').replace('{n}', fahren.length)
+        : (ghosts ? t('{n} NPC(s) losfahren lassen').replace('{n}', ghosts)
+                  : t('Erst ein Auto auf "NPC" stellen'));
     }
   }
 
@@ -61885,6 +62123,7 @@
       else if (!playerCar) setCarRole(car, 'player');
       else setCarRole(car, 'ghost');
       log(`${garageLabel(car)} verbunden (${garage.length} insgesamt)` + (opt && opt.auto ? ' - automatisch beim Start.' : '.'), 'info');
+      if (typeof hdAutoVerbunden === 'function') hdAutoVerbunden(car);   // HybridDash 2.1
       playStartFx();
     } finally {
       garVerbindetGerade.delete(String(dev.id));
@@ -65496,6 +65735,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // Prozent stehenzubleiben.
   let padKreuzSeit = null;
   function flagTasteTick(flagNow) {
+    // HybridDash 2.1: while the safety-car prompt is open, this button is the Confirmation
+    // Button only (98i-hybriddash.js) - no pit stop, no yellow flag.
+    if (typeof hdScFrageOffen === 'function' && hdScFrageOffen()) { prevYellowFlag = flagNow; return; }
     // ALLERERSTE STUFE: ist das Autos-in-Position-Fenster offen (70-race.js), startet dieselbe
     // Taste das Rennen (X statt Touch). Alles dahinter bleibt unberuehrt.
     if (typeof raceGridOffen === 'function' && raceGridOffen()) {
@@ -70288,6 +70530,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Herausgegeben fuer den Prueflauf: das ZIEL ist, was die Kurvenlogik entscheidet. Das
       // erreichte Tempo haengt zusaetzlich an der Physik, und ein Prueflauf mit kuenstlicher
       // Kacheluhr verfaelscht es - dann prueft man seinen Prueflauf.
+      // HybridDash 2.1: under yellow, never faster than the car ahead when close (98i-hybriddash.js).
+      if (flagState !== 'green' && typeof hdGelbFolge === 'function') target = hdGelbFolge(car, target, now);
       g.lastTarget = target;
       const st2 = ghostSpeedControl(g, target, v, dtG);
       g.lastFF = g.iTerm || 0;
@@ -82742,8 +82986,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const opt = mwEl('crank').querySelector('option[value=cross]');
     if (opt) {
       opt.disabled = noCross;
-      opt.textContent = noCross ? 'Cross-Plane (hier nicht moeglich)'
-                                : 'Cross-Plane (ungleiche Baenke)';
+      opt.textContent = noCross ? t('Cross-Plane (hier nicht möglich)')
+                                : t('Cross-Plane (ungleiche Bänke)');
     }
     mwEl('crank').disabled = false;
     // Steht Cross-Plane und wird gerade unmoeglich, muss der Wert mit: ein Auswahlfeld, das
@@ -83040,7 +83284,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" aria-label="Z\u00fcndfolge">'
          + '<rect x="' + L + '" y="' + T + '" width="' + (W - L - R) + '" height="'
          + (H - T - 22) + '" fill="#14161c"/>' + out
-         + '<text x="' + L + '" y="12" font-size="9.5" fill="#f4f6fb">Kurbelwinkel, Grad'
+         + '<text x="' + L + '" y="12" font-size="9.5" fill="#f4f6fb">' + t('Kurbelwinkel, Grad')
          + '</text></svg>';
   }
 
@@ -83288,8 +83532,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       b.className = 'mw-preset'
         + (mwPreset && mwPreset.id === p.id && mwOrderActive(mwRead()) ? ' sel' : '');
       b.textContent = p.name;
-      b.title = p.motor + ', ' + p.rpm + '/min, Zuendfolge ' + p.order.join('-')
-              + (p.lader ? ' (aufgeladen, ohne Ladermodell)' : '');
+      b.title = (lang === 'de' ? p.motor : p.motor.replace(/ Grad\b/g, '°')) + ', ' + p.rpm + (lang === 'de' ? '/min, ' : ' rpm, ') + t('Zündfolge') + ' ' + p.order.join('-')
+              + (p.lader ? ' ' + t('(aufgeladen, ohne Ladermodell)') : '');
       b.addEventListener('click', () => mwPresetLoad(p));
       row.appendChild(b);
     }
@@ -85150,6 +85394,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     //    unbeabsichtigte Doppelbelegung ab Werk waere derselbe Fehler, nur von Anfang an.
     const zaehler = new Map();
     for (const n of Object.keys(vorgabe)) {
+      // HybridDash 2.1: the Confirmation Button only acts while the safety-car prompt is open
+      // (a modal, like the grid confirm on the same button), so it may share A / Cross.
+      if (n === 'confirm') continue;
       const k = schluessel(vorgabe[n]);
       if (!k) continue;
       zaehler.set(k, (zaehler.get(k) || []).concat(n));
@@ -111574,8 +111821,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     }
     setzeBrakeStealLast();
     setzeGran();
-    presetSay(p.label + ': ' + n + ' Regler gesetzt'
-              + (missing.length ? ', nicht gefunden: ' + missing.join(', ') : ''));
+    presetSay(t(p.label) + ': ' + t('{n} Regler gesetzt').replace('{n}', n)
+              + (missing.length ? ', ' + t('nicht gefunden') + ': ' + missing.join(', ') : ''));
     $('preset-json').value = JSON.stringify(presetRead());
   }
 
@@ -111622,7 +111869,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       b.id = klein ? '' : 'preset-' + key;
       b.textContent = p.label;
       if (p.wip) b.insertAdjacentHTML('beforeend', ' <span class="wip-tag">WIP</span>');
-      b.title = p.kurz + ' \u2013 ' + p.text;
+      b.title = t(p.kurz) + ' \u2013 ' + t(p.text);
       b.addEventListener('click', () => applyPreset(key));
       host.appendChild(b);
     }
@@ -111813,8 +112060,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (bad.length) { presetSay('Unbrauchbare Werte: ' + bad.join(', ')); return; }
     let n = 0;
     for (const [id, val] of Object.entries(cfg)) if (presetSet(id, val)) n++;
-    presetSay(n + ' Regler gesetzt'
-              + (unknown.length ? ', ' + unknown.length + ' unbekannt \u00fcbergangen' : ''));
+    presetSay(t('{n} Regler gesetzt').replace('{n}', n)
+              + (unknown.length ? ', ' + t('{n} unbekannt übergangen').replace('{n}', unknown.length) : ''));
   });
 
   $('preset-json').value = JSON.stringify(presetRead());
@@ -115093,15 +115340,28 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // safety car or the cleaning car, not a car in the pit lane, not an NPC that is pitting,
   // finishing or deliberately stopped.
   //
-  // WHAT COUNTS:
-  //   off track  byte 12 reads 0x00 (TILE_OFFTRACK) for the whole window, or an NPC was
-  //              parked by the ghost logic because it left the track.
-  //   stagnant   the tile counter has not moved for the whole window. The window starts no
-  //              earlier than the green light (start or restart), so a grid of standing cars
-  //              does not trigger it.
+  // v2.1 FIX, REPORTED: "the safety car would deploy all the time at the start of the race."
+  // A car STANDING STILL reports byte 12 = 0x00, exactly like a car off the track, and of
+  // course its tile counter does not move. Every car still on the grid (a human who has not
+  // pulled away yet, an NPC with a start delay) therefore looked "off track" and "stuck".
+  // Now a car is only watched once it is ARMED: it has driven HD_SC_SCHARF_KACHELN tiles
+  // since the last green (start or restart). Plus a grace period after every green.
+  //
+  // WHAT COUNTS (armed cars only):
+  //   off track  byte 12 reads 0x00 for the whole window, or an NPC was parked by the ghost
+  //              logic because it left the track.
+  //   stagnant   the tile counter has not moved for the whole window.
+  //
+  // v2.1: THE HOST CONFIRMS. A detection opens a prompt ("Deploy safety car?") instead of
+  // raising yellow directly; the Confirmation Button (A / Cross by default, Enter on the
+  // keyboard) deploys, Dismiss (Esc) ignores that incident. The prompt closes by itself if the
+  // car gets going again. "Ask before deploying" can be switched off in race settings.
   //
   // Only on the track (trackMode 'on'): in printout mode byte 12 is almost always 0x00.
-  const hdSc = { offSeit: new Map(), gruenSeit: 0, letzterStatus: '', sperreBis: 0, letzterFlag: 'green' };
+  const HD_SC_SCHARF_KACHELN = 2;
+  const HD_SC_GNADE_MS = 6000;
+  const hdSc = { offSeit: new Map(), gruenSeit: 0, letzterStatus: '', sperreBis: 0, letzterFlag: 'green',
+                 zaehler: new Map(), frage: null, ignoriert: new Map() };
 
   function hdAutoScAn() { return !!hd.autoSc; }
   function hdAutoScFenster() { return Math.max(1000, Math.min(15000, Number(hd.autoScMs) || HD_AUTO_SC_MS)); }
@@ -115121,54 +115381,87 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     return false;
   }
 
+  // Tiles driven since the last green, counted from changes of the tile counter (byte 11).
+  function hdKachelnSeitGruen(car) {
+    let z = hdSc.zaehler.get(car);
+    if (!z) { z = { letzter: car.tileCount, gefahren: 0 }; hdSc.zaehler.set(car, z); }
+    if (car.tileCount !== null && car.tileCount !== undefined && car.tileCount !== z.letzter) {
+      if (z.letzter !== null && z.letzter !== undefined) z.gefahren++;
+      z.letzter = car.tileCount;
+    }
+    return z.gefahren;
+  }
+  function hdScharf(car) { return hdKachelnSeitGruen(car) >= HD_SC_SCHARF_KACHELN; }
+
   function hdAutoScGrund(car, now) {
     const fenster = hdAutoScFenster();
-    const key = car;
     // Off track: byte 12 = 0x00 without a break.
     if (car.tileCode === TILE_OFFTRACK || car.parked === 'Bahn verlassen') {
-      if (!hdSc.offSeit.has(key)) hdSc.offSeit.set(key, now);
-      if (now - hdSc.offSeit.get(key) >= fenster) return 'off';
+      if (!hdSc.offSeit.has(car)) hdSc.offSeit.set(car, now);
+      if (now - hdSc.offSeit.get(car) >= fenster) return 'off';
     } else {
-      hdSc.offSeit.delete(key);
+      hdSc.offSeit.delete(car);
     }
-    // Stagnant: no tile change since max(last tile change, green).
+    // Stagnant: no tile change for the window (and never before the green).
     const seit = Math.max(car.tileAt || 0, hdSc.gruenSeit);
     if (seit && now - seit >= fenster) return 'stuck';
     return null;
   }
 
+  function hdAutoScRuecksetzen(now) {
+    hdSc.gruenSeit = now; hdSc.offSeit.clear(); hdSc.zaehler.clear(); hdSc.ignoriert.clear();
+    hdScFrageZu();
+  }
+
   function hdAutoScTick() {
     let now;
     try { now = rennZeitJetzt(); } catch (e) { return; }
-    // Watch the flag so the stagnation window restarts at every green.
+    // Every green (start or restart) starts over: grace period, nobody armed yet.
     if (flagState === 'green' && hdSc.letzterFlag !== 'green') {
-      hdSc.gruenSeit = now; hdSc.offSeit.clear();
-      hdSc.sperreBis = now + HD_AUTO_SC_COOLDOWN_MS;
+      hdAutoScRuecksetzen(now);
+      hdSc.sperreBis = now + HD_SC_GNADE_MS;
     }
     hdSc.letzterFlag = flagState;
-    if (raceState !== 'racing') { hdSc.gruenSeit = 0; hdSc.offSeit.clear(); return; }
-    if (!hdSc.gruenSeit) hdSc.gruenSeit = now;
-    if (!hdAutoScAn() || flagState !== 'green' || trackMode !== 'on' || raceFormationLap) return;
-    if (rennPauseAktiv() || gelbDeaktiviert() || now < hdSc.sperreBis) return;
-    for (const car of garage) {
-      if (!hdRenntAuto(car)) { hdSc.offSeit.delete(car); continue; }
-      const grund = hdAutoScGrund(car, now);
-      if (!grund) continue;
-      hdAutoScAusloesen(car, grund, now);
+    if (raceState !== 'racing') { hdSc.gruenSeit = 0; hdSc.offSeit.clear(); hdSc.zaehler.clear(); hdScFrageZu(); return; }
+    if (!hdSc.gruenSeit) { hdAutoScRuecksetzen(now); hdSc.sperreBis = now + HD_SC_GNADE_MS; }
+    // Keep counting tiles even while we do not trigger (grace period, yellow) - arming needs it.
+    garage.forEach((c) => { if (c.device) hdKachelnSeitGruen(c); });
+    if (!hdAutoScAn() || flagState !== 'green' || trackMode !== 'on' || raceFormationLap
+        || rennPauseAktiv() || gelbDeaktiviert()) { hdScFrageZu(); return; }
+    // An open prompt closes by itself when its car is going again.
+    if (hdSc.frage) {
+      const c = hdSc.frage.car;
+      if (!garage.includes(c) || !hdRenntAuto(c) || !hdAutoScGrund(c, now)) hdScFrageZu();
       return;
     }
+    if (now < hdSc.sperreBis) return;
+    for (const car of garage) {
+      if (!hdRenntAuto(car) || !hdScharf(car)) { hdSc.offSeit.delete(car); continue; }
+      // Dismissed incident: ignore this car until it has driven again.
+      const ign = hdSc.ignoriert.get(car);
+      if (ign !== undefined) {
+        if (hdKachelnSeitGruen(car) >= ign + HD_SC_SCHARF_KACHELN) hdSc.ignoriert.delete(car);
+        else continue;
+      }
+      const grund = hdAutoScGrund(car, now);
+      if (!grund) continue;
+      if (hd.scFragen === false) hdAutoScAusloesen(car, grund, now);
+      else hdScFrageAuf(car, grund);
+      return;
+    }
+  }
+
+  function hdGrundText(grund) {
+    const sek = (hdAutoScFenster() / 1000).toLocaleString(lang === 'de' ? 'de-DE' : 'en-US');
+    return grund === 'off' ? t('HD: neben der Strecke').replace('{s}', sek) : t('HD: steht').replace('{s}', sek);
   }
 
   function hdAutoScAusloesen(car, grund, now) {
     hdSc.sperreBis = now + HD_AUTO_SC_COOLDOWN_MS;
     hdSc.offSeit.clear();
     const name = garageLabel(car);
-    const sek = (hdAutoScFenster() / 1000).toLocaleString(lang === 'de' ? 'de-DE' : 'en-US');
-    const warum = grund === 'off'
-      ? t('HD: neben der Strecke').replace('{s}', sek)
-      : t('HD: steht').replace('{s}', sek);
-    hdSc.letzterStatus = name + ' – ' + warum;
-    log('HybridDash: automatic safety car – ' + name + ' (' + grund + ', ' + sek + ' s).', 'err');
+    hdSc.letzterStatus = name + ' – ' + hdGrundText(grund);
+    log('HybridDash: safety car – ' + name + ' (' + grund + ').', 'err');
     setFlag('yellow');
     if (flagState !== 'yellow') return;           // yellow disabled or refused
     showHudToast(t('SAFETY CAR') + ' · ' + name);
@@ -115176,7 +115469,108 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     hdEinstellungenMalen();
   }
 
+  // ---- the confirmation prompt ------------------------------------------------------------
+  function hdScFrageOffen() { return !!hdSc.frage; }
+  function hdScFrageAuf(car, grund) {
+    hdSc.frage = { car, grund, at: performance.now() };
+    const box = $('hd-sc-frage');
+    if (box) {
+      $('hd-sc-frage-wer').textContent = garageLabel(car) + ' · ' + hdGrundText(grund);
+      const b = typeof bindings === 'object' && bindings && bindings.confirm;
+      $('hd-sc-frage-taste').textContent = (b && b.type !== 'none' ? bindingDescription(b) + ' / ' : '') + 'Enter';
+      box.hidden = false;
+    }
+    hdSprechen(hdSatz('frage', { name: garageLabel(car), grund }), 25);
+  }
+  function hdScFrageZu() {
+    if (!hdSc.frage) return;
+    hdSc.frage = null;
+    const box = $('hd-sc-frage');
+    if (box) box.hidden = true;
+  }
+  function hdScBestaetigen() {
+    const f = hdSc.frage;
+    if (!f) return;
+    hdScFrageZu();
+    hdAutoScAusloesen(f.car, f.grund, rennZeitJetzt());
+  }
+  function hdScIgnorieren() {
+    const f = hdSc.frage;
+    if (!f) return;
+    hdScFrageZu();
+    hdSc.ignoriert.set(f.car, hdKachelnSeitGruen(f.car));
+    hdSc.offSeit.delete(f.car);
+    log('HybridDash: safety car dismissed for ' + garageLabel(f.car) + '.', 'info');
+  }
+  // Confirmation Button on any connected controller (rising edge), and Enter / Esc.
+  let hdPadVorher = false;
+  setInterval(() => {
+    let jetzt = false;
+    try {
+      const b = typeof bindings === 'object' && bindings && bindings.confirm;
+      if (b && b.type !== 'none' && navigator.getGamepads) {
+        for (const pad of navigator.getGamepads()) {
+          if (pad && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) { jetzt = true; break; }
+        }
+      }
+    } catch (e) { /* no gamepad API */ }
+    if (jetzt && !hdPadVorher && hdSc.frage) hdScBestaetigen();
+    hdPadVorher = jetzt;
+  }, 40);
+  document.addEventListener('keydown', (e) => {
+    if (!hdSc.frage) return;
+    if (e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); hdScBestaetigen(); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); hdScIgnorieren(); }
+  }, true);
+  (function () {
+    const j = $('hd-sc-frage-ja'), n = $('hd-sc-frage-nein');
+    if (j) j.addEventListener('click', hdScBestaetigen);
+    if (n) n.addEventListener('click', hdScIgnorieren);
+  })();
+
   setInterval(hdAutoScTick, 200);
+
+  // ---- 1b. THE FIELD UNDER THE SAFETY CAR (v2.1) -------------------------------------------
+  //
+  // REPORTED: "Make sure they do not crash with each other and maintain a reasonable gap. No
+  // overtakes during the safety car."
+  //
+  // What OmegaSim already did under yellow: one speed for everybody, no overtaking manoeuvres
+  // (ghostSpice off), a gap factor that slows a car when the car ahead is within 1.5 tiles, and
+  // a hard cap behind the safety car itself. Why cars still touched: the gap factor runs FIRST,
+  // and afterwards the corner profile and the minimum speed (0.37, below which the car cannot
+  // read the track) are applied - the floor lifted a follower back up to the speed of a leader
+  // that was braking for a hairpin. So the follower closed in exactly where it should not.
+  //
+  // hdGelbFolge() is the LAST word on the target speed under yellow, after the floor: within
+  // hdFolge.voll tiles of the car ahead, never faster than that car's own target; closer than
+  // hdFolge.eng tiles, hdFolge.boden of it, so the gap opens again. Going a little under the
+  // read threshold for a moment is allowed - the off-track detector gets grace for it (gnadeBis),
+  // and the car ahead pulls away, so it never lasts long. Used for NPCs (ghostTick) and for your
+  // car's autopilot under yellow (50-drive.js).
+  const hdFolge = { voll: 2.2, eng: 0.8, boden: 0.82, min: 0.26 };
+  function hdFuehrTempo(o, now) {
+    if (!o) return null;
+    if (o.ghost && o.ghost.running && o.ghost.lastTarget > 0) return o.ghost.lastTarget;
+    if (o.hdZiel > 0 && now - (o.hdZielAt || 0) < 400) return o.hdZiel;
+    if (o === playerCar && physEngine && physEngine.config && physEngine.config.topSpeedKmh)
+      return Math.abs(physEngine.state.speedKmh) / physEngine.config.topSpeedKmh;
+    return null;
+  }
+  function hdGelbFolge(car, target, now) {
+    if (hd.gelbFolge === false || flagState === 'green' || !car) return target;
+    if (car.ghost && (car.ghost.pit || car.ghost.randHalt)) return target;
+    const v = gelbVordermann(car);
+    if (!v || v.gap >= hdFolge.voll) return target;
+    const lt = hdFuehrTempo(v.car, now);
+    if (!(lt > 0)) return target;
+    const x = Math.max(0, Math.min(1, (v.gap - hdFolge.eng) / (hdFolge.voll - hdFolge.eng)));
+    const deckel = Math.max(hdFolge.min, lt * (hdFolge.boden + (1 - hdFolge.boden) * x));
+    if (deckel >= target) return target;
+    // Slower than the read threshold for a moment: not an off-track excursion.
+    if (car.ghost && deckel < GHOST_READ_MIN) car.ghost.gnadeBis = Math.max(car.ghost.gnadeBis || 0, now + 700);
+    return deckel;
+  }
 
   // ---- 2. NPC DRIVER NAMES ----------------------------------------------------------------
   //
@@ -115235,9 +115629,20 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     carRemember(car);
     log('HybridDash: new NPC driver ' + car.alias + ' in ' + hdAutoBeschreibung(car) + '.', 'info');
     showHudToast(t('Neuer Fahrer') + ': ' + car.alias);
-    if (hd.npcAnsage) hdSprechen(hdSatz('fahrer', { name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
+    // While a car is being connected and "Announce all drivers" is on, the connect
+    // announcement (hdAutoVerbunden) names it - no second sentence here.
+    const imVerbinden = hd.alleAnsagen && garVerbindetGerade.has(String(car.device.id));
+    if (hd.npcAnsage && !imVerbinden) hdSprechen(hdSatz('fahrer', { name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
     if (typeof renderGarage === 'function') renderGarage();
     if (typeof renderRaceGrid === 'function') renderRaceGrid();
+  }
+
+  // v2.1 "Announce all drivers": every car that connects is announced with driver, car and
+  // colour. Hook, called at the end of garageGeraetAufnehmen() in 90-ghosts.js.
+  function hdAutoVerbunden(car) {
+    if (!hd.alleAnsagen || !car) return;
+    hdSprechen(hdSatz('verbunden', { name: garageLabel(car), tag: car.tag, auto: hdAutoBeschreibung(car),
+                                     farbe: hdFarbName(carColor(car).id), modell: carModellWert(car.modellId) ? carModellName(car.modellId) : '' }), 10);
   }
 
   // Give a car a fresh random name (the dice button in the garage).
@@ -115255,13 +115660,25 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   function hdSatz(art, x) {
     if (lang === 'de') {
       if (art === 'fahrer') return 'Neu im Feld: ' + x.name + ', im ' + x.auto + '.';
+      if (art === 'verbunden') return x.name === x.tag
+        ? 'Auto ' + x.tag + ' verbunden' + (x.farbe || x.modell ? ': ' + [x.farbe && x.farbe.replace(/en$/, ''), x.modell].filter(Boolean).join(' ') : '') + '.'
+        : x.name + ' ist verbunden, im ' + x.auto + '.';
+      if (art === 'frage') return 'Safety Car? ' + x.name + (x.grund === 'off' ? ' ist neben der Strecke.' : ' steht.');
       return 'Safety Car! ' + x.name + (x.grund === 'off' ? ' ist von der Strecke abgekommen.' : ' steht auf der Strecke.');
     }
     if (lang === 'es') {
       if (art === 'fahrer') return 'Nuevo piloto: ' + x.name + ', en el ' + x.auto + '.';
+      if (art === 'verbunden') return x.name === x.tag
+        ? 'Coche ' + x.tag + ' conectado' + (x.farbe || x.modell ? ': ' + [x.modell, x.farbe].filter(Boolean).join(' ') : '') + '.'
+        : x.name + ' está conectado, en el ' + x.auto + '.';
+      if (art === 'frage') return '¿Coche de seguridad? ' + x.name + (x.grund === 'off' ? ' está fuera de pista.' : ' está detenido.');
       return '¡Coche de seguridad! ' + x.name + (x.grund === 'off' ? ' se ha salido de la pista.' : ' está detenido en la pista.');
     }
     if (art === 'fahrer') return 'New driver: ' + x.name + ', driving the ' + x.auto + '.';
+    if (art === 'verbunden') return x.name === x.tag
+      ? 'Car ' + x.tag + ' connected' + (x.farbe || x.modell ? ': ' + [x.farbe, x.modell].filter(Boolean).join(' ') : '') + '.'
+      : x.name + ' is connected, driving the ' + x.auto + '.';
+    if (art === 'frage') return 'Safety car? ' + x.name + (x.grund === 'off' ? ' is off track.' : ' has stopped.');
     return 'Safety car deployed! ' + x.name + (x.grund === 'off' ? ' has gone off track.' : ' has stopped on track.');
   }
   function hdSprechen(text, prioritaet) {
@@ -115326,15 +115743,19 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const a = $('hd-auto-sc'); if (a) a.checked = !!hd.autoSc;
     const s = $('hd-auto-sc-sek'); if (s) s.value = String(hdAutoScFenster() / 1000);
     const sw = $('hd-auto-sc-sek-wert'); if (sw) sw.textContent = (hdAutoScFenster() / 1000).toFixed(1) + ' s';
+    const fr = $('hd-sc-fragen'); if (fr) fr.checked = hd.scFragen !== false;
     const n = $('hd-npc-namen'); if (n) n.checked = !!hd.npcNamen;
     const v = $('hd-npc-ansage'); if (v) v.checked = !!hd.npcAnsage;
+    const al = $('hd-alle-ansagen'); if (al) al.checked = !!hd.alleAnsagen;
     const st = $('hd-auto-sc-status'); if (st) st.textContent = hdSc.letzterStatus ? t('Zuletzt') + ': ' + hdSc.letzterStatus : '';
   }
   (function hdEinstellungenAnbinden() {
     const an = (id, fn) => { const el = $(id); if (el) el.addEventListener('change', () => { fn(el); hdSpeichern(); hdEinstellungenMalen(); }); };
     an('hd-auto-sc', el => { hd.autoSc = el.checked; });
+    an('hd-sc-fragen', el => { hd.scFragen = el.checked; });
     an('hd-npc-namen', el => { hd.npcNamen = el.checked; });
     an('hd-npc-ansage', el => { hd.npcAnsage = el.checked; });
+    an('hd-alle-ansagen', el => { hd.alleAnsagen = el.checked; });
     const s = $('hd-auto-sc-sek');
     if (s) s.addEventListener('input', () => { hd.autoScMs = Math.round(Number(s.value) * 1000); hdSpeichern(); hdEinstellungenMalen(); });
     hdEinstellungenMalen();
@@ -115357,7 +115778,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       raceState = merk.raceState; flagState = merk.flagState; trackMode = merk.trackMode;
       raceFormationLap = merk.raceFormationLap; pitState = merk.pitState;
       garage.length = 0; merk.garage.forEach(c => garage.push(c));
-      Object.assign(hd, JSON.parse(merk.hd)); Object.assign(hdSc, merk.sc); hdSc.offSeit = new Map();
+      Object.assign(hd, JSON.parse(merk.hd)); Object.assign(hdSc, merk.sc); hdSc.offSeit = new Map(); hdSc.zaehler = new Map(); hdSc.ignoriert = new Map(); hdScFrageZu();
       carStoreSchreiben(JSON.parse(merk.store));
     };
     try {
@@ -115366,42 +115787,89 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       raceState = 'racing'; flagState = 'green'; trackMode = 'on'; raceFormationLap = false; pitState = 'off';
       hdSc.letzterFlag = 'green'; hdSc.sperreBis = 0; hdSc.offSeit = new Map();
 
-      // A: a car that keeps moving does not trigger anything.
-      const a = fake('hd-a', 'player', { tileAt: now - 500 });
-      garage.push(a); hdSc.gruenSeit = now - 10000;
-      hdAutoScTick();
-      prüfen('moving car: no safety car', flagState === 'green', 'flag ' + flagState);
+      // Helpers: a fresh green, and "drive n tiles" (the tile counter changes, seen by a tick).
+      const gruen = () => { hdAutoScRuecksetzen(now - 20000); hdSc.sperreBis = 0; hdSc.letzterFlag = 'green'; };
+      const fahren = (c, n) => { for (let i = 0; i < n; i++) { c.tileCount = ((c.tileCount || 0) + 1) & 0xff; c.tileAt = now; hdAutoScTick(); } };
+      const reset = () => { hdScFrageZu(); if (flagState !== 'green') gelbBeenden(); hdSc.letzterFlag = 'green'; hdSc.sperreBis = 0; };
+      hd.scFragen = true;
 
-      // B: stagnant 2.5 s -> nothing yet; 3.5 s -> yellow.
+      // A: REPORTED BUG - a car standing on the grid (byte 12 = 0x00 at standstill, counter
+      // not moving) for 20 s after green never triggers, because it never drove.
+      const a = fake('hd-a', 'player', { tileCount: 5, tileCode: TILE_OFFTRACK, tileAt: now - 20000 });
+      garage.push(a); gruen();
+      hdSc.offSeit.set(a, now - 20000);
+      for (let i = 0; i < 3; i++) hdAutoScTick();
+      prüfen('standing on the grid after green: no safety car, no prompt', flagState === 'green' && !hdScFrageOffen(),
+             'flag ' + flagState + ', prompt ' + hdScFrageOffen());
+
+      // B: grace period right after green, even for a car that already drove.
+      a.tileCode = 0x02; hdAutoScRuecksetzen(now); hdSc.sperreBis = now + HD_SC_GNADE_MS; hdSc.letzterFlag = 'green';
+      fahren(a, 3); a.tileAt = now - 5000; hdAutoScTick();
+      prüfen('grace period after green: nothing', !hdScFrageOffen() && flagState === 'green', 'prompt ' + hdScFrageOffen());
+      reset();
+
+      // C: a moving car does not trigger.
+      gruen(); fahren(a, 3); a.tileAt = now - 500; hdAutoScTick();
+      prüfen('moving car: no prompt', !hdScFrageOffen(), 'prompt ' + hdScFrageOffen());
+
+      // D: drove, then stuck > 3 s -> PROMPT, the flag stays green until confirmed.
       a.tileAt = now - 2500; hdAutoScTick();
-      const vorher = flagState;
+      const bei25 = hdScFrageOffen();
       a.tileAt = now - 3500; hdAutoScTick();
-      prüfen('stagnant > 3 s: safety car', vorher === 'green' && flagState === 'yellow',
-             'at 2.5 s ' + vorher + ', at 3.5 s ' + flagState);
-      gelbBeenden(); hdSc.letzterFlag = 'green'; hdSc.sperreBis = 0;
+      prüfen('stuck > 3 s after driving: asks the host, flag still green', !bei25 && hdScFrageOffen() && flagState === 'green',
+             'at 2.5 s ' + bei25 + ', at 3.5 s ' + hdScFrageOffen() + ', flag ' + flagState);
 
-      // C: the stagnation window never starts before green (grid start).
-      a.tileAt = 0; hdSc.gruenSeit = now - 1000; hdAutoScTick();
-      prüfen('standing grid right after green: no safety car', flagState === 'green', 'flag ' + flagState);
+      // E: the Confirmation Button deploys.
+      hdScBestaetigen();
+      prüfen('confirm deploys the safety car', flagState === 'yellow' && !hdScFrageOffen(), 'flag ' + flagState);
+      reset();
 
-      // D: off track for 3 s (byte 12 = 0x00) -> yellow, even though tiles were counting.
-      a.tileAt = now; a.tileCode = TILE_OFFTRACK; hdSc.gruenSeit = now - 10000;
-      hdSc.offSeit.set(a, now - 3100); hdAutoScTick();
-      prüfen('off track > 3 s: safety car', flagState === 'yellow', 'flag ' + flagState);
-      gelbBeenden(); hdSc.letzterFlag = 'green'; hdSc.sperreBis = 0; a.tileCode = 0x02;
+      // F: dismiss -> ignored until the car drives again; then it can ask again.
+      gruen(); fahren(a, 3); a.tileAt = now - 4000; hdAutoScTick();
+      const gefragt = hdScFrageOffen();
+      hdScIgnorieren(); hdAutoScTick(); hdAutoScTick();
+      const still = !hdScFrageOffen() && flagState === 'green';
+      fahren(a, 3); a.tileAt = now - 4000; hdAutoScTick();
+      prüfen('dismiss ignores the incident until the car drives again', gefragt && still && hdScFrageOffen(),
+             'asked ' + gefragt + ', quiet after dismiss ' + still + ', asks again ' + hdScFrageOffen());
+      reset();
 
-      // E: switched off -> nothing.
-      hd.autoSc = false; a.tileAt = now - 5000; hdAutoScTick();
-      prüfen('setting off: no safety car', flagState === 'green', 'flag ' + flagState);
-      hd.autoSc = true;
+      // G2: the prompt closes by itself when the car gets going.
+      gruen(); fahren(a, 3); a.tileAt = now - 4000; hdAutoScTick();
+      const auf = hdScFrageOffen(); fahren(a, 1);
+      prüfen('prompt closes by itself when the car moves again', auf && !hdScFrageOffen() && flagState === 'green', 'open ' + auf);
+      reset();
 
-      // F: player in the pit lane is ignored; safety car itself is ignored.
-      pitState = 'servicing'; hdAutoScTick();
-      const imPit = flagState;
-      pitState = 'off'; a.role = 'safetycar'; hdAutoScTick();
-      prüfen('pit lane and the safety car itself are ignored', imPit === 'green' && flagState === 'green',
-             'pit ' + imPit + ', sc ' + flagState);
-      a.role = 'player';
+      // H: off track (0x00) > 3 s after driving -> prompt.
+      gruen(); fahren(a, 3); a.tileCode = TILE_OFFTRACK; hdSc.offSeit.set(a, now - 3100); hdAutoScTick();
+      prüfen('off track > 3 s after driving: asks the host', hdScFrageOffen(), 'prompt ' + hdScFrageOffen());
+      reset(); a.tileCode = 0x02;
+
+      // I: "Ask before" off -> straight to yellow.
+      hd.scFragen = false; gruen(); fahren(a, 3); a.tileAt = now - 4000; hdAutoScTick();
+      prüfen('ask-before off: deploys straight away', flagState === 'yellow' && !hdScFrageOffen(), 'flag ' + flagState);
+      reset(); hd.scFragen = true;
+
+      // J: switched off, pit lane, the safety car itself -> nothing.
+      hd.autoSc = false; gruen(); fahren(a, 3); a.tileAt = now - 5000; hdAutoScTick();
+      const aus = !hdScFrageOffen(); hd.autoSc = true;
+      pitState = 'servicing'; gruen(); fahren(a, 3); a.tileAt = now - 5000; hdAutoScTick();
+      const pit = !hdScFrageOffen(); pitState = 'off';
+      a.role = 'safetycar'; gruen(); fahren(a, 3); a.tileAt = now - 5000; hdAutoScTick();
+      const sc = !hdScFrageOffen(); a.role = 'player';
+      prüfen('setting off, pit lane and the safety car itself are ignored', aus && pit && sc, 'off ' + aus + ', pit ' + pit + ', sc ' + sc);
+      reset();
+
+      // K: while the prompt is open, A/Cross does not also call a pit stop / yellow flag.
+      gruen(); fahren(a, 3); a.tileAt = now - 4000; hdAutoScTick();
+      const merkPrev = prevYellowFlag;
+      flagTasteTick(true);
+      prüfen('prompt open: the button does nothing else', flagState === 'green' && pitState === 'off', 'flag ' + flagState + ', pit ' + pitState);
+      flagTasteTick(false); prevYellowFlag = merkPrev;
+      prüfen('Confirmation Button is in the mapping, default A / Cross', DEFAULT_BINDINGS.confirm && DEFAULT_BINDINGS.confirm.index === 0
+             && BIND_ACTION_LABELS.confirm === 'Bestätigungstaste' && t('Bestätigungstaste') === (lang === 'de' ? 'Bestätigungstaste' : lang === 'en' ? 'Confirmation Button' : t('Bestätigungstaste')),
+             JSON.stringify(DEFAULT_BINDINGS.confirm));
+      reset();
 
       // G: NPC driver name on first NPC assignment, unique, kept when set again, announced.
       hd.npcNamen = true; hd.npcAnsage = true;
@@ -115421,6 +115889,20 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const satz = lang === 'en' ? hdSatz('fahrer', { name: b.alias, auto: hdAutoBeschreibung(b) }) : '';
       prüfen('announcement names the car', !satz || satz === 'New driver: ' + b.alias + ', driving the red car ' + b.tag + '.', satz);
 
+      // G3: "Announce all drivers": a connecting car is announced with driver, car and colour.
+      hd.alleAnsagen = true; soundEnabled = true;
+      const vorAlle = rennAnsagen.jobs.filter(j => j.art === 'hybriddash').length;
+      const d = fake('hd-d', 'player', { alias: 'Mara Kovac', colorId: 'blau', tag: 'Gamma', modellId: 'porsche911' });
+      hdAutoVerbunden(d);
+      const alle = rennAnsagen.jobs.filter(j => j.art === 'hybriddash').length - vorAlle;
+      rennAnsagen.jobs = rennAnsagen.jobs.filter(j => j.art !== 'hybriddash');
+      const satzAlle = hdSatz('verbunden', { name: 'Mara Kovac', tag: 'Gamma', auto: 'blue Porsche 911', farbe: 'blue', modell: 'Porsche 911' });
+      const satzTag = hdSatz('verbunden', { name: 'Gamma', tag: 'Gamma', auto: 'blue car Gamma', farbe: 'blue', modell: '' });
+      soundEnabled = merkSound; hd.alleAnsagen = false;
+      prüfen('announce all drivers: connecting car is announced', alle === 1 && (lang !== 'en' ||
+             (satzAlle === 'Mara Kovac is connected, driving the blue Porsche 911.' && satzTag === 'Car Gamma connected: blue.')),
+             satzAlle + ' | ' + satzTag);
+
       // H: avatar.
       const svg = hdAvatarSvg('Mara Kovac', '#e23b3b', 0, 30);
       prüfen('avatar renders with initials', /<svg[\s\S]*>MK<\/text>/.test(svg), svg.length + ' chars');
@@ -115438,6 +115920,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     avatarSvg: hdAvatarSvg,
     tick: hdAutoScTick,
     selbsttest: hdSelbsttest,
+    // Race simulation hooks for the yellow-flag measurement (tests only).
+    sim: { start: () => simStart(), stop: () => simStop('test'), gelb: () => setFlag('yellow'), gruen: () => gelbBeenden(),
+           folge: (an) => { hd.gelbFolge = !!an; }, kacheln: () => (currentTrackTiles || []).length, param: (o) => Object.assign(hdFolge, o || {}) },
   });
   // =========================================================================
   // HybridDash 2.0: TWO-LAPTOP MODE (Bluetooth relay)
@@ -115885,8 +116370,30 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
         liste.querySelectorAll('[data-hdr-dazu]').forEach((b) => { b.onclick = () => { const d = hdRelay.fremd.get(Number(b.dataset.hdrDazu)); if (d) hdFremdesAuto(d._k, d.id.slice(HD_RELAY_ID.length), d.name); }; });
       } else liste.innerHTML = '';
     }
+    hdChipAuffrischen();
     const z = $('hdr-zahlen');
     if (z) z.textContent = hdRelay.offen ? hdRelay.gesendet + ' sent · ' + hdRelay.empfangen + ' received' : '';
+  }
+  // v2.1: a chip in the header (top right, next to the car count) reopens the panel from any
+  // screen. REPORTED: "have a tab or button to prompt the Helper window". Closing the panel
+  // never closes the link - only "Unlink" or closing the browser tab does.
+  function hdRelayChip(st) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'hd-relay-chip';
+    b.className = 'hd-relay-chip' + (hdRelay.offen ? (hdRelay.warStill ? ' gelb' : ' an') : hdRelay.rolle ? ' rot' : '');
+    const n = hdRelay.rolle === 'host' ? [...hdRelay.fremd.values()].filter((d) => d.gatt.connected).length : hdRelay.eigen.size;
+    b.textContent = '⇄ ' + (hdRelay.rolle === 'helper' ? 'HELPER' : '2 LAPTOPS') + (hdRelay.offen ? ' · ' + n : '');
+    b.title = 'Two-laptop mode';
+    b.setAttribute('data-i18n-skip', '');
+    b.addEventListener('click', (e) => { e.stopPropagation(); hdRelayOeffnen(); });
+    st.appendChild(b);
+  }
+  function hdChipAuffrischen() {
+    const st = $('k-status'), alt = $('hd-relay-chip');
+    if (!st) return;
+    if (alt) alt.remove();
+    hdRelayChip(st);
   }
   function hdRelayOeffnen(rolle) {
     const box = $('hd-relay');
@@ -115925,8 +116432,23 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       catch (e) { if (!(e && e.name === 'NotFoundError')) fehler(e); }
     });
     an('hdr-trennen', () => { hdRelaySchliessen(false); hdStatus('Link closed.'); });
-    // ?helper in the address opens straight into helper mode.
-    try { if (new URLSearchParams(location.search).has('helper')) hdRelayOeffnen('helper'); } catch (e) { /* no URL */ }
+    // ?helper in the address (or helper.html, which forwards here) is the DEDICATED HELPER
+    // PAGE: the panel fills the screen, cannot be closed, and nothing else of the app shows -
+    // so it cannot be closed by accident in the middle of a race.
+    let helperSeite = false;
+    try { helperSeite = new URLSearchParams(location.search).has('helper'); } catch (e) { /* no URL */ }
+    if (helperSeite) {
+      document.body.classList.add('hd-helper-seite');
+      document.title = 'HybridDash Helper';
+      hdRelayOeffnen('helper');
+    }
+    // While linked, closing or reloading the tab asks first (it would drop the link and stop
+    // the helper's cars).
+    window.addEventListener('beforeunload', (e) => {
+      if (!hdRelay.offen && !(hdRelay.rolle === 'helper' && hdRelay.eigen.size)) return;
+      e.preventDefault(); e.returnValue = '';
+    });
+    an('hdr-helper-seite', () => { window.open(location.pathname + '?helper', '_blank', 'noopener'); });
     setInterval(() => { if ($('hd-relay') && !$('hd-relay').hidden) hdRelayMalen(); }, 1000);
     hdRelayMalen();
   })();

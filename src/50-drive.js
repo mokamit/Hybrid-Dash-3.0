@@ -118,7 +118,7 @@
       window.__applyPreset(key);
       const txt = $('race-act-mode-txt');
       if (txt) txt.textContent = window.__presetLabel(key);
-      showHudToast('ABSTIMMUNG ' + window.__presetLabel(key).toUpperCase());
+      showHudToast(t('ABSTIMMUNG') + ' ' + window.__presetLabel(key).toUpperCase());
     });
   }
 
@@ -825,8 +825,8 @@
   // sehen koennen.
   const ACCEL_REF_S = 3.2;   // Bezugswert = 100 %
   function accelLabel(s) {
-    return Math.round(ACCEL_REF_S / s * 100) + ' % ('
-         + s.toFixed(1).replace('.', ',') + ' s auf 100)';
+    return t('{p} % ({s} s auf 100)').replace('{p}', Math.round(ACCEL_REF_S / s * 100))
+         .replace('{s}', lang === 'de' ? s.toFixed(1).replace('.', ',') : s.toFixed(1));
   }
   $('setting-zero-to-top').addEventListener('input', (e) => {
     physEngine.config.launchAnchorTimeS = parseFloat(e.target.value);
@@ -1542,7 +1542,7 @@
   $('setting-brakebias').addEventListener('input', (e) => {
     const pct = parseInt(e.target.value, 10);
     physEngine.config.brakeBias = pct / 100;
-    $('setting-brakebias-val').textContent = pct + '% vorn';
+    $('setting-brakebias-val').textContent = t('{p}% vorn').replace('{p}', pct);
   });
 
   // BESTELLT (GT7-Fahrmodus): "mehr Traegheit/Gewichtsverlagerung." transferK/loadTau
@@ -2238,7 +2238,7 @@
       sel.value = naechste.value;
       sel.dispatchEvent(new Event('change', { bubbles: true }));
       p2ScreenRender();
-      showHudToast('AUTO ' + nr + ': ' + motorNamen(naechste).toUpperCase());
+      showHudToast(t('AUTO') + ' ' + nr + ': ' + motorNamen(naechste).toUpperCase());
     }
   }
   // setzen. 80 ms, dann zurueck: eine Anzeige mit Masse setzt sich kurz, ein Textfeld nicht.
@@ -3183,7 +3183,10 @@
     const zielSc = (grund === 'yellow' && typeof scFolgeDeckel === 'function')
       ? Math.min(zielBasis, scFolgeDeckel(meinAuto)) : zielBasis;
     // v1.1.39: unter Gelb Mindesttempo und Haarnadel-Obergrenze wie die NPCs (autopilotGelbGrenzen).
-    const ziel = grund === 'yellow' && typeof autopilotGelbGrenzen === 'function' ? autopilotGelbGrenzen(meinAuto, zielSc) : zielSc;
+    const zielGrenzen = grund === 'yellow' && typeof autopilotGelbGrenzen === 'function' ? autopilotGelbGrenzen(meinAuto, zielSc) : zielSc;
+    // HybridDash 2.1: the last word under yellow - never faster than the car ahead when close.
+    const ziel = grund === 'yellow' && typeof hdGelbFolge === 'function' ? hdGelbFolge(meinAuto, zielGrenzen, rennZeitJetzt()) : zielGrenzen;
+    if (meinAuto) { meinAuto.hdZiel = ziel; meinAuto.hdZielAt = rennZeitJetzt(); }
     const v = Math.abs(st.speedKmh) / motor.config.topSpeedKmh;
     const dtA = Math.max(0.01, Math.min(0.25,
       (rennZeitJetzt() - (regler.at || rennZeitJetzt())) / 1000));
