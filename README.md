@@ -18,9 +18,22 @@ HybridDash 2.0 is a fork of **[OmegaSim](https://github.com/Luuke42/omegasim) by
 | **Random NPC driver names** | Garage / Race settings | The first time a car becomes an NPC without a name, it gets a random, unique driver name that is remembered with the car. 🎲 next to the name field rolls a new one. |
 | **Driver announcements** | Race settings | The announcer voice reads out each new driver and the car they drive (“New driver: Mara Kovac, driving the red Porsche 911.”) and calls the reason for an automatic safety car. |
 | **Driver avatars** | Garage | Each driver gets a generated helmet avatar in the car colour with their initials. Tap it to restyle. |
+| **Two-laptop mode** | Garage → *Two laptops…* | Split the Bluetooth connections across two laptops on the same Wi-Fi. Laptop A (host) runs the race as usual; laptop B (helper) connects the remaining cars over its own Bluetooth and relays their packets over a direct WebRTC link. Helper cars appear in the host's Garage, standings and NPC grid like every other car. If the link drops, the helper stops its cars. |
 
 All HybridDash code lives in `src/98i-hybriddash.js`; the original files only carry small hooks,
 so upstream OmegaSim improvements can still be merged.
+
+## Two-laptop mode (more cars)
+
+1. Open HybridDash in Chrome or Edge on **both** laptops (same Wi-Fi). On the helper you can open `…/hybriddash/?helper` to jump straight in.
+2. **Laptop A (host):** Garage → *Two laptops…* → *This laptop is the HOST* → *Create pairing code* → *Copy*.
+3. Get the code to laptop B (any note, chat or e-mail) and paste it there under *This laptop is a HELPER* → *Create answer* → *Copy*.
+4. Paste the answer on laptop A → *Connect*. Both show **LINKED**.
+5. On laptop B press *Connect a car to this laptop* once per car. Each one appears in laptop A's Garage within a second.
+
+Connect the cars you want on laptop A as usual. Each laptop's Bluetooth adapter holds roughly
+7–9 cars, so two laptops carry about twice that. Keep the helper tab open and in front during a race.
+The link is LAN only: no server, nothing leaves your network.
 
 ## Building
 
