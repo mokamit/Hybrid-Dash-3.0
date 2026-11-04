@@ -2261,7 +2261,9 @@
         return Math.abs(A[0] - B[0]) + Math.abs(A[1] - B[1]) + Math.abs(A[2] - B[2]);
       };
 
-      const werte = Array.prototype.map.call(sel.options, o => o.value);
+      // HybridDash 2.1: 'hybriddash' is its own LAYOUT (98m-hd-cockpit.js), not a colour theme over
+      // the shared one - the theme comparison below does not apply to it.
+      const werte = Array.prototype.map.call(sel.options, o => o.value).filter(v => v !== 'hybriddash');
       if (werte.length < 3) schlecht.push('nur ' + werte.length + ' Ansichten');
       const proben = werte.map(messe);
 

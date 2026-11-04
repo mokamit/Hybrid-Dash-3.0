@@ -3496,6 +3496,7 @@
     ps.dirtyAir += (ziel - ps.dirtyAir) * Math.min(1, dt * 4);
     const out = physEngine.update({ steering: steer, throttle: rawThrottle, brake: rawBrake,
                                     headlights: headlightsOn, apFaehrt: !!ap }, dt);
+    if (typeof hdCockpitEingabe === 'function') hdCockpitEingabe(rawThrottle, rawBrake);   // HybridDash cockpit bar
     pacejkaRueckmeldung(physEngine, 1);
     // Telemetrie: etwa 10 Proben je Sekunde (Tempo, Gas, Bremse, Gang, Lenkung).
     if (typeof teleProbe === 'function') teleProbe(rawThrottle, rawBrake);
