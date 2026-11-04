@@ -57,7 +57,7 @@ public class OmegaUpdatePlugin extends Plugin {
      *  native Faehigkeiten braucht - dann meldet pruefen() "neue APK noetig". */
     static final int APK_STUFE = 2;
 
-    static final String QUELLE = "https://YOUR-GITHUB-USER.github.io/hybriddash/";
+    static final String QUELLE = "https://mokamit.github.io/hybriddash/";
     static final String PREFS = "OmegaUpdate";
     static final String K_OFFEN = "offen";            // umgeschaltet, noch nicht bestaetigt
     static final String K_OFFEN_VERSION = "offenVersion";

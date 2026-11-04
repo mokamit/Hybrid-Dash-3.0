@@ -1,6 +1,6 @@
 # HybridDash 2.0
 
-[⬇ Download the Android app (APK)](https://github.com/YOUR-GITHUB-USER/hybriddash/releases/latest/download/HybridDash.apk) · Play in the browser: [YOUR-GITHUB-USER.github.io/hybriddash](https://YOUR-GITHUB-USER.github.io/hybriddash/)
+[⬇ Download the Android app (APK)](https://github.com/mokamit/hybriddash/releases/latest/download/HybridDash.apk) · Play in the browser: [mokamit.github.io/hybriddash](https://mokamit.github.io/hybriddash/)
 
 An open source controller for Carrera Hybrid Bluetooth cars, with physics from scientific
 formulae and engine sound from an enginesim implementation, plus a race director, NPCs,

@@ -29,8 +29,8 @@
     // v0.9.6, der Rueckfall wird also nicht mehr gebraucht.
     {
       const info = $('app-apk-link');
-      a.href = 'https://github.com/YOUR-GITHUB-USER/hybriddash/releases/latest/download/HybridDash.apk';
-      if (info) info.href = 'https://github.com/YOUR-GITHUB-USER/hybriddash/releases/latest';
+      a.href = 'https://github.com/mokamit/hybriddash/releases/latest/download/HybridDash.apk';
+      if (info) info.href = 'https://github.com/mokamit/hybriddash/releases/latest';
     }
     a.hidden = false;
   })();
