@@ -25,11 +25,12 @@ so upstream OmegaSim improvements can still be merged.
 
 ## Two-laptop mode (more cars)
 
-1. Open HybridDash in Chrome or Edge on **both** laptops (same Wi-Fi). On the helper you can open `…/hybriddash/?helper` to jump straight in.
-2. **Laptop A (host):** Garage → *Two laptops…* → *This laptop is the HOST* → *Create pairing code* → *Copy*.
-3. Get the code to laptop B (any note, chat or e-mail) and paste it there under *This laptop is a HELPER* → *Create answer* → *Copy*.
-4. Paste the answer on laptop A → *Connect*. Both show **LINKED**.
-5. On laptop B press *Connect a car to this laptop* once per car. Each one appears in laptop A's Garage within a second.
+1. Open HybridDash in Chrome or Edge on **both** laptops (same Wi-Fi). On the helper laptop open **`helper.html`** – a dedicated page that shows only the helper panel.
+2. **Laptop A (host):** Garage → *Two laptops…* (or **⇄** at the top right) → *HOST* → *Create pairing code*. A short code like `K7Q-2XM` appears.
+3. **Laptop B (helper):** type the code → *Pair*. Both show **LINKED**.
+4. On laptop B press *Connect a car to this laptop* once per car. Each one appears in laptop A's Garage within a second.
+
+Both laptops remember the pairing: after a reload, a dropped link or the next race night they find each other by themselves (on the helper, *Reconnect known cars* brings its cars back). *Unlink* stops that; *Forget pairing* clears the code. The short code needs internet only to introduce the laptops (an encrypted Supabase Realtime channel); the car data always goes laptop to laptop over your Wi-Fi. Without internet, use *Pair without internet* (copy two codes).
 
 Connect the cars you want on laptop A as usual. Each laptop's Bluetooth adapter holds roughly
 7–9 cars, so two laptops carry about twice that. Keep the helper tab open and in front during a race.

@@ -389,6 +389,17 @@
      deutlicher (aktuell sehr schwach und kaum erkennbar)". Vorher ::before mit 4,5 % Deckkraft;
      jetzt ein eigenes Element (die zwei Glitch-Ebenen brauchen ::before und ::after) mit 13 %. */
   /* HybridDash 2.0 */
+  .hdr-schnell { border: 1px solid rgba(0,163,224,.45); background: rgba(0,163,224,.07); border-radius: 8px; padding: 10px 12px; margin: 8px 0 10px; }
+  .hdr-schnell p { margin: 4px 0 8px; color: #c3c8d4; font-size: 13.5px; }
+  .hdr-schnell-titel { color: #6fd3ff; letter-spacing: .04em; }
+  .hdr-code-zeile { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .hdr-code { font: 800 30px/1 ui-monospace, monospace; letter-spacing: .12em; color: #fff; min-width: 7.2ch; }
+  .hdr-code-ein { font: 800 24px/1.1 ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; width: 11ch; box-sizing: content-box;
+                  background: #05070c; color: #fff; border: 1px solid rgba(255,255,255,.25); border-radius: 6px; padding: 6px 8px; }
+  .hdr-manuell { margin: 6px 0 10px; color: #c3c8d4; }
+  .hdr-manuell summary { cursor: pointer; color: #9aa1b0; font-size: 13px; }
+  .hdr-autos-schritt { list-style: none; padding-left: 0; }
+  .hdr-paar-status { color: #7cd8ff; }
   .hd-relay-chip { font-size: inherit; padding: 1px 7px; border-radius: 3px; border: 1px solid rgba(255,255,255,.25);
                    background: transparent; color: var(--k-dim); cursor: pointer; letter-spacing: .06em; min-height: 0; line-height: 1.4; }
   .hd-relay-chip.an { border-color: #35b45a; color: #7cff9b; }
@@ -9755,6 +9766,14 @@
         <button type="button" id="hdr-wahl-helper"><b>This laptop is a HELPER</b><small>Laptop B &middot; extra cars only</small></button>
       </div>
       <div class="hdr-teil hdr-host">
+        <div class="hdr-schnell">
+          <b class="hdr-schnell-titel">Quick pairing</b>
+          <p>Create a code here, type it on the helper laptop once. After that the two laptops find each other by themselves &ndash; after a reload, a dropped link or next race night.</p>
+          <div class="hdr-code-zeile"><span class="hdr-code" id="hdr-paar-code">&mdash;&mdash;</span>
+            <button type="button" class="primary" id="hdr-paar-host">Create pairing code</button>
+            <button type="button" id="hdr-paar-neu">New code</button></div>
+        </div>
+        <details class="hdr-manuell"><summary>Pair without internet (copy two codes)</summary>
         <ol>
           <li><button type="button" class="primary" id="hdr-host-code">Create pairing code</button>
             <div class="hdr-feld"><textarea id="hdr-host-code-text" readonly rows="3" placeholder="The code appears here"></textarea>
@@ -9764,22 +9783,35 @@
           <li><div class="hdr-feld"><textarea id="hdr-host-antwort" rows="3" placeholder="Paste the helper&rsquo;s answer code"></textarea>
             <button type="button" class="primary" id="hdr-host-verbinden">Connect</button></div></li>
         </ol>
+        </details>
       </div>
       <div class="hdr-teil hdr-helper">
+        <div class="hdr-schnell">
+          <b class="hdr-schnell-titel">Quick pairing</b>
+          <p>Type the code shown on the host laptop. This laptop remembers it and reconnects by itself.</p>
+          <div class="hdr-code-zeile"><input type="text" id="hdr-paar-eingabe" class="hdr-code-ein" maxlength="7" autocomplete="off" spellcheck="false" placeholder="K7Q-2XM" aria-label="Pairing code">
+            <button type="button" class="primary" id="hdr-paar-helper">Pair</button></div>
+        </div>
+        <details class="hdr-manuell"><summary>Pair without internet (copy two codes)</summary>
         <ol>
           <li><div class="hdr-feld"><textarea id="hdr-helper-angebot" rows="3" placeholder="Paste the host&rsquo;s pairing code"></textarea>
             <button type="button" class="primary" id="hdr-helper-antwort">Create answer</button></div></li>
           <li><div class="hdr-feld"><textarea id="hdr-helper-code-text" readonly rows="3" placeholder="The answer code appears here"></textarea>
             <button type="button" id="hdr-helper-kopieren">Copy</button></div>
             <small>Paste it on the host laptop and press <i>Connect</i>.</small></li>
+        </ol>
+        </details>
+        <ol class="hdr-autos-schritt">
           <li><button type="button" class="primary" id="hdr-helper-auto">Connect a car to this laptop</button>
+            <button type="button" id="hdr-helper-bekannte">Reconnect known cars</button>
             <small>One click per car (Web Bluetooth asks each time). Keep this tab open and in front while racing.
             If the link drops, this laptop stops its cars.</small></li>
         </ol>
       </div>
+      <p id="hdr-paar-status" class="hdr-status hdr-paar-status"></p>
       <p id="hdr-status" class="hdr-status"></p>
       <ul id="hdr-autos" class="hdr-autos"></ul>
-      <div class="hdr-fuss"><span id="hdr-zahlen" class="muted"></span><button type="button" id="hdr-trennen">Unlink</button></div>
+      <div class="hdr-fuss"><span id="hdr-zahlen" class="muted"></span><span><button type="button" id="hdr-paar-vergessen" hidden>Forget pairing</button> <button type="button" id="hdr-trennen">Unlink</button></span></div>
     </div>
   </div>
   <div class="mp-info" id="mp-info" hidden>

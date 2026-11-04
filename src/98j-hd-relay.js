@@ -144,7 +144,11 @@
     clearInterval(hdRelay.pingUhr); hdRelay.pingUhr = null;
     if (hdRelay.rolle === 'helper') hdAlleAnhalten();
     if (hdRelay.rolle === 'host') hdRelay.fremd.forEach((d) => d._weg());
-    if (war) { hdStatus(grund + ' Pair again to continue.'); log('HybridDash two-laptop mode: ' + grund, 'warn'); }
+    if (war) {
+      const auto = typeof hdPaar !== 'undefined' && hdPaar.aktiv;
+      hdStatus(grund + (auto ? ' Reconnecting automatically …' : ' Pair again to continue.'));
+      log('HybridDash two-laptop mode: ' + grund, 'warn');
+    }
     hdRelayMalen();
   }
   function hdRelaySchliessen(still) {
