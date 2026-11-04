@@ -56,6 +56,20 @@
           <div class="hd-cp-zeilen">${zeile('Battery', 'akku')}${zeile('Position', 'pos')}${zeile('Fuel', 'tank')}${zeile('Off track', 'abseits')}</div>
         </div>
         <div class="hd-cp-chips2">${chip('LCK', '#ff5a5a', 'lck')}${chip('EXPO', '#35d07f', 'expo')}${chip('BRK', '#3b7fe2', 'brk')}</div>
+        <div class="hd-cp-steuer">
+          <div class="hd-cp-box hd-cp-g" title="G-force: green = measured on the car, red = simulated">
+            <svg viewBox="0 0 100 100" aria-label="G-force"><circle cx="50" cy="50" r="46" fill="#04060b" stroke="#2a3346"/>
+              <circle cx="50" cy="50" r="31" fill="none" stroke="#1e2634"/><circle cx="50" cy="50" r="16" fill="none" stroke="#1e2634"/>
+              <path d="M50 4V96M4 50H96" stroke="#1e2634"/>
+              <circle id="hd-cp-g-real" cx="50" cy="50" r="5" fill="#2ee06a" opacity=".85"/><circle id="hd-cp-g-sim" cx="50" cy="50" r="5.5" fill="#ff4d4d"/></svg>
+            <span>G</span></div>
+          <button type="button" class="hd-cp-knopf" id="hd-cp-licht-knopf" title="Lights on/off">
+            <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path d="M13 5 C7 5 6 9 6 12 C6 15 7 19 13 19 Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8 H21 M16 12 H21 M16 16 H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span id="hd-cp-licht-txt">Lights</span></button>
+          <button type="button" class="hd-cp-knopf" id="hd-cp-wetter-knopf" title="Change weather: dry, rain, changeable">
+            <svg id="hd-cp-wetter-ico" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"></svg>
+            <span id="hd-cp-wetter-txt">Dry</span></button>
+        </div>
       </div>
       <div class="hd-cp-mitte">
         <div class="hd-cp-box hd-cp-tempo"><b id="hd-cp-kmh">0</b><small>km/h</small></div>
@@ -69,6 +83,10 @@
           <div class="hd-cp-zt-fuss"><div><span>Δ Best</span><b id="hd-cp-delta">--</b></div><div><span>Best</span><b id="hd-cp-best">--</b></div></div></div>
         <div class="hd-cp-box hd-cp-reihe"><span>Last lap</span><b id="hd-cp-letzte">—</b></div>
         <div class="hd-cp-box hd-cp-reihe"><span>Condition</span><b id="hd-cp-schaden" class="hd-cp-blau">—</b></div>
+        <div class="hd-cp-aktionen">
+          <button type="button" class="hd-cp-aktion" id="hd-cp-box-knopf">PIT STOP</button>
+          <button type="button" class="hd-cp-aktion hd-cp-gelb" id="hd-cp-flagge-knopf">YELLOW FLAG</button>
+        </div>
       </div>
       <div class="hd-cp-aussen">
         <div class="hd-cp-flagge" id="hd-cp-flagge">—</div>
@@ -80,6 +98,13 @@
       </div>`;
     el.appendChild(innen);
     dash.appendChild(el);
+    // The controls press the standard cockpit's own buttons, so every rule (pit lane, 1 s
+    // hold for the flag on the pad, pause, two-player) stays exactly as it is there.
+    const druecke = (id) => () => { const k = $(id); if (k && !k.disabled) k.click(); setTimeout(hdCockpitMalen, 60); };
+    innen.querySelector('#hd-cp-box-knopf').addEventListener('click', druecke('race-act-pit'));
+    innen.querySelector('#hd-cp-flagge-knopf').addEventListener('click', druecke('race-act-flag'));
+    innen.querySelector('#hd-cp-licht-knopf').addEventListener('click', druecke('race-light-box'));
+    innen.querySelector('#hd-cp-wetter-knopf').addEventListener('click', druecke('race-wx-box'));
     hdCp.el = el;
     if (window.ResizeObserver) new ResizeObserver(hdCockpitEinpassen).observe(el);
     return el;
@@ -161,6 +186,35 @@
     hdSetz('best', hdLeer(hdTxt('race-lap-best')).replace('—', '--'));
     hdSetz('letzte', hdLeer(hdTxt('race-lap-last')));
     hdSetz('schaden', hdLeer(hdTxt('race-dmg')));
+    // G-force: the same two dots as the standard cockpit's G plot.
+    for (const k of ['real', 'sim']) {
+      const q = $('race-g-' + k), z = $('hd-cp-g-' + k);
+      if (q && z) { z.setAttribute('cx', q.getAttribute('cx')); z.setAttribute('cy', q.getAttribute('cy')); }
+    }
+    // Lights
+    let licht = true; try { licht = !!headlightsOn; } catch (e) { /* not ready */ }
+    const lk = $('hd-cp-licht-knopf');
+    lk.classList.toggle('an', licht); hdSetz('licht-txt', licht ? 'Lights on' : 'Lights off');
+    // Weather
+    // The weather MODE the tile cycles (dry -> rain -> changeable), plus rain right now.
+    let modus = 'dry', nass = false;
+    try { modus = raceWxStart; nass = weather === 'wet'; } catch (e) { /* not ready */ }
+    const wechsel = modus === 'wechsel';
+    if (modus === 'rain') nass = true;
+    const wetterTxt = wechsel ? 'Changeable' : nass ? 'Rain' : 'Dry';
+    if ($('hd-cp-wetter-txt').textContent !== wetterTxt) {
+      hdSetz('wetter-txt', wetterTxt);
+      $('hd-cp-wetter-ico').innerHTML = nass || wechsel
+        ? '<path d="M7 15 C4 15 3 12.5 4.5 10.8 C5 8 8 7 10 8.3 C11.3 5.5 16.5 5.5 17.3 9.4 C20 9.6 21 12 20 13.8 C19.5 14.7 18.6 15 17.6 15 Z" fill="none" stroke="#5aa9ff" stroke-width="1.8"/><path d="M8 18 L7 20.5 M12 18 L11 20.5 M16 18 L15 20.5" stroke="#5aa9ff" stroke-width="1.8" stroke-linecap="round"/>'
+        : '<circle cx="12" cy="12" r="4.5" fill="none" stroke="#ffd23f" stroke-width="1.8"/><path d="M12 2.5V5 M12 19V21.5 M2.5 12H5 M19 12H21.5 M5.3 5.3L7 7 M17 17L18.7 18.7 M5.3 18.7L7 17 M17 7L18.7 5.3" stroke="#ffd23f" stroke-width="1.8" stroke-linecap="round"/>';
+    }
+    // Pit stop and yellow flag: label and state from the standard buttons.
+    const bp = $('race-act-pit'), bf = $('hd-cp-box-knopf');
+    if (bp && bf) { const tx = bp.textContent.replace(/\s+/g, ' ').trim() || 'PIT STOP'; if (bf.textContent !== tx) bf.textContent = tx;
+      bf.disabled = !!bp.disabled; bf.classList.toggle('an', bp.classList.contains('flagged') || bp.classList.contains('an') || bp.classList.contains('aktiv')); }
+    const ff = $('race-act-flag'), ffk = $('hd-cp-flagge-knopf');
+    if (ff && ffk) { const tx = ff.textContent.replace(/\s+/g, ' ').trim() || 'YELLOW FLAG'; if (ffk.textContent !== tx) ffk.textContent = tx;
+      ffk.disabled = !!ff.disabled; ffk.classList.toggle('an', ff.classList.contains('flagged')); }
     // Flag box
     const fl = $('hd-cp-flagge');
     let f = 'GREEN', fc = '#35d07f';
@@ -238,6 +292,26 @@
       .hd-cp-seg i.hd-b.an { background: #ff4d4d; border-color: #ff4d4d; }
       .hd-cp-pfeil { display: grid !important; place-items: center; color: #8a93a3; font-size: 22px; background: transparent !important; border: 0 !important; }
       .hd-cp-pfeil.an { color: #ffd23f; }
+      .hd-cp-steuer { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 4px; }
+      .hd-cp-g { position: relative; height: 112px; display: grid; place-items: center; }
+      .hd-cp-g svg { width: 100px; height: 100px; }
+      .hd-cp-g span { position: absolute; left: 7px; top: 4px; font-size: 12px; font-weight: 800; color: #8a93a3; }
+      .hd-cp-knopf { all: unset; box-sizing: border-box; cursor: pointer; height: 112px; display: grid; place-items: center; align-content: center; gap: 6px;
+        border: 2px solid #2a2e35; border-radius: 8px; background: #121418; color: #8a93a3; font: 700 14px Inter, system-ui, sans-serif; text-align: center; }
+      .hd-cp-knopf:hover { border-color: #4a5160; }
+      .hd-cp-knopf:focus-visible, .hd-cp-aktion:focus-visible { outline: 2px solid #00d6ff; outline-offset: 2px; }
+      #hd-cp-licht-knopf.an { color: #35d07f; border-color: #35d07f; }
+      .hd-cp-aktionen { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+      .hd-cp-aktion { all: unset; box-sizing: border-box; cursor: pointer; height: 96px; display: grid; place-items: center; text-align: center;
+        border: 2px solid #2a2e35; border-bottom: 3px solid #00a3e0; border-radius: 8px; background: #1a1d24; color: #f4f6fb;
+        font: 800 16px Inter, system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; padding: 0 8px; }
+      .hd-cp-aktion:hover { background: #232733; }
+      .hd-cp-aktion.an { background: #00a3e0; color: #05070c; }
+      .hd-cp-aktion.hd-cp-gelb.an { background: #ffd23f; border-bottom-color: #ffd23f; color: #14161c; }
+      .hd-cp-aktion:disabled { opacity: .45; cursor: default; }
+      /* The standard cockpit's weather tile draws its accent above the screen overlays (seen as a
+         stray blue line on the Pit, Race and Dashboard screens). Hidden while another screen shows. */
+      #race-dash:not([data-screen="main"]):not([data-screen="auto2"]) #race-wx-box { visibility: hidden; }
     `;
     document.head.appendChild(css);
     // REQUESTED: "Keep the original 3 cockpit windows, but add the new one as a 4th option."
