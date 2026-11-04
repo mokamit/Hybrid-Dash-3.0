@@ -43482,7 +43482,10 @@
                                      ? sectorHistory
                                      : ((c.race && c.race.sek && c.race.sek.hist) || []),
                                    // HybridDash race control: did not finish.
-                                   dnf: typeof hdDnfAuto === 'function' && hdDnfAuto(c) }));
+                                   dnf: typeof hdDnfAuto === 'function' && hdDnfAuto(c),
+                                   // HybridDash race control: disqualified (black flag) and time penalties.
+                                   dsq: typeof hdDsqAuto === 'function' && hdDsqAuto(c),
+                                   strafeMs: typeof hdStrafeMs === 'function' ? hdStrafeMs(String(c.device && c.device.id)) : 0 }));
     if (!garage.some(c => c === playerCar) && raceLapTimes.length) {
       // Ohne Garage gibt es kein Geraet und damit keine Farbe: dann bleibt das Feld leer,
       // statt eine zu erfinden.
@@ -43808,7 +43811,10 @@
     // Ranking depends on the mode. Endurance and Runden: most laps, then quickest to get
     // there. Qualifying: the single fastest lap, nothing else.
     const scored = cars.map(c => ({ c, st: raceStats(c.laps) }));
-    scored.sort((a, b) => ((a.c.dnf ? 1 : 0) - (b.c.dnf ? 1 : 0)) || (raceMode === 'qualifying'
+    // HybridDash race control: time penalties count on the total; DNF, then DSQ at the bottom.
+    for (const x of scored) x.st.total += x.c.strafeMs || 0;
+    const aus = (c) => (c.dsq ? 2 : c.dnf ? 1 : 0);
+    scored.sort((a, b) => (aus(a.c) - aus(b.c)) || (raceMode === 'qualifying'
       ? a.st.best - b.st.best
       : (b.st.n - a.st.n) || (a.st.total - b.st.total)));
 
@@ -43816,8 +43822,8 @@
     $('race-results-body').innerHTML = scored.map((x, i) => {
       const st = x.st, isBest = st.best === fastest;
       return `<tr>
-        <td style="${td}">${x.c.dnf ? '<b style="color:#ff6b7f">DNF</b>' : i + 1}</td>
-        <td style="${td}">${ergDot(x.c)}${x.c.name}${x.c.role === 'ghost' ? ' <span class="muted">(NPC)</span>' : ''}${rammerLabel(x.c)}</td>
+        <td style="${td}">${x.c.dsq ? '<b style="color:#ff6b7f">DSQ</b>' : x.c.dnf ? '<b style="color:#ff6b7f">DNF</b>' : i + 1}</td>
+        <td style="${td}">${ergDot(x.c)}${x.c.name}${x.c.strafeMs ? ' <b style="color:#e8b400">+' + Math.round(x.c.strafeMs / 1000) + ' s</b>' : ''}${x.c.role === 'ghost' ? ' <span class="muted">(NPC)</span>' : ''}${rammerLabel(x.c)}</td>
         <td style="${tdr}">${st.n}</td>
         <td style="${tdr}${isBest ? '; color:var(--good); font-weight:700' : ''}">${formatLapTime(st.best)}</td>
         <td style="${tdr}">${formatLapTime(Math.round(st.mean))}</td>
@@ -49611,7 +49617,7 @@
     // Rennens und das Ergebnis danach nicht verschiedene Sieger nennen.
     const mit = cars.map((c) => {
       const ms = c.laps.map((l) => l.ms);
-      return { c, n: ms.length, summe: ms.reduce((a, b) => a + b, 0),
+      return { c, n: ms.length, summe: ms.reduce((a, b) => a + b, 0) + (c.strafeMs || 0),
                letzte: ms.length ? ms[ms.length - 1] : null,
                beste: ms.length ? Math.min.apply(null, ms) : null };
     });
@@ -49621,11 +49627,13 @@
     // Garagenreihenfolge.
     const ortVon = (x) => (typeof x.c.ort === 'number' ? x.c.ort : -Infinity);
     // HybridDash: DNF cars at the bottom, in the order they retired (more laps first).
-    mit.sort((a, b) => ((a.c.dnf ? 1 : 0) - (b.c.dnf ? 1 : 0)) || (b.n - a.n) || (a.summe - b.summe) || (ortVon(b) - ortVon(a)));
+    const aus = (c) => (c.dsq ? 2 : c.dnf ? 1 : 0);
+    mit.sort((a, b) => (aus(a.c) - aus(b.c)) || (b.n - a.n) || (a.summe - b.summe) || (ortVon(b) - ortVon(a)));
     const fuehrer = mit.length ? mit[0] : null;
     return mit.map((x, i) => {
       let luecke = '';
-      if (x.c.dnf) luecke = 'DNF';
+      if (x.c.dsq) luecke = 'DSQ';
+      else if (x.c.dnf) luecke = 'DNF';
       else if (fuehrer && x !== fuehrer) {
         const zurueck = fuehrer.n - x.n;
         if (zurueck > 0) {
@@ -49642,7 +49650,7 @@
       } else if (fuehrer && x === fuehrer) {
         luecke = '\u2014';
       }
-      return { pos: i + 1, name: x.c.name, farbe: x.c.farbe, rolle: x.c.role, id: x.c.id, dnf: !!x.c.dnf,
+      return { pos: i + 1, name: x.c.name, farbe: x.c.farbe, rolle: x.c.role, id: x.c.id, dnf: !!x.c.dnf, dsq: !!x.c.dsq, strafeMs: x.c.strafeMs || 0,
                runden: x.n, summe: x.summe, luecke, letzte: x.letzte, beste: x.beste,
                // Die schnellste Runde des ganzen Feldes wird hervorgehoben, wie auf einer
                // Zeittafel. Verglichen wird SPAETER, wenn alle Zeilen vorliegen.
@@ -49845,7 +49853,7 @@
       const mix = eigen
         ? '<span class="ov-mix" style="background:' + mischungFarbe(tyres) + '"></span>'
         : '<span class="ov-mix ov-mix-leer"></span>';
-      return '<div class="ov-zeile' + (eigen ? ' ov-ich' : '') + (z.dnf ? ' ov-dnf' : '') + '">'
+      return '<div class="ov-zeile' + (eigen ? ' ov-ich' : '') + (z.dnf ? ' ov-dnf' : '') + (z.dsq ? ' ov-dsq' : '') + '">'
         + '<span class="ov-pos">' + z.pos + '</span>'
         + '<span class="ov-farbe" style="background:' + (z.farbe || 'transparent') + '"></span>'
         + '<span class="ov-name" data-i18n-skip>' + z.name + '</span>'
@@ -117453,6 +117461,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const css = document.createElement('style');
     css.textContent = `
       #race-dash .race-corner-links { right: clamp(96px, 9vw, 130px); }
+      /* The same glowing line as under the main menu, in neon green, under the cockpit tabs. */
+      #race-dash .race-corner-links:has(.hd-reiter)::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px;
+        background: linear-gradient(90deg, transparent, #39ff88 8%, #39ff88 92%, transparent);
+        box-shadow: 0 0 4px rgba(57,255,136,.9), 0 0 12px rgba(57,255,136,.45); pointer-events: none; z-index: 1; }
       #race-screen-dots.hd-reiter { flex: 1; min-width: 0; height: 34px; gap: 0; padding: 0; margin-left: 6px;
         background: #0d1015; overflow: hidden; display: flex; align-items: stretch; }
       #race-screen-dots.hd-reiter button { all: unset; box-sizing: border-box; flex: 1; min-width: 0; cursor: pointer; text-align: center;
@@ -117497,9 +117509,14 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   //   * an NPC's driver is stopped too (stopGhost), so it stops planning;
   //   * standings and results sort it to the bottom and show DNF; it no longer counts for
   //     "everyone has finished", the safety car detection, or the yellow-flag gap keeping.
+  // BLACK FLAG - the same stop as DNF (hdRl.dnf with art 'dsq'), shown as DSQ, sorted below DNF.
+  // TIME PENALTIES - hdRl.strafe (device id -> list of ms), added to the race time in the
+  //   standings and the results, so a penalised car can lose places at the flag.
+  // Each standings row has a STEWARD button: +5 s, +10 s, clear penalties, black flag, DNF,
+  //   reinstate.
 
   const HD_RL_GELB_TEMPO = 1.35;     // local yellow: 35 % above the safety-car pace, still no overtaking
-  const hdRl = { modus: 'sc', dnf: new Map(), log: [], letzterRennstatus: 'idle' };
+  const hdRl = { modus: 'sc', dnf: new Map(), strafe: new Map(), log: [], letzterRennstatus: 'idle' };
 
   // ---- hooks used by the original code ------------------------------------------------------
   function hdRlOhneSafetyCar() { return flagState === 'yellow' && (hdRl.modus === 'gelb' || hdRl.modus === 'vsc'); }
@@ -117525,6 +117542,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   }
   function hdDnfPaket() { return buildCommandPacket(0, 0, trackModeBit()); }
   function hdDnfVonId(id) { return hdRl.dnf.has(String(id)); }
+  function hdDsqVonId(id) { const x = hdRl.dnf.get(String(id)); return !!(x && x.art === 'dsq'); }
+  function hdDsqAuto(car) { const id = hdDnfId(car); return !!(id && hdDsqVonId(id)); }
+  function hdStrafeMs(id) { const l = hdRl.strafe.get(String(id)); return l ? l.reduce((a, b) => a + b, 0) : 0; }
 
   // ---- incident log -------------------------------------------------------------------------
   function hdRlZeit() {
@@ -117605,45 +117625,127 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   }
 
   // ---- DNF ------------------------------------------------------------------------------------
-  function hdRlDnf(id) {
+  function hdRlName(id) { const car = garage.find((c) => hdDnfId(c) === id); return { car, name: car ? garageLabel(car) : id }; }
+  function hdRlNeuMalen() {
+    hdRlMalen();
+    try { if (typeof ovScreenRender === 'function') ovScreenRender(); } catch (e) { /* not ready */ }
+    try { if (typeof renderRaceResults === 'function' && raceState === 'finished') renderRaceResults(); } catch (e) { /* not ready */ }
+  }
+  function hdRlWieder(id) {
     id = String(id);
-    const car = garage.find((c) => hdDnfId(c) === id);
-    const name = car ? garageLabel(car) : id;
-    if (hdRl.dnf.has(id)) {
-      if (!window.confirm('Reinstate ' + name + '? The car can drive again.')) return;
-      hdRl.dnf.delete(id);
-      if (car && car.ghost && car.role === 'ghost' && hdRlRennt() && typeof startGhost === 'function') startGhost(car);
-      hdRlLog(name + ' reinstated', 'dnf');
-      hdRlMalen(); return;
-    }
-    if (!window.confirm('DNF: take ' + name + ' out of the race?\n\nThe car is stopped and the race continues without it. It stays in the results as DNF. Remove it from the track yourself.')) return;
-    let runden = 0;
-    try { const x = raceAllCars().find((c) => c.id === id); runden = x ? x.laps.length : 0; } catch (e) { runden = 0; }
-    hdRl.dnf.set(id, { runden, zeit: hdRlZeit() });
+    if (!hdRl.dnf.has(id)) return;
+    const { car, name } = hdRlName(id);
+    if (!window.confirm('Reinstate ' + name + '? The car can drive again.')) return;
+    hdRl.dnf.delete(id);
+    if (car && car.ghost && car.role === 'ghost' && hdRlRennt() && typeof startGhost === 'function') startGhost(car);
+    hdRlLog(name + ' reinstated', 'dnf');
+    hdRlNeuMalen();
+  }
+  // Take a car out: art 'dnf' (did not finish) or 'dsq' (black flag, disqualified).
+  function hdRlAus(id, art) {
+    id = String(id); art = art === 'dsq' ? 'dsq' : 'dnf';
+    const { car, name } = hdRlName(id);
+    const alt = hdRl.dnf.get(id);
+    if (alt && alt.art === art) return;
+    const frage = art === 'dsq'
+      ? 'BLACK FLAG: disqualify ' + name + '?\n\nThe car is stopped and the race continues without it. It stays in the results as DSQ, below every finisher and DNF. Remove it from the track yourself.'
+      : 'DNF: take ' + name + ' out of the race?\n\nThe car is stopped and the race continues without it. It stays in the results as DNF. Remove it from the track yourself.';
+    if (!window.confirm(frage)) return;
+    let runden = alt ? alt.runden : 0;
+    if (!alt) { try { const x = raceAllCars().find((c) => c.id === id); runden = x ? x.laps.length : 0; } catch (e) { runden = 0; } }
+    hdRl.dnf.set(id, { runden, zeit: alt ? alt.zeit : hdRlZeit(), art });
     if (car) {
       if (car.ghost && typeof stopGhost === 'function') stopGhost(car);
       try { if (car.rx) writeToCar(car, 0, 0, trackModeBit()); } catch (e) { /* not connected */ }
     }
-    showHudToast('DNF · ' + name);
-    hdRlLog(name + ' – DNF after ' + runden + ' lap' + (runden === 1 ? '' : 's'), 'dnf');
-    hdRlSag(name + ' is out of the race.');
-    hdRlMalen();
-    if (typeof renderRaceResults === 'function') renderRaceResults();
+    if (art === 'dsq') {
+      showHudToast('BLACK FLAG · ' + name + ' · DSQ');
+      hdRlLog('Black flag: ' + name + ' disqualified', 'dsq');
+      hdRlSag('Black flag. ' + name + ' is disqualified.');
+    } else {
+      showHudToast('DNF · ' + name);
+      hdRlLog(name + ' – DNF after ' + runden + ' lap' + (runden === 1 ? '' : 's'), 'dnf');
+      hdRlSag(name + ' is out of the race.');
+    }
+    hdRlNeuMalen();
+  }
+  // Toggle (kept for older calls): DNF, or reinstate a car that is out.
+  function hdRlDnf(id) { id = String(id); if (hdRl.dnf.has(id)) hdRlWieder(id); else hdRlAus(id, 'dnf'); }
+  // Time penalty in seconds; 0 clears them all.
+  function hdRlStrafe(id, s) {
+    id = String(id);
+    const { name } = hdRlName(id);
+    if (!s) {
+      if (!hdRl.strafe.has(id)) return;
+      hdRl.strafe.delete(id);
+      hdRlLog(name + ': penalties cleared', 'strafe');
+      showHudToast(name + ' · penalties cleared');
+    } else {
+      const l = hdRl.strafe.get(id) || [];
+      l.push(s * 1000); hdRl.strafe.set(id, l);
+      const summe = Math.round(hdStrafeMs(id) / 1000);
+      hdRlLog(s + ' second penalty: ' + name + (summe !== s ? ' (total +' + summe + ' s)' : ''), 'strafe');
+      showHudToast('+' + s + ' s · ' + name);
+      hdRlSag(s + ' second time penalty for ' + name + '.');
+    }
+    hdRlNeuMalen();
   }
   // Standings row cell (ovScreenRender, 70-race.js).
   function hdDnfZelle(z) {
     if (!z || !z.id || z.id === 'undefined') return '<span class="ov-dnf-zelle"></span>';
-    const aus = hdDnfVonId(z.id);
-    return '<span class="ov-dnf-zelle"><button type="button" class="ov-dnf-knopf' + (aus ? ' aus' : '') + '" data-hd-dnf="'
-      + String(z.id).replace(/"/g, '') + '" title="' + (aus ? 'Reinstate this car' : 'Did not finish: take this car out of the race') + '">'
-      + (aus ? 'DNF ✕' : 'DNF') + '</button></span>';
+    const id = String(z.id).replace(/"/g, '');
+    const x = hdRl.dnf.get(id), s = Math.round(hdStrafeMs(id) / 1000);
+    const marke = x ? (x.art === 'dsq' ? 'DSQ' : 'DNF') : '⚑';
+    return '<span class="ov-dnf-zelle">'
+      + (s ? '<span class="ov-strafe" title="Time penalties">+' + s + 's</span>' : '')
+      + '<button type="button" class="ov-dnf-knopf' + (x ? ' aus' + (x.art === 'dsq' ? ' dsq' : '') : '') + '" data-hd-steward="' + id
+      + '" title="Steward: time penalty, black flag, DNF" aria-haspopup="menu">' + marke + '</button></span>';
+  }
+  // The steward menu for one car.
+  function hdRlMenueZu() { const m = $('hd-rl-menue'); if (m) m.remove(); }
+  function hdRlMenue(knopf) {
+    const id = knopf.getAttribute('data-hd-steward');
+    const offen = $('hd-rl-menue');
+    if (offen && offen.dataset.id === id) { hdRlMenueZu(); return; }
+    hdRlMenueZu();
+    const { name } = hdRlName(id);
+    const x = hdRl.dnf.get(id), s = Math.round(hdStrafeMs(id) / 1000);
+    const m = document.createElement('div');
+    m.id = 'hd-rl-menue'; m.className = 'hd-rl-menue'; m.dataset.id = id; m.setAttribute('role', 'menu'); m.setAttribute('data-i18n-skip', '');
+    const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    m.innerHTML = '<b>' + esc(name) + (s ? ' · +' + s + ' s' : '') + (x ? ' · ' + (x.art === 'dsq' ? 'DSQ' : 'DNF') : '') + '</b>'
+      + '<button type="button" role="menuitem" data-hd-st="5">+5 s penalty</button>'
+      + '<button type="button" role="menuitem" data-hd-st="10">+10 s penalty</button>'
+      + (s ? '<button type="button" role="menuitem" data-hd-st="0">Clear penalties</button>' : '')
+      + (x && x.art === 'dsq' ? '' : '<button type="button" role="menuitem" data-hd-st="dsq" class="st-schwarz">⚑ Black flag (DSQ)</button>')
+      + (x && x.art !== 'dsq' ? '' : '<button type="button" role="menuitem" data-hd-st="dnf" class="st-dnf">DNF – retire</button>')
+      + (x ? '<button type="button" role="menuitem" data-hd-st="wieder">Reinstate</button>' : '');
+    (document.fullscreenElement || document.body).appendChild(m);
+    const r = knopf.getBoundingClientRect(), mr = m.getBoundingClientRect();
+    let left = r.right - mr.width, top = r.bottom + 4;
+    if (top + mr.height > innerHeight - 6) top = Math.max(6, r.top - mr.height - 4);
+    m.style.left = Math.max(6, Math.min(innerWidth - mr.width - 6, left)) + 'px';
+    m.style.top = top + 'px';
+    const erster = m.querySelector('button'); if (erster) erster.focus();
   }
   document.addEventListener('click', (e) => {
-    const k = e.target && e.target.closest && e.target.closest('[data-hd-dnf]');
-    if (!k) return;
-    e.preventDefault(); e.stopPropagation();
-    hdRlDnf(k.getAttribute('data-hd-dnf'));
+    const ziel = e.target && e.target.closest ? e.target : null;
+    if (!ziel) return;
+    const k = ziel.closest('[data-hd-steward]');
+    if (k) { e.preventDefault(); e.stopPropagation(); hdRlMenue(k); return; }
+    const a = ziel.closest('#hd-rl-menue [data-hd-st]');
+    if (a) {
+      e.preventDefault(); e.stopPropagation();
+      const id = $('hd-rl-menue').dataset.id, w = a.getAttribute('data-hd-st');
+      hdRlMenueZu();
+      if (w === 'dsq' || w === 'dnf') hdRlAus(id, w);
+      else if (w === 'wieder') hdRlWieder(id);
+      else hdRlStrafe(id, Number(w));
+      return;
+    }
+    if (!ziel.closest('#hd-rl-menue')) hdRlMenueZu();
   }, true);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hdRlMenueZu(); });
 
   // ---- the steward bar and the log ------------------------------------------------------------
   function hdRlBauen() {
@@ -117697,7 +117799,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (a === 'sc') k.title = (typeof safetyCar === 'function' && safetyCar()) ? 'Safety car: the safety car goes out, the field queues behind it' : 'No safety car in the garage – assign a car the role "Safety Car"';
     });
     const txt = { gruen: rennt ? 'GREEN' : (raceState === 'finished' ? 'FINISHED' : 'NO RACE'), gelb: 'YELLOW', vsc: 'VSC', sc: 'SAFETY CAR', rot: 'RED FLAG', restart: 'RESTART' }[lage];
-    const l = $('hd-rl-lage'); if (l) { l.textContent = (raceState === 'finishing' && lage === 'gruen' ? 'FINAL LAP' : txt) + (hdRl.dnf.size ? ' · ' + hdRl.dnf.size + ' DNF' : ''); l.dataset.lage = lage; }
+    const l = $('hd-rl-lage'); if (l) { l.textContent = (raceState === 'finishing' && lage === 'gruen' ? 'FINAL LAP' : txt) + hdRlAusText(); l.dataset.lage = lage; }
     const liste = $('hd-rl-log-liste');
     if (liste) {
       const html = hdRl.log.length ? hdRl.log.map((x) => `<li class="art-${x.art}"><time>${x.zeit}</time> ${String(x.text).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])}</li>`).join('')
@@ -117705,10 +117807,15 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (liste.innerHTML !== html) liste.innerHTML = html;
     }
   }
-  // A new race starts clean: no DNFs, empty log, safety-car mode by default.
+  function hdRlAusText() {
+    let dnf = 0, dsq = 0;
+    hdRl.dnf.forEach((x) => { if (x.art === 'dsq') dsq++; else dnf++; });
+    return (dnf ? ' · ' + dnf + ' DNF' : '') + (dsq ? ' · ' + dsq + ' DSQ' : '');
+  }
+  // A new race starts clean: no DNFs, no penalties, empty log, safety-car mode by default.
   function hdRlTick() {
     if (raceState === 'countdown' && hdRl.letzterRennstatus !== 'countdown') {
-      hdRl.dnf.clear(); hdRl.log = []; hdRl.modus = 'sc';
+      hdRl.dnf.clear(); hdRl.strafe.clear(); hdRl.log = []; hdRl.modus = 'sc'; hdRlMenueZu();
       hdRlLog('Race start', 'gruen');
     }
     if (flagState === 'green' && hdRl.modus !== 'sc') hdRl.modus = 'sc';
@@ -117761,10 +117868,23 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       .hd-rl-log ol { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; }
       .hd-rl-log time { color: #6fd3ff; font-variant-numeric: tabular-nums; margin-right: 6px; }
       .hd-rl-log .art-rot { color: #ff8a9a; } .hd-rl-log .art-gelb, .hd-rl-log .art-vsc { color: #ffe27a; } .hd-rl-log .art-sc { color: #ffc070; }
-      .hd-rl-log .art-dnf { color: #ff8a9a; font-weight: 700; } .hd-rl-log .leer { opacity: .6; }
+      .hd-rl-log .art-dnf { color: #ff8a9a; font-weight: 700; } .hd-rl-log .art-strafe { color: #ffd34d; }
+      .hd-rl-log .art-dsq { color: #fff; font-weight: 800; background: #000; border-left: 3px solid #fff; padding-left: 4px; } .hd-rl-log .leer { opacity: .6; }
       /* standings: one more column for the DNF button */
-      body .ov-zeile { grid-template-columns: 1.5em 1.1em minmax(0, 1fr) 2.2em 2.2em 1.4em 4.4em 4.4em 3.8em 4em !important; }
-      body #race-ovscreen.ov-fertig .ov-zeile { grid-template-columns: 1.5em 1.1em minmax(0, 1fr) 2.2em 2.2em 1.4em 4.4em 3.8em 4em !important; }
+      body .ov-zeile { grid-template-columns: 1.5em 1.1em minmax(0, 1fr) 2.2em 2.2em 1.4em 4.4em 4.4em 3.8em 5.4em !important; }
+      body #race-ovscreen.ov-fertig .ov-zeile { grid-template-columns: 1.5em 1.1em minmax(0, 1fr) 2.2em 2.2em 1.4em 4.4em 3.8em 5.4em !important; }
+      .ov-dnf-zelle { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+      .ov-strafe { font: 800 10px var(--k-font, Inter, sans-serif); color: #14161c; background: #ffd34d; border-radius: 3px; padding: 2px 4px; font-variant-numeric: tabular-nums; }
+      .ov-dnf-knopf.dsq { background: #000; color: #fff; border-color: #fff; }
+      .ov-zeile.ov-dsq .ov-luecke { color: #fff; }
+      .hd-rl-menue { position: fixed; z-index: 2147483000; display: grid; gap: 3px; min-width: 190px; padding: 8px; border-radius: 8px;
+        background: #12161d; border: 1px solid #39ff88; box-shadow: 0 0 14px rgba(57,255,136,.25), 0 10px 30px rgba(0,0,0,.6);
+        font: 600 12px var(--k-font, Inter, sans-serif); color: #e6e9ef; }
+      .hd-rl-menue b { font-size: 11px; letter-spacing: .06em; color: #8a93a3; padding: 0 4px 4px; text-transform: uppercase; }
+      .hd-rl-menue button { all: unset; cursor: pointer; padding: 6px 8px; border-radius: 5px; }
+      .hd-rl-menue button:hover, .hd-rl-menue button:focus-visible { background: #222a36; outline: none; }
+      .hd-rl-menue .st-schwarz { background: #000; color: #fff; border: 1px solid #555; }
+      .hd-rl-menue .st-dnf { color: #ff8a9a; }
       .ov-dnf-knopf { all: unset; cursor: pointer; font: 800 10px var(--k-font, Inter, sans-serif); letter-spacing: .06em; padding: 3px 7px;
         border-radius: 4px; border: 1px solid #5a2a33; color: #ff8a9a; background: transparent; }
       .ov-dnf-knopf:hover { background: #3a1820; }
@@ -117794,7 +117914,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       garage.length = 0;
       const a = fake('rl-a', 'ghost'), b = fake('rl-b', 'ghost');
       garage.push(a, b);
-      raceState = 'racing'; flagState = 'green'; hdRl.dnf.clear(); hdRl.log = [];
+      raceState = 'racing'; flagState = 'green'; hdRl.dnf.clear(); hdRl.strafe.clear(); hdRl.log = [];
       // Yellow: no safety car, caution pace above the SC pace.
       hdRlFlagge('gelb');
       const gelbZiel = gelbZielFuer(a);
@@ -117841,6 +117961,26 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Reinstate.
       hdRlDnf('rl-a');
       ok('DNF can be undone', !hdDnfAuto(a), 'dnf ' + hdDnfAuto(a));
+      // Time penalty: a gets +5 s on its race time.
+      const vorher = ovDaten().map((z) => z.id);
+      hdRlStrafe('rl-a', 5);
+      const nachher = ovDaten();
+      ok('time penalty: +5 s counts on the race time', hdStrafeMs('rl-a') === 5000 && nachher.find((z) => z.id === 'rl-a').strafeMs === 5000
+         && nachher.find((z) => z.id === 'rl-a').summe === 9000 + 8800 + 5000, 'before ' + vorher.join(',') + ' after ' + nachher.map((z) => z.id + ':' + z.summe).join(','));
+      hdRlStrafe('rl-a', 10);
+      ok('time penalties add up and are logged', hdStrafeMs('rl-a') === 15000 && hdRl.log.filter((x) => x.art === 'strafe').length === 2, 'total ' + hdStrafeMs('rl-a'));
+      hdRlStrafe('rl-a', 0);
+      ok('penalties can be cleared', hdStrafeMs('rl-a') === 0, 'total ' + hdStrafeMs('rl-a'));
+      // Black flag: stopped like a DNF, shown as DSQ below DNF.
+      hdRlAus('rl-b', 'dsq'); hdRlAus('rl-a', 'dnf');
+      geschrieben.length = 0;
+      await funkSchreiben(b.rx, buildCommandPacket(0.6, 0.8, trackModeBit()), null);
+      const r = geschrieben.find((x) => x.id === 'rl-b');
+      const z2 = ovDaten();
+      ok('black flag: car stopped, DSQ below DNF', r && JSON.stringify(r.b) === JSON.stringify(neutral) && z2[z2.length - 1].id === 'rl-b' && z2[z2.length - 1].luecke === 'DSQ'
+         && z2[z2.length - 2].luecke === 'DNF', z2.map((z) => z.id + ':' + z.luecke).join(' | '));
+      ok('steward cell shows DSQ / penalty badge', /DSQ/.test(hdDnfZelle({ id: 'rl-b' })) && (hdRlStrafe('rl-b', 5), /\+5s/.test(hdDnfZelle({ id: 'rl-b' }))), hdDnfZelle({ id: 'rl-b' }).slice(0, 80));
+      hdRlWieder('rl-a'); hdRlWieder('rl-b'); hdRl.strafe.clear();
       // Chequered flag.
       hdRlZiel();
       ok('chequered flag: final lap for everyone', raceState === 'finishing', 'state ' + raceState);
@@ -117851,7 +117991,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (flagState !== 'green') gelbBeenden();
       raceState = merk.raceState; flagState = merk.flagState; limitYellow = merk.limitYellow; hdRl.modus = merk.modus;
       garage.length = 0; merk.garage.forEach((c) => garage.push(c));
-      hdRl.dnf.clear(); hdRl.log = [];
+      hdRl.dnf.clear(); hdRl.strafe.clear(); hdRl.log = []; hdRlMenueZu();
     }
     return out;
   }
@@ -117867,11 +118007,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
                   mk('d3', 'Noor Rahimi', 'gelb', [9600, 9400]), mk('d4', 'Emil Strand', 'gruen', [9800, 9500]));
       raceState = 'racing'; raceStartedAt = rennZeitJetzt() - 184000;
       window.confirm = () => true;
-      hdRlFlagge('vsc'); hdRlDnf('d4'); hdRlWetter('rain');
+      hdRlFlagge('vsc'); hdRlDnf('d4'); hdRlWetter('rain'); hdRlStrafe('d2', 5); hdRlAus('d3', 'dsq');
     },
-    flagge: hdRlFlagge, gruen: hdRlGruen, rot: hdRlRot, ziel: hdRlZiel, wetter: hdRlWetter, dnf: hdRlDnf,
+    flagge: hdRlFlagge, gruen: hdRlGruen, rot: hdRlRot, ziel: hdRlZiel, wetter: hdRlWetter, dnf: hdRlDnf, dsq: (id) => hdRlAus(id, 'dsq'), strafe: hdRlStrafe, wieder: hdRlWieder,
     status: () => ({ modus: hdRl.modus, flag: flagState, rot: typeof rennPauseAktiv === 'function' && rennPauseAktiv(),
-                     dnf: [...hdRl.dnf.keys()], log: hdRl.log.slice(), limitYellow, raceState }),
+                     dnf: [...hdRl.dnf.keys()], strafe: Object.fromEntries([...hdRl.strafe].map(([k]) => [k, hdStrafeMs(k)])), log: hdRl.log.slice(), limitYellow, raceState }),
   });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------

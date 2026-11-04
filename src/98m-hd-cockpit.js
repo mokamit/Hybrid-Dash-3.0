@@ -366,6 +366,10 @@
     const css = document.createElement('style');
     css.textContent = `
       #race-dash .race-corner-links { right: clamp(96px, 9vw, 130px); }
+      /* The same glowing line as under the main menu, in neon green, under the cockpit tabs. */
+      #race-dash .race-corner-links:has(.hd-reiter)::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 1px;
+        background: linear-gradient(90deg, transparent, #39ff88 8%, #39ff88 92%, transparent);
+        box-shadow: 0 0 4px rgba(57,255,136,.9), 0 0 12px rgba(57,255,136,.45); pointer-events: none; z-index: 1; }
       #race-screen-dots.hd-reiter { flex: 1; min-width: 0; height: 34px; gap: 0; padding: 0; margin-left: 6px;
         background: #0d1015; overflow: hidden; display: flex; align-items: stretch; }
       #race-screen-dots.hd-reiter button { all: unset; box-sizing: border-box; flex: 1; min-width: 0; cursor: pointer; text-align: center;
