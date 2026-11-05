@@ -7189,7 +7189,12 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // GELB_ABSTAND_MIN nur noch GELB_ABSTAND_BODEN des Gelb-Tempos - ganz anhalten wuerde das
   // Auto unter die Leseschwelle bringen und den Abgangsmelder ausloesen.
   // v1.0.32: Boden 0,7 statt 0,55 (BESTELLT: "damit sie nicht verhungern").
-  const GELB_ABSTAND_VOLL = 1.5, GELB_ABSTAND_MIN = 0.5, GELB_ABSTAND_BODEN = 0.7;
+  // HybridDash v2.2 BESTELLT: "closer bunching under yellow / safety car, about 1-2 car lengths".
+  // A car is 9.5 cm, a tile 43 cm; the gap is measured front to front:
+  // 0.35 tiles leaves ~5 cm of air, 0.65 tiles ~18 cm (two car lengths).
+  // Simulator, 7 cars, 60 s yellow: queue median 0.72 tiles (~2 car lengths of air), closest 0.48,
+  // no contacts, no overtakes. Was 1.5 / 0.5 (queue median ~2 tiles, ~9 car lengths).
+  const GELB_ABSTAND_VOLL = 0.65, GELB_ABSTAND_MIN = 0.35, GELB_ABSTAND_BODEN = 0.7;
   function gelbVordermann(car) {
     const n = currentTrackTiles ? currentTrackTiles.length : 0;
     const a = ghostOrt(car);

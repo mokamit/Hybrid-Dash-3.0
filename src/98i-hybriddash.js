@@ -299,7 +299,8 @@
   // read threshold for a moment is allowed - the off-track detector gets grace for it (gnadeBis),
   // and the car ahead pulls away, so it never lasts long. Used for NPCs (ghostTick) and for your
   // car's autopilot under yellow (50-drive.js).
-  const hdFolge = { voll: 2.2, eng: 0.8, boden: 0.82, min: 0.26 };
+  // v2.2: closer queue, 1-2 car lengths of air (was voll 2.2, eng 0.8 tiles); see GELB_ABSTAND_* in 90-ghosts.js.
+  const hdFolge = { voll: 0.65, eng: 0.35, boden: 0.82, min: 0.26 };
   function hdFuehrTempo(o, now) {
     if (!o) return null;
     if (o.ghost && o.ghost.running && o.ghost.lastTarget > 0) return o.ghost.lastTarget;
