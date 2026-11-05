@@ -5397,13 +5397,15 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // AM EIGENEN PLATZ GILT ES NICHT MEHR: dort ist niemand, sonst haette ich den Platz
     // nicht bekommen. Ohne diese Ausnahme wuerde ein Auto die Gasse hinunterfahren und
     // links stehen bleiben.
-    const amPlatz = car.ghost.tileIndex === pitKachelFuer(p.platz);
-    if (!amPlatz && pitVorbeiNoetig(car)) return PIT_VORBEI;
+    // HybridDash: an own spot - no lane past other boxes, and the edge can be the LEFT one.
+    const seitenFaktor = p.hd && p.hd.seite === 'l' ? -1 : 1;
+    const amPlatz = car.ghost.tileIndex === (p.hd ? p.hd.k : pitKachelFuer(p.platz));
+    if (!p.hd && !amPlatz && pitVorbeiNoetig(car)) return PIT_VORBEI;
     if (p.phase === 'raus') {
       const f = Math.max(0, 1 - (rennZeitJetzt() - p.at) / PIT_RAUS_MS);
-      return PIT_RAND * f;
+      return PIT_RAND * f * seitenFaktor;
     }
-    return PIT_RAND;
+    return PIT_RAND * seitenFaktor;
   }
 
   // Das Zieltempo, das der Boxenstopp verlangt, oder null. formationPace() ist genau der
@@ -5572,6 +5574,22 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
 
   function pitAusweichenSetzen(pitCar) {
     const now = rennZeitJetzt();
+    // HybridDash: a car on its own pit spot - the others pass it on the far side, near that spot only.
+    const hdP = pitCar && pitCar.ghost && pitCar.ghost.pit && pitCar.ghost.pit.hd;
+    if (hdP) {
+      const n = currentTrackTiles ? currentTrackTiles.length : 0;
+      if (!n) return;
+      for (const c of garage) {
+        if (c === pitCar || !c.ghost || c.role !== 'ghost') continue;
+        const ort = ghostOrt(c);
+        if (ort === null) continue;
+        const d = ((Math.floor(ort) - hdP.k) % n + n) % n;
+        if (d !== 0 && d !== n - 1) continue;
+        c.ghost.yieldSide = hdP.seite === 'l' ? 1 : -1;
+        c.ghost.yieldUntil = now + PIT_AUSWEICH_MS;
+      }
+      return;
+    }
     for (const c of garage) {
       if (c === pitCar || !c.ghost || c.role !== 'ghost') continue;
       if (!pitSperreRechts(c)) continue;
@@ -5606,6 +5624,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (pitKachel() < 0) return false;
     const imRennen = raceState === 'racing' || raceState === 'finishing';
     if (!imRennen && !(g.freeRun && ghostCfg.pitFrei)) return false;
+    // HybridDash: an own pit spot - free unless the car sharing it is standing there right now.
+    if (typeof hdBoxFuer === 'function') {
+      const meins = hdBoxFuer(car);
+      if (meins) return !garage.some((c) => c !== car && c.ghost && c.ghost.pit && c.ghost.pit.hd && c.ghost.pit.hd.nr === meins.nr);
+    }
     return pitPlatzFrei(car);
   }
 
@@ -5745,6 +5768,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // So lange gleitet das Tempo vom normalen Fahren auf das Tempo der Aufnahme, geradeaus - statt anzuhalten.
   const MANOEVER_ANPASS_MS = 300;
   function manoeverDauer(m) { return m[m.length - 1][0]; }
+  // HybridDash: the same recorded sequence for the other side (steering mirrored, timing and throttle kept).
+  function manoeverGespiegelt(m) { return m.map(([ms, lenk, gas]) => [ms, -lenk, gas]); }
   function manoeverWert(m, ms) {
     let w = m[0];
     for (const p of m) { if (p[0] <= ms) w = p; else break; }
@@ -5926,7 +5951,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // DIE EIGENE Boxenkachel, nicht die von Platz 0. Bis v0.5.46 gab es nur eine, und
     // pitKachel() war beides - jetzt ist das ein Unterschied, und ein Auto fuer Platz 2, das
     // auf Kachel 0 anhaelt, waere ein Auffahrunfall mit dem, der dort steht.
-    const pk = pitKachelFuer(p.platz);
+    const pk = p.hd ? p.hd.k : pitKachelFuer(p.platz);
+    const links = !!(p.hd && p.hd.seite === 'l');   // HybridDash: park at the LEFT edge
 
     if (p.phase === 'anfahrt') {
       // v1.2.4 BESTELLT: "NPC-Boxenstopp ueberarbeiten: so wie Safety Car." Am eigenen Platz die Einparkfolge des
@@ -5941,7 +5967,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       }
       if (g.tileIndex === pk) {
         p.phase = 'einparken'; p.at = now;
-        const sk = MANOEVER.scEin;
+        const sk = links ? manoeverGespiegelt(MANOEVER.scEin) : MANOEVER.scEin;
         randHaltStarten(car, { phase: 'skript', quer: 0, skript: sk, anpassMs: MANOEVER_ANPASS_MS,
           vonDrive: letztesGas(car, sk[0][2]), haltMs: 500, sofort: true, ohneStopp: true,
           fertig: (c) => npcBoxStehen(c) });
@@ -5955,7 +5981,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // langsames Auto (kleines tempoAnteil) erreicht die Breite erst spaeter; ein
       // schnelles faehrt nach dem Erreichen die restliche Mindestzeit am Rand weiter.
       const seit = now - p.at;
-      const amRand = (g.querSoll || 0) >= PIT_RAND_TARGET;
+      const amRand = (links ? -(g.querSoll || 0) : (g.querSoll || 0)) >= PIT_RAND_TARGET;
       if ((seit >= PIT_RAND_MS && amRand) || seit >= PIT_RAND_MAX_MS) {
         p.phase = 'halt'; p.at = now;
         log(garageLabel(car) + ': am Rand, bremst ab.', 'info');
@@ -5983,7 +6009,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
         // v1.2.4: Ausparken wie das Safety Car (scAus, mit dem Gasfaktor), ohne Halt in das normale Fahren.
         // v1.2.67: beim Querlagen-Tankort heraus ueber die Querlage (pitQuer blendet in PIT_RAUS_MS aus).
         if (p.ort !== 'rand') {
-          randHaltStarten(car, { phase: 'skript', quer: 0, skript: scAusSkript(), anpassMs: 0, vonDrive: 0, weiter: true,
+          randHaltStarten(car, { phase: 'skript', quer: 0, skript: links ? manoeverGespiegelt(scAusSkript()) : scAusSkript(), anpassMs: 0, vonDrive: 0, weiter: true,
             fertig: (c) => { if (c.ghost) { c.ghost.pit = null; } pitPlatzRaeumen(c); if (c.ghost) pitFaelligZiehen(c.ghost); } });
         }
         // ---- DIE REIFEN KOMMEN AM ENDE DER STANDZEIT DRAUF -------------------------
@@ -10498,7 +10524,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Die Anfahrt beginnt VOR der Linie, nicht auf ihr. Ein Auto, das mit Renntempo ueber
       // Start/Ziel kommt und dann anhalten soll, braucht eine Kachel zum Verzoegern - genau
       // so ist eine Boxeneinfahrt gebaut.
-      const pk0 = pitKachel();
+      // HybridDash: with pit spots on the track (98o-hd-boxen.js) every car pits on its OWN spot.
+      const pkHd = typeof hdBoxKachel === 'function' ? hdBoxKachel(car) : -1;
+      const pk0 = pkHd >= 0 ? pkHd : pitKachel();
       // ---- WARUM GEPITTET WIRD, und die Reifen schlagen den Plan --------------------
       //
       // Zwei Gruende, und der Unterschied ist nicht Kosmetik: der Plan wartet auf seine
@@ -10518,7 +10546,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (pk0 >= 0 && g.tileIndex !== null
           && (g.tileIndex + 1) % currentTrackTiles.length === pk0
           && (planFaellig || reifenNot)
-          && pitErlaubt(car)) {
+          && pitErlaubt(car)
+          && !(pkHd >= 0 && hdBoxNpcPitStarten(car, now, reifenNot))) {
         // EINEN PLATZ NEHMEN, den niedrigsten freien. pitErlaubt() hat gerade geprueft, dass
         // einer da ist - der Aufruf hier ist derselbe und liefert deshalb keine -1.
         const platz = pitPlatzSuchen(car);
