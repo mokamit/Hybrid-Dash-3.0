@@ -475,6 +475,8 @@
   .hd-sc-frage-knoepfe { display: flex; gap: 10px; flex-wrap: wrap; }
   .hd-sc-frage-knoepfe button { flex: 1; min-width: 140px; }
   .hd-sc-frage-knoepfe small { opacity: .75; margin-left: .4em; font-weight: 400; }
+  .hd-sc-frage-knoepfe button.hd-sc-frage-vsc { background: #ffd23f; color: #1a1405; border-color: #ffd23f; font-weight: 700; }
+  .hd-sc-frage-knoepfe button.hd-sc-frage-vsc:hover { background: #ffe27a; }
   .hd-relay { position: fixed; inset: 0; z-index: 9100; background: rgba(3,5,9,.82); display: grid; place-items: center;
               padding: 16px; box-sizing: border-box; overflow: auto; }
   .hd-relay[hidden] { display: none; }
@@ -9787,6 +9789,7 @@
       <span class="hd-sc-frage-wer" id="hd-sc-frage-wer" data-i18n-skip></span>
       <div class="hd-sc-frage-knoepfe">
         <button type="button" class="primary" id="hd-sc-frage-ja">Losschicken <small id="hd-sc-frage-taste" data-i18n-skip></small></button>
+        <button type="button" id="hd-sc-frage-vsc" class="hd-sc-frage-vsc">VSC <small id="hd-sc-frage-vsc-taste" data-i18n-skip>X / V</small></button>
         <button type="button" id="hd-sc-frage-nein">Ignorieren <small id="hd-sc-frage-nein-taste" data-i18n-skip>B / Esc</small></button>
       </div>
     </div>
@@ -72441,7 +72444,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (resetNow && !prevResetCar) resetCarState();
       prevResetCar = resetNow;
 
-      const downshiftNow = readBindingValue(pad, bindings.downshift) > BUTTON_CAPTURE_THRESHOLD;
+      // HybridDash: X answers VSC in the safety-car prompt; it must not shift down at the same time.
+      const downshiftNow = readBindingValue(pad, bindings.downshift) > BUTTON_CAPTURE_THRESHOLD
+        && !(typeof hdScTasteGesperrt === 'function' && bindings.downshift && bindings.downshift.index === 2 && hdScTasteGesperrt(2));
       // HybridDash: B ignores the safety-car prompt; it must not shift up at the same time.
       const upshiftNow = readBindingValue(pad, bindings.upshift) > BUTTON_CAPTURE_THRESHOLD
         && !(typeof hdScTasteB === 'function' && bindings.upshift && bindings.upshift.index === 1 && hdScTasteB());
@@ -115646,8 +115651,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (box) {
       $('hd-sc-frage-wer').textContent = garageLabel(car) + ' · ' + hdGrundText(grund);
       const b = typeof bindings === 'object' && bindings && bindings.confirm;
-      $('hd-sc-frage-taste').textContent = (b && b.type !== 'none' ? bindingDescription(b) + ' / ' : '') + 'Enter';
+      $('hd-sc-frage-taste').textContent = (b && b.type !== 'none' ? (b.type === 'button' && b.index === 0 ? 'A' : t(bindingDescription(b))) + ' / ' : '') + 'Enter';
       const n = $('hd-sc-frage-nein-taste'); if (n) n.textContent = (b && b.type === 'button' && b.index === 1 ? '' : 'B / ') + 'Esc';
+      const v = $('hd-sc-frage-vsc-taste'); if (v) v.textContent = (b && b.type === 'button' && b.index === 2 ? '' : 'X / ') + 'V';
       box.hidden = false;
     }
     hdSprechen(hdSatz('frage', { name: garageLabel(car), grund }), 25);
@@ -115664,6 +115670,20 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     hdScFrageZu();
     hdAutoScAusloesen(f.car, f.grund, rennZeitJetzt());
   }
+  // REQUESTED: a virtual safety car as the third answer - the whole field slows to the
+  // safety-car pace, gaps kept, but no safety car goes out (Race Director's VSC).
+  function hdScVsc() {
+    const f = hdSc.frage;
+    if (!f) return;
+    hdScFrageZu();
+    const now = rennZeitJetzt();
+    hdSc.sperreBis = now + HD_AUTO_SC_COOLDOWN_MS;
+    hdSc.offSeit.clear();
+    hdSc.letzterStatus = garageLabel(f.car) + ' – ' + hdGrundText(f.grund) + ' (VSC)';
+    log('HybridDash: virtual safety car – ' + garageLabel(f.car) + ' (' + f.grund + ').', 'err');
+    if (typeof hdRlFlagge === 'function') hdRlFlagge('vsc');
+    hdEinstellungenMalen();
+  }
   function hdScIgnorieren() {
     const f = hdSc.frage;
     if (!f) return;
@@ -115676,36 +115696,47 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // REQUESTED: Ignore on the B button (Xbox; Circle on PlayStation) too. B is upshift by
   // default, so while the prompt is open - and until B is let go after ignoring - the gearbox
   // does not see it (hdScTasteB, read by the pad loop in 90-ghosts.js).
-  let hdPadVorher = false, hdPadBVorher = false, hdBGesperrt = false;
-  const HD_B = 1;   // standard gamepad mapping: B (Xbox) / Circle (PlayStation)
-  function hdScTasteB() { return !!hdSc.frage || hdBGesperrt; }
+  // Likewise X (Xbox; Square on PlayStation) answers VSC; X is downshift by default.
+  let hdPadVorher = false;
+  const HD_B = 1, HD_X = 2;   // standard gamepad mapping: B / Circle, X / Square
+  const hdTaste = { [HD_B]: { vorher: false, gesperrt: false, tun: () => hdScIgnorieren() },
+                    [HD_X]: { vorher: false, gesperrt: false, tun: () => hdScVsc() } };
+  function hdScTasteGesperrt(i) { const k = hdTaste[i]; return !!k && (!!hdSc.frage || k.gesperrt); }
+  function hdScTasteB() { return hdScTasteGesperrt(HD_B); }
   setInterval(() => {
-    let jetzt = false, bJetzt = false;
+    let jetzt = false;
+    const gedrueckt = {};
     try {
       const b = typeof bindings === 'object' && bindings && bindings.confirm;
-      const bIstBestaetigen = b && b.type === 'button' && b.index === HD_B;
+      const bestIndex = b && b.type === 'button' ? b.index : -1;
       if (navigator.getGamepads) {
         for (const pad of navigator.getGamepads()) {
           if (!pad) continue;
           if (b && b.type !== 'none' && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) jetzt = true;
-          if (!bIstBestaetigen && pad.buttons[HD_B] && pad.buttons[HD_B].pressed) bJetzt = true;
+          for (const i of [HD_B, HD_X]) if (i !== bestIndex && pad.buttons[i] && pad.buttons[i].pressed) gedrueckt[i] = true;
         }
       }
     } catch (e) { /* no gamepad API */ }
     if (jetzt && !hdPadVorher && hdSc.frage) hdScBestaetigen();
-    else if (bJetzt && !hdPadBVorher && hdSc.frage) { hdScIgnorieren(); hdBGesperrt = true; }
-    if (!bJetzt) hdBGesperrt = false;
-    hdPadVorher = jetzt; hdPadBVorher = bJetzt;
+    for (const i of [HD_B, HD_X]) {
+      const k = hdTaste[i], an = !!gedrueckt[i];
+      if (an && !k.vorher && hdSc.frage) { k.tun(); k.gesperrt = true; }
+      if (!an) k.gesperrt = false;
+      k.vorher = an;
+    }
+    hdPadVorher = jetzt;
   }, 40);
   document.addEventListener('keydown', (e) => {
     if (!hdSc.frage) return;
     if (e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); hdScBestaetigen(); }
     else if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); hdScIgnorieren(); }
+    else if (e.key === 'v' || e.key === 'V') { e.preventDefault(); e.stopImmediatePropagation(); hdScVsc(); }
   }, true);
   (function () {
     const j = $('hd-sc-frage-ja'), n = $('hd-sc-frage-nein');
     if (j) j.addEventListener('click', hdScBestaetigen);
     if (n) n.addEventListener('click', hdScIgnorieren);
+    const v = $('hd-sc-frage-vsc'); if (v) v.addEventListener('click', hdScVsc);
   })();
 
   setInterval(hdAutoScTick, 200);
@@ -116187,7 +116218,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     tick: hdAutoScTick,
     selbsttest: hdSelbsttest,
     // Tests only: open the safety-car prompt for a stand-in car, read its state.
-    _frage: { auf: () => hdScFrageAuf({ role: 'player', alias: 'Test', device: { id: 'hd-q' } }, 'stand'), offen: hdScFrageOffen, b: hdScTasteB },
+    _frage: { auf: () => hdScFrageAuf({ role: 'player', alias: 'Test', device: { id: 'hd-q' } }, 'stand'), offen: hdScFrageOffen, b: hdScTasteB,
+              gesperrt: hdScTasteGesperrt, vsc: hdScVsc },
     // Race simulation hooks for the yellow-flag measurement (tests only).
     sim: { start: () => simStart(), stop: () => simStop('test'), gelb: () => setFlag('yellow'), gruen: () => gelbBeenden(),
            folge: (an) => { hd.gelbFolge = !!an; }, kacheln: () => (currentTrackTiles || []).length, param: (o) => Object.assign(hdFolge, o || {}) },

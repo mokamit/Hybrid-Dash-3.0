@@ -12757,7 +12757,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (resetNow && !prevResetCar) resetCarState();
       prevResetCar = resetNow;
 
-      const downshiftNow = readBindingValue(pad, bindings.downshift) > BUTTON_CAPTURE_THRESHOLD;
+      // HybridDash: X answers VSC in the safety-car prompt; it must not shift down at the same time.
+      const downshiftNow = readBindingValue(pad, bindings.downshift) > BUTTON_CAPTURE_THRESHOLD
+        && !(typeof hdScTasteGesperrt === 'function' && bindings.downshift && bindings.downshift.index === 2 && hdScTasteGesperrt(2));
       // HybridDash: B ignores the safety-car prompt; it must not shift up at the same time.
       const upshiftNow = readBindingValue(pad, bindings.upshift) > BUTTON_CAPTURE_THRESHOLD
         && !(typeof hdScTasteB === 'function' && bindings.upshift && bindings.upshift.index === 1 && hdScTasteB());
