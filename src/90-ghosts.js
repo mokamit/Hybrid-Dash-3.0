@@ -2228,6 +2228,24 @@
     plusKnopf.onclick = () => { const c = $('gar-connect'); if (c) c.click(); };
     plus.appendChild(plusKnopf);
     links.appendChild(plus);
+    // HybridDash: reconnect every car this browser was allowed to use before, in one click.
+    const bek = document.createElement('div');
+    bek.className = 'opt-row opt-breit gar-a-aktion';
+    const bekKnopf = document.createElement('button');
+    bekKnopf.type = 'button';
+    bekKnopf.id = 'gar-bekannte';
+    bekKnopf.className = 'gar-karte-neu gar-bekannte';
+    bekKnopf.hidden = true;
+    bekKnopf.onclick = () => garageBekannteVerbinden(bekKnopf);
+    bek.appendChild(bekKnopf);
+    links.appendChild(bek);
+    garageBekannteKandidaten().then((l) => {
+      if (garBekannteLaeuft) return;
+      bekKnopf.hidden = !l.length;
+      bek.hidden = !l.length;
+      bekKnopf.textContent = '⟳ ' + t('Bekannte Autos verbinden') + ' (' + l.length + ')';
+    });
+    bek.hidden = true;
     ['gar-stop-ghosts', 'gar-go', 'gar-disconnect-all', 'gar-to-cockpit'].forEach((id) => {
       const z = garAktionsZeile(id);
       if (z) links.appendChild(z);
@@ -2649,6 +2667,59 @@
     } finally {
       garVerbindetGerade.delete(String(dev.id));
     }
+  }
+
+  // ---- HybridDash: RECONNECT PREVIOUS CARS (garage button) -----------------------------------
+  // REQUESTED: "a feature on this screen to quickly add remaining cars that have been previously
+  // added". Chrome/Edge remember which cars this site was allowed to use (getDevices()); those
+  // that are not in the garage yet are listed, watched for advertising for a few seconds (a
+  // remembered car can only be connected once it has been seen), then connected one after the
+  // other. A car that is off, out of range or connected elsewhere is skipped.
+  let garBekannteLaeuft = false;
+  async function garageBekannteKandidaten() {
+    const bt = navigator.bluetooth;
+    if (!bt || typeof bt.getDevices !== 'function') return [];
+    try {
+      return (await bt.getDevices()).filter((d) => /^HYBRID/i.test(d.name || '')
+        && !garage.some((c) => c.device && String(c.device.id) === String(d.id)));
+    } catch (e) { return []; }
+  }
+  function garageGesehen(dev, ms) {
+    if (typeof dev.watchAdvertisements !== 'function') return Promise.resolve(true);
+    return new Promise((ok) => {
+      const ac = typeof AbortController === 'function' ? new AbortController() : null;
+      const ende = (ja) => { clearTimeout(uhr); try { if (ac) ac.abort(); } catch (e) {} ok(ja); };
+      const uhr = setTimeout(() => ende(false), ms);
+      dev.addEventListener('advertisementreceived', () => ende(true), { once: true });
+      // Watching not possible (older browser / flag off): just try to connect.
+      dev.watchAdvertisements(ac ? { signal: ac.signal } : undefined).catch(() => ende(true));
+    });
+  }
+  async function garageBekannteVerbinden(knopf) {
+    if (garBekannteLaeuft) return;
+    const liste = await garageBekannteKandidaten();
+    if (!liste.length) { showHudToast(t('Keine weiteren bekannten Autos')); return; }
+    garBekannteLaeuft = true;
+    if (knopf) { knopf.disabled = true; knopf.textContent = '⟳ ' + t('Suche bekannte Autos …'); }
+    let n = 0;
+    try {
+      const gesehen = await Promise.all(liste.map((d) => garageGesehen(d, 6000)));
+      for (let i = 0; i < liste.length; i++) {
+        const dev = liste[i];
+        if (!gesehen[i]) { log('Reconnect: ' + (dev.name || dev.id) + ' not found (off, out of range or connected elsewhere).', 'info'); continue; }
+        if (knopf) knopf.textContent = '⟳ ' + (dev.name || '') + ' …';
+        const vorher = garage.length;
+        try {
+          await Promise.race([garageGeraetAufnehmen(dev), new Promise((_, nein) => setTimeout(() => nein(new Error('timeout')), 12000))]);
+        } catch (e) { log('Reconnect: ' + (dev.name || dev.id) + ' – ' + ((e && e.message) || e), 'info'); }
+        if (garage.length > vorher) n++;
+      }
+    } finally {
+      garBekannteLaeuft = false;
+      if (knopf) knopf.disabled = false;
+    }
+    showHudToast(t('{n} von {m} bekannten Autos verbunden').replace('{n}', n).replace('{m}', liste.length));
+    renderGarage();
   }
 
   // ---- BEKANNTE AUTOS BEIM START VERBINDEN (v1.1.3) ----------------------------------------

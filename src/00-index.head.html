@@ -3223,6 +3223,10 @@
   .gar-row.gar-a-zeile { display: grid; grid-template-columns: 6px 56px minmax(0, 1fr) auto; align-items: center; gap: 8px;
     padding: 4px 8px 4px 0; background: rgba(14,16,22,.94); border: 2px solid transparent; border-radius: 0; cursor: pointer; }
   .gar-row.gar-a-zeile.gk-auf { border-color: rgba(255,255,255,.55); }
+  /* HybridDash v2.2: the selected car (open on the right) is outlined neon green; hover stays white. */
+  body .gar-row.gar-a-zeile.gk-auf, body .gar-row.gar-karte.gk-auf { border-color: #39ff88 !important; box-shadow: 0 0 0 1px #39ff88, 0 0 14px rgba(57,255,136,.35); }
+  body .gar-a-aktion .gar-bekannte { background: transparent !important; color: #fff !important; border: 1px dashed #39ff88 !important; }
+  body .gar-a-aktion .gar-bekannte:hover { background: rgba(57,255,136,.12) !important; }
   .gar-row.gar-a-zeile:hover, .gar-row.gar-a-zeile.menu-nav-sel { border-color: #fff; }
   .gar-a-zeile .gk-streifen { align-self: stretch; }
   .gar-a-zeile .gk-bild { height: 38px; }
