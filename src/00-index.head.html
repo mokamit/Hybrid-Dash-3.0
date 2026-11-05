@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>HybridDash 2.0</title>
+<title>Hybrid-Dash 3.0</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <!-- ALS APP INSTALLIERBAR. Rein zusaetzlich: im Browser laeuft alles unveraendert weiter.
      Der Nutzen ist Vollbild ohne Adresszeile, ein Symbol im Startmenue und - mit dem
@@ -444,15 +444,15 @@
   #grid-liste .grid-box select { font-size: 12px; padding: 3px 4px; background: #0d1015; color: #fff; border: 1px solid #39414f; border-radius: 4px; max-width: 7.2em; }
   .gt3-gridschirm:not([hidden]):has(#hd-grid-info) { grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
     grid-template-areas: "kopf bild" "hinweis bild" "selbst bild" "liste bild" "liste info" "fuss fuss"; }
-  .hd-grid-info { grid-area: info; border-top: 2px solid #39ff88; background: rgba(14,16,22,.9); padding: 8px 10px; }
-  .hd-grid-info .hd-gi-titel { font: 800 12px var(--k-font, Inter, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: #39ff88; margin-bottom: 6px; }
+  .hd-grid-info { grid-area: info; border-top: 2px solid #e10600; background: rgba(14,16,22,.9); padding: 8px 10px; }
+  .hd-grid-info .hd-gi-titel { font: 800 12px var(--k-font, Inter, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: #e10600; margin-bottom: 6px; }
   .hd-grid-info .hd-gi-raster { display: grid; grid-template-columns: repeat(2, auto minmax(0, 1fr)); gap: 3px 12px; font-size: clamp(11px, 1.1vw, 14px); align-items: baseline; }
   .hd-grid-info .l { color: #8a93a3; text-transform: uppercase; letter-spacing: .05em; font-size: .85em; white-space: nowrap; }
   .hd-grid-info b { color: #fff; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* v2.2: garage actions as a fixed bar above the cars and the settings. */
   body #gar-list.gar-a { grid-template-rows: auto minmax(0, 1fr); }
   .gar-a-leiste { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; padding: 8px;
-    background: rgba(14,16,22,.96); border-bottom: 2px solid #39ff88; position: sticky; top: 0; z-index: 5; }
+    background: rgba(14,16,22,.96); border-bottom: 2px solid #e10600; position: sticky; top: 0; z-index: 5; }
   .gar-a-leiste > .gar-a-aktion { flex: 0 1 auto; margin: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; min-height: 0; }
   .gar-a-leiste > .gar-a-aktion[hidden] { display: none; }
   .gar-a-leiste > .gar-a-aktion > button { width: auto !important; min-width: 0; white-space: nowrap; padding: 8px 14px !important; font-size: 13px !important; height: 100%; }
@@ -3271,11 +3271,11 @@
   /* Green means "selected" only: no separate green outline for Player 1 (its badge is blue). */
   body .gar-row.gar-a-zeile.is-player:not(.gk-auf):not(:hover) { border-color: transparent; }
   body .gar-row.gar-a-zeile.gk-mit-foto { background-size: cover; background-position: center; }
-  .gar-a-ueber { color: #39ff88; font: 800 12px var(--k-font, Inter, sans-serif); letter-spacing: .14em; text-transform: uppercase;
-    margin: 4px 0 0; text-shadow: 0 0 8px rgba(57,255,136,.35); }
-  body .gar-row.gar-a-zeile.gk-auf, body .gar-row.gar-karte.gk-auf { border-color: #39ff88 !important; box-shadow: 0 0 0 1px #39ff88, 0 0 14px rgba(57,255,136,.35); }
-  body .gar-a-aktion .gar-bekannte { background: transparent !important; color: #fff !important; border: 1px dashed #39ff88 !important; }
-  body .gar-a-aktion .gar-bekannte:hover { background: rgba(57,255,136,.12) !important; }
+  .gar-a-ueber { color: #e10600; font: 800 12px var(--k-font, Inter, sans-serif); letter-spacing: .14em; text-transform: uppercase;
+    margin: 4px 0 0; text-shadow: 0 0 8px rgba(225,6,0,.35); }
+  body .gar-row.gar-a-zeile.gk-auf, body .gar-row.gar-karte.gk-auf { border-color: #e10600 !important; box-shadow: 0 0 0 1px #e10600, 0 0 14px rgba(225,6,0,.4); }
+  body .gar-a-aktion .gar-bekannte { background: transparent !important; color: #fff !important; border: 1px dashed #e10600 !important; }
+  body .gar-a-aktion .gar-bekannte:hover { background: rgba(225,6,0,.14) !important; }
   .gar-row.gar-a-zeile:hover, .gar-row.gar-a-zeile.menu-nav-sel { border-color: #fff; }
   .gar-a-zeile .gk-streifen { align-self: stretch; }
   .gar-a-zeile .gk-bild { height: 38px; }
@@ -5707,6 +5707,96 @@
   .stat-clean button { min-height:40px; margin-top:6px; }
   .stat-clean .stat-clean-danger { border-color:var(--bad,#df4f4f); }
 </style>
+<style id="hd3-broadcast">
+  /* ================= HYBRID-DASH 3.0: BROADCAST THEME =================
+     One layer over everything above: race-weekend TV graphics. Titillium Web (bundled in
+     fonts/, works offline), asphalt greys, race red as the accent, flag yellow for flags,
+     slanted bars for tabs and primary buttons, each car's colour as a stripe. Body text
+     stays upright; italics and capitals are for headlines, tabs and timing. */
+  @font-face { font-family: "Titillium Web"; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/titillium-web-latin-400-normal.woff2) format("woff2"); }
+  @font-face { font-family: "Titillium Web"; font-style: italic; font-weight: 400; font-display: swap; src: url(fonts/titillium-web-latin-400-italic.woff2) format("woff2"); }
+  @font-face { font-family: "Titillium Web"; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/titillium-web-latin-600-normal.woff2) format("woff2"); }
+  @font-face { font-family: "Titillium Web"; font-style: normal; font-weight: 700 800; font-display: swap; src: url(fonts/titillium-web-latin-700-normal.woff2) format("woff2"); }
+  @font-face { font-family: "Titillium Web"; font-style: italic; font-weight: 600 900; font-display: swap; src: url(fonts/titillium-web-latin-700-italic.woff2) format("woff2"); }
+  @font-face { font-family: "Titillium Web"; font-style: normal; font-weight: 900; font-display: swap; src: url(fonts/titillium-web-latin-900-normal.woff2) format("woff2"); }
+  :root {
+    --b-asphalt: #15171c; --b-pit: #23262e; --b-pit-2: #1c1f26; --b-paper: #f2f3f5;
+    --b-red: #e10600; --b-yellow: #ffc400; --b-purple: #b05cff; --b-dim: #a8adb8;
+    --b-font: "Titillium Web", "Segoe UI", system-ui, sans-serif;
+    --k-font: var(--b-font); --gt3-font: var(--b-font);
+    --k-blau: var(--b-red); --k-blau-text: #ffffff; --k-grau: var(--b-pit); --k-weiss: var(--b-paper); --k-tinte: var(--b-asphalt);
+    --k-dim: var(--b-dim);
+    --panel: #1c1f26; --panel-2: #23262e; --panel-3: #2b2f38; --border: #2f333d;
+    --warn: var(--b-yellow); --bad: #ff4a3d;
+    --glitch-r: transparent; --glitch-c: transparent;
+  }
+  html, body, button, input, select, textarea { font-family: var(--b-font); }
+  html { background: var(--b-asphalt); }
+  #k-bg { background-color: var(--b-asphalt); filter: brightness(.36) saturate(.9) grayscale(.25) blur(1.5px); }
+
+  /* Headlines: heavy, italic, capitals */
+  h1, h2, h3, .card > h2, .misc-tile b, .k-kk, .k-kt, #fa-start-titel, .gar-a-ueber, .hd-gi-titel {
+    font-family: var(--b-font); font-style: italic; font-weight: 900; letter-spacing: .04em; }
+
+  /* Main header: tabs as slanted TV bars, the active one paper-white, a solid red rule under it */
+  header#k-kopf { background: #0e1014; }
+  body header#k-kopf::after { height: 3px; background: var(--b-red); box-shadow: none; }
+  .k-reiter { background: #0e1014; }
+  .k-reiter button { font-weight: 700; letter-spacing: .06em; clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%); }
+  .k-reiter button.an { font-weight: 900; font-style: italic; background: var(--b-paper); color: var(--b-asphalt); }
+  .k-reiter button:hover { background: rgba(225,6,0,.22); color: #fff; }
+
+  /* Cockpit tabs (Dashboard / Pit Wall / Race Director): same bars, red rule instead of green */
+  html body #race-dash .race-corner-links:has(.hd-reiter)::after { height: 3px; bottom: -7px; background: var(--b-red); box-shadow: none; }
+  html body #race-screen-dots.hd-reiter { background: #0e1014; }
+  html body #race-screen-dots.hd-reiter button { font-family: var(--b-font); font-weight: 700; letter-spacing: .06em; }
+  html body #race-screen-dots.hd-reiter button.an { font-style: italic; font-weight: 900; background: var(--b-paper); color: var(--b-asphalt); }
+  html body #race-screen-dots.hd-reiter button:hover:not(.an) { background: rgba(225,6,0,.22); }
+  html body .hd-unterreiter { background: #0e1014; border-color: #2f333d; }
+  html body .hd-unterreiter button { font-family: var(--b-font); text-transform: uppercase; }
+  html body .hd-unterreiter button.an { color: #fff; background: var(--b-red); font-style: italic; font-weight: 900; }
+
+  /* Menu tiles: pit-lane grey header bar with a red underline */
+  .misc-tile b, .k-kk { background: var(--b-pit); border-bottom: 3px solid var(--b-red); }
+  .misc-tile:hover, .k-kachel:hover { border-color: var(--b-paper); }
+
+  /* Buttons: primary = red slanted, everything else flat pit-lane grey with a sharp edge */
+  .k-knopf, .btn, button.primary { border-radius: 0; }
+  button.primary, .k-primaer, #k-tutorial-start.k-primaer {
+    background: var(--b-red); color: #fff; border-color: var(--b-red); font-style: italic; font-weight: 900; text-transform: uppercase; }
+  button.primary:hover { background: #ff2a1f; }
+
+  /* Standings: each car's colour as a vertical stripe, not a dot; positions italic; timing tabular */
+  /* Titillium's default line height (~1.5) is taller than the old condensed font's; the
+     standings rows are sized for ~1.2, so pin it there or small screens overflow. */
+  #race-ovscreen, #race-dash .gt3, .gt3-banner { line-height: 1.12; }
+  #race-ovscreen button, #race-dash .gt3 button { line-height: inherit; }
+  .ov-farbe { width: 5px !important; border-radius: 0 !important; box-shadow: none !important; }
+  #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
+  #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
+
+  /* Flag band (yellow / SC / VSC): solid flag-yellow TV bar with a cut corner */
+  html body #gt3-flag { background: var(--b-yellow); color: var(--b-asphalt); font-family: var(--b-font); font-style: italic; font-weight: 900;
+    letter-spacing: .08em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, calc(100% - 22px) 100%, 0 100%); }
+  .gt3-banner { font-family: var(--b-font); font-style: italic; font-weight: 900; letter-spacing: .06em; }
+  html body #gt3-zev { font-family: var(--b-font); font-style: italic; font-weight: 900; border-left: 6px solid var(--b-red); }
+
+  /* Home title: no glitch, broadcast lock-up — HYBRID-DASH in heavy italics, 3.0 on a red slanted plate */
+  .home-titel-text { font-family: var(--b-font); font-style: italic; letter-spacing: .02em; text-shadow: none !important; color: #fff; }
+  .home-titel-text::before, .home-titel-text::after { display: none !important; }
+  .home-titel-text.k-glitch-rot { margin-left: 0; }
+  .home-titel .hd3-strich { font: italic 900 clamp(30px, 8vw, 72px)/1 var(--b-font); color: var(--b-red); position: relative; z-index: 1; }
+  .home-titel .hd3-plakette { display: inline-block; position: relative; z-index: 1; margin-left: .35em; vertical-align: .45em;
+    padding: .08em .55em; background: var(--b-red); color: #fff; font: italic 900 clamp(16px, 3.2vw, 30px)/1.1 var(--b-font);
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); }
+  .home-omega { font-family: var(--b-font); font-style: italic; font-weight: 900; color: rgba(242,243,245,.06); text-shadow: none; }
+  .home-omega::before, .home-omega::after { display: none; }
+  .home-titel-text span, .home-titel-text i { color: inherit !important; text-shadow: none !important; }
+  .gl-b::before, .gl-b::after { display: none !important; }
+
+  /* Focus: red instead of cyan */
+  :focus-visible { outline-color: var(--b-red); }
+</style>
 </head>
 <body>
 
@@ -5807,13 +5897,14 @@
          Jede Taste, jeder Klick ausserhalb von Sprache und Links fuehrt ins Hauptmenue
          (51-konsole.js). #lang-toggle, #app-version und #home-install behalten ihre ids. -->
     <div class="k-titel">
-    <div class="home-titel" aria-label="HYBRIDDASH 2.0" data-i18n-skip>
-      <span class="home-omega hd-omega" data-t="2.0" aria-hidden="true">2.0</span>
+    <div class="home-titel" aria-label="HYBRID-DASH 3.0" data-i18n-skip>
+      <span class="home-omega hd-omega" data-t="3.0" aria-hidden="true">3.0</span>
       <!-- BESTELLT: "OMEGA blaue glitches und SIM rote (links blau, rechts rot, wie die
            Strecke). Sonst sieht es aus wie die Niederländische Flagge" - vorher lag oben ein
            blauer und unten ein roter Streifen quer ueber beiden Woertern. -->
       <span class="home-titel-text k-glitch-blau" data-text="HYBRID">HYBRID</span><span
-        class="home-titel-text k-glitch-rot" data-text="DASH">DASH</span>
+        class="hd3-strich" aria-hidden="true">-</span><span
+        class="home-titel-text k-glitch-rot" data-text="DASH">DASH</span><span class="hd3-plakette" aria-hidden="true">3.0</span>
     </div>
       <h2 class="k-slogan">Vollst&auml;ndige Gestaltungsfreiheit f&uuml;r deine Carrera Hybrid&nbsp;Bahn</h2>
       <button type="button" id="lang-toggle" aria-label="Sprache wechseln / switch language / cambiar idioma">
@@ -5867,7 +5958,7 @@
       </div>
       <div class="k-titel-fuss">
         <span class="foot-ver">v<span id="app-version">1.3.92</span></span>
-        <span data-i18n-skip>HybridDash 2.0 &middot; MIT &middot; based on <a href="https://github.com/Luuke42/omegasim" target="_blank" rel="noopener noreferrer">OmegaSim</a> by Luuke</span>
+        <span data-i18n-skip>Hybrid-Dash 3.0 &middot; MIT &middot; based on <a href="https://github.com/Luuke42/omegasim" target="_blank" rel="noopener noreferrer">OmegaSim</a> by Luuke</span>
         <a class="foot-code" href="https://github.com/mokamit/hybriddash"
            target="_blank" rel="noopener noreferrer">Code auf GitHub</a>
         <button id="home-install" hidden>Als App installieren</button>
@@ -10356,7 +10447,7 @@
   </div>
   <div class="mp-info" id="mp-info" hidden>
     <div class="mpi-kopf">
-      <h1 data-i18n-skip>HYBRIDDASH 2.0</h1>
+      <h1 data-i18n-skip>HYBRID-DASH 3.0</h1>
       <div class="mpi-wert"><span id="mpi-uhr-label">Laufzeit</span><b id="mpi-uhr" data-i18n-skip>&ndash;</b></div>
       <div class="mpi-wert"><span>Rennl&auml;nge</span><b id="mpi-laenge" data-i18n-skip>&ndash;</b></div>
       <div class="mpi-wert"><span>Fahrer</span><b id="mpi-anzahl" data-i18n-skip>0</b></div>

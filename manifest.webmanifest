@@ -1,6 +1,6 @@
 {
-  "name": "HybridDash 2.0",
-  "short_name": "HybridDash",
+  "name": "Hybrid-Dash 3.0",
+  "short_name": "Hybrid-Dash",
   "description": "Cockpit, physics and race control for Carrera Hybrid cars, in the browser.",
   "lang": "en",
   "start_url": "./index.html",

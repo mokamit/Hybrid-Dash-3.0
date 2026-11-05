@@ -454,7 +454,7 @@
       .ov-dnf-knopf.dsq { background: #000; color: #fff; border-color: #fff; }
       .ov-zeile.ov-dsq .ov-luecke { color: #fff; }
       .hd-rl-menue { position: fixed; z-index: 2147483000; display: grid; gap: 3px; min-width: 190px; padding: 8px; border-radius: 8px;
-        background: #12161d; border: 1px solid #39ff88; box-shadow: 0 0 14px rgba(57,255,136,.25), 0 10px 30px rgba(0,0,0,.6);
+        background: #12161d; border: 1px solid #e10600; box-shadow: 0 0 14px rgba(225,6,0,.25), 0 10px 30px rgba(0,0,0,.6);
         font: 600 12px var(--k-font, Inter, sans-serif); color: #e6e9ef; }
       .hd-rl-menue b { font-size: 11px; letter-spacing: .06em; color: #8a93a3; padding: 0 4px 4px; text-transform: uppercase; }
       .hd-rl-menue button { all: unset; cursor: pointer; padding: 6px 8px; border-radius: 5px; }

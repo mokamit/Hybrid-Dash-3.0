@@ -1,4 +1,4 @@
-# HybridDash 2.0
+# Hybrid-Dash 3.0
 
 [⬇ Download the Android app (APK)](https://github.com/mokamit/hybriddash/releases/latest/download/HybridDash.apk) · Play in the browser: [mokamit.github.io/hybriddash](https://mokamit.github.io/hybriddash/)
 
@@ -7,10 +7,22 @@ formulae and engine sound from an enginesim implementation, plus a Race Director
 stewards, NPCs, safety car, Pit Boxes, championships and multiplayer. The interface is in English by default; German and
 Spanish are one tap away on the title screen.
 
-HybridDash 2.0 is a fork of **[OmegaSim](https://github.com/Luuke42/omegasim) by Luuke**
-(MIT License). Everything OmegaSim does still works; HybridDash adds its own features on top.
+Hybrid-Dash 3.0 is a standalone project built on **[OmegaSim](https://github.com/Luuke42/omegasim) by Luuke**
+(MIT License), continuing from HybridDash 2.x. Everything OmegaSim does still works; Hybrid-Dash adds its own
+features and its own look on top.
 
-## What HybridDash adds
+## The 3.0 look: Broadcast
+
+Race-weekend TV graphics across the whole app:
+
+- **Titillium Web** everywhere (bundled in `fonts/`, so it works offline and in the APK); heavy italic capitals for headlines, tabs and timing, plain upright text for everything else.
+- **Asphalt and pit-lane greys** with **race red** as the accent and **flag yellow** for flags.
+- **Slanted tab bars** with the active tab in white and a solid red rule underneath, in the menu and in the cockpit.
+- **Each car's colour as a stripe** in the standings, positions in italics, timing in tabular figures.
+- **Flag band** as a solid yellow TV bar with a cut corner.
+- New title lock-up: **HYBRID-DASH** with a red **3.0** plate.
+
+## What Hybrid-Dash adds
 
 Based on OmegaSim **1.3.92** (random events, track sectors, the ACC cockpit screens and everything
 before). On top of that:
@@ -112,4 +124,6 @@ Double-click `Start HybridDash.bat` (local server + app window, nothing to insta
 ## License
 
 MIT, see [LICENSE](LICENSE). Original work © 2026 Luuke (OmegaSim).
-Modifications © 2026 Mo Kamit (HybridDash), released under the same MIT License.
+Modifications © 2026 Mo Kamit (HybridDash / Hybrid-Dash 3.0), released under the same MIT License.
+
+Titillium Web font (in `fonts/`) © Accademia di Belle Arti di Urbino, SIL Open Font License 1.1 (see `fonts/OFL-Titillium-Web.txt`).
