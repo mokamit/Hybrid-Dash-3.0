@@ -437,6 +437,18 @@
     box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
   #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
   #grid-start { text-transform: uppercase; letter-spacing: .06em; }
+  /* v2.2: pit spot picker in the grid cards and the race information under the map. */
+  #race-gridscreen #grid-liste .grid-row { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "auto name box move" "auto wo box move"; }
+  #grid-liste .grid-box { grid-area: box; display: flex; flex-direction: column; gap: 1px; font-size: 10px; color: var(--muted, #8a93a3);
+    text-transform: uppercase; letter-spacing: .06em; }
+  #grid-liste .grid-box select { font-size: 12px; padding: 3px 4px; background: #0d1015; color: #fff; border: 1px solid #39414f; border-radius: 4px; max-width: 7.2em; }
+  .gt3-gridschirm:not([hidden]):has(#hd-grid-info) { grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "kopf bild" "hinweis bild" "selbst bild" "liste bild" "liste info" "fuss fuss"; }
+  .hd-grid-info { grid-area: info; border-top: 2px solid #39ff88; background: rgba(14,16,22,.9); padding: 8px 10px; }
+  .hd-grid-info .hd-gi-titel { font: 800 12px var(--k-font, Inter, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: #39ff88; margin-bottom: 6px; }
+  .hd-grid-info .hd-gi-raster { display: grid; grid-template-columns: repeat(2, auto minmax(0, 1fr)); gap: 3px 12px; font-size: clamp(11px, 1.1vw, 14px); align-items: baseline; }
+  .hd-grid-info .l { color: #8a93a3; text-transform: uppercase; letter-spacing: .05em; font-size: .85em; white-space: nowrap; }
+  .hd-grid-info b { color: #fff; font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* v2.2: garage actions as a fixed bar above the cars and the settings. */
   body #gar-list.gar-a { grid-template-rows: auto minmax(0, 1fr); }
   .gar-a-leiste { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; padding: 8px;

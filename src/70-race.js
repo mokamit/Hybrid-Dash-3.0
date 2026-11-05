@@ -1655,6 +1655,7 @@
         + `<span class="grid-handle" draggable="true" title="Ziehen zum Umsortieren">&#8942;&#8942;</span>`
         + gridAutoBild(car)
         + `<span class="grid-name" data-pos="${i + 1}">${carDot(car)}${garageLabel(car)}</span><small class="grid-wo">${wo}</small>`
+        + (typeof hdBoxGridZelle === 'function' ? hdBoxGridZelle(car) : '')
         + `<span class="grid-move">`
         + `<button data-mv="up" ${i === 0 ? 'disabled' : ''} aria-label="nach vorn">&#9650;</button>`
         + `<button data-mv="down" ${i === cars.length - 1 ? 'disabled' : ''} aria-label="nach hinten">&#9660;</button>`
@@ -1677,7 +1678,7 @@
       });
       // v1.1.25 BESTELLT: "Wenn ich dort auf ein Auto druecke, mach, dass es die Lichter blinkt."
       row.addEventListener('click', (e) => {
-        if (e.target.closest('button, .grid-handle')) return;
+        if (e.target.closest('button, .grid-handle, select, label')) return;
         if (typeof blinkCar === 'function' && car.rx) blinkCar(car);
         row.classList.remove('grid-blinkt');
         void row.offsetWidth;
@@ -1740,7 +1741,8 @@
       // Auf der Bahn: das Layout aus Editor oder Challenge (renderTrackPreview).
       const tiles = currentTrackTiles;
       if (tiles && tiles.length >= 2) {
-        const r = renderTrackPreview(tiles, null, { detailed: true, cars: [] });
+        const r = renderTrackPreview(tiles, null, { detailed: true, cars: [],
+          boxFarbe: typeof hdBoxFarbeFuer === 'function' ? hdBoxFarbeFuer : undefined });
         if (host.innerHTML !== r.html) host.innerHTML = r.html;
       } else if (host.innerHTML) host.innerHTML = '';
       return;
@@ -1762,6 +1764,7 @@
     syncRaceGridOrder();
     raceGridZeilen($('grid-liste'));
     gridBildMalen();
+    if (typeof hdGridInfoMalen === 'function') hdGridInfoMalen();   // HybridDash: race information
     // v1.0.25: im Meisterschafts-Event steht oben, welches Event und nach welcher Regel aufgestellt wird.
     if ($('grid-kopf-info')) $('grid-kopf-info').textContent = typeof meisterGridInfo === 'function' ? meisterGridInfo() : '';
     // Time Attack: Medaillenzeiten, bisher Gewonnenes und Bestzeit dieser Strecke.
@@ -8078,6 +8081,7 @@
         return;
       }
       setPitState('limited');
+      if (typeof hdBoxSpielerHinweis === 'function') hdBoxSpielerHinweis(playerCar);   // HybridDash: name your pit spot
       return;
     }
     // v1.1.42 BESTELLT: "Mach, dass ich den Boxenstopp nicht abbrechen kann, wenn Reifen gewechselt

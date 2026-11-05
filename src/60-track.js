@@ -3548,6 +3548,10 @@
               + `stroke-width="1.3" stroke-opacity=".8" stroke-linecap="butt"/>`;
       }
     }
+    // HybridDash: pit spots (98o-hd-boxen.js), a small "P1" box beside the piece.
+    if (o.detailed && kachelTab && o.boxen !== false && typeof hdBoxSvg === 'function') {
+      try { body += hdBoxSvg({ tiles, pts, nrm, kachelTab, half, ox, oy, farbeFuer: o.boxFarbe }); } catch (e) { /* no spots */ }
+    }
 
     // ---- Die Autos ----------------------------------------------------------------
     //
@@ -4072,8 +4076,11 @@
   function editorStreckeDaten() {
     const sek = { m: currentTrackTiles[0] && currentTrackTiles[0].sm || null, g: [] };
     currentTrackTiles.forEach((x, i) => { if (x.sg) sek.g.push(i); });
+    // HybridDash: the pit spots of the track ([[piece, 'r'|'l'|'b'], ...]).
+    const box = [];
+    currentTrackTiles.forEach((x, i) => { if (x.pb) box.push([i, x.pb]); });
     return { tiles: currentTrackTiles.map((x) => x.type), rotation: trackRotationDeg, zoom: editorZoom,
-             sek: sek.m || sek.g.length ? sek : undefined };
+             sek: sek.m || sek.g.length ? sek : undefined, box: box.length ? box : undefined };
   }
   function editorStreckeLaden() {
     let d = null;
@@ -4085,6 +4092,9 @@
     if (d.sek && typeof d.sek === 'object') {
       if (d.sek.m === 'manuell' || d.sek.m === 'aus') currentTrackTiles[0].sm = d.sek.m;
       (Array.isArray(d.sek.g) ? d.sek.g : []).forEach((i) => { if (currentTrackTiles[i]) currentTrackTiles[i].sg = 1; });
+    }
+    if (Array.isArray(d.box)) {
+      d.box.forEach((e) => { if (Array.isArray(e) && currentTrackTiles[e[0]] && ['r', 'l', 'b'].includes(e[1])) currentTrackTiles[e[0]].pb = e[1]; });
     }
     if (Number.isFinite(d.rotation)) trackRotationDeg = d.rotation;
     if (Number.isFinite(d.zoom)) editorZoom = Math.max(0.5, Math.min(3, d.zoom));
@@ -4112,7 +4122,7 @@
     const result = renderTrackPreview(currentTrackTiles, null,
       { detailed: true, cars: trackCarMarks(), echt: true,
         // In der manuellen Sektorwahl ist das hervorgehobene Teil der Fokus der Wahl.
-        auswahl: imEditor ? (sekWahl ? sekWahl.sel : trackSelIndex()) : null,
+        auswahl: imEditor ? (sekWahl ? sekWahl.sel : (typeof hdBoxWahlAktiv === 'function' && hdBoxWahlAktiv() ? hdBoxWahlSel() : trackSelIndex())) : null,
         // Der Editor zeigt die Sektoren der Strecke auch im Ausdruck-Modus: sie gehoeren zur
         // Strecke, gemessen werden sie nur auf der Bahn.
         sektorenImmer: true,
@@ -4942,6 +4952,7 @@
 
   async function exitTrackFullscreen() {
     if (sekWahl) sekWahlAbbrechen();
+    if (typeof hdBoxWahlAktiv === "function" && hdBoxWahlAktiv()) hdBoxWahlAbbrechen();
     trackFsDrin = false;
     try {
       if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
@@ -4982,6 +4993,7 @@
     { id: 'track-rotate-right' },
     { id: 'track-clear' },
     { id: 'track-sektoren' },
+    { id: 'track-boxen' },
     { id: 'track-tour' },
     { id: 'track-fs-toggle' },
   ];
@@ -5001,6 +5013,7 @@
     // Ein offener Dialog (konsoleFrage, z. B. "Sektoren") bekommt die Tasten, nicht der Editor.
     if (typeof konsoleFrageOffen === 'function' && konsoleFrageOffen()) return false;
     if (sekWahl) return sekWahlPad(button);
+    if (typeof hdBoxWahlAktiv === 'function' && hdBoxWahlAktiv()) return hdBoxWahlPad(button);
     const n = trackPadRow === 0 ? TRACK_ACTIONS.length : TRACK_PALETTE.length;
     switch (button) {
       case 'up':
@@ -6012,6 +6025,7 @@
     if (best !== null && bestD < Math.pow(g.half * 3, 2)) {
       // Manuelle Sektorwahl: das angetippte Teil beginnt einen Sektor (nochmal: nicht mehr).
       if (sekWahl) { sekWahl.sel = best; sekWahlUmschalten(best); return; }
+      if (typeof hdBoxWahlAktiv === 'function' && hdBoxWahlAktiv()) { hdBoxWahlKlick(best); return; }
       trackSel = best; refreshTrackPreview();
     }
   });
@@ -6040,6 +6054,7 @@
       else if ((k === 'escape' || k === 'backspace') && !e.repeat) sekWahlAbbrechen();
       return;
     }
+    if (typeof hdBoxWahlAktiv === 'function' && hdBoxWahlAktiv()) { hdBoxWahlTaste(e); return; }
     if (e.repeat && !['arrowleft', 'arrowright', 'q', 'e'].includes(k)) return;
     if (k === 'arrowleft') { weg(); trackEditorPad('left'); }
     else if (k === 'arrowright') { weg(); trackEditorPad('right'); }
