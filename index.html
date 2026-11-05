@@ -14807,6 +14807,15 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "Weiß": "White",
+    "Schwarz": "Black",
+    "Rot": "Red",
+    "Blau": "Blue",
+    "Grün": "Green",
+    "Gelb": "Yellow",
+    "Lila": "Purple",
+    "Orange": "Orange",
+    "Farbe": "Colour",
     "ACC (Vorgabe)": "ACC (default)",
     "Fahrer am Rand": "Driver at the edge",
     "Eiche hell": "Light oak",
@@ -18706,6 +18715,16 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "Weiß": "Blanco",
+    "Schwarz": "Negro",
+    "Rot": "Rojo",
+    "Blau": "Azul",
+    "Grün": "Verde",
+    "Gelb": "Amarillo",
+    "Lila": "Morado",
+    "Orange": "Naranja",
+    "Farbe": "Color",
+    "keine Autos verbunden": "ningún coche conectado",
     "ACC (Vorgabe)": "ACC (predeterminado)",
     "Nur das Aussehen des Cockpit-Schirms – Anzeigen, Tasten und Physik bleiben, wie sie sind. „ACC“ ist die Vorgabe und an das Rennspiel Assetto Corsa Competizione angelehnt: fast schwarze, kantige Felder mit schmalen blauen Akzentlinien, segmentierte Drehzahlleiste, der Gang groß in der Mitte und die Zeiten wie im Timing-Fenster des Spiels. „Omega“ ist Carbon und weiße Schrift auf Schwarz. „GT3“ sind schwarze Kacheln mit weißer Schrift, auf größten Kontrast getrimmt. „Oldschool“ ist Bernstein auf Schwarz mit sichtbaren Pixelzeilen, breiter Kunststoffblende und Messingschrauben, wie die Vakuumfluoreszenz-Armaturen der 1980er. „Modern“ ist ein weißer Schirm mit schwarzen Bedienflächen und schmaler Alublende, wie die ersten Farb-TFT der 2000er – Regenradar und G-Plot behalten dort ihren dunklen Einsatz, weil sie hell auf dunkel zeichnen und auf Weiß unsichtbar wären. „Klassiker“ ist Walnussfurnier mit Chromschrauben und cremefarbener Schrift auf Schwarzbraun, wie das Armaturenbrett eines Gran Turismo der Sechziger. Die Bedeutungsfarben bleiben in allen Ansichten gleich: der Tankbalken ist grün und der Schaden rot, auch in der Retro-Ansicht – eine Ansicht darf ändern, wie es aussieht, nicht was eine Farbe sagt. Die Voreinstellungen fassen die Ansicht nicht an.": "Solo el aspecto de la pantalla del cockpit – indicadores, botones y física se quedan como están. «ACC» es la opción predeterminada y se inspira en el juego de carreras Assetto Corsa Competizione: paneles casi negros y rectos con finas líneas de acento azules, barra de revoluciones segmentada, la marcha grande en el centro y los tiempos como en la ventana de cronometraje del juego. «Omega» es carbono y letra blanca sobre negro. «GT3» son casillas negras con letra blanca, ajustadas al máximo contraste. «Oldschool» es ámbar sobre negro con líneas de píxeles visibles, un marco ancho de plástico y tornillos de latón, como los instrumentos fluorescentes de vacío de los años 80. «Modern» es una pantalla blanca con controles negros y un marco estrecho de aluminio, como los primeros TFT en color de los años 2000 – el radar de lluvia y el gráfico G conservan ahí su fondo oscuro, porque dibujan claro sobre oscuro y serían invisibles sobre blanco. «Clásico» es chapa de nogal con tornillos cromados y letra crema sobre marrón oscuro, como el salpicadero de un gran turismo de los años sesenta. Los colores con significado son iguales en todas las vistas: la barra del depósito es verde y el daño rojo, también en la vista retro – una vista puede cambiar cómo se ve algo, no lo que dice un color. Los preajustes no tocan la vista.",
     "Fahrer am Rand": "Piloto en el borde",
@@ -60696,6 +60715,12 @@
     { id: 'keine', name: 'keine', hex: '#7a7a7a', ink: '#ffffff', auto: false },
     { id: 'mehrfarbig', name: 'mehrfarbig', hex: '#b0b0b0', ink: '#14161c', auto: false },
   ];
+  // HybridDash: the colour names follow the app language (the list stays German inside, `de`).
+  CAR_COLORS.forEach((c) => {
+    const de = c.name;
+    Object.defineProperty(c, 'de', { value: de, enumerable: false });
+    Object.defineProperty(c, 'name', { get() { try { return lang === 'de' ? de : t(de); } catch (e) { return de; } }, enumerable: true });
+  });
   const CAR_AUTO_COLORS = CAR_COLORS.filter((c) => c.auto !== false);
   // Ausgeschrieben, nicht als Zeichen: "Alpha" liest sich in einer Ergebnisliste, ein
   // einzelnes Alpha sieht dort nach einem Tippfehler aus. Das Zeichen steht im Farbklecks,
@@ -61451,7 +61476,7 @@
     const f = carColor(car);
     const fi = CAR_COLORS.findIndex((c) => c.id === f.id);
     const farbe = (d) => garageFarbeSetzen(car, CAR_COLORS[(fi + d + CAR_COLORS.length) % CAR_COLORS.length].id);
-    box.appendChild(garWertZeile('Farbe ' + garageLabel(car), f.name, () => farbe(-1), () => farbe(1)));
+    box.appendChild(garWertZeile((lang === 'de' ? 'Farbe ' : t('Farbe') + ' · ') + garageLabel(car), f.name, () => farbe(-1), () => farbe(1)));
     box.appendChild(garWertZeile('Marke / Modell', t(carModellName(car.modellId)),
       () => garageModellWechsel(car, -1), () => garageModellWechsel(car, 1)));
     if (car.role === 'ghost') {
@@ -61668,7 +61693,7 @@
       if (fb.id === 'keine') { b.textContent = '∅'; b.style.color = fb.ink; }
       b.className = fb.id === car.colorId ? 'on' : '';
       const wer = fb.auto === false ? null : garage.find(c => c !== car && c.colorId === fb.id);
-      b.title = t(fb.name) + (wer ? ' (schon ' + garageLabel(wer) + ')' : '');
+      b.title = fb.name + (wer ? (lang === 'de' ? ' (schon ' : lang === 'es' ? ' (ya ' : ' (taken by ') + garageLabel(wer) + ')' : '');
       b.setAttribute('aria-label', b.title);
       b.onclick = (ev) => { ev.stopPropagation(); garageFarbeSetzen(car, fb.id); pal.remove(); };
       pal.appendChild(b);
@@ -61755,8 +61780,10 @@
     // Anzeige, drin in der Rechnung.
     const echte = garage.filter((c) => !c.sim);
     $('gar-count').textContent = echte.length
-      ? `${echte.length} Auto${echte.length === 1 ? '' : 's'} verbunden`
-      : 'keine Autos verbunden';
+      ? (lang === 'de' ? `${echte.length} Auto${echte.length === 1 ? '' : 's'} verbunden`
+                       : lang === 'es' ? `${echte.length} coche${echte.length === 1 ? '' : 's'} conectado${echte.length === 1 ? '' : 's'}`
+                       : `${echte.length} car${echte.length === 1 ? '' : 's'} connected`)
+      : t('keine Autos verbunden');
     // ---- DIE GARAGE ALS KARTEN (v0.8.26, Vorschlag B aus mockup/garage-mp.html) --------
     //
     // BESTELLT: "Garage: Implementiere Vorschlag B. Als Bilder nimm die Farben wie vorher
@@ -118127,6 +118154,12 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       raceState = 'racing'; raceStartedAt = rennZeitJetzt() - 184000;
       window.confirm = () => true;
       hdRlFlagge('vsc'); hdRlDnf('d4'); hdRlWetter('rain'); hdRlStrafe('d2', 5); hdRlAus('d3', 'dsq');
+    },
+    // Tests/screenshots only: one stand-in car in the garage (reload the page afterwards).
+    _garage: (farbe) => {
+      garage.push({ role: 'player', alias: 'Mo Kamit', device: { id: 'hd-g1', name: 'HYBRID-G1', gatt: { connected: true } }, colorId: farbe || 'gelb',
+        tileCode: 2, tileCount: 0, tileAt: 0, rx: null, tx: null, ghost: null });
+      carRetag(); renderGarage();
     },
     flagge: hdRlFlagge, gruen: hdRlGruen, rot: hdRlRot, ziel: hdRlZiel, wetter: hdRlWetter, dnf: hdRlDnf, dsq: (id) => hdRlAus(id, 'dsq'), strafe: hdRlStrafe, wieder: hdRlWieder,
     status: () => ({ modus: hdRl.modus, flag: flagState, rot: typeof rennPauseAktiv === 'function' && rennPauseAktiv(),

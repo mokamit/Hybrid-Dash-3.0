@@ -1031,6 +1031,12 @@
     { id: 'keine', name: 'keine', hex: '#7a7a7a', ink: '#ffffff', auto: false },
     { id: 'mehrfarbig', name: 'mehrfarbig', hex: '#b0b0b0', ink: '#14161c', auto: false },
   ];
+  // HybridDash: the colour names follow the app language (the list stays German inside, `de`).
+  CAR_COLORS.forEach((c) => {
+    const de = c.name;
+    Object.defineProperty(c, 'de', { value: de, enumerable: false });
+    Object.defineProperty(c, 'name', { get() { try { return lang === 'de' ? de : t(de); } catch (e) { return de; } }, enumerable: true });
+  });
   const CAR_AUTO_COLORS = CAR_COLORS.filter((c) => c.auto !== false);
   // Ausgeschrieben, nicht als Zeichen: "Alpha" liest sich in einer Ergebnisliste, ein
   // einzelnes Alpha sieht dort nach einem Tippfehler aus. Das Zeichen steht im Farbklecks,
@@ -1786,7 +1792,7 @@
     const f = carColor(car);
     const fi = CAR_COLORS.findIndex((c) => c.id === f.id);
     const farbe = (d) => garageFarbeSetzen(car, CAR_COLORS[(fi + d + CAR_COLORS.length) % CAR_COLORS.length].id);
-    box.appendChild(garWertZeile('Farbe ' + garageLabel(car), f.name, () => farbe(-1), () => farbe(1)));
+    box.appendChild(garWertZeile((lang === 'de' ? 'Farbe ' : t('Farbe') + ' · ') + garageLabel(car), f.name, () => farbe(-1), () => farbe(1)));
     box.appendChild(garWertZeile('Marke / Modell', t(carModellName(car.modellId)),
       () => garageModellWechsel(car, -1), () => garageModellWechsel(car, 1)));
     if (car.role === 'ghost') {
@@ -2003,7 +2009,7 @@
       if (fb.id === 'keine') { b.textContent = '∅'; b.style.color = fb.ink; }
       b.className = fb.id === car.colorId ? 'on' : '';
       const wer = fb.auto === false ? null : garage.find(c => c !== car && c.colorId === fb.id);
-      b.title = t(fb.name) + (wer ? ' (schon ' + garageLabel(wer) + ')' : '');
+      b.title = fb.name + (wer ? (lang === 'de' ? ' (schon ' : lang === 'es' ? ' (ya ' : ' (taken by ') + garageLabel(wer) + ')' : '');
       b.setAttribute('aria-label', b.title);
       b.onclick = (ev) => { ev.stopPropagation(); garageFarbeSetzen(car, fb.id); pal.remove(); };
       pal.appendChild(b);
@@ -2090,8 +2096,10 @@
     // Anzeige, drin in der Rechnung.
     const echte = garage.filter((c) => !c.sim);
     $('gar-count').textContent = echte.length
-      ? `${echte.length} Auto${echte.length === 1 ? '' : 's'} verbunden`
-      : 'keine Autos verbunden';
+      ? (lang === 'de' ? `${echte.length} Auto${echte.length === 1 ? '' : 's'} verbunden`
+                       : lang === 'es' ? `${echte.length} coche${echte.length === 1 ? '' : 's'} conectado${echte.length === 1 ? '' : 's'}`
+                       : `${echte.length} car${echte.length === 1 ? '' : 's'} connected`)
+      : t('keine Autos verbunden');
     // ---- DIE GARAGE ALS KARTEN (v0.8.26, Vorschlag B aus mockup/garage-mp.html) --------
     //
     // BESTELLT: "Garage: Implementiere Vorschlag B. Als Bilder nimm die Farben wie vorher
