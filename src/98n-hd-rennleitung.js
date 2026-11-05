@@ -83,10 +83,7 @@
   function hdRlFlagge(modus) {
     if (!hdRlRennt()) { showHudToast('No race running'); return; }
     if (typeof rennPauseAktiv === 'function' && rennPauseAktiv()) { showHudToast('Red flag is out – resume first'); return; }
-    if (modus === 'sc' && !(typeof safetyCar === 'function' && safetyCar())) {
-      showHudToast('No safety car in the garage – assign one, or use VSC');
-      return;
-    }
+    if (modus === 'sc' && !(typeof safetyCar === 'function' && safetyCar())) { hdRlScWaehlen(); return; }
     if (typeof hdScFrageZu === 'function') hdScFrageZu();
     const vorher = flagState;
     hdRl.modus = modus;
@@ -102,6 +99,25 @@
     hdRlLog(name + (vorher === 'yellow' ? ' (changed)' : ''), modus);
     hdRlSag({ gelb: 'Yellow flag. No overtaking.', vsc: 'Virtual safety car deployed.', sc: 'Safety car deployed.' }[modus]);
     if (typeof updateFlagUi === 'function') updateFlagUi();
+  }
+  // REPORTED: "The SC button does not deploy the safety car" - there was no car with the
+  // Safety Car role, and the refusal was only a short toast. Now the button asks: pick a car
+  // to drive as the safety car right now (spare cars first, then NPCs - never a human
+  // driver), use the virtual safety car instead, or cancel.
+  function hdRlScWaehlen() {
+    const kandidaten = garage.filter((c) => c.device && !hdDnfAuto(c) && (c.role === 'none' || c.role === 'ghost' || !c.role))
+      .sort((a, b) => (a.role === 'ghost' ? 1 : 0) - (b.role === 'ghost' ? 1 : 0));
+    const knoepfe = kandidaten.slice(0, 6).map((c) => ['#' + hdNummer(c) + ' ' + garageLabel(c) + (c.role === 'ghost' ? ' (NPC)' : ''), () => {
+      setCarRole(c, 'safetycar');
+      hdRlLog(garageLabel(c) + ' is now the safety car', 'sc');
+      hdRlFlagge('sc');
+    }]);
+    knoepfe.push(['Use VSC instead', () => hdRlFlagge('vsc')], ['Cancel', null]);
+    const text = kandidaten.length
+      ? 'None of your cars has the Safety Car role. Pick a car to drive as the safety car now – an NPC leaves the race to do it – or use the virtual safety car (everyone slows down, no safety car on track).'
+      : 'None of your cars has the Safety Car role, and every car is racing. Connect a spare car and give it the Safety Car role in the garage, or use the virtual safety car.';
+    if (typeof konsoleFrage === 'function') konsoleFrage('No safety car', text, knoepfe);
+    else showHudToast('No safety car in the garage – assign one, or use VSC');
   }
   function hdRlGruen() {
     if (typeof rennPauseAktiv === 'function' && rennPauseAktiv()) {
@@ -178,11 +194,11 @@
     if (art === 'dsq') {
       showHudToast('BLACK FLAG · ' + name + ' · DSQ');
       hdRlLog('Black flag: ' + name + ' disqualified', 'dsq');
-      hdRlSag('Black flag. ' + name + ' is disqualified.');
+      hdRlSag('Black flag. ' + (car ? hdSprechName(car, true, 'en') : name) + ' is disqualified.');
     } else {
       showHudToast('DNF · ' + name);
       hdRlLog(name + ' – DNF after ' + runden + ' lap' + (runden === 1 ? '' : 's'), 'dnf');
-      hdRlSag(name + ' is out of the race.');
+      hdRlSag((car ? hdSprechName(car, true, 'en') : name) + ' is out of the race.');
     }
     hdRlNeuMalen();
   }
@@ -191,7 +207,7 @@
   // Time penalty in seconds; 0 clears them all.
   function hdRlStrafe(id, s) {
     id = String(id);
-    const { name } = hdRlName(id);
+    const { car, name } = hdRlName(id);
     if (!s) {
       if (!hdRl.strafe.has(id)) return;
       hdRl.strafe.delete(id);
@@ -203,7 +219,7 @@
       const summe = Math.round(hdStrafeMs(id) / 1000);
       hdRlLog(s + ' second penalty: ' + name + (summe !== s ? ' (total +' + summe + ' s)' : ''), 'strafe');
       showHudToast('+' + s + ' s · ' + name);
-      hdRlSag(s + ' second time penalty for ' + name + '.');
+      hdRlSag(s + ' second time penalty for ' + (car ? hdSprechName(car, false, 'en', true) : name) + '.');
     }
     hdRlNeuMalen();
   }
@@ -326,7 +342,7 @@
       k.classList.toggle('an', a === lage || (a === 'dry' || a === 'rain' || a === 'wechsel') && a === raceWxStart);
       if (['gelb', 'vsc', 'sc', 'rot', 'ziel'].includes(a)) k.disabled = !rennt || (a !== 'rot' && rot) || (a === 'ziel' && raceState !== 'racing');
       if (a === 'gruen') k.disabled = !(rot ? rennPause.phase === 'pause' : flagState === 'yellow');
-      if (a === 'sc') k.title = (typeof safetyCar === 'function' && safetyCar()) ? 'Safety car: the safety car goes out, the field queues behind it' : 'No safety car in the garage – assign a car the role "Safety Car"';
+      if (a === 'sc') k.title = (typeof safetyCar === 'function' && safetyCar()) ? 'Safety car: the safety car goes out, the field queues behind it' : 'No safety car yet – click to pick a car for it, or use VSC';
     });
     const txt = { gruen: rennt ? 'GREEN' : (raceState === 'finished' ? 'FINISHED' : 'NO RACE'), gelb: 'YELLOW', vsc: 'VSC', sc: 'SAFETY CAR', rot: 'RED FLAG', restart: 'RESTART' }[lage];
     const l = $('hd-rl-lage'); if (l) { l.textContent = (raceState === 'finishing' && lage === 'gruen' ? 'FINAL LAP' : txt) + hdRlAusText(); l.dataset.lage = lage; }
@@ -460,7 +476,9 @@
       ok('VSC: safety car stays in, slower than yellow', scRausGerufen === 0 && vscZiel < gelbZiel, 'yellow ' + gelbZiel.toFixed(2) + ' / VSC ' + vscZiel.toFixed(2));
       // SC without a safety car in the garage: refused, VSC stays.
       hdRlFlagge('sc');
-      ok('SC without a safety car: refused', hdRl.modus === 'vsc', 'mode ' + hdRl.modus);
+      const gefragt = typeof konsoleFrageOffen === 'function' && konsoleFrageOffen();
+      if (typeof konsoleFrageZu === 'function') konsoleFrageZu();
+      ok('SC without a safety car: asks which car (or VSC), changes nothing yet', hdRl.modus === 'vsc' && gefragt, 'mode ' + hdRl.modus + ', asked ' + gefragt);
       // SC with a safety car: deployed.
       const sc = fake('rl-sc', 'safetycar'); garage.push(sc);
       gelbBeenden(); hdRl.modus = 'sc';

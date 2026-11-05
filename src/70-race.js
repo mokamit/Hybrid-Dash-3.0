@@ -893,7 +893,7 @@
     // ueber einen GHOST ausloesen, und ein Rundenrennen ohne (oder mit zu langsamen) Ghosts
     // endete nie.
     const out = garage.filter(c => c.role !== 'safetycar' && c.role !== 'reinig').map(c => ({ name: garageLabel(c), role: c.role, id: String(c.device && c.device.id),
-                                   farbe: carColor(c).hex, farbeId: carColor(c).id, kennung: c.tag, modellId: carModellWert(c.modellId), alias: c.alias || '',
+                                   farbe: carColor(c).hex, farbeId: carColor(c).id, kennung: c.tag, nummer: c.nummer || 0, modellId: carModellWert(c.modellId), alias: c.alias || '',
                                    // Der Ort auf der Schiene. Auto 2 geht ueber
                                    // ghostOrtGes(): es hat seit v0.6.46 einen eigenen
                                    // Ortungssatz, und der ist genau der, aus dem ein Ghost

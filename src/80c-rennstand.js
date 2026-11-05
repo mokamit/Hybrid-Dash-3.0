@@ -87,7 +87,7 @@
       const laps = Array.isArray(c.laps) ? c.laps : [];
       const valid = laps.every((l) => l && Number.isFinite(l.ms) && l.ms >= 0);
       return { id: c.id || ('local:' + i), role: c.role, farbe: c.farbe, farbeId: c.farbeId, modellId: carModellWert(c.modellId),
-               alias: c.alias || '', laps, rate: Number.isFinite(c.rate) && c.rate > 0 ? c.rate : null,
+               alias: c.alias || '', nummer: c.nummer || 0, laps, rate: Number.isFinite(c.rate) && c.rate > 0 ? c.rate : null,
                runden: laps.length,
                summe: valid ? laps.reduce((a, l) => a + l.ms, 0) : null,
                ort: Number.isFinite(c.ort) ? c.ort : -1 };
@@ -146,7 +146,7 @@
     // Nur bereits erfolgte Durchfahrten dieser Messrunde aufnehmen.
     const rows = cars.map((c, i) => ({
       id: c.id || ('local:' + i), role: c.role, farbe: c.farbe,
-      farbeId: c.farbeId, modellId: carModellWert(c.modellId), alias: c.alias || '',
+      farbeId: c.farbeId, modellId: carModellWert(c.modellId), alias: c.alias || '', nummer: c.nummer || 0,
       crossedAt: rennstandDurchfahrt(c, n), runden: n,
     })).filter((c) => c.crossedAt !== null && c.crossedAt <= bis);
     rows.sort((a, b) => a.crossedAt - b.crossedAt || String(a.id).localeCompare(String(b.id)));
@@ -321,7 +321,9 @@
   function rennstandStimmeNoetig(rows) {
     if (!rennstandWebSpeechVerfuegbar() || rennstandStimmenModus === 'clips') return false;
     if (rennstandStimmenModus === 'browser') return true;
-    return rows.slice(0, 3).some((x) => rennstandNameVon(x));
+    // HybridDash: the car NUMBER is announced too, and there are no recordings for it - so in
+    // the automatic mode the device voice speaks whenever a car has a number.
+    return rows.slice(0, 3).some((x) => rennstandNameVon(x) || x.nummer);
   }
   const RENNSTAND_FARBWORT = {
     de: { weiss: 'der weiße', schwarz: 'der schwarze', rot: 'der rote', blau: 'der blaue',
@@ -345,7 +347,15 @@
   // der Name steht an der Stelle der Marke ("der rote Porsche s42").
   function rennstandText(rows, runde, ergebnis, spr) {
     const de = spr === 'de', L = de ? 'de' : 'en';
-    const wagen = (x) => {
+    // HybridDash: every car is also called by its number ("Mo Kamit, car number 7").
+    // Without a driver name or a model it is "the red car number 9", without the comma.
+    const nummer = (x) => {
+      if (!x || !x.nummer) return '';
+      const nackt = !rennstandNameVon(x) && !carModellWert(x.modellId);
+      return nackt ? (de ? ' Nummer ' : ' number ') + x.nummer : (de ? ', Auto Nummer ' : ', car number ') + x.nummer;
+    };
+    const wagen = (x) => wagenOhneNr(x) + nummer(x);
+    const wagenOhneNr = (x) => {
       const name = rennstandNameVon(x);
       if (name && rennstandNamensart === 'fahrer') return name;
       const farbe = CAR_COLORS.find((c) => c.id === x.farbeId)

@@ -179,7 +179,7 @@
     setFlag('yellow');
     if (flagState !== 'yellow') return;           // yellow disabled or refused
     showHudToast(t('SAFETY CAR') + ' · ' + name);
-    hdSprechen(hdSatz('sc', { name, grund }), 30);
+    hdSprechen(hdSatz('sc', { name: hdSprechName(car, true), grund }), 30);
     hdEinstellungenMalen();
   }
 
@@ -196,7 +196,7 @@
       const v = $('hd-sc-frage-vsc-taste'); if (v) v.textContent = (b && b.type === 'button' && b.index === 2 ? '' : 'X / ') + 'V';
       box.hidden = false;
     }
-    hdSprechen(hdSatz('frage', { name: garageLabel(car), grund }), 25);
+    hdSprechen(hdSatz('frage', { name: hdSprechName(car, true), grund }), 25);
   }
   function hdScFrageZu() {
     if (!hdSc.frage) return;
@@ -374,6 +374,16 @@
     const modell = carModellWert(car.modellId) ? carModellName(car.modellId) : '';
     if (lang === 'es') return (modell || 'coche') + (farbName ? ' ' + farbName : '');
     return (farbName ? farbName + ' ' : '') + (modell || (lang === 'de' ? 'Auto' : 'car'));
+  }
+  // Spoken car: "Mo Kamit, car number 7" (mid-sentence: followed by a comma), or "car number 7".
+  // klein: the name does not start a clause ("penalty for car number 7").
+  function hdSprechName(car, mitten, sprache, klein) {
+    const spr = sprache || lang;
+    const nr = hdNummer(car);
+    const wort = spr === 'de' ? 'Auto Nummer ' : spr === 'es' ? 'coche número ' : 'car number ';
+    if (!nr) return garageLabel(car);
+    if (!car.alias) return (klein || spr === 'de' ? wort : wort.charAt(0).toUpperCase() + wort.slice(1)) + nr;
+    return car.alias + ', ' + wort + nr + (mitten ? ',' : '');
   }
   function hdNummer(car) { return car && car.nummer ? car.nummer : (garage.indexOf(car) + 1 || ''); }
 
@@ -741,6 +751,21 @@
       prüfen('announce all drivers: connecting car is announced', alle === 1 && (lang !== 'en' ||
              (satzAlle === 'Car number 3 connected: Mara Kovac, the blue Porsche 911.' && satzTag === 'Car number 3 connected: the blue car.')),
              satzAlle + ' | ' + satzTag);
+
+      // G4: car numbers in the other announcements (safety car, standings).
+      if (lang === 'en') {
+        const e = fake('hd-e', 'ghost', { alias: 'Mo Kamit', nummer: 7, colorId: 'gelb', modellId: 'bmw' });
+        const ohneName = fake('hd-f', 'ghost', { alias: '', nummer: 9, colorId: 'rot' });
+        const frage = hdSatz('frage', { name: hdSprechName(e, true), grund: 'stand' });
+        const frage2 = hdSatz('frage', { name: hdSprechName(ohneName, true), grund: 'off' });
+        const stand = typeof rennstandText === 'function'
+          ? rennstandText([{ platz: 1, alias: 'Mo Kamit', nummer: 7, farbeId: 'gelb', modellId: 'bmw', rundenZurueck: 0, msZurueck: 0 },
+                           { platz: 2, alias: '', nummer: 9, farbeId: 'rot', modellId: '', rundenZurueck: 0, msZurueck: 1500 }], 3, false, 'en') : '';
+        prüfen('car number in safety-car and standings announcements',
+               frage === 'Safety car? Mo Kamit, car number 7, has stopped.' && frage2 === 'Safety car? Car number 9 is off track.'
+               && /car number 7\./.test(stand) && /car number 9\./.test(stand),
+               frage + ' | ' + frage2 + ' | ' + stand);
+      }
 
       // H: avatar.
       const svg = hdAvatarSvg('Mara Kovac', '#e23b3b', 0, 30, 'porsche911');

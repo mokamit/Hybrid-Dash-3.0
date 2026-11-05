@@ -43533,7 +43533,7 @@
     // ueber einen GHOST ausloesen, und ein Rundenrennen ohne (oder mit zu langsamen) Ghosts
     // endete nie.
     const out = garage.filter(c => c.role !== 'safetycar' && c.role !== 'reinig').map(c => ({ name: garageLabel(c), role: c.role, id: String(c.device && c.device.id),
-                                   farbe: carColor(c).hex, farbeId: carColor(c).id, kennung: c.tag, modellId: carModellWert(c.modellId), alias: c.alias || '',
+                                   farbe: carColor(c).hex, farbeId: carColor(c).id, kennung: c.tag, nummer: c.nummer || 0, modellId: carModellWert(c.modellId), alias: c.alias || '',
                                    // Der Ort auf der Schiene. Auto 2 geht ueber
                                    // ghostOrtGes(): es hat seit v0.6.46 einen eigenen
                                    // Ortungssatz, und der ist genau der, aus dem ein Ghost
@@ -58275,7 +58275,7 @@
       const laps = Array.isArray(c.laps) ? c.laps : [];
       const valid = laps.every((l) => l && Number.isFinite(l.ms) && l.ms >= 0);
       return { id: c.id || ('local:' + i), role: c.role, farbe: c.farbe, farbeId: c.farbeId, modellId: carModellWert(c.modellId),
-               alias: c.alias || '', laps, rate: Number.isFinite(c.rate) && c.rate > 0 ? c.rate : null,
+               alias: c.alias || '', nummer: c.nummer || 0, laps, rate: Number.isFinite(c.rate) && c.rate > 0 ? c.rate : null,
                runden: laps.length,
                summe: valid ? laps.reduce((a, l) => a + l.ms, 0) : null,
                ort: Number.isFinite(c.ort) ? c.ort : -1 };
@@ -58334,7 +58334,7 @@
     // Nur bereits erfolgte Durchfahrten dieser Messrunde aufnehmen.
     const rows = cars.map((c, i) => ({
       id: c.id || ('local:' + i), role: c.role, farbe: c.farbe,
-      farbeId: c.farbeId, modellId: carModellWert(c.modellId), alias: c.alias || '',
+      farbeId: c.farbeId, modellId: carModellWert(c.modellId), alias: c.alias || '', nummer: c.nummer || 0,
       crossedAt: rennstandDurchfahrt(c, n), runden: n,
     })).filter((c) => c.crossedAt !== null && c.crossedAt <= bis);
     rows.sort((a, b) => a.crossedAt - b.crossedAt || String(a.id).localeCompare(String(b.id)));
@@ -58509,7 +58509,9 @@
   function rennstandStimmeNoetig(rows) {
     if (!rennstandWebSpeechVerfuegbar() || rennstandStimmenModus === 'clips') return false;
     if (rennstandStimmenModus === 'browser') return true;
-    return rows.slice(0, 3).some((x) => rennstandNameVon(x));
+    // HybridDash: the car NUMBER is announced too, and there are no recordings for it - so in
+    // the automatic mode the device voice speaks whenever a car has a number.
+    return rows.slice(0, 3).some((x) => rennstandNameVon(x) || x.nummer);
   }
   const RENNSTAND_FARBWORT = {
     de: { weiss: 'der weiße', schwarz: 'der schwarze', rot: 'der rote', blau: 'der blaue',
@@ -58533,7 +58535,15 @@
   // der Name steht an der Stelle der Marke ("der rote Porsche s42").
   function rennstandText(rows, runde, ergebnis, spr) {
     const de = spr === 'de', L = de ? 'de' : 'en';
-    const wagen = (x) => {
+    // HybridDash: every car is also called by its number ("Mo Kamit, car number 7").
+    // Without a driver name or a model it is "the red car number 9", without the comma.
+    const nummer = (x) => {
+      if (!x || !x.nummer) return '';
+      const nackt = !rennstandNameVon(x) && !carModellWert(x.modellId);
+      return nackt ? (de ? ' Nummer ' : ' number ') + x.nummer : (de ? ', Auto Nummer ' : ', car number ') + x.nummer;
+    };
+    const wagen = (x) => wagenOhneNr(x) + nummer(x);
+    const wagenOhneNr = (x) => {
       const name = rennstandNameVon(x);
       if (name && rennstandNamensart === 'fahrer') return name;
       const farbe = CAR_COLORS.find((c) => c.id === x.farbeId)
@@ -115727,7 +115737,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     setFlag('yellow');
     if (flagState !== 'yellow') return;           // yellow disabled or refused
     showHudToast(t('SAFETY CAR') + ' · ' + name);
-    hdSprechen(hdSatz('sc', { name, grund }), 30);
+    hdSprechen(hdSatz('sc', { name: hdSprechName(car, true), grund }), 30);
     hdEinstellungenMalen();
   }
 
@@ -115744,7 +115754,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const v = $('hd-sc-frage-vsc-taste'); if (v) v.textContent = (b && b.type === 'button' && b.index === 2 ? '' : 'X / ') + 'V';
       box.hidden = false;
     }
-    hdSprechen(hdSatz('frage', { name: garageLabel(car), grund }), 25);
+    hdSprechen(hdSatz('frage', { name: hdSprechName(car, true), grund }), 25);
   }
   function hdScFrageZu() {
     if (!hdSc.frage) return;
@@ -115922,6 +115932,16 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const modell = carModellWert(car.modellId) ? carModellName(car.modellId) : '';
     if (lang === 'es') return (modell || 'coche') + (farbName ? ' ' + farbName : '');
     return (farbName ? farbName + ' ' : '') + (modell || (lang === 'de' ? 'Auto' : 'car'));
+  }
+  // Spoken car: "Mo Kamit, car number 7" (mid-sentence: followed by a comma), or "car number 7".
+  // klein: the name does not start a clause ("penalty for car number 7").
+  function hdSprechName(car, mitten, sprache, klein) {
+    const spr = sprache || lang;
+    const nr = hdNummer(car);
+    const wort = spr === 'de' ? 'Auto Nummer ' : spr === 'es' ? 'coche número ' : 'car number ';
+    if (!nr) return garageLabel(car);
+    if (!car.alias) return (klein || spr === 'de' ? wort : wort.charAt(0).toUpperCase() + wort.slice(1)) + nr;
+    return car.alias + ', ' + wort + nr + (mitten ? ',' : '');
   }
   function hdNummer(car) { return car && car.nummer ? car.nummer : (garage.indexOf(car) + 1 || ''); }
 
@@ -116289,6 +116309,21 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       prüfen('announce all drivers: connecting car is announced', alle === 1 && (lang !== 'en' ||
              (satzAlle === 'Car number 3 connected: Mara Kovac, the blue Porsche 911.' && satzTag === 'Car number 3 connected: the blue car.')),
              satzAlle + ' | ' + satzTag);
+
+      // G4: car numbers in the other announcements (safety car, standings).
+      if (lang === 'en') {
+        const e = fake('hd-e', 'ghost', { alias: 'Mo Kamit', nummer: 7, colorId: 'gelb', modellId: 'bmw' });
+        const ohneName = fake('hd-f', 'ghost', { alias: '', nummer: 9, colorId: 'rot' });
+        const frage = hdSatz('frage', { name: hdSprechName(e, true), grund: 'stand' });
+        const frage2 = hdSatz('frage', { name: hdSprechName(ohneName, true), grund: 'off' });
+        const stand = typeof rennstandText === 'function'
+          ? rennstandText([{ platz: 1, alias: 'Mo Kamit', nummer: 7, farbeId: 'gelb', modellId: 'bmw', rundenZurueck: 0, msZurueck: 0 },
+                           { platz: 2, alias: '', nummer: 9, farbeId: 'rot', modellId: '', rundenZurueck: 0, msZurueck: 1500 }], 3, false, 'en') : '';
+        prüfen('car number in safety-car and standings announcements',
+               frage === 'Safety car? Mo Kamit, car number 7, has stopped.' && frage2 === 'Safety car? Car number 9 is off track.'
+               && /car number 7\./.test(stand) && /car number 9\./.test(stand),
+               frage + ' | ' + frage2 + ' | ' + stand);
+      }
 
       // H: avatar.
       const svg = hdAvatarSvg('Mara Kovac', '#e23b3b', 0, 30, 'porsche911');
@@ -117836,10 +117871,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   function hdRlFlagge(modus) {
     if (!hdRlRennt()) { showHudToast('No race running'); return; }
     if (typeof rennPauseAktiv === 'function' && rennPauseAktiv()) { showHudToast('Red flag is out – resume first'); return; }
-    if (modus === 'sc' && !(typeof safetyCar === 'function' && safetyCar())) {
-      showHudToast('No safety car in the garage – assign one, or use VSC');
-      return;
-    }
+    if (modus === 'sc' && !(typeof safetyCar === 'function' && safetyCar())) { hdRlScWaehlen(); return; }
     if (typeof hdScFrageZu === 'function') hdScFrageZu();
     const vorher = flagState;
     hdRl.modus = modus;
@@ -117855,6 +117887,25 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     hdRlLog(name + (vorher === 'yellow' ? ' (changed)' : ''), modus);
     hdRlSag({ gelb: 'Yellow flag. No overtaking.', vsc: 'Virtual safety car deployed.', sc: 'Safety car deployed.' }[modus]);
     if (typeof updateFlagUi === 'function') updateFlagUi();
+  }
+  // REPORTED: "The SC button does not deploy the safety car" - there was no car with the
+  // Safety Car role, and the refusal was only a short toast. Now the button asks: pick a car
+  // to drive as the safety car right now (spare cars first, then NPCs - never a human
+  // driver), use the virtual safety car instead, or cancel.
+  function hdRlScWaehlen() {
+    const kandidaten = garage.filter((c) => c.device && !hdDnfAuto(c) && (c.role === 'none' || c.role === 'ghost' || !c.role))
+      .sort((a, b) => (a.role === 'ghost' ? 1 : 0) - (b.role === 'ghost' ? 1 : 0));
+    const knoepfe = kandidaten.slice(0, 6).map((c) => ['#' + hdNummer(c) + ' ' + garageLabel(c) + (c.role === 'ghost' ? ' (NPC)' : ''), () => {
+      setCarRole(c, 'safetycar');
+      hdRlLog(garageLabel(c) + ' is now the safety car', 'sc');
+      hdRlFlagge('sc');
+    }]);
+    knoepfe.push(['Use VSC instead', () => hdRlFlagge('vsc')], ['Cancel', null]);
+    const text = kandidaten.length
+      ? 'None of your cars has the Safety Car role. Pick a car to drive as the safety car now – an NPC leaves the race to do it – or use the virtual safety car (everyone slows down, no safety car on track).'
+      : 'None of your cars has the Safety Car role, and every car is racing. Connect a spare car and give it the Safety Car role in the garage, or use the virtual safety car.';
+    if (typeof konsoleFrage === 'function') konsoleFrage('No safety car', text, knoepfe);
+    else showHudToast('No safety car in the garage – assign one, or use VSC');
   }
   function hdRlGruen() {
     if (typeof rennPauseAktiv === 'function' && rennPauseAktiv()) {
@@ -117931,11 +117982,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (art === 'dsq') {
       showHudToast('BLACK FLAG · ' + name + ' · DSQ');
       hdRlLog('Black flag: ' + name + ' disqualified', 'dsq');
-      hdRlSag('Black flag. ' + name + ' is disqualified.');
+      hdRlSag('Black flag. ' + (car ? hdSprechName(car, true, 'en') : name) + ' is disqualified.');
     } else {
       showHudToast('DNF · ' + name);
       hdRlLog(name + ' – DNF after ' + runden + ' lap' + (runden === 1 ? '' : 's'), 'dnf');
-      hdRlSag(name + ' is out of the race.');
+      hdRlSag((car ? hdSprechName(car, true, 'en') : name) + ' is out of the race.');
     }
     hdRlNeuMalen();
   }
@@ -117944,7 +117995,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // Time penalty in seconds; 0 clears them all.
   function hdRlStrafe(id, s) {
     id = String(id);
-    const { name } = hdRlName(id);
+    const { car, name } = hdRlName(id);
     if (!s) {
       if (!hdRl.strafe.has(id)) return;
       hdRl.strafe.delete(id);
@@ -117956,7 +118007,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const summe = Math.round(hdStrafeMs(id) / 1000);
       hdRlLog(s + ' second penalty: ' + name + (summe !== s ? ' (total +' + summe + ' s)' : ''), 'strafe');
       showHudToast('+' + s + ' s · ' + name);
-      hdRlSag(s + ' second time penalty for ' + name + '.');
+      hdRlSag(s + ' second time penalty for ' + (car ? hdSprechName(car, false, 'en', true) : name) + '.');
     }
     hdRlNeuMalen();
   }
@@ -118079,7 +118130,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       k.classList.toggle('an', a === lage || (a === 'dry' || a === 'rain' || a === 'wechsel') && a === raceWxStart);
       if (['gelb', 'vsc', 'sc', 'rot', 'ziel'].includes(a)) k.disabled = !rennt || (a !== 'rot' && rot) || (a === 'ziel' && raceState !== 'racing');
       if (a === 'gruen') k.disabled = !(rot ? rennPause.phase === 'pause' : flagState === 'yellow');
-      if (a === 'sc') k.title = (typeof safetyCar === 'function' && safetyCar()) ? 'Safety car: the safety car goes out, the field queues behind it' : 'No safety car in the garage – assign a car the role "Safety Car"';
+      if (a === 'sc') k.title = (typeof safetyCar === 'function' && safetyCar()) ? 'Safety car: the safety car goes out, the field queues behind it' : 'No safety car yet – click to pick a car for it, or use VSC';
     });
     const txt = { gruen: rennt ? 'GREEN' : (raceState === 'finished' ? 'FINISHED' : 'NO RACE'), gelb: 'YELLOW', vsc: 'VSC', sc: 'SAFETY CAR', rot: 'RED FLAG', restart: 'RESTART' }[lage];
     const l = $('hd-rl-lage'); if (l) { l.textContent = (raceState === 'finishing' && lage === 'gruen' ? 'FINAL LAP' : txt) + hdRlAusText(); l.dataset.lage = lage; }
@@ -118213,7 +118264,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       ok('VSC: safety car stays in, slower than yellow', scRausGerufen === 0 && vscZiel < gelbZiel, 'yellow ' + gelbZiel.toFixed(2) + ' / VSC ' + vscZiel.toFixed(2));
       // SC without a safety car in the garage: refused, VSC stays.
       hdRlFlagge('sc');
-      ok('SC without a safety car: refused', hdRl.modus === 'vsc', 'mode ' + hdRl.modus);
+      const gefragt = typeof konsoleFrageOffen === 'function' && konsoleFrageOffen();
+      if (typeof konsoleFrageZu === 'function') konsoleFrageZu();
+      ok('SC without a safety car: asks which car (or VSC), changes nothing yet', hdRl.modus === 'vsc' && gefragt, 'mode ' + hdRl.modus + ', asked ' + gefragt);
       // SC with a safety car: deployed.
       const sc = fake('rl-sc', 'safetycar'); garage.push(sc);
       gelbBeenden(); hdRl.modus = 'sc';
