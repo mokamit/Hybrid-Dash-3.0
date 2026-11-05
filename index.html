@@ -115534,21 +115534,35 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   const HD_SC_SCHARF_KACHELN = 2;
   const HD_SC_GNADE_MS = 6000;
   const hdSc = { offSeit: new Map(), gruenSeit: 0, letzterStatus: '', sperreBis: 0, letzterFlag: 'green',
-                 zaehler: new Map(), frage: null, ignoriert: new Map() };
+                 zaehler: new Map(), frage: null, ignoriert: new Map(), box: new Map() };
 
   function hdAutoScAn() { return !!hd.autoSc; }
   function hdAutoScFenster() { return Math.max(1000, Math.min(15000, Number(hd.autoScMs) || HD_AUTO_SC_MS)); }
 
+  // REQUESTED: a car stopped in the pit never triggers the safety car prompt. In the pit =
+  // its pit stop is running, it stands on the pit marker tile, or it has not moved since its
+  // stop ended (it still stands in the box: the stagnant timer would fire the moment the
+  // stop is over). The memory clears on the car's first tile change after the stop.
+  function hdInBox(car, boxAktiv) {
+    if (boxAktiv) { hdSc.box.set(car, car.tileAt || 0); return true; }
+    try { if (pitMarkerCode !== null && car.tileCode === pitMarkerCode) return true; } catch (e) { /* no marker */ }
+    if (hdSc.box.has(car)) {
+      if ((car.tileAt || 0) === hdSc.box.get(car)) return true;
+      hdSc.box.delete(car);
+    }
+    return false;
+  }
   function hdRenntAuto(car) {
     if (!car || !car.device) return false;
     if (typeof hdDnfAuto === 'function' && hdDnfAuto(car)) return false;   // retired by race control
-    if (car.role === 'player') return pitState === 'off';
+    if (car.role === 'player') return !hdInBox(car, pitState !== 'off');
     const z = zusatzPlatzVonRolle(car.role);
-    if (z) return !(z.box && z.box.lage && z.box.lage !== 'aus');
+    if (z) return !hdInBox(car, !!(z.box && z.box.lage && z.box.lage !== 'aus'));
     if (car.role === 'ghost' || car.role === 'challenger') {
       const g = car.ghost;
       if (!g || !g.running) return false;
-      if (g.pit || g.nachZiel || g.auslauf) return false;
+      if (hdInBox(car, !!g.pit)) return false;
+      if (g.nachZiel || g.auslauf) return false;
       if (g.aufstellZiel !== undefined && g.aufstellZiel !== null) return false;
       return true;
     }
@@ -115583,7 +115597,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   }
 
   function hdAutoScRuecksetzen(now) {
-    hdSc.gruenSeit = now; hdSc.offSeit.clear(); hdSc.zaehler.clear(); hdSc.ignoriert.clear();
+    hdSc.gruenSeit = now; hdSc.offSeit.clear(); hdSc.zaehler.clear(); hdSc.ignoriert.clear(); hdSc.box.clear();
     hdScFrageZu();
   }
 
@@ -116070,7 +116084,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       raceState = merk.raceState; flagState = merk.flagState; trackMode = merk.trackMode;
       raceFormationLap = merk.raceFormationLap; pitState = merk.pitState;
       garage.length = 0; merk.garage.forEach(c => garage.push(c));
-      Object.assign(hd, JSON.parse(merk.hd)); Object.assign(hdSc, merk.sc); hdSc.offSeit = new Map(); hdSc.zaehler = new Map(); hdSc.ignoriert = new Map(); hdScFrageZu();
+      Object.assign(hd, JSON.parse(merk.hd)); Object.assign(hdSc, merk.sc); hdSc.offSeit = new Map(); hdSc.zaehler = new Map(); hdSc.ignoriert = new Map(); hdSc.box = new Map(); hdScFrageZu();
       carStoreSchreiben(JSON.parse(merk.store));
     };
     try {
@@ -116150,6 +116164,17 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       a.role = 'safetycar'; gruen(); fahren(a, 3); a.tileAt = now - 5000; hdAutoScTick();
       const sc = !hdScFrageOffen(); a.role = 'player';
       prüfen('setting off, pit lane and the safety car itself are ignored', aus && pit && sc, 'off ' + aus + ', pit ' + pit + ', sc ' + sc);
+      reset();
+
+      // J2: stop over, the car still stands in the box -> nothing; once it has driven off
+      // and then stops on track -> asked again.
+      gruen(); fahren(a, 3); a.tileAt = now - 5000;
+      pitState = 'servicing'; hdAutoScTick(); pitState = 'off'; hdAutoScTick();
+      const stehtInBox = !hdScFrageOffen();
+      fahren(a, 1); a.tileAt = now - 5000; hdAutoScTick();
+      const danachGefragt = hdScFrageOffen();
+      prüfen('standing in the box after the stop: no prompt until it drives off', stehtInBox && danachGefragt,
+             'quiet in box ' + stehtInBox + ', asked after driving off ' + danachGefragt);
       reset();
 
       // K: while the prompt is open, A/Cross does not also call a pit stop / yellow flag.
