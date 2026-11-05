@@ -437,6 +437,13 @@
     box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
   #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
   #grid-start { text-transform: uppercase; letter-spacing: .06em; }
+  /* v2.2: garage actions as a fixed bar above the cars and the settings. */
+  body #gar-list.gar-a { grid-template-rows: auto minmax(0, 1fr); }
+  .gar-a-leiste { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; padding: 8px;
+    background: rgba(14,16,22,.96); border-bottom: 2px solid #39ff88; position: sticky; top: 0; z-index: 5; }
+  .gar-a-leiste > .gar-a-aktion { flex: 0 1 auto; margin: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; min-height: 0; }
+  .gar-a-leiste > .gar-a-aktion[hidden] { display: none; }
+  .gar-a-leiste > .gar-a-aktion > button { width: auto !important; min-width: 0; white-space: nowrap; padding: 8px 14px !important; font-size: 13px !important; height: 100%; }
   /* v2.2: starting grid as two staggered columns (like a TV grid graphic): smaller cards, each
      car half a row below the one before, on its side of the track (P1 right, P2 left, ...). */
   #grid-liste { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: clamp(30px, 4.2vh, 40px);

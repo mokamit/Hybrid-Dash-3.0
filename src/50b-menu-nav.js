@@ -407,7 +407,13 @@
     // v1.1.11 Garage wie die Meisterschaft: links (Autos, Aktionen) und rechts (Einstellungen) sind zwei
     // Listen; hoch/runter bleibt in der Spalte, in der der Fokus steht.
     // v1.3.31: Teile derselben Zeile (Farbklecks und Name) sind EIN Schritt; man landet auf dem ersten.
-    const spalte = (r) => (r && r.el && r.el.closest) ? r.el.closest('.gar-a-links, .gar-a-rechts') : null;
+    // HybridDash: the action bar above the garage belongs to the left half for up/down
+    // (bar -> cars -> back to the bar).
+    const spalte = (r) => {
+      if (!(r && r.el && r.el.closest)) return null;
+      const sp = r.el.closest('.gar-a-links, .gar-a-rechts, .gar-a-leiste');
+      return sp && sp.classList.contains('gar-a-leiste') ? (document.querySelector('.gar-a-links') || sp) : sp;
+    };
     const zeileVon = (r) => r.zeile || r.el;
     if (menuNavIndex >= rows.length) menuNavIndex = 0;
     const sp = spalte(rows[menuNavIndex]);

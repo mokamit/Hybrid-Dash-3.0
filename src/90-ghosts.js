@@ -2222,6 +2222,10 @@
       // ersten Zeile (garRollenZeile).
       links.appendChild(row);
     });
+    // HybridDash: the actions are a fixed bar above both columns (always in reach, whatever
+    // is scrolled), instead of rows at the end of the car list.
+    const leiste = document.createElement('div');
+    leiste.className = 'gar-a-leiste';
     // Aktionen, einspaltig unter den Autos.
     const plus = document.createElement('div');
     plus.className = 'opt-row opt-breit gar-a-aktion';
@@ -2231,7 +2235,7 @@
     plusKnopf.textContent = '+ ' + t('Auto verbinden');
     plusKnopf.onclick = () => { const c = $('gar-connect'); if (c) c.click(); };
     plus.appendChild(plusKnopf);
-    links.appendChild(plus);
+    leiste.appendChild(plus);
     // HybridDash: reconnect every car this browser was allowed to use before, in one click.
     const bek = document.createElement('div');
     bek.className = 'opt-row opt-breit gar-a-aktion';
@@ -2242,7 +2246,7 @@
     bekKnopf.hidden = true;
     bekKnopf.onclick = () => garageBekannteVerbinden(bekKnopf);
     bek.appendChild(bekKnopf);
-    links.appendChild(bek);
+    leiste.appendChild(bek);
     garageBekannteKandidaten().then((l) => {
       if (garBekannteLaeuft) return;
       bekKnopf.hidden = !l.length;
@@ -2252,7 +2256,7 @@
     bek.hidden = true;
     ['gar-stop-ghosts', 'gar-go', 'gar-disconnect-all', 'gar-to-cockpit'].forEach((id) => {
       const z = garAktionsZeile(id);
-      if (z) links.appendChild(z);
+      if (z) leiste.appendChild(z);
     });
     // v1.1.3: virtuelle Fahrt (60d-virtuell.js) - ein Auto ohne Bluetooth auf der Editor-Strecke.
     // BESTELLT: ganz unten, unter "Zum Cockpit".
@@ -2267,7 +2271,7 @@
     if (garVirtuellAuf) virtKnopf.classList.add('primary');
     virtKnopf.onclick = () => { garVirtuellAuf = true; renderGarage(); };
     virt.appendChild(virtKnopf);
-    links.appendChild(virt);
+    leiste.appendChild(virt);
     // Rechte Seite: das gewaehlte Auto, oder die Optionen der virtuellen Fahrt.
     const car = garVirtuellAuf ? null : garAufAuto;
     if (garVirtuellAuf && typeof vfGarageOptionen === 'function') {
@@ -2345,6 +2349,7 @@
       p.textContent = t('Noch kein Auto verbunden. Links auf „+ Auto verbinden“ tippen.');
       rechts.appendChild(p);
     }
+    list.appendChild(leiste);
     list.appendChild(links);
     list.appendChild(rechts);
     refreshGarageGo();

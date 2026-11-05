@@ -25298,7 +25298,8 @@
     const probe = ['ghost', 'ghost', 'none'].map((role, i) => ({ role, device: { id: 'probe-nav-' + i, name: 'Probe' },
       alias: 'Nav ' + i, colorId: ['rot', 'blau', 'gelb'][i], sim: false, testSenke: [], probe: true }));
     const cur = () => menuNavRows()[menuNavIndex] || null;
-    const seite = (r) => (r && r.el.closest('.gar-a-links') ? 'L' : r && r.el.closest('.gar-a-rechts') ? 'R' : '-');
+    // HybridDash: the actions are a bar above both halves ('B').
+    const seite = (r) => (r && r.el.closest('.gar-a-links') ? 'L' : r && r.el.closest('.gar-a-rechts') ? 'R' : r && r.el.closest('.gar-a-leiste') ? 'B' : '-');
     const name = (r) => (r ? (r.el.textContent || r.el.className || '').replace(/\s+/g, ' ').trim().slice(0, 24) : 'nichts');
     const druecke = (dir) => {
       if (dir === 'up' || dir === 'down') menuNavMove(dir);
@@ -25340,14 +25341,14 @@
       if (!r || seite(r) !== 'R') f.push('runter verlaesst die rechte Spalte (' + name(r) + ')');
       r = druecke('left');
       if (seite(r) === 'R' && r.zeile) r = druecke('left');   // Farbklecks vor dem Namen
-      if (seite(r) !== 'L') f.push('links von einem Knopf rechts bleibt rechts (' + name(r) + ')');
+      if (seite(r) !== 'L' && seite(r) !== 'B') f.push('links von einem Knopf rechts bleibt rechts (' + name(r) + ')');
       // Kreis in der rechten Spalte: zurueck zum gewaehlten Auto.
       setze((x) => x.el.classList.contains('gar-a-rolle'));
       if (!menuNavGarageZurueck() || !cur() || cur().el._car !== probe[1]) f.push('Kreis rechts fuehrt nicht zum gewaehlten Auto (' + name(cur()) + ')');
-      // 5. Links von einer Aktion (kein Auto) nach rechts: raeumlich in die rechte Spalte, und zurueck.
+      // 5. HybridDash: in the action bar, right moves to the next action of the bar.
       setze((x) => x.el.querySelector && x.el.querySelector('.gar-karte-neu'));
       r = druecke('right');
-      if (seite(r) !== 'R') f.push('rechts von "+ Auto verbinden" bleibt ' + seite(r));
+      if (seite(r) !== 'B' || (r.el.querySelector && r.el.querySelector('.gar-karte-neu'))) f.push('rechts von "+ Auto verbinden" geht nicht zur naechsten Aktion (' + seite(r) + ')');
       // 6. Alles erreichbar: jede Spalte mit hoch/runter ablaufen, geteilte Zeilen mit links/rechts.
       const besucht = new Set();
       const lauf = (start) => {
@@ -25380,9 +25381,10 @@
       setze(autoZeile(probe[0]));
       const sel = document.querySelector('.menu-nav-sel');
       if (!sel || getComputedStyle(sel).outlineStyle === 'none') f.push('kein Fokusrahmen am Auto');
+      // HybridDash: "Drive virtually" sits in the action bar; X on it opens its options on the right.
       setze((x) => x.el.classList.contains('gar-a-virtuell'));
-      r = druecke('right');
-      if (!garVirtuellAuf || seite(r) !== 'R') f.push('rechts auf "Virtuell fahren" zeigt die Optionen nicht');
+      menuNavActivate();
+      if (!garVirtuellAuf) f.push('X auf "Virtuell fahren" zeigt die Optionen nicht');
     } catch (e) {
       f.push('Fehler: ' + e.message);
     } finally {
