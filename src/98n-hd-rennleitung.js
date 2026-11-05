@@ -545,8 +545,8 @@
       hdRlFlagge('vsc'); hdRlDnf('d4'); hdRlWetter('rain'); hdRlStrafe('d2', 5); hdRlAus('d3', 'dsq');
     },
     // Tests/screenshots only: one stand-in car in the garage (reload the page afterwards).
-    _garage: (farbe) => {
-      garage.push({ role: 'player', alias: 'Mo Kamit', device: { id: 'hd-g1', name: 'HYBRID-G1', gatt: { connected: true } }, colorId: farbe || 'gelb',
+    _garage: (farbe, id, name) => {
+      garage.push({ role: garage.length ? 'ghost' : 'player', alias: name || 'Mo Kamit', device: { id: id || 'hd-g1', name: 'HYBRID-G1', gatt: { connected: true } }, colorId: farbe || 'gelb',
         tileCode: 2, tileCount: 0, tileAt: 0, rx: null, tx: null, ghost: null });
       carRetag(); renderGarage();
     },
