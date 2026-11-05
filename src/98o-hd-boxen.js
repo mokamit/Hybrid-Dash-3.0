@@ -1,4 +1,4 @@
-  // ============================== HybridDash: PIT AREAS (BOXENPLAETZE) ==============================
+  // ============================== HybridDash: PIT BOXES (BOXENPLAETZE) ==============================
   //
   // REQUESTED: "designate pit stop locations on the track for different cars. Each car will be
   // assigned a spot on the side of the track, as far as they can park to the left or right of the
@@ -329,9 +329,27 @@
     if (!p || !car.ghost) return false;
     car.ghost.pit = { phase: 'anfahrt', at: now, laenge: Math.max(1, ghostCfg.pitSek) * 1000, platz: -1,
                       hd: { k: p.k, seite: p.seite, nr: p.nr }, grund: reifenNot ? 'reifen' : 'plan' };
-    log(garageLabel(car) + ': pits on its own spot P' + p.nr + ' (piece ' + (p.k + 1) + ', ' + (p.seite === 'l' ? 'left' : 'right') + ' edge)'
+    log(garageLabel(car) + ': pits in its own Pit Box P' + p.nr + ' (piece ' + (p.k + 1) + ', ' + (p.seite === 'l' ? 'left' : 'right') + ' edge)'
         + (reifenNot ? ' – ' + reifenName(reifenPassend()) + ' tyres.' : '.'), 'info');
     showHudToast(garageLabel(car).toUpperCase() + ' · BOX P' + p.nr);
+    return true;
+  }
+  // How many pieces before its Pit Box an NPC switches on the pit limiter and its flashing
+  // lights: two, on a track long enough for it (one on a very short one).
+  function hdBoxVorlauf() { const n = currentTrackTiles ? currentTrackTiles.length : 0; return n >= 8 ? 2 : 1; }
+  // Clear to rejoin: no racing car coming up from behind within 1.5 pieces, and none alongside.
+  function hdBoxStreckeFrei(car) {
+    const n = currentTrackTiles ? currentTrackTiles.length : 0;
+    const ich = ghostOrt(car);
+    if (!n || ich === null) return true;
+    for (const c of ghostFieldRacing()) {
+      if (c === car || !c.ghost || c.parked) continue;
+      if (c.ghost.pit && c.ghost.pit.phase !== 'ausfahrt') continue;   // standing in its own box
+      const o = ghostOrt(c);
+      if (o === null) continue;
+      const hinter = ((ich - o) % n + n) % n;        // how far behind me
+      if (hinter < 1.5 || hinter > n - 0.3) return false;
+    }
     return true;
   }
   // Your own car: you drive it, so its spot is guidance - named when you call the stop.
@@ -450,6 +468,7 @@
     wahl: { start: () => hdBoxWahlStart(), klick: (k) => hdBoxWahlKlick(k), fertig: () => hdBoxWahlFertig(), abbrechen: () => hdBoxWahlAbbrechen() },
     _pitCfg: (o) => { Object.assign(ghostCfg, o || {}); return { an: ghostCfg.pitAn, frei: ghostCfg.pitFrei, min: ghostCfg.pitRundenMin, max: ghostCfg.pitRundenMax, sek: ghostCfg.pitSek }; },
     _pitLage: () => garage.filter((c) => c.ghost).map((c) => ({ name: c.alias, tile: c.ghost.tileIndex, quer: +(c.ghost.querSoll || 0).toFixed(2),
-      pit: c.ghost.pit ? { phase: c.ghost.pit.phase, hd: c.ghost.pit.hd || null, platz: c.ghost.pit.platz } : null, spot: (hdBoxFuer(c) || {}).nr || null })),
+      pit: c.ghost.pit ? { phase: c.ghost.pit.phase, hd: c.ghost.pit.hd || null, platz: c.ghost.pit.platz } : null, spot: (hdBoxFuer(c) || {}).nr || null,
+      blink: !!c.ghost.pitBlink, ziel: +(c.ghost.lastTarget || 0).toFixed(2), frei: hdBoxStreckeFrei(c) })),
     fuer: (id) => { const c = garage.find((x) => x.device && String(x.device.id) === String(id)); const p = c && hdBoxFuer(c); return p ? { nr: p.nr, k: p.k, seite: p.seite } : null; },
   });
