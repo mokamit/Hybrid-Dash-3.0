@@ -373,6 +373,8 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "Charakter": "Character",
+    "wird beim Start gewürfelt": "rolled at the start",
     "Weiß": "White",
     "Schwarz": "Black",
     "Rot": "Red",
@@ -4281,6 +4283,8 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "Charakter": "Carácter",
+    "wird beim Start gewürfelt": "se sortea en la salida",
     "Weiß": "Blanco",
     "Schwarz": "Negro",
     "Rot": "Rojo",

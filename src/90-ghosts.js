@@ -1038,17 +1038,6 @@
     Object.defineProperty(c, 'name', { get() { try { return lang === 'de' ? de : t(de); } catch (e) { return de; } }, enumerable: true });
   });
   const CAR_AUTO_COLORS = CAR_COLORS.filter((c) => c.auto !== false);
-  // Ausgeschrieben, nicht als Zeichen: "Alpha" liest sich in einer Ergebnisliste, ein
-  // einzelnes Alpha sieht dort nach einem Tippfehler aus. Das Zeichen steht im Farbklecks,
-  // wo der Platz fuer ein Wort fehlt. Zwoelf, weil acht Farben plus Doppelbelegung.
-  const CAR_TAGS = [
-    { wort: 'Alpha', zeichen: '\u03b1' }, { wort: 'Beta', zeichen: '\u03b2' },
-    { wort: 'Gamma', zeichen: '\u03b3' }, { wort: 'Delta', zeichen: '\u03b4' },
-    { wort: 'Epsilon', zeichen: '\u03b5' }, { wort: 'Zeta', zeichen: '\u03b6' },
-    { wort: 'Eta', zeichen: '\u03b7' }, { wort: 'Theta', zeichen: '\u03b8' },
-    { wort: 'Iota', zeichen: '\u03b9' }, { wort: 'Kappa', zeichen: '\u03ba' },
-    { wort: 'Lambda', zeichen: '\u03bb' }, { wort: 'My', zeichen: '\u03bc' },
-  ];
 
   // Fahrzeugidentitaet, unabhaengig von Alias, Motorsound und Physik.
   const CAR_MODELLE = [
@@ -1290,11 +1279,12 @@
   // Der Buchstabe folgt der Position in der Garage und wird deshalb NICHT gespeichert: er
   // ist die Reihenfolge des Verbindens, keine Eigenschaft des Autos. Trennt man eines aus
   // der Mitte, ruecken die dahinter auf.
+  // HybridDash: car NUMBERS instead of Greek letters - #1, #2, ... in garage order.
   function carRetag() {
     garage.forEach((c, i) => {
-      const t = CAR_TAGS[i] || { wort: 'Auto ' + (i + 1), zeichen: String(i + 1) };
-      c.tag = t.wort;
-      c.tagChar = t.zeichen;
+      c.nummer = i + 1;
+      c.tag = '#' + (i + 1);
+      c.tagChar = String(i + 1);
     });
   }
 
@@ -1309,6 +1299,7 @@
   // auf dem Tisch das war.
   function garageLabel(car) {
     if (car.alias) return car.alias;
+    if (car.nummer) return (lang === 'de' ? 'Auto ' : lang === 'es' ? 'Coche ' : 'Car ') + car.nummer;
     if (car.tag) return car.tag;
     return car.device.name || ('Auto ' + String(car.device.id).slice(0, 6));
   }
@@ -1976,8 +1967,8 @@
     if (car.role !== 'ghost' || !ghostCfg.charakter) return '';
     const ch = car.ghost && car.ghost.charakter;
     if (!ch) {
-      return '<div class="gar-speed"><label>Charakter</label>'
-           + '<b>wird beim Start gewürfelt</b></div>';
+      return '<div class="gar-speed"><label>' + t('Charakter') + '</label>'
+           + '<b>' + t('wird beim Start gewürfelt') + '</b></div>';
     }
     const p = (x) => Math.round(x * 100) + '%';
     const versatz = ch.pitVersatz > 0 ? '+' + ch.pitVersatz : String(ch.pitVersatz);

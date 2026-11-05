@@ -15828,7 +15828,7 @@
     if (mit.farbpunkte !== 2) maengel.push('mit: ' + mit.farbpunkte + ' Farbpunkte statt 2');
     if (mit.leer) maengel.push('mit: als leer gekennzeichnet');
     // 2. Die leere Lage muss die FOLGE nennen, nicht nur schweigen.
-    if (!/Alpha/.test(ohne.text)) maengel.push('ohne: "Alpha" nicht genannt');
+    if (!/Nummer 1|number 1|número 1/i.test(ohne.text)) maengel.push('ohne: "Nummer 1" nicht genannt');
     // Und sie muss sagen, dass keine Autos gemerkt sind - auch wenn sonst etwas liegt
     // (Einstellungen zaehlen nicht als Auto).
     if (!/[Kk]eine? Auto/.test(ohne.text)) maengel.push('ohne: sagt nicht "keine Autos"');
@@ -15842,7 +15842,7 @@
     }
     return { ok: !maengel.length,
              mass: 'mit 2 Autos: ' + JSON.stringify(mit.autoNamen)
-                 + ' | leer: ' + (/Alpha/.test(ohne.text) ? 'nennt Alpha' : 'schweigt')
+                 + ' | leer: ' + (/Nummer 1|number 1|número 1/i.test(ohne.text) ? 'nennt Nummer 1' : 'schweigt')
                  + ' | ohne Namen: ' + JSON.stringify(namenlos.autoNamen)
                  + (maengel.length ? ' | ' + maengel.join(', ') : '') };
   });
@@ -19382,9 +19382,10 @@
       a.alias = 'Testfahrer';
       const mit = garageLabel(a);
       const ok = !doppelt
-                 && tags.join(',') === 'Alpha,Beta,Gamma'
-                 && nachAbgang.join(',') === 'Alpha,Beta'
-                 && ohne === 'Alpha' && mit === 'Testfahrer';
+                 // HybridDash: car numbers instead of Greek letters.
+                 && tags.join(',') === '#1,#2,#3'
+                 && nachAbgang.join(',') === '#1,#2'
+                 && /^(Auto|Car|Coche) 1$/.test(ohne) && mit === 'Testfahrer';
       return { ok,
                mass: 'Farben ' + farben.join('/') + (doppelt ? ' DOPPELT' : ' verschieden')
                      + ', Buchstaben ' + tags.join('/')
