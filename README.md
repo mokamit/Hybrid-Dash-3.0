@@ -68,3 +68,4 @@ Double-click `Start HybridDash.bat` (local server + app window, nothing to insta
 ## License
 
 MIT, see [LICENSE](LICENSE). Original work © 2026 Luuke (OmegaSim).
+Modifications © 2026 Mo Kamit (HybridDash), released under the same MIT License.
