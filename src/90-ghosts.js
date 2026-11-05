@@ -112,6 +112,10 @@
     // may share, see resolveBindingCollisions): while the prompt is open, flagTasteTick()
     // hands the button to the prompt only.
     confirm: { type: 'button', index: 0, label: 'Kreuz (PS) / A (Xbox)' },
+    // HybridDash: automatic pit stop (hold 1 s) - the car drives itself to its Pit Box.
+    // REQUESTED on LB (Xbox) / L1 (PlayStation), the tyre-select button, ON PURPOSE shared like
+    // the yellow flag: a short tap still cycles the tyres (on release), holding 1 s starts the stop.
+    autobox: { type: 'button', index: 4, label: 'L1 (PS) / LB (Xbox)' },
   };
   const BIND_ACTION_LABELS = {
     pause: 'Pause / Fortsetzen',
@@ -128,6 +132,7 @@
     fullscreenToggle: 'Vollbild umschalten',
     resetcar: 'Auto zurücksetzen',
     confirm: 'Bestätigungstaste',
+    autobox: 'Automatischer Boxenstopp (1 s halten)',
   };
 
   // Boxenstopp und Streckenansicht haben die Knoepfe getauscht. Gespeichertes liegt UEBER
@@ -436,6 +441,7 @@
   // Die drei neuen Aktionen. padFlagFired merkt sich, dass die Sekunde in DIESEM Druck schon
   // voll war - ohne das wuerde die Flagge im Takt danach gleich wieder umgeschaltet.
   let prevTyreSelect = false, prevFuelSelect = false, prevYellowFlag = false;
+  let tyreGedruecktAb = 0;   // HybridDash: tyre select shares its button with the automatic pit stop
   let prevFsToggle = false;
   let padFlagFired = false;
 
@@ -5424,7 +5430,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (!p) return null;
     // 'rand' faehrt weiter - das ist der Sinn der Phase: eine Sekunde am Rand ROLLEN,
     // damit die Querbewegung ueberhaupt stattfinden kann.
-    if (p.phase === 'anfahrt' || p.phase === 'rand') return formationPace();
+    if (p.phase === 'anfahrt' || p.phase === 'rand' || p.phase === 'ausfahrt') return formationPace();
     if (p.phase === 'halt' || p.phase === 'stand') return 0;
     return null;               // 'raus' laeuft ueber die Anfahrrampe
   }
@@ -5492,7 +5498,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // Dauer nicht von einer Phase vorgegeben wird, sondern das Auto einfach wieder ins
     // Feld faehrt.
     const seit = now - (p.at || 0);
-    const dauernd = p.phase === 'rand' || p.phase === 'halt' || p.phase === 'stand';
+    const dauernd = p.phase === 'rand' || p.phase === 'halt' || p.phase === 'stand'
+      || (p.hd && (p.phase === 'anfahrt' || p.phase === 'einparken' || p.phase === 'ausfahrt'));   // HybridDash
     g.pitBlink = dauernd ? pitBlinkMuster(seit)
                          : !!(p.phase === 'raus' && pitBlinkDunkel(seit));
   }
@@ -5583,7 +5590,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
         if (c === pitCar || !c.ghost || c.role !== 'ghost') continue;
         const ort = ghostOrt(c);
         if (ort === null) continue;
-        const d = ((Math.floor(ort) - hdP.k) % n + n) % n;
+        const wo = pitCar.ghost.pit.phase === 'ausfahrt' && ghostOrt(pitCar) !== null ? Math.floor(ghostOrt(pitCar)) : hdP.k;
+        const d = ((Math.floor(ort) - wo) % n + n) % n;
         if (d !== 0 && d !== n - 1) continue;
         c.ghost.yieldSide = hdP.seite === 'l' ? 1 : -1;
         c.ghost.yieldUntil = now + PIT_AUSWEICH_MS;
@@ -5939,6 +5947,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     return true;
   }
 
+  // HybridDash: leaving a Pit Box along the edge - at least this long (the car gets rolling), at
+  // most this long (endless traffic must not keep it at the limiter for the rest of the race).
+  const HD_AUSFAHRT_MIN_MS = 1200, HD_AUSFAHRT_MAX_MS = 12000;
   function pitTick(car) {
     const g = car.ghost, p = g && g.pit;
     if (!p) return false;
@@ -5976,6 +5987,19 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       return true;
     }
     if (p.phase === 'einparken') return true;     // die Folge laeuft (randHaltTick)
+    // HybridDash: leaving an own Pit Box - along the edge at the pit limiter (pitZiel, pitQuer)
+    // until the track behind is clear, then back to racing.
+    if (p.phase === 'ausfahrt') {
+      const frei = typeof hdBoxStreckeFrei === 'function' ? hdBoxStreckeFrei(car) : true;
+      const seit = now - p.at;
+      if ((frei && seit >= HD_AUSFAHRT_MIN_MS) || seit >= HD_AUSFAHRT_MAX_MS) {
+        g.pit = null;
+        pitPlatzRaeumen(car);
+        pitFaelligZiehen(g);
+        log(garageLabel(car) + (frei ? ': track clear, joins the racing line.' : ': joins the racing line (time limit).'), 'info');
+      }
+      return true;
+    }
     if (p.phase === 'rand') {
       // BIS AN DEN RAND, und erst dann abbremsen - nicht blind nach PIT_RAND_MS. Ein
       // langsames Auto (kleines tempoAnteil) erreicht die Breite erst spaeter; ein
@@ -6006,10 +6030,17 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (now - p.at >= p.laenge) {
         p.phase = 'raus'; p.at = now;
         npcBoxKlang(car, false);
+        // HybridDash: from an own Pit Box the car leaves at once but along its edge, at the pit
+        // limiter, and joins the racing line only when no traffic is coming (phase 'ausfahrt').
+        if (p.hd) {
+          p.phase = 'ausfahrt';
+          g.randHalt = null;
+          g.querIst = PIT_RAND * (links ? -1 : 1);
+        }
         // v1.2.4: Ausparken wie das Safety Car (scAus, mit dem Gasfaktor), ohne Halt in das normale Fahren.
         // v1.2.67: beim Querlagen-Tankort heraus ueber die Querlage (pitQuer blendet in PIT_RAUS_MS aus).
-        if (p.ort !== 'rand') {
-          randHaltStarten(car, { phase: 'skript', quer: 0, skript: links ? manoeverGespiegelt(scAusSkript()) : scAusSkript(), anpassMs: 0, vonDrive: 0, weiter: true,
+        if (p.ort !== 'rand' && !p.hd) {
+          randHaltStarten(car, { phase: 'skript', quer: 0, skript: scAusSkript(), anpassMs: 0, vonDrive: 0, weiter: true,
             fertig: (c) => { if (c.ghost) { c.ghost.pit = null; } pitPlatzRaeumen(c); if (c.ghost) pitFaelligZiehen(c.ghost); } });
         }
         // ---- DIE REIFEN KOMMEN AM ENDE DER STANDZEIT DRAUF -------------------------
@@ -10544,7 +10575,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const reifenNot = !reifenPassen(car);
       const planFaellig = (g.laps || 0) >= (g.pitFaellig || 0);
       if (pk0 >= 0 && g.tileIndex !== null
-          && (g.tileIndex + 1) % currentTrackTiles.length === pk0
+          && (g.tileIndex + (pkHd >= 0 && typeof hdBoxVorlauf === 'function' ? hdBoxVorlauf() : 1)) % currentTrackTiles.length === pk0
           && (planFaellig || reifenNot)
           && pitErlaubt(car)
           && !(pkHd >= 0 && hdBoxNpcPitStarten(car, now, reifenNot))) {
@@ -12871,7 +12902,18 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // BESTELLT (ACC-Menue): "schultertasten zum tab wechseln" - in den Menues wechseln
       // L1/R1 die Reiter der innersten Ebene, im Cockpit bleiben sie Reifen- und Tankvorwahl.
       const tyreNow = readBindingValue(pad, bindings.tyreSelect) > BUTTON_CAPTURE_THRESHOLD;
-      if (tyreNow && !prevTyreSelect) { if (trackEditorPad('prev')) { /* Editor */ } else if (konsoleMenue()) konsoleReiterSchritt(-1); else pitMischungWeiter(); }
+      // HybridDash: on the same button as the automatic pit stop (hold 1 s), the tyre choice in the
+      // cockpit fires on RELEASE of a short tap - a hold must not also change the tyres.
+      const tyreTeilt = typeof hdAutoBoxTeilt === 'function' && hdAutoBoxTeilt(bindings.tyreSelect);
+      if (tyreNow && !prevTyreSelect) {
+        if (trackEditorPad('prev')) { /* Editor */ } else if (konsoleMenue()) konsoleReiterSchritt(-1);
+        else if (tyreTeilt) tyreGedruecktAb = performance.now();
+        else pitMischungWeiter();
+      }
+      if (!tyreNow && prevTyreSelect && tyreGedruecktAb) {
+        if (performance.now() - tyreGedruecktAb < 1000) pitMischungWeiter();
+        tyreGedruecktAb = 0;
+      }
       prevTyreSelect = tyreNow;
 
       const fuelNow = readBindingValue(pad, bindings.fuelSelect) > BUTTON_CAPTURE_THRESHOLD;

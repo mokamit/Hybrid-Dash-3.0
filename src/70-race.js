@@ -4971,7 +4971,8 @@
     // Funktionsdeklaration im selben Skriptblock und damit hochgezogen - genau wie
     // stopGhost(), das von hier aus schon immer gerufen wird. Eine Wache, die nie greifen
     // kann, liest sich wie eine echte und verdeckt, dass die Abhaengigkeit sicher ist.
-    const amOrt = pitTrigger !== 'offtrack' || istAbseits();
+    // HybridDash: an automatic pit stop parks at the edge of its Pit Box - that is the place.
+    const amOrt = pitTrigger !== 'offtrack' || istAbseits() || (typeof hdAutoBoxAmOrt === 'function' && hdAutoBoxAmOrt());
     if (pitState === 'limited' && stopped && amOrt) { setPitState('servicing'); return; }
     if (pitState === 'limited' && stopped && !amOrt && !pitOrtGemeldet) {
       pitOrtGemeldet = true;

@@ -1,4 +1,4 @@
-  // ============================== HybridDash: PIT AREAS (BOXENPLAETZE) ==============================
+  // ============================== HybridDash: PIT BOXES (BOXENPLAETZE) ==============================
   //
   // REQUESTED: "designate pit stop locations on the track for different cars. Each car will be
   // assigned a spot on the side of the track, as far as they can park to the left or right of the
@@ -329,9 +329,27 @@
     if (!p || !car.ghost) return false;
     car.ghost.pit = { phase: 'anfahrt', at: now, laenge: Math.max(1, ghostCfg.pitSek) * 1000, platz: -1,
                       hd: { k: p.k, seite: p.seite, nr: p.nr }, grund: reifenNot ? 'reifen' : 'plan' };
-    log(garageLabel(car) + ': pits on its own spot P' + p.nr + ' (piece ' + (p.k + 1) + ', ' + (p.seite === 'l' ? 'left' : 'right') + ' edge)'
+    log(garageLabel(car) + ': pits in its own Pit Box P' + p.nr + ' (piece ' + (p.k + 1) + ', ' + (p.seite === 'l' ? 'left' : 'right') + ' edge)'
         + (reifenNot ? ' – ' + reifenName(reifenPassend()) + ' tyres.' : '.'), 'info');
     showHudToast(garageLabel(car).toUpperCase() + ' · BOX P' + p.nr);
+    return true;
+  }
+  // How many pieces before its Pit Box an NPC switches on the pit limiter and its flashing
+  // lights: two, on a track long enough for it (one on a very short one).
+  function hdBoxVorlauf() { const n = currentTrackTiles ? currentTrackTiles.length : 0; return n >= 8 ? 2 : 1; }
+  // Clear to rejoin: no racing car coming up from behind within 1.5 pieces, and none alongside.
+  function hdBoxStreckeFrei(car) {
+    const n = currentTrackTiles ? currentTrackTiles.length : 0;
+    const ich = ghostOrt(car);
+    if (!n || ich === null) return true;
+    for (const c of ghostFieldRacing()) {
+      if (c === car || !c.ghost || c.parked) continue;
+      if (c.ghost.pit && c.ghost.pit.phase !== 'ausfahrt') continue;   // standing in its own box
+      const o = ghostOrt(c);
+      if (o === null) continue;
+      const hinter = ((ich - o) % n + n) % n;        // how far behind me
+      if (hinter < 1.5 || hinter > n - 0.3) return false;
+    }
     return true;
   }
   // Your own car: you drive it, so its spot is guidance - named when you call the stop.
@@ -340,6 +358,141 @@
     if (!p) return;
     showHudToast(t('Deine Box') + ': P' + p.nr + ' · ' + t('Teil') + ' ' + (p.k + 1) + ' · ' + hdBoxSeiteText(p.seite));
   }
+
+  // ---- AUTOMATIC PIT STOP FOR YOUR CAR ---------------------------------------------------------
+  // REQUESTED: "a mappable button for the human player to have 'Automatic Pitstop' - like deploying
+  // the yellow flag, they have to hold the button to confirm. Once activated the car goes into
+  // autonomous mode and makes its way to the designated Pit Box, then the pit mini game (if
+  // enabled) plays like normal. The pull away is the same as the NPCs: the pit limiter stays on;
+  // for human players they can set how long the limiter stays on after a pit stop, default 2 s."
+  // Button: LB (Xbox) / L1 (PlayStation) held 1 s (bindings.autobox); holding again before the car
+  // has parked cancels. Phases, run from the player's autopilot (autopilot() in 50-drive.js):
+  //   anfahrt    to the Pit Box at the pit limiter (pitState 'limited', lane bytes, centre line)
+  //   einparken  the safety-car parking sequence (mirrored for a left box), straight onto the bytes
+  //   stand      held still; OmegaSim's pit service starts (refuel, tyres, mini game as usual)
+  //   ausfahrt   when the service is done: along the box's edge at the limiter for the set time
+  // then the car is yours again.
+  const HD_AUTOBOX_HALTEN_MS = 1000;
+  const hdAuto = { stopp: null, sekunden: 2, gedrueckt: 0, ausgeloest: false, hinweis: false };
+  try {
+    const roh = localStorage.getItem('hybriddash-autobox-sek');   // null = never set (Number(null) would be 0)
+    const v = roh === null ? NaN : Number(roh);
+    if (v >= 0 && v <= 10) hdAuto.sekunden = v;
+  } catch (e) { /* private */ }
+  function hdAutoBoxAktiv(car) { try { return !!(hdAuto.stopp && (!car || hdAuto.stopp.car === car)); } catch (e) { return false; } }
+  function hdAutoBoxAmOrt() { try { return !!(hdAuto.stopp && hdAuto.stopp.phase === 'stand'); } catch (e) { return false; } }
+  // Does a binding sit on the same input as the automatic pit stop? (tyre select then waits for release)
+  function hdAutoBoxTeilt(b) {
+    try { const a = bindings.autobox; return !!(a && b && a.type !== 'none' && a.type === b.type && a.index === b.index); } catch (e) { return false; }
+  }
+  function hdAutoBoxStarten() {
+    const car = playerCar;
+    if (!car) { showHudToast(t('Kein Auto verbunden')); return false; }
+    if (trackMode !== 'on') { showHudToast(t('Automatischer Boxenstopp nur auf der Bahn')); return false; }
+    if (flagState !== 'green' || raceFormationLap) { showHudToast(t('Automatischer Boxenstopp erst bei Grün')); return false; }
+    if (pitState !== 'off') { showHudToast(t('Boxenstopp läuft schon')); return false; }
+    const p = hdBoxFuer(car);
+    if (!p) { showHudToast(t('Keine Pit Box auf dieser Strecke – im Streckeneditor festlegen')); return false; }
+    if (typeof ghostOrt === 'function' && ghostOrt(car) === null) { showHudToast(t('Auto noch nicht geortet – eine Runde fahren')); return false; }
+    hdAuto.stopp = { car, p, phase: 'anfahrt', at: rennZeitJetzt(), service: false };
+    setPitState('limited');
+    showHudToast(t('AUTOMATISCHER BOXENSTOPP') + ' · P' + p.nr + ' · ' + hdBoxSeiteText(p.seite));
+    log('Automatic pit stop: driving to Pit Box P' + p.nr + ' (piece ' + (p.k + 1) + ', ' + (p.seite === 'l' ? 'left' : 'right') + ').', 'info');
+    return true;
+  }
+  function hdAutoBoxEnde(text) {
+    hdAuto.stopp = null;
+    try { autopilotZuruecksetzen(1); } catch (e) { /* not ready */ }
+    if (text) showHudToast(text);
+  }
+  function hdAutoBoxAbbrechen() {
+    if (!hdAuto.stopp) return;
+    const vorParken = hdAuto.stopp.phase === 'anfahrt';
+    hdAutoBoxEnde(t('Automatischer Boxenstopp abgebrochen'));
+    if (vorParken && pitState === 'limited') setPitState('off');
+  }
+  // Hold detection: LB / L1 (or whatever is mapped) held for 1 s starts - or, before parking, cancels.
+  setInterval(() => {
+    let an = false;
+    try {
+      const b = bindings.autobox;
+      if (b && b.type !== 'none' && navigator.getGamepads) {
+        for (const pad of navigator.getGamepads()) if (pad && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) { an = true; break; }
+      }
+    } catch (e) { /* no pad */ }
+    const imCockpit = (() => { try { return document.body.classList.contains('race-fs') || document.querySelector('.tabpage.active') === $('tab-race'); } catch (e) { return false; } })();
+    if (!an || !imCockpit) { hdAuto.gedrueckt = 0; hdAuto.ausgeloest = false; return; }
+    const now = performance.now();
+    if (!hdAuto.gedrueckt) { hdAuto.gedrueckt = now; return; }
+    if (hdAuto.ausgeloest || now - hdAuto.gedrueckt < HD_AUTOBOX_HALTEN_MS) return;
+    hdAuto.ausgeloest = true;
+    if (hdAuto.stopp) { if (hdAuto.stopp.phase === 'anfahrt') hdAutoBoxAbbrechen(); }
+    else hdAutoBoxStarten();
+  }, 40);
+  // The autopilot for the stop (called from autopilot() in 50-drive.js). null = not active.
+  function hdAutoBoxPilot(car, st, motor, regler, fahrerBremse) {
+    // Called every physics step - also while the app is still loading, before this file ran.
+    let s;
+    try { s = hdAuto.stopp; } catch (e) { return null; }
+    if (!s || car !== s.car) return null;
+    if (car !== playerCar || trackMode !== 'on') { hdAutoBoxEnde(null); return null; }
+    const now = rennZeitJetzt();
+    const tempo = (ziel) => {
+      const v = Math.abs(st.speedKmh) / motor.config.topSpeedKmh;
+      const dt = Math.max(0.01, Math.min(0.25, (now - (regler.at || now)) / 1000));
+      regler.at = now;
+      return ghostSpeedControl(regler, ziel, v, dt);
+    };
+    const limiter = () => formationPace() * (typeof autopilotKurvenFaktor === 'function' ? autopilotKurvenFaktor(car) : 1);
+    if (s.phase === 'anfahrt') {
+      const ort = ghostOrt(car);
+      if (ort !== null && Math.floor(ort) === s.p.k) {
+        s.phase = 'einparken'; s.at = now;
+        s.skript = s.p.seite === 'l' ? manoeverGespiegelt(MANOEVER.scEin) : MANOEVER.scEin;
+      } else {
+        const g = tempo(limiter());
+        return { grund: 'autobox', throttle: g.throttle, brake: g.brake, steer: 0, lenkt: !abseitsJetztFuer(1) };
+      }
+    }
+    if (s.phase === 'einparken') {
+      const ms = now - s.at;
+      if (ms < manoeverDauer(s.skript)) {
+        const w = manoeverWert(s.skript, ms);
+        return { grund: 'autobox', throttle: 0, brake: 0, steer: 0, lenkt: false, radLenk: w[1], radGas: w[2] };
+      }
+      s.phase = 'stand'; s.at = now;
+      log('Automatic pit stop: parked in Pit Box P' + s.p.nr + '.', 'info');
+    }
+    if (s.phase === 'stand') {
+      if (pitState === 'servicing') s.service = true;
+      const fertig = s.service && pitReady;
+      const abgebrochen = s.service && pitState === 'off';
+      if (fertig || abgebrochen) { s.phase = 'ausfahrt'; s.at = now; }
+      else if (!s.service && now - s.at > 6000) { hdAutoBoxEnde(t('Boxenstopp startete nicht – du fährst wieder selbst')); return null; }
+      else {
+        st.speedKmh = 0;
+        return { grund: 'autobox', throttle: 0, brake: 1, steer: 0, lenkt: false };
+      }
+    }
+    if (s.phase === 'ausfahrt') {
+      if (now - s.at >= hdAuto.sekunden * 1000) { hdAutoBoxEnde(t('Du fährst wieder selbst')); return null; }
+      const g = tempo(limiter());
+      return { grund: 'autobox', throttle: g.throttle, brake: g.brake, steer: s.p.seite === 'l' ? -0.9 : 0.9, lenkt: !abseitsJetztFuer(1) };
+    }
+    return null;
+  }
+  (function hdAutoBoxRegler() {
+    const r = $('hd-autobox-sek'), w = $('hd-autobox-sek-wert');
+    if (!r) return;
+    r.value = String(hdAuto.sekunden);
+    const zeigen = () => { if (w) w.textContent = hdAuto.sekunden.toFixed(1) + ' s'; };
+    zeigen();
+    r.addEventListener('input', () => {
+      hdAuto.sekunden = Math.max(0, Math.min(10, Number(r.value) || 0));
+      try { localStorage.setItem('hybriddash-autobox-sek', String(hdAuto.sekunden)); } catch (e) { /* private */ }
+      zeigen();
+    });
+  })();
 
   // ---- RACE INFORMATION on the grid screen ------------------------------------------------------
   function hdGridInfoMalen() {
@@ -379,6 +532,62 @@
     try { z(t('Zufallsevents'), $('race-zev') && $('race-zev').checked ? t('an') : t('aus')); } catch (e) { /* older build */ }
     try { z(t('Automatisches Safety Car'), hd.autoSc ? t('an') : t('aus')); } catch (e) { /* not loaded */ }
     box.innerHTML = '<div class="hd-gi-titel">' + t('Rennen') + '</div><div class="hd-gi-raster">' + zeilen.join('') + '</div>';
+  }
+
+  // Self-test of the automatic pit stop: a stand-in player car walked through the four phases.
+  function hdAutoBoxSelbsttest(ok) {
+    const merk = { tiles: currentTrackTiles, pc: playerCar, tm: trackMode, fl: flagState, ps: pitState, pr: pitReady,
+                   ort: ghostOrt, form: raceFormationLap, garage: garage.slice(), zut: Object.assign({}, hdBox.zuteilung), sek: hdAuto.sekunden };
+    try {
+      ok('automatic pit stop: on LB / L1 by default, sharing the button with tyre select',
+         bindings.autobox && bindings.autobox.index === 4 && hdAutoBoxTeilt(bindings.tyreSelect), JSON.stringify(bindings.autobox));
+      currentTrackTiles = codeToTrack('SG3R4G3R4').tiles;
+      hdBoxAutomatisch(2);
+      currentTrackTiles.forEach((x) => { if (x.pb) x.pb = 'l'; });           // left boxes: mirrored parking
+      const car = { role: 'player', alias: 'Ich', device: { id: 'hd-ab' }, colorId: 'gelb' };
+      garage.length = 0; garage.push(car); hdBox.zuteilung = {};
+      playerCar = car; trackMode = 'on'; flagState = 'green'; raceFormationLap = false; pitState = 'off'; pitReady = false;
+      let ort = 0.2;
+      ghostOrt = (c) => (c === car ? ort : null);
+      const st = { speedKmh: 30 }, motor = { config: { topSpeedKmh: 100 } }, regler = {};
+      const box = hdBoxFuer(car);
+      const gestartet = hdAutoBoxStarten();
+      ok('hold 1 s: starts, pit limiter on', gestartet && hdAuto.stopp.phase === 'anfahrt' && pitState === 'limited', 'phase ' + (hdAuto.stopp && hdAuto.stopp.phase) + ', pit ' + pitState);
+      const a1 = hdAutoBoxPilot(car, st, motor, regler, 0);
+      ok('on the way: drives itself at the pit limiter', a1 && a1.grund === 'autobox' && a1.throttle >= 0 && a1.steer === 0, JSON.stringify(a1));
+      ort = box.k + 0.1;
+      hdAutoBoxPilot(car, st, motor, regler, 0);
+      const sk = MANOEVER.scEin, w0 = manoeverWert(sk, 300);          // a moment with steering in it
+      const phaseEin = hdAuto.stopp.phase;
+      hdAuto.stopp.at -= 300;
+      const a2 = hdAutoBoxPilot(car, st, motor, regler, 0);
+      ok('at its Pit Box: parks with the sequence, mirrored for a left box', phaseEin === 'einparken' && a2 && w0[1] !== 0
+         && Math.abs(a2.radLenk + w0[1]) < 1e-9, 'radLenk ' + (a2 && a2.radLenk) + ' vs recorded ' + w0[1]);
+      hdAuto.stopp.at -= manoeverDauer(sk) + 50;
+      const a3 = hdAutoBoxPilot(car, st, motor, regler, 0);
+      ok('parked: held still so the pit service can start', hdAuto.stopp.phase === 'stand' && a3 && a3.brake === 1 && hdAutoBoxAmOrt(), JSON.stringify(a3));
+      pitState = 'servicing'; hdAutoBoxPilot(car, st, motor, regler, 0);
+      pitReady = true;
+      const a4 = hdAutoBoxPilot(car, st, motor, regler, 0);
+      ok('service done: pulls away along its (left) edge at the limiter', hdAuto.stopp && hdAuto.stopp.phase === 'ausfahrt' && a4 && a4.steer < 0, JSON.stringify(a4));
+      hdAuto.sekunden = 2;
+      hdAuto.stopp.at -= 2100;
+      const a5 = hdAutoBoxPilot(car, st, motor, regler, 0);
+      ok('after the set time (2 s): the car is yours again', a5 === null && !hdAuto.stopp, 'still ' + (hdAuto.stopp && hdAuto.stopp.phase));
+      // Cancel before parking.
+      pitState = 'off'; pitReady = false; ort = 0.2;
+      hdAutoBoxStarten(); hdAutoBoxAbbrechen();
+      ok('hold again before parking: cancelled', !hdAuto.stopp && pitState === 'off', 'pit ' + pitState);
+    } catch (e) {
+      ok('automatic pit stop self-test ran', false, String(e && e.stack || e));
+    } finally {
+      hdAuto.stopp = null; hdAuto.sekunden = merk.sek;
+      currentTrackTiles = merk.tiles; playerCar = merk.pc; trackMode = merk.tm; flagState = merk.fl; raceFormationLap = merk.form;
+      pitReady = merk.pr; ghostOrt = merk.ort;
+      if (pitState !== merk.ps) { try { setPitState(merk.ps); } catch (e) { pitState = merk.ps; } }
+      garage.length = 0; merk.garage.forEach((c) => garage.push(c));
+      hdBox.zuteilung = merk.zut;
+    }
   }
 
   // ---- SELF-TEST (window.HYBRIDDASH_BOX.selbsttest()) - stand-in track and cars, state put back ----
@@ -438,18 +647,21 @@
       garage.length = 0; merk.garage.forEach((c) => garage.push(c));
       hdBox.zuteilung = merk.zut; hdBox.wahl = merk.wahl;
     }
+    hdAutoBoxSelbsttest(ok);
     return out;
   }
 
   // Tests/screenshots only.
   window.HYBRIDDASH_BOX = Object.freeze({
     selbsttest: hdBoxSelbsttest,
+    autoBox: { starten: () => hdAutoBoxStarten(), abbrechen: () => hdAutoBoxAbbrechen(), lage: () => (hdAuto.stopp ? { phase: hdAuto.stopp.phase, nr: hdAuto.stopp.p.nr } : null), sekunden: () => hdAuto.sekunden },
     strecke: (code) => { currentTrackTiles = codeToTrack(code).tiles; if (typeof refreshTrackPreview === 'function') refreshTrackPreview(); return currentTrackTiles.length; },
     auto: (n) => { const z = hdBoxAutomatisch(n); hdBoxGeaendert(); return z; },
     plaetze: () => hdBoxPlaetze().map((p) => ({ nr: p.nr, k: p.k, seite: p.seite, typ: currentTrackTiles[p.k].type })),
     wahl: { start: () => hdBoxWahlStart(), klick: (k) => hdBoxWahlKlick(k), fertig: () => hdBoxWahlFertig(), abbrechen: () => hdBoxWahlAbbrechen() },
     _pitCfg: (o) => { Object.assign(ghostCfg, o || {}); return { an: ghostCfg.pitAn, frei: ghostCfg.pitFrei, min: ghostCfg.pitRundenMin, max: ghostCfg.pitRundenMax, sek: ghostCfg.pitSek }; },
     _pitLage: () => garage.filter((c) => c.ghost).map((c) => ({ name: c.alias, tile: c.ghost.tileIndex, quer: +(c.ghost.querSoll || 0).toFixed(2),
-      pit: c.ghost.pit ? { phase: c.ghost.pit.phase, hd: c.ghost.pit.hd || null, platz: c.ghost.pit.platz } : null, spot: (hdBoxFuer(c) || {}).nr || null })),
+      pit: c.ghost.pit ? { phase: c.ghost.pit.phase, hd: c.ghost.pit.hd || null, platz: c.ghost.pit.platz } : null, spot: (hdBoxFuer(c) || {}).nr || null,
+      blink: !!c.ghost.pitBlink, ziel: +(c.ghost.lastTarget || 0).toFixed(2), frei: hdBoxStreckeFrei(c) })),
     fuer: (id) => { const c = garage.find((x) => x.device && String(x.device.id) === String(id)); const p = c && hdBoxFuer(c); return p ? { nr: p.nr, k: p.k, seite: p.seite } : null; },
   });
