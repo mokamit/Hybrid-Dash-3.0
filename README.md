@@ -3,25 +3,68 @@
 [⬇ Download the Android app (APK)](https://github.com/mokamit/hybriddash/releases/latest/download/HybridDash.apk) · Play in the browser: [mokamit.github.io/hybriddash](https://mokamit.github.io/hybriddash/)
 
 An open source controller for Carrera Hybrid Bluetooth cars, with physics from scientific
-formulae and engine sound from an enginesim implementation, plus a race director, NPCs,
-safety car, championships and multiplayer. The interface is in English by default; German and
+formulae and engine sound from an enginesim implementation, plus a Race Director with flags and
+stewards, NPCs, safety car, Pit Boxes, championships and multiplayer. The interface is in English by default; German and
 Spanish are one tap away on the title screen.
 
 HybridDash 2.0 is a fork of **[OmegaSim](https://github.com/Luuke42/omegasim) by Luuke**
 (MIT License). Everything OmegaSim does still works; HybridDash adds its own features on top.
 
-## New in HybridDash 2.0
+## What HybridDash adds
 
+Based on OmegaSim **1.3.92** (random events, track sectors, the ACC cockpit screens and everything
+before). On top of that:
+
+### Race control
 | Feature | Where | What it does |
 |---|---|---|
-| **Automatic safety car** | Race settings | If any racing car (players or NPCs) is off the track or has not advanced a track tile for 3 s (adjustable 1–10 s), the yellow flag goes out automatically and the safety car is deployed. Ignores cars in the pit lane, NPCs pitting/finishing, the safety car itself, and the standing grid at a start or restart. Track mode only. |
-| **Random NPC driver names** | Garage / Race settings | The first time a car becomes an NPC without a name, it gets a random, unique driver name that is remembered with the car. 🎲 next to the name field rolls a new one. |
-| **Driver announcements** | Race settings | The announcer voice reads out each new driver and the car they drive (“New driver: Mara Kovac, driving the red Porsche 911.”) and calls the reason for an automatic safety car. |
-| **Driver avatars** | Garage | Each driver gets a generated helmet avatar in the car colour with their initials. Tap it to restyle. |
-| **Two-laptop mode** | Garage → *Two laptops…* | Split the Bluetooth connections across two laptops on the same Wi-Fi. Laptop A (host) runs the race as usual; laptop B (helper) connects the remaining cars over its own Bluetooth and relays their packets over a direct WebRTC link. Helper cars appear in the host's Garage, standings and NPC grid like every other car. If the link drops, the helper stops its cars. |
+| **Race Director** | Cockpit → *Race Director* tab | Green, yellow, VSC, safety car, red flag, final lap and weather in one bar, with live standings and an incident log. Each driver has a **steward menu** (⚑): **+5 s / +10 s time penalty**, clear penalties, **black flag (DSQ)**, **DNF** and reinstate. Penalties count in standings and results; DNF and DSQ cars are stopped and sorted to the bottom. Confirmations use the app's own dialog, so the race keeps running while you decide. |
+| **Safety car on demand** | Race Director → *SC* | Without a car in the Safety Car role, SC asks which car should drive it (spare cars first, then NPCs) or offers VSC instead. |
+| **Automatic safety car** | Race settings | If a racing car is off the track or hasn't moved for 3 s (adjustable 1–10 s), the app asks: **Deploy** (A / Cross / Enter), **VSC** (X / Square / V) or **Ignore** (B / Circle / Esc). Can also deploy straight away without asking. Ignores the standing grid, cars in the pit and the safety car itself. Track mode only. |
+| **Safety car queue** | – | Under yellow or the safety car, the field closes up to about 1–2 car lengths, keeps its gaps and never overtakes. |
 
-All HybridDash code lives in `src/98i-hybriddash.js`; the original files only carry small hooks,
-so upstream OmegaSim improvements can still be merged.
+### Pit Boxes
+| Feature | Where | What it does |
+|---|---|---|
+| **Pit Boxes in the track editor** | Track editor → *Pit Boxes* | **Set automatically** for a number of cars (spread around the lap: straights at the right edge, curves at the outside edge, never on the starting grid), **set manually** (tap a piece: right → left → both sides → off; automatic ones can be edited), or **off**. Shown on the map as P1, P2, … and saved with the track. A straight holds up to 2 boxes (one per side), a standard curve 1 (outside). |
+| **Pit Box per car** | Starting grid | Every car gets a Pit Box (grid order by default, changeable per car and remembered). The map shows each box in its car's colour. |
+| **NPC pit stops** | – | Two pieces before its box an NPC switches on the pit limiter and flashing lights, parks at its edge (left boxes use the mirrored parking sequence), leaves straight away along the edge at the limiter, and rejoins the racing line once the track behind is clear. |
+| **Automatic pit stop for your car** | Hold **LB / L1** for 1 s | Your car drives itself to its Pit Box at the pit limiter, parks, stays still for the normal pit service (fuel, tyres, mini-game), then pulls away along its edge at the limiter and hands back control. How long the limiter stays on afterwards is a setting (Race settings, default **2 s**). A short tap on LB / L1 still selects tyres. Holding again before the car parks cancels. |
+
+### Cockpit and screens
+| Feature | Where | What it does |
+|---|---|---|
+| **Cockpit tabs** | Cockpit | Three named tabs: **Dashboard** (sub menu **OmegaSim / Digital Dash**, remembers the last one), **Pit Wall** and **Race Director**, under a neon green line. |
+| **Digital Dash** | Dashboard → *Digital Dash* | A tile dashboard that scales to any window, with pit stop, yellow flag, G-force, weather and lights. |
+| **Starting grid** | Before every race | Smaller cards in two staggered columns (each car half a row behind the one before, on its side of the track), a Pit Box picker per car, and a **Race** panel: type, duration, weather, start, mandatory stops, cars, track, sectors, Pit Boxes, random events and automatic safety car. |
+| **Main menu** | Race Control | **Car Summary** lists every car with its number badge; the value bars look and press like buttons; panels light up on hover. Mute button and the two-laptops button sit at the top right. |
+
+### Cars and drivers
+| Feature | Where | What it does |
+|---|---|---|
+| **Car numbers** | Garage → *Car number* | #1, #2, … instead of Greek letters, or your own number 1–99 (remembered per car, never twice in one field). |
+| **Garage** | Garage | Action bar at the top: connect, **⟳ Reconnect previous cars** (one click for every car this browser has used before), start NPCs, disconnect all, cockpit, drive virtually. The selected car has a green outline, a car's own photo fills its card, and the right side is titled *Driver and Car Settings*. |
+| **Random NPC driver names** | Garage / Race settings | A car without a name gets a unique random driver name the first time it becomes an NPC. 🎲 rolls a new one. |
+| **Driver avatars** | Garage | A flat helmet-and-suit avatar for every driver, patterned from the car's make and colour. Tap it to restyle. |
+| **Announcements** | Race settings | Connecting cars and new drivers, the standings, safety-car calls and steward decisions name the **car number, driver, colour and make/model** ("Car number 7 connected: Mo Kamit, the yellow BMW M4 GT3."). |
+
+### Controllers and language
+| Feature | Where | What it does |
+|---|---|---|
+| **PS / Xbox presets** | Options → Controller | Button names and pictures for PlayStation or Xbox pads. |
+| **Mappable buttons** | Options → Controller | *Confirmation Button* (default A / Cross) and *Automatic pit stop* (default LB / L1, hold 1 s). |
+| **English by default** | Title screen | The whole interface is translated, German and Spanish one tap away. |
+
+### Two laptops
+| Feature | Where | What it does |
+|---|---|---|
+| **Two-laptop mode** | **⇄** at the top right | Split the Bluetooth connections across two laptops for bigger fields (about 7–9 cars per laptop). Pair with a short code; both remember it and reconnect by themselves. See below. |
+
+The HybridDash code lives in `src/98i-hybriddash.js` (safety car, names, avatars, voice),
+`98j-hd-relay.js` and `98k-hd-pairing.js` (two laptops), `98l-hd-ui.js` (mute, pad presets),
+`98m-hd-cockpit.js` (Digital Dash, cockpit tabs), `98n-hd-rennleitung.js` (Race Director) and
+`98o-hd-boxen.js` (Pit Boxes, automatic pit stop). The original files only carry small hooks,
+so OmegaSim updates can still be merged.
 
 ## Two-laptop mode (more cars)
 
@@ -44,8 +87,9 @@ python3 -m http.server 8080     # then open http://localhost:8080 in Chrome/Edge
 ```
 
 Web Bluetooth needs Chrome or Edge (desktop or Android) on `https://` or `localhost`.
-In the browser console, `HYBRIDDASH.selbsttest()` runs the HybridDash self-tests; the app's
-full self-test is in the developer tab.
+In the browser console, `HYBRIDDASH.selbsttest()`, `HYBRIDDASH_RL.selbsttest()` (Race Director)
+and `HYBRIDDASH_BOX.selbsttest()` (Pit Boxes, automatic pit stop) run the HybridDash self-tests;
+the app's full self-test is in the developer tab.
 
 ### Point the app at your own repository
 
