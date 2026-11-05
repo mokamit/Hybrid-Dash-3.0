@@ -3224,6 +3224,11 @@
     padding: 4px 8px 4px 0; background: rgba(14,16,22,.94); border: 2px solid transparent; border-radius: 0; cursor: pointer; }
   .gar-row.gar-a-zeile.gk-auf { border-color: rgba(255,255,255,.55); }
   /* HybridDash v2.2: the selected car (open on the right) is outlined neon green; hover stays white. */
+  /* Green means "selected" only: no separate green outline for Player 1 (its badge is blue). */
+  body .gar-row.gar-a-zeile.is-player:not(.gk-auf):not(:hover) { border-color: transparent; }
+  body .gar-row.gar-a-zeile.gk-mit-foto { background-size: cover; background-position: center; }
+  .gar-a-ueber { color: #39ff88; font: 800 12px var(--k-font, Inter, sans-serif); letter-spacing: .14em; text-transform: uppercase;
+    margin: 4px 0 0; text-shadow: 0 0 8px rgba(57,255,136,.35); }
   body .gar-row.gar-a-zeile.gk-auf, body .gar-row.gar-karte.gk-auf { border-color: #39ff88 !important; box-shadow: 0 0 0 1px #39ff88, 0 0 14px rgba(57,255,136,.35); }
   body .gar-a-aktion .gar-bekannte { background: transparent !important; color: #fff !important; border: 1px dashed #39ff88 !important; }
   body .gar-a-aktion .gar-bekannte:hover { background: rgba(57,255,136,.12) !important; }

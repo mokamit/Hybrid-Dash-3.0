@@ -2191,13 +2191,17 @@
       const f = carColor(car);
       const foto = autoFoto(car);
       const rolle = GAR_ROLLEN.find((r) => r.id === car.role) || GAR_ROLLEN.find((r) => r.id === 'none');
-      const bild = foto
-        ? 'background-image:url("' + foto + '")'
-        : 'background:linear-gradient(135deg,' + f.hex + ' 0%,' + f.hex + ' 55%,rgba(0,0,0,.55) 100%);color:' + f.ink;
+      // HybridDash: the car's own photo is the background of the whole card (darkened so the
+      // text stays readable); the small block keeps the colour and the car number.
+      const bild = 'background:linear-gradient(135deg,' + f.hex + ' 0%,' + f.hex + ' 55%,rgba(0,0,0,.55) 100%);color:' + f.ink;
+      if (foto) {
+        row.classList.add('gk-mit-foto');
+        row.style.backgroundImage = 'linear-gradient(90deg, rgba(10,12,18,.88) 0%, rgba(10,12,18,.55) 55%, rgba(10,12,18,.35) 100%), url("' + foto + '")';
+      }
       const name = car.alias || car.tag || garageLabel(car);
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
-        <div class="gk-bild${foto ? ' mit-foto' : ''}" style='${bild}'>${foto ? '' : `<span class="gk-zeichen">${car.tagChar || ''}</span>`}</div>
+        <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
         <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
@@ -2269,6 +2273,10 @@
     if (garVirtuellAuf && typeof vfGarageOptionen === 'function') {
       vfGarageOptionen(rechts);
     } else if (car) {
+      const ueber = document.createElement('div');
+      ueber.className = 'gar-a-ueber';
+      ueber.textContent = t('Fahrer- und Fahrzeugeinstellungen');
+      rechts.appendChild(ueber);
       const kopf = document.createElement('h3');
       kopf.className = 'gar-a-titel';
       kopf.setAttribute('data-i18n-skip', '');

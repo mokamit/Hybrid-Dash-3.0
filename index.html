@@ -3224,6 +3224,11 @@
     padding: 4px 8px 4px 0; background: rgba(14,16,22,.94); border: 2px solid transparent; border-radius: 0; cursor: pointer; }
   .gar-row.gar-a-zeile.gk-auf { border-color: rgba(255,255,255,.55); }
   /* HybridDash v2.2: the selected car (open on the right) is outlined neon green; hover stays white. */
+  /* Green means "selected" only: no separate green outline for Player 1 (its badge is blue). */
+  body .gar-row.gar-a-zeile.is-player:not(.gk-auf):not(:hover) { border-color: transparent; }
+  body .gar-row.gar-a-zeile.gk-mit-foto { background-size: cover; background-position: center; }
+  .gar-a-ueber { color: #39ff88; font: 800 12px var(--k-font, Inter, sans-serif); letter-spacing: .14em; text-transform: uppercase;
+    margin: 4px 0 0; text-shadow: 0 0 8px rgba(57,255,136,.35); }
   body .gar-row.gar-a-zeile.gk-auf, body .gar-row.gar-karte.gk-auf { border-color: #39ff88 !important; box-shadow: 0 0 0 1px #39ff88, 0 0 14px rgba(57,255,136,.35); }
   body .gar-a-aktion .gar-bekannte { background: transparent !important; color: #fff !important; border: 1px dashed #39ff88 !important; }
   body .gar-a-aktion .gar-bekannte:hover { background: rgba(57,255,136,.12) !important; }
@@ -14853,6 +14858,7 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "Fahrer- und Fahrzeugeinstellungen": "Driver and Car Settings",
     "Bekannte Autos verbinden": "Reconnect previous cars",
     "Keine weiteren bekannten Autos": "No other previous cars",
     "Suche bekannte Autos …": "Looking for previous cars …",
@@ -18770,6 +18776,7 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "Fahrer- und Fahrzeugeinstellungen": "Ajustes de piloto y coche",
     "Bekannte Autos verbinden": "Reconectar coches conocidos",
     "Keine weiteren bekannten Autos": "No hay más coches conocidos",
     "Suche bekannte Autos …": "Buscando coches conocidos …",
@@ -61966,13 +61973,17 @@
       const f = carColor(car);
       const foto = autoFoto(car);
       const rolle = GAR_ROLLEN.find((r) => r.id === car.role) || GAR_ROLLEN.find((r) => r.id === 'none');
-      const bild = foto
-        ? 'background-image:url("' + foto + '")'
-        : 'background:linear-gradient(135deg,' + f.hex + ' 0%,' + f.hex + ' 55%,rgba(0,0,0,.55) 100%);color:' + f.ink;
+      // HybridDash: the car's own photo is the background of the whole card (darkened so the
+      // text stays readable); the small block keeps the colour and the car number.
+      const bild = 'background:linear-gradient(135deg,' + f.hex + ' 0%,' + f.hex + ' 55%,rgba(0,0,0,.55) 100%);color:' + f.ink;
+      if (foto) {
+        row.classList.add('gk-mit-foto');
+        row.style.backgroundImage = 'linear-gradient(90deg, rgba(10,12,18,.88) 0%, rgba(10,12,18,.55) 55%, rgba(10,12,18,.35) 100%), url("' + foto + '")';
+      }
       const name = car.alias || car.tag || garageLabel(car);
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
-        <div class="gk-bild${foto ? ' mit-foto' : ''}" style='${bild}'>${foto ? '' : `<span class="gk-zeichen">${car.tagChar || ''}</span>`}</div>
+        <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
         <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
@@ -62044,6 +62055,10 @@
     if (garVirtuellAuf && typeof vfGarageOptionen === 'function') {
       vfGarageOptionen(rechts);
     } else if (car) {
+      const ueber = document.createElement('div');
+      ueber.className = 'gar-a-ueber';
+      ueber.textContent = t('Fahrer- und Fahrzeugeinstellungen');
+      rechts.appendChild(ueber);
       const kopf = document.createElement('h3');
       kopf.className = 'gar-a-titel';
       kopf.setAttribute('data-i18n-skip', '');
@@ -96967,7 +96982,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const c = document.createElement('canvas'); c.width = 2; c.height = 2;
       const foto = c.toDataURL('image/jpeg', 0.8);
       if (!autoFotoSetzen(att, foto)) return { skip: true, mass: 'Speicher voll' };
-      if (!/url\(/.test(karte().querySelector('.gk-bild').getAttribute('style') || '')) f.push('Foto nicht auf der Karte');
+      // HybridDash: the photo is the background of the whole card, not of the small number block.
+      if (!/url\(/.test(karte().getAttribute('style') || '')) f.push('Foto nicht auf der Karte');
       garAufAuto = att; renderGarage();
       if (!$('gar-list').querySelector('.gar-a-rechts [data-act="foto-weg"]')) f.push('kein Knopf zum Entfernen');
       const auf = $('gar-list').querySelector('.gar-a-rechts .gk-aufzeile');

@@ -12868,7 +12868,8 @@
       const c = document.createElement('canvas'); c.width = 2; c.height = 2;
       const foto = c.toDataURL('image/jpeg', 0.8);
       if (!autoFotoSetzen(att, foto)) return { skip: true, mass: 'Speicher voll' };
-      if (!/url\(/.test(karte().querySelector('.gk-bild').getAttribute('style') || '')) f.push('Foto nicht auf der Karte');
+      // HybridDash: the photo is the background of the whole card, not of the small number block.
+      if (!/url\(/.test(karte().getAttribute('style') || '')) f.push('Foto nicht auf der Karte');
       garAufAuto = att; renderGarage();
       if (!$('gar-list').querySelector('.gar-a-rechts [data-act="foto-weg"]')) f.push('kein Knopf zum Entfernen');
       const auf = $('gar-list').querySelector('.gar-a-rechts .gk-aufzeile');
