@@ -373,6 +373,7 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "Fahrer- und Fahrzeugeinstellungen": "Driver and Car Settings",
     "Bekannte Autos verbinden": "Reconnect previous cars",
     "Keine weiteren bekannten Autos": "No other previous cars",
     "Suche bekannte Autos …": "Looking for previous cars …",
@@ -4290,6 +4291,7 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "Fahrer- und Fahrzeugeinstellungen": "Ajustes de piloto y coche",
     "Bekannte Autos verbinden": "Reconectar coches conocidos",
     "Keine weiteren bekannten Autos": "No hay más coches conocidos",
     "Suche bekannte Autos …": "Buscando coches conocidos …",

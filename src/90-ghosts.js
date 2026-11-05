@@ -2191,13 +2191,17 @@
       const f = carColor(car);
       const foto = autoFoto(car);
       const rolle = GAR_ROLLEN.find((r) => r.id === car.role) || GAR_ROLLEN.find((r) => r.id === 'none');
-      const bild = foto
-        ? 'background-image:url("' + foto + '")'
-        : 'background:linear-gradient(135deg,' + f.hex + ' 0%,' + f.hex + ' 55%,rgba(0,0,0,.55) 100%);color:' + f.ink;
+      // HybridDash: the car's own photo is the background of the whole card (darkened so the
+      // text stays readable); the small block keeps the colour and the car number.
+      const bild = 'background:linear-gradient(135deg,' + f.hex + ' 0%,' + f.hex + ' 55%,rgba(0,0,0,.55) 100%);color:' + f.ink;
+      if (foto) {
+        row.classList.add('gk-mit-foto');
+        row.style.backgroundImage = 'linear-gradient(90deg, rgba(10,12,18,.88) 0%, rgba(10,12,18,.55) 55%, rgba(10,12,18,.35) 100%), url("' + foto + '")';
+      }
       const name = car.alias || car.tag || garageLabel(car);
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
-        <div class="gk-bild${foto ? ' mit-foto' : ''}" style='${bild}'>${foto ? '' : `<span class="gk-zeichen">${car.tagChar || ''}</span>`}</div>
+        <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
         <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
@@ -2218,6 +2222,10 @@
       // ersten Zeile (garRollenZeile).
       links.appendChild(row);
     });
+    // HybridDash: the actions are a fixed bar above both columns (always in reach, whatever
+    // is scrolled), instead of rows at the end of the car list.
+    const leiste = document.createElement('div');
+    leiste.className = 'gar-a-leiste';
     // Aktionen, einspaltig unter den Autos.
     const plus = document.createElement('div');
     plus.className = 'opt-row opt-breit gar-a-aktion';
@@ -2227,7 +2235,7 @@
     plusKnopf.textContent = '+ ' + t('Auto verbinden');
     plusKnopf.onclick = () => { const c = $('gar-connect'); if (c) c.click(); };
     plus.appendChild(plusKnopf);
-    links.appendChild(plus);
+    leiste.appendChild(plus);
     // HybridDash: reconnect every car this browser was allowed to use before, in one click.
     const bek = document.createElement('div');
     bek.className = 'opt-row opt-breit gar-a-aktion';
@@ -2238,7 +2246,7 @@
     bekKnopf.hidden = true;
     bekKnopf.onclick = () => garageBekannteVerbinden(bekKnopf);
     bek.appendChild(bekKnopf);
-    links.appendChild(bek);
+    leiste.appendChild(bek);
     garageBekannteKandidaten().then((l) => {
       if (garBekannteLaeuft) return;
       bekKnopf.hidden = !l.length;
@@ -2248,7 +2256,7 @@
     bek.hidden = true;
     ['gar-stop-ghosts', 'gar-go', 'gar-disconnect-all', 'gar-to-cockpit'].forEach((id) => {
       const z = garAktionsZeile(id);
-      if (z) links.appendChild(z);
+      if (z) leiste.appendChild(z);
     });
     // v1.1.3: virtuelle Fahrt (60d-virtuell.js) - ein Auto ohne Bluetooth auf der Editor-Strecke.
     // BESTELLT: ganz unten, unter "Zum Cockpit".
@@ -2263,12 +2271,16 @@
     if (garVirtuellAuf) virtKnopf.classList.add('primary');
     virtKnopf.onclick = () => { garVirtuellAuf = true; renderGarage(); };
     virt.appendChild(virtKnopf);
-    links.appendChild(virt);
+    leiste.appendChild(virt);
     // Rechte Seite: das gewaehlte Auto, oder die Optionen der virtuellen Fahrt.
     const car = garVirtuellAuf ? null : garAufAuto;
     if (garVirtuellAuf && typeof vfGarageOptionen === 'function') {
       vfGarageOptionen(rechts);
     } else if (car) {
+      const ueber = document.createElement('div');
+      ueber.className = 'gar-a-ueber';
+      ueber.textContent = t('Fahrer- und Fahrzeugeinstellungen');
+      rechts.appendChild(ueber);
       const kopf = document.createElement('h3');
       kopf.className = 'gar-a-titel';
       kopf.setAttribute('data-i18n-skip', '');
@@ -2337,6 +2349,7 @@
       p.textContent = t('Noch kein Auto verbunden. Links auf „+ Auto verbinden“ tippen.');
       rechts.appendChild(p);
     }
+    list.appendChild(leiste);
     list.appendChild(links);
     list.appendChild(rechts);
     refreshGarageGo();

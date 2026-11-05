@@ -437,6 +437,13 @@
     box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
   #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
   #grid-start { text-transform: uppercase; letter-spacing: .06em; }
+  /* v2.2: garage actions as a fixed bar above the cars and the settings. */
+  body #gar-list.gar-a { grid-template-rows: auto minmax(0, 1fr); }
+  .gar-a-leiste { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; padding: 8px;
+    background: rgba(14,16,22,.96); border-bottom: 2px solid #39ff88; position: sticky; top: 0; z-index: 5; }
+  .gar-a-leiste > .gar-a-aktion { flex: 0 1 auto; margin: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; min-height: 0; }
+  .gar-a-leiste > .gar-a-aktion[hidden] { display: none; }
+  .gar-a-leiste > .gar-a-aktion > button { width: auto !important; min-width: 0; white-space: nowrap; padding: 8px 14px !important; font-size: 13px !important; height: 100%; }
   /* v2.2: starting grid as two staggered columns (like a TV grid graphic): smaller cards, each
      car half a row below the one before, on its side of the track (P1 right, P2 left, ...). */
   #grid-liste { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: clamp(30px, 4.2vh, 40px);
@@ -3224,6 +3231,11 @@
     padding: 4px 8px 4px 0; background: rgba(14,16,22,.94); border: 2px solid transparent; border-radius: 0; cursor: pointer; }
   .gar-row.gar-a-zeile.gk-auf { border-color: rgba(255,255,255,.55); }
   /* HybridDash v2.2: the selected car (open on the right) is outlined neon green; hover stays white. */
+  /* Green means "selected" only: no separate green outline for Player 1 (its badge is blue). */
+  body .gar-row.gar-a-zeile.is-player:not(.gk-auf):not(:hover) { border-color: transparent; }
+  body .gar-row.gar-a-zeile.gk-mit-foto { background-size: cover; background-position: center; }
+  .gar-a-ueber { color: #39ff88; font: 800 12px var(--k-font, Inter, sans-serif); letter-spacing: .14em; text-transform: uppercase;
+    margin: 4px 0 0; text-shadow: 0 0 8px rgba(57,255,136,.35); }
   body .gar-row.gar-a-zeile.gk-auf, body .gar-row.gar-karte.gk-auf { border-color: #39ff88 !important; box-shadow: 0 0 0 1px #39ff88, 0 0 14px rgba(57,255,136,.35); }
   body .gar-a-aktion .gar-bekannte { background: transparent !important; color: #fff !important; border: 1px dashed #39ff88 !important; }
   body .gar-a-aktion .gar-bekannte:hover { background: rgba(57,255,136,.12) !important; }
@@ -14853,6 +14865,7 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "Fahrer- und Fahrzeugeinstellungen": "Driver and Car Settings",
     "Bekannte Autos verbinden": "Reconnect previous cars",
     "Keine weiteren bekannten Autos": "No other previous cars",
     "Suche bekannte Autos …": "Looking for previous cars …",
@@ -18770,6 +18783,7 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "Fahrer- und Fahrzeugeinstellungen": "Ajustes de piloto y coche",
     "Bekannte Autos verbinden": "Reconectar coches conocidos",
     "Keine weiteren bekannten Autos": "No hay más coches conocidos",
     "Suche bekannte Autos …": "Buscando coches conocidos …",
@@ -30073,7 +30087,13 @@
     // v1.1.11 Garage wie die Meisterschaft: links (Autos, Aktionen) und rechts (Einstellungen) sind zwei
     // Listen; hoch/runter bleibt in der Spalte, in der der Fokus steht.
     // v1.3.31: Teile derselben Zeile (Farbklecks und Name) sind EIN Schritt; man landet auf dem ersten.
-    const spalte = (r) => (r && r.el && r.el.closest) ? r.el.closest('.gar-a-links, .gar-a-rechts') : null;
+    // HybridDash: the action bar above the garage belongs to the left half for up/down
+    // (bar -> cars -> back to the bar).
+    const spalte = (r) => {
+      if (!(r && r.el && r.el.closest)) return null;
+      const sp = r.el.closest('.gar-a-links, .gar-a-rechts, .gar-a-leiste');
+      return sp && sp.classList.contains('gar-a-leiste') ? (document.querySelector('.gar-a-links') || sp) : sp;
+    };
     const zeileVon = (r) => r.zeile || r.el;
     if (menuNavIndex >= rows.length) menuNavIndex = 0;
     const sp = spalte(rows[menuNavIndex]);
@@ -61966,13 +61986,17 @@
       const f = carColor(car);
       const foto = autoFoto(car);
       const rolle = GAR_ROLLEN.find((r) => r.id === car.role) || GAR_ROLLEN.find((r) => r.id === 'none');
-      const bild = foto
-        ? 'background-image:url("' + foto + '")'
-        : 'background:linear-gradient(135deg,' + f.hex + ' 0%,' + f.hex + ' 55%,rgba(0,0,0,.55) 100%);color:' + f.ink;
+      // HybridDash: the car's own photo is the background of the whole card (darkened so the
+      // text stays readable); the small block keeps the colour and the car number.
+      const bild = 'background:linear-gradient(135deg,' + f.hex + ' 0%,' + f.hex + ' 55%,rgba(0,0,0,.55) 100%);color:' + f.ink;
+      if (foto) {
+        row.classList.add('gk-mit-foto');
+        row.style.backgroundImage = 'linear-gradient(90deg, rgba(10,12,18,.88) 0%, rgba(10,12,18,.55) 55%, rgba(10,12,18,.35) 100%), url("' + foto + '")';
+      }
       const name = car.alias || car.tag || garageLabel(car);
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
-        <div class="gk-bild${foto ? ' mit-foto' : ''}" style='${bild}'>${foto ? '' : `<span class="gk-zeichen">${car.tagChar || ''}</span>`}</div>
+        <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
         <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
@@ -61993,6 +62017,10 @@
       // ersten Zeile (garRollenZeile).
       links.appendChild(row);
     });
+    // HybridDash: the actions are a fixed bar above both columns (always in reach, whatever
+    // is scrolled), instead of rows at the end of the car list.
+    const leiste = document.createElement('div');
+    leiste.className = 'gar-a-leiste';
     // Aktionen, einspaltig unter den Autos.
     const plus = document.createElement('div');
     plus.className = 'opt-row opt-breit gar-a-aktion';
@@ -62002,7 +62030,7 @@
     plusKnopf.textContent = '+ ' + t('Auto verbinden');
     plusKnopf.onclick = () => { const c = $('gar-connect'); if (c) c.click(); };
     plus.appendChild(plusKnopf);
-    links.appendChild(plus);
+    leiste.appendChild(plus);
     // HybridDash: reconnect every car this browser was allowed to use before, in one click.
     const bek = document.createElement('div');
     bek.className = 'opt-row opt-breit gar-a-aktion';
@@ -62013,7 +62041,7 @@
     bekKnopf.hidden = true;
     bekKnopf.onclick = () => garageBekannteVerbinden(bekKnopf);
     bek.appendChild(bekKnopf);
-    links.appendChild(bek);
+    leiste.appendChild(bek);
     garageBekannteKandidaten().then((l) => {
       if (garBekannteLaeuft) return;
       bekKnopf.hidden = !l.length;
@@ -62023,7 +62051,7 @@
     bek.hidden = true;
     ['gar-stop-ghosts', 'gar-go', 'gar-disconnect-all', 'gar-to-cockpit'].forEach((id) => {
       const z = garAktionsZeile(id);
-      if (z) links.appendChild(z);
+      if (z) leiste.appendChild(z);
     });
     // v1.1.3: virtuelle Fahrt (60d-virtuell.js) - ein Auto ohne Bluetooth auf der Editor-Strecke.
     // BESTELLT: ganz unten, unter "Zum Cockpit".
@@ -62038,12 +62066,16 @@
     if (garVirtuellAuf) virtKnopf.classList.add('primary');
     virtKnopf.onclick = () => { garVirtuellAuf = true; renderGarage(); };
     virt.appendChild(virtKnopf);
-    links.appendChild(virt);
+    leiste.appendChild(virt);
     // Rechte Seite: das gewaehlte Auto, oder die Optionen der virtuellen Fahrt.
     const car = garVirtuellAuf ? null : garAufAuto;
     if (garVirtuellAuf && typeof vfGarageOptionen === 'function') {
       vfGarageOptionen(rechts);
     } else if (car) {
+      const ueber = document.createElement('div');
+      ueber.className = 'gar-a-ueber';
+      ueber.textContent = t('Fahrer- und Fahrzeugeinstellungen');
+      rechts.appendChild(ueber);
       const kopf = document.createElement('h3');
       kopf.className = 'gar-a-titel';
       kopf.setAttribute('data-i18n-skip', '');
@@ -62112,6 +62144,7 @@
       p.textContent = t('Noch kein Auto verbunden. Links auf „+ Auto verbinden“ tippen.');
       rechts.appendChild(p);
     }
+    list.appendChild(leiste);
     list.appendChild(links);
     list.appendChild(rechts);
     refreshGarageGo();
@@ -96967,7 +97000,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const c = document.createElement('canvas'); c.width = 2; c.height = 2;
       const foto = c.toDataURL('image/jpeg', 0.8);
       if (!autoFotoSetzen(att, foto)) return { skip: true, mass: 'Speicher voll' };
-      if (!/url\(/.test(karte().querySelector('.gk-bild').getAttribute('style') || '')) f.push('Foto nicht auf der Karte');
+      // HybridDash: the photo is the background of the whole card, not of the small number block.
+      if (!/url\(/.test(karte().getAttribute('style') || '')) f.push('Foto nicht auf der Karte');
       garAufAuto = att; renderGarage();
       if (!$('gar-list').querySelector('.gar-a-rechts [data-act="foto-weg"]')) f.push('kein Knopf zum Entfernen');
       const auf = $('gar-list').querySelector('.gar-a-rechts .gk-aufzeile');
@@ -109396,7 +109430,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const probe = ['ghost', 'ghost', 'none'].map((role, i) => ({ role, device: { id: 'probe-nav-' + i, name: 'Probe' },
       alias: 'Nav ' + i, colorId: ['rot', 'blau', 'gelb'][i], sim: false, testSenke: [], probe: true }));
     const cur = () => menuNavRows()[menuNavIndex] || null;
-    const seite = (r) => (r && r.el.closest('.gar-a-links') ? 'L' : r && r.el.closest('.gar-a-rechts') ? 'R' : '-');
+    // HybridDash: the actions are a bar above both halves ('B').
+    const seite = (r) => (r && r.el.closest('.gar-a-links') ? 'L' : r && r.el.closest('.gar-a-rechts') ? 'R' : r && r.el.closest('.gar-a-leiste') ? 'B' : '-');
     const name = (r) => (r ? (r.el.textContent || r.el.className || '').replace(/\s+/g, ' ').trim().slice(0, 24) : 'nichts');
     const druecke = (dir) => {
       if (dir === 'up' || dir === 'down') menuNavMove(dir);
@@ -109438,14 +109473,14 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (!r || seite(r) !== 'R') f.push('runter verlaesst die rechte Spalte (' + name(r) + ')');
       r = druecke('left');
       if (seite(r) === 'R' && r.zeile) r = druecke('left');   // Farbklecks vor dem Namen
-      if (seite(r) !== 'L') f.push('links von einem Knopf rechts bleibt rechts (' + name(r) + ')');
+      if (seite(r) !== 'L' && seite(r) !== 'B') f.push('links von einem Knopf rechts bleibt rechts (' + name(r) + ')');
       // Kreis in der rechten Spalte: zurueck zum gewaehlten Auto.
       setze((x) => x.el.classList.contains('gar-a-rolle'));
       if (!menuNavGarageZurueck() || !cur() || cur().el._car !== probe[1]) f.push('Kreis rechts fuehrt nicht zum gewaehlten Auto (' + name(cur()) + ')');
-      // 5. Links von einer Aktion (kein Auto) nach rechts: raeumlich in die rechte Spalte, und zurueck.
+      // 5. HybridDash: in the action bar, right moves to the next action of the bar.
       setze((x) => x.el.querySelector && x.el.querySelector('.gar-karte-neu'));
       r = druecke('right');
-      if (seite(r) !== 'R') f.push('rechts von "+ Auto verbinden" bleibt ' + seite(r));
+      if (seite(r) !== 'B' || (r.el.querySelector && r.el.querySelector('.gar-karte-neu'))) f.push('rechts von "+ Auto verbinden" geht nicht zur naechsten Aktion (' + seite(r) + ')');
       // 6. Alles erreichbar: jede Spalte mit hoch/runter ablaufen, geteilte Zeilen mit links/rechts.
       const besucht = new Set();
       const lauf = (start) => {
@@ -109478,9 +109513,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       setze(autoZeile(probe[0]));
       const sel = document.querySelector('.menu-nav-sel');
       if (!sel || getComputedStyle(sel).outlineStyle === 'none') f.push('kein Fokusrahmen am Auto');
+      // HybridDash: "Drive virtually" sits in the action bar; X on it opens its options on the right.
       setze((x) => x.el.classList.contains('gar-a-virtuell'));
-      r = druecke('right');
-      if (!garVirtuellAuf || seite(r) !== 'R') f.push('rechts auf "Virtuell fahren" zeigt die Optionen nicht');
+      menuNavActivate();
+      if (!garVirtuellAuf) f.push('X auf "Virtuell fahren" zeigt die Optionen nicht');
     } catch (e) {
       f.push('Fehler: ' + e.message);
     } finally {
