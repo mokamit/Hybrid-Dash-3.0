@@ -248,7 +248,7 @@
     const x = hdRl.dnf.get(id), s = Math.round(hdStrafeMs(id) / 1000);
     const marke = x ? (x.art === 'dsq' ? 'DSQ' : 'DNF') : '⚑';
     return '<span class="ov-dnf-zelle">'
-      + (s ? '<span class="ov-strafe" title="Time penalties">+' + s + 's</span>' : '')
+      + (s ? '<span class="ov-hd-strafe" title="Time penalties">+' + s + 's</span>' : '')
       + '<button type="button" class="ov-dnf-knopf' + (x ? ' aus' + (x.art === 'dsq' ? ' dsq' : '') : '') + '" data-hd-steward="' + id
       + '" title="Steward: time penalty, black flag, DNF" aria-haspopup="menu">' + marke + '</button></span>';
   }
@@ -391,17 +391,26 @@
   (function hdRlStart() {
     const css = document.createElement('style');
     css.textContent = `
-      /* Standings get the whole left column; map, incident log and lap chart stack on the right. */
-      body #race-ovscreen { grid-template-rows: auto auto minmax(0, auto) minmax(96px, 1fr) minmax(0, auto) auto auto !important;
-        grid-template-areas: "kopf kopf" "rl rl" "tab karte" "tab log" "tab dia" "sek sek" "fuss fuss" !important; }
-      body #race-ovscreen:has(.ov-podest:not([hidden])) { grid-template-rows: auto auto auto minmax(0, auto) minmax(96px, 1fr) minmax(0, auto) auto auto !important;
-        grid-template-areas: "kopf kopf" "rl rl" "podium podium" "tab karte" "tab log" "tab dia" "sek sek" "fuss fuss" !important; }
-      body #race-ovscreen { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) !important; }
-      body #race-ovscreen > .ov-tab { overflow: auto; align-self: start; max-height: 100%; }
+      /* OmegaSim 1.3.92 layout (standings | chart + map | sectors, podium after the finish, Again
+         button in the corner) with two Race Director additions: the steward bar under the heading
+         and the incident log in the right column. */
+      body #race-ovscreen { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, .8fr) !important;
+        grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr) auto auto !important;
+        grid-template-areas: "kopf kopf kopf" "rl rl rl" "tab dia log" "tab karte log" "sek sek sek" "fuss fuss nochmal" !important; }
+      body #race-ovscreen:has(.ov-karte:empty) { grid-template-areas: "kopf kopf kopf" "rl rl rl" "tab dia log" "tab dia log" "sek sek sek" "fuss fuss nochmal" !important; }
+      body #race-ovscreen:has(.ov-podest:not([hidden])) { grid-template-rows: auto auto minmax(0, .62fr) minmax(0, 1fr) auto auto !important;
+        grid-template-areas: "kopf kopf kopf" "rl rl rl" "podium podium karte" "tab dia log" "sek sek sek" "fuss fuss nochmal" !important; }
+      body #race-ovscreen:has(.ov-podest:not([hidden])):has(.ov-karte:empty) {
+        grid-template-areas: "kopf kopf kopf" "rl rl rl" "podium podium podium" "tab dia log" "sek sek sek" "fuss fuss nochmal" !important; }
+      body #race-ovscreen > .ov-podest { grid-area: podium; min-height: 0; }
+      body #race-ovscreen > .ov-diagramm { grid-area: dia; min-height: 0; overflow: hidden; }
+      body #race-ovscreen > .ov-diagramm svg { width: 100%; height: 100%; }
+      body #race-ovscreen > .ov-karte { min-height: 0; overflow: hidden; }
+      body #race-ovscreen > .ov-sektoren { grid-area: sek; }
+      body #race-ovscreen > .ov-sektoren:empty { display: none; }
+      body #race-ovscreen > .ov-nochmal { grid-area: nochmal; }
+      body #race-ovscreen > .ov-tab { overflow: auto; min-height: 0; }
       body #race-ovscreen > .hd-rl-log { min-height: 0; }
-      body #race-ovscreen > .ov-diagramm { height: min(18vh, 170px); overflow: hidden; }
-      body #race-ovscreen > .ov-diagramm svg { width: 100%; height: 100%; max-height: min(18vh, 170px); }
-      body #race-ovscreen > .ov-karte { max-height: 30vh; }
       #race-ovscreen > .schirm-kopf { grid-area: kopf; }
       #race-ovscreen > .ov-tab { grid-area: tab; }
       #race-ovscreen > .ov-karte { grid-area: karte; }
@@ -426,7 +435,7 @@
       .hd-rl-lage[data-lage="gelb"], .hd-rl-lage[data-lage="vsc"], .hd-rl-lage[data-lage="restart"] { background: #ffd23f; color: #14161c; }
       .hd-rl-lage[data-lage="sc"] { background: #ff9a1f; color: #14161c; }
       .hd-rl-lage[data-lage="rot"] { background: #e0283e; }
-      .hd-rl-log { grid-area: log; min-height: 0; overflow: auto; max-height: 28vh; padding: 6px 8px; border: 1px solid #262e3d; border-radius: 6px;
+      .hd-rl-log { grid-area: log; min-height: 0; overflow: auto; padding: 6px 8px; border: 1px solid #262e3d; border-radius: 6px;
         font: 12px/1.4 var(--k-font, Inter, sans-serif); color: #c3c8d4; }
       .hd-rl-log b { font-size: 11px; letter-spacing: .12em; color: #8a93a3; text-transform: uppercase; }
       .hd-rl-log ol { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; }
@@ -437,8 +446,11 @@
       /* standings: one more column for the DNF button */
       body .ov-zeile { grid-template-columns: 1.5em 1.1em minmax(0, 1fr) 2.2em 2.2em 1.4em 4.4em 4.4em 3.8em 5.4em !important; }
       body #race-ovscreen.ov-fertig .ov-zeile { grid-template-columns: 1.5em 1.1em minmax(0, 1fr) 2.2em 2.2em 1.4em 4.4em 3.8em 5.4em !important; }
+      /* OmegaSim 1.3.92 adds its own penalty column (.ov-strafe) when penalties exist: one more column. */
+      body #race-ovscreen .ov-mit-strafe > .ov-zeile { grid-template-columns: 1.5em 1.1em minmax(0, 1fr) 2.2em 2.2em 1.4em 4.4em 4.4em 3.8em 4.6em 5.4em !important; }
+      body #race-ovscreen.ov-fertig .ov-mit-strafe > .ov-zeile { grid-template-columns: 1.5em 1.1em minmax(0, 1fr) 2.2em 2.2em 1.4em 4.4em 3.8em 4.6em 5.4em !important; }
       .ov-dnf-zelle { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
-      .ov-strafe { font: 800 10px var(--k-font, Inter, sans-serif); color: #14161c; background: #ffd34d; border-radius: 3px; padding: 2px 4px; font-variant-numeric: tabular-nums; }
+      .ov-hd-strafe { font: 800 10px var(--k-font, Inter, sans-serif); color: #14161c; background: #ffd34d; border-radius: 3px; padding: 2px 4px; font-variant-numeric: tabular-nums; }
       .ov-dnf-knopf.dsq { background: #000; color: #fff; border-color: #fff; }
       .ov-zeile.ov-dsq .ov-luecke { color: #fff; }
       .hd-rl-menue { position: fixed; z-index: 2147483000; display: grid; gap: 3px; min-width: 190px; padding: 8px; border-radius: 8px;
