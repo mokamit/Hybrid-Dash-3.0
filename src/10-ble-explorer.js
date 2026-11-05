@@ -373,6 +373,18 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "AUTOMATISCHER BOXENSTOPP": "AUTOMATIC PIT STOP",
+    "Auto noch nicht geortet – eine Runde fahren": "Car not located yet – drive one lap",
+    "Automatischer Boxenstopp abgebrochen": "Automatic pit stop cancelled",
+    "Automatischer Boxenstopp erst bei Grün": "Automatic pit stop only under green",
+    "Automatischer Boxenstopp nur auf der Bahn": "Automatic pit stop only on the track",
+    "Boxenstopp läuft schon": "Pit stop already under way",
+    "Boxenstopp startete nicht – du fährst wieder selbst": "Pit stop did not start – you are driving again",
+    "Du fährst wieder selbst": "You are driving again",
+    "Keine Pit Box auf dieser Strecke – im Streckeneditor festlegen": "No Pit Box on this track – set them in the track editor",
+    "Automatischer Boxenstopp (1 s halten)": "Automatic pit stop (hold 1 s)",
+    "Boxenbegrenzer nach automatischem Boxenstopp": "Pit limiter after an automatic pit stop",
+    "So lange fährt dein Auto nach dem automatischen Boxenstopp noch selbst am Rand mit Boxentempo, bevor du wieder steuerst. Den automatischen Boxenstopp startest du, indem du L1 / LB 1 s hältst (kurz tippen wählt weiter die Reifen; die Taste lässt sich unter Optionen → Controller ändern).": "How long your car keeps driving itself along the edge at pit speed after an automatic pit stop, before you take over. Start an automatic pit stop by holding L1 / LB for 1 s (a short tap still selects tyres; the button can be changed under Options → Controller).",
     "Auf Start/Ziel steht die Startaufstellung": "The starting grid stands on start/finish",
     "Automatisch: so viele Plätze wie Autos im Rennen, verteilt über die Runde, am Rand von Geraden und Kurven. Manuell: Teile antippen – erst rechts, nochmal links, nochmal beide Seiten, nochmal entfernt. Automatisch gesetzte Plätze lassen sich danach manuell ändern.": "Automatic: as many Pit Boxes as cars in the race, spread around the lap, at the edge of straights and curves. Manual: tap pieces – first right, again left, again both sides, again removed. Automatic Pit Boxes can be changed manually afterwards.",
     "Autos im Rennen": "Cars in the race",
@@ -4385,6 +4397,18 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "AUTOMATISCHER BOXENSTOPP": "PARADA AUTOMÁTICA",
+    "Auto noch nicht geortet – eine Runde fahren": "Coche aún sin localizar – da una vuelta",
+    "Automatischer Boxenstopp abgebrochen": "Parada automática cancelada",
+    "Automatischer Boxenstopp erst bei Grün": "Parada automática solo con bandera verde",
+    "Automatischer Boxenstopp nur auf der Bahn": "Parada automática solo en la pista",
+    "Boxenstopp läuft schon": "La parada ya está en marcha",
+    "Boxenstopp startete nicht – du fährst wieder selbst": "La parada no empezó – vuelves a conducir tú",
+    "Du fährst wieder selbst": "Vuelves a conducir tú",
+    "Keine Pit Box auf dieser Strecke – im Streckeneditor festlegen": "No hay box en este circuito – fíjalos en el editor",
+    "Automatischer Boxenstopp (1 s halten)": "Parada automática (mantener 1 s)",
+    "Boxenbegrenzer nach automatischem Boxenstopp": "Limitador tras la parada automática",
+    "So lange fährt dein Auto nach dem automatischen Boxenstopp noch selbst am Rand mit Boxentempo, bevor du wieder steuerst. Den automatischen Boxenstopp startest du, indem du L1 / LB 1 s hältst (kurz tippen wählt weiter die Reifen; die Taste lässt sich unter Optionen → Controller ändern).": "Cuánto tiempo sigue tu coche conduciendo solo por el borde a velocidad de box tras la parada automática. Inicia la parada automática manteniendo L1 / LB 1 s (un toque corto sigue eligiendo neumáticos; el botón se cambia en Opciones → Mando).",
     "Auf Start/Ziel steht die Startaufstellung": "En la salida/meta está la parrilla",
     "Automatisch: so viele Plätze wie Autos im Rennen, verteilt über die Runde, am Rand von Geraden und Kurven. Manuell: Teile antippen – erst rechts, nochmal links, nochmal beide Seiten, nochmal entfernt. Automatisch gesetzte Plätze lassen sich danach manuell ändern.": "Automático: tantos puestos como coches en la carrera, repartidos por la vuelta, al borde de rectas y curvas. Manual: toca las piezas – primero derecha, otra vez izquierda, otra vez ambos lados, otra vez quitar. Los puestos automáticos se pueden cambiar después a mano.",
     "Autos im Rennen": "Coches en la carrera",

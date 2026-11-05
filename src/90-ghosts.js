@@ -112,6 +112,10 @@
     // may share, see resolveBindingCollisions): while the prompt is open, flagTasteTick()
     // hands the button to the prompt only.
     confirm: { type: 'button', index: 0, label: 'Kreuz (PS) / A (Xbox)' },
+    // HybridDash: automatic pit stop (hold 1 s) - the car drives itself to its Pit Box.
+    // REQUESTED on LB (Xbox) / L1 (PlayStation), the tyre-select button, ON PURPOSE shared like
+    // the yellow flag: a short tap still cycles the tyres (on release), holding 1 s starts the stop.
+    autobox: { type: 'button', index: 4, label: 'L1 (PS) / LB (Xbox)' },
   };
   const BIND_ACTION_LABELS = {
     pause: 'Pause / Fortsetzen',
@@ -128,6 +132,7 @@
     fullscreenToggle: 'Vollbild umschalten',
     resetcar: 'Auto zurücksetzen',
     confirm: 'Bestätigungstaste',
+    autobox: 'Automatischer Boxenstopp (1 s halten)',
   };
 
   // Boxenstopp und Streckenansicht haben die Knoepfe getauscht. Gespeichertes liegt UEBER
@@ -436,6 +441,7 @@
   // Die drei neuen Aktionen. padFlagFired merkt sich, dass die Sekunde in DIESEM Druck schon
   // voll war - ohne das wuerde die Flagge im Takt danach gleich wieder umgeschaltet.
   let prevTyreSelect = false, prevFuelSelect = false, prevYellowFlag = false;
+  let tyreGedruecktAb = 0;   // HybridDash: tyre select shares its button with the automatic pit stop
   let prevFsToggle = false;
   let padFlagFired = false;
 
@@ -12896,7 +12902,18 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // BESTELLT (ACC-Menue): "schultertasten zum tab wechseln" - in den Menues wechseln
       // L1/R1 die Reiter der innersten Ebene, im Cockpit bleiben sie Reifen- und Tankvorwahl.
       const tyreNow = readBindingValue(pad, bindings.tyreSelect) > BUTTON_CAPTURE_THRESHOLD;
-      if (tyreNow && !prevTyreSelect) { if (trackEditorPad('prev')) { /* Editor */ } else if (konsoleMenue()) konsoleReiterSchritt(-1); else pitMischungWeiter(); }
+      // HybridDash: on the same button as the automatic pit stop (hold 1 s), the tyre choice in the
+      // cockpit fires on RELEASE of a short tap - a hold must not also change the tyres.
+      const tyreTeilt = typeof hdAutoBoxTeilt === 'function' && hdAutoBoxTeilt(bindings.tyreSelect);
+      if (tyreNow && !prevTyreSelect) {
+        if (trackEditorPad('prev')) { /* Editor */ } else if (konsoleMenue()) konsoleReiterSchritt(-1);
+        else if (tyreTeilt) tyreGedruecktAb = performance.now();
+        else pitMischungWeiter();
+      }
+      if (!tyreNow && prevTyreSelect && tyreGedruecktAb) {
+        if (performance.now() - tyreGedruecktAb < 1000) pitMischungWeiter();
+        tyreGedruecktAb = 0;
+      }
       prevTyreSelect = tyreNow;
 
       const fuelNow = readBindingValue(pad, bindings.fuelSelect) > BUTTON_CAPTURE_THRESHOLD;

@@ -1680,6 +1680,9 @@
       // HybridDash 2.1: the Confirmation Button only acts while the safety-car prompt is open
       // (a modal, like the grid confirm on the same button), so it may share A / Cross.
       if (n === 'confirm') continue;
+      // HybridDash: the automatic pit stop is a 1 s HOLD on the tyre-select button (a tap stays
+      // tyre select, fired on release) - a deliberate pair, like tap/hold on the flag button.
+      if (n === 'autobox') continue;
       const k = schluessel(vorgabe[n]);
       if (!k) continue;
       zaehler.set(k, (zaehler.get(k) || []).concat(n));
@@ -21499,7 +21502,7 @@
       const neu = loadBindings();
       if (!neu.racestart || neu.racestart.index !== 0) f.push('Rennstart auf Kreuz geht beim Laden verloren');
       if (!neu.yellowflag || neu.yellowflag.index !== 2) f.push('gelbe Flagge auf Quadrat geht beim Laden verloren');
-      const keys = Object.keys(BIND_ACTION_LABELS).map((n) => bindingKey(neu[n])).filter(Boolean);
+      const keys = Object.keys(BIND_ACTION_LABELS).filter((n) => n !== 'autobox').map((n) => bindingKey(neu[n])).filter(Boolean);   // HybridDash: autobox shares LB by design
       if (new Set(keys).size !== keys.length) f.push('Doppelbelegung gespeichert');
       const zweimal = loadBindings();
       if (JSON.stringify(zweimal) !== JSON.stringify(neu)) f.push('zweites Laden aendert die Belegung');

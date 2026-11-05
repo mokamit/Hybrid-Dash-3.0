@@ -3055,6 +3055,7 @@
     if (scanStopp.car === car && rennZeitJetzt() < scanStopp.bis) return true;
     if (typeof garageScan !== 'undefined' && garageScan.aktiv && garageScan.car === car) return true;
     if (trackMode === 'on' && typeof aufstellenSpielerZiel === 'function' && aufstellenSpielerZiel(car) && !aufstellRennenLaeuft()) return true;
+    if (!zPl && typeof hdAutoBoxAktiv === 'function' && hdAutoBoxAktiv(car)) return true;   // HybridDash: automatic pit stop
     return !!autopilotGrund();
   }
   function autopilot(fahrerBremse, wer) {
@@ -3102,6 +3103,11 @@
       const geregelt = ghostSpeedControl(regler, ziel, v, dt);
       return { grund: 'scan', throttle: geregelt.throttle, brake: geregelt.brake,
                steer: 0, lenkt: !abseitsJetztFuer(wer || 1) };
+    }
+    // HybridDash: automatic pit stop - to the own Pit Box, park, stand for the service, pull away.
+    if (!zwei && typeof hdAutoBoxPilot === 'function') {
+      const hdAp = hdAutoBoxPilot(meinAuto, st, motor, regler, fahrerBremse);
+      if (hdAp) return hdAp;
     }
     // Automatische Aufstellung (v0.9.24, 90-ghosts.js): zum Startplatz, dort halten.
     // v0.9.87: nur auf der Bahn - im Ausdruck-Modus wuerde die Querlage als Radwinkel gelesen.
