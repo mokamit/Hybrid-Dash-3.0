@@ -437,6 +437,17 @@
     box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
   #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
   #grid-start { text-transform: uppercase; letter-spacing: .06em; }
+  /* v2.2: car number row in the garage - the field replaces the plain value. */
+  .gk-nummer .gk-w > b { display: none; }
+  .gk-nummer .gk-w { display: inline-flex; align-items: center; gap: 6px; }
+  .gk-nummer-extra { display: contents; }
+  .gk-nummer .gk-w [data-d="-1"] { order: 0; } .gk-nummer .gk-nummer-feld { order: 1; } .gk-nummer .gk-w [data-d="1"] { order: 2; } .gk-nummer .gk-nummer-auto { order: 3; }
+  .gk-nummer-feld { width: 4.2em; text-align: center; font: 700 15px var(--k-font, Inter, sans-serif); color: #fff; background: #0d1015;
+    border: 1px solid #39414f; border-radius: 5px; padding: 3px 4px; }
+  .gk-nummer-feld:focus { outline: 2px solid #00d6ff; outline-offset: 1px; }
+  .gk-nummer-auto { all: unset; cursor: pointer; font: 600 11px var(--k-font, Inter, sans-serif); letter-spacing: .06em; text-transform: uppercase;
+    color: #b4bccb; border: 1px solid #39414f; border-radius: 4px; padding: 3px 7px; }
+  .gk-nummer-auto:hover { color: #fff; border-color: #fff; }
   /* v2.2b: main menu panels light up on HOVER only; a selected (focused) panel keeps the plain look. */
   body .k-kachel.menu-nav-sel:not(:hover), body .k-start.menu-nav-sel:not(:hover) { outline: 0; border-color: transparent; transform: none; box-shadow: none; }
   body .k-kachel.menu-nav-sel:not(:hover) .k-kk { background: var(--k-grau); color: #fff; }

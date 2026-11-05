@@ -373,6 +373,9 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "Startnummer": "Car number",
+    "auto": "auto",
+    "Automatische Nummer": "Automatic number",
     "Charakter": "Character",
     "wird beim Start gewürfelt": "rolled at the start",
     "Weiß": "White",
@@ -4283,6 +4286,9 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "Startnummer": "Número",
+    "auto": "auto",
+    "Automatische Nummer": "Número automático",
     "Charakter": "Carácter",
     "wird beim Start gewürfelt": "se sortea en la salida",
     "Weiß": "Blanco",

@@ -1081,7 +1081,7 @@
   // Verbindungsreihenfolge und ist deshalb keine Eigenschaft des Autos - gemerkt wird sie
   // nur, wenn sie von Hand gewaehlt wurde (car.farbeGewaehlt). Ohne beides wird ein
   // vorhandener Eintrag geloescht statt ein leerer angelegt.
-  function carProfilGeaendert(e) { return !!(e && (e.alias || e.farbe || carModellWert(e.modellId))); }
+  function carProfilGeaendert(e) { return !!(e && (e.alias || e.farbe || carModellWert(e.modellId) || e.nummer)); }
   // ROLLE UND GHOST-TEMPO JE AUTO (v0.9.6). GEMELDET (Familie): Einstellungen muessten am
   // naechsten Tag neu gesetzt werden. Rolle und eigenes Ghost-Tempo lagen nur im Speicher der
   // Sitzung. Eigene Ablage, damit carProfilGeaendert (Name/Farbe) unberuehrt bleibt.
@@ -1110,6 +1110,7 @@
     const all = carStore();
     const e = { modellId: carModellWert(car.modellId), color: car.colorId, alias: car.alias || '', farbe: !!car.farbeGewaehlt,
                 name: car.device.name || '' };
+    if (car.nummerWahl) e.nummer = car.nummerWahl;   // HybridDash: chosen car number
     if (carProfilGeaendert(e)) all[String(car.device.id)] = e;
     else delete all[String(car.device.id)];
     carStoreSchreiben(all);
@@ -1163,6 +1164,7 @@
     car.alias = e.alias || '';
     car.modellId = carModellWert(e.modellId);
     car.farbeGewaehlt = !!e.farbe;
+    car.nummerWahl = carNummerOk(e.nummer);
     delete all[id];
     all[String(car.device.id)] = Object.assign({}, e, { name: car.device.name || e.name || '' });
     carStoreSchreiben(all);
@@ -1273,19 +1275,54 @@
       : (CAR_AUTO_COLORS.find(c => !belegt.has(c.id)) || CAR_AUTO_COLORS[0]).id;
     car.alias = merk.alias || '';
     car.modellId = carModellWert(merk.modellId);
+    car.nummerWahl = carNummerOk(merk.nummer);
     carRetag();
   }
 
   // Der Buchstabe folgt der Position in der Garage und wird deshalb NICHT gespeichert: er
   // ist die Reihenfolge des Verbindens, keine Eigenschaft des Autos. Trennt man eines aus
   // der Mitte, ruecken die dahinter auf.
-  // HybridDash: car NUMBERS instead of Greek letters - #1, #2, ... in garage order.
+  // HybridDash: car NUMBERS instead of Greek letters. A number chosen in the garage
+  // (car.nummerWahl, 1-99, remembered per car) is kept; every other car gets the lowest number
+  // nobody uses, in garage order (#1, #2, ...).
+  const CAR_NUMMER_MAX = 99;
+  function carNummerOk(n) { n = Math.round(Number(n)); return n >= 1 && n <= CAR_NUMMER_MAX ? n : 0; }
   function carRetag() {
-    garage.forEach((c, i) => {
-      c.nummer = i + 1;
-      c.tag = '#' + (i + 1);
-      c.tagChar = String(i + 1);
+    // Chosen numbers first (the first car to claim a number keeps it), then the rest.
+    const fest = new Map();
+    garage.forEach((c) => { const n = carNummerOk(c.nummerWahl); if (n && !fest.has(n)) fest.set(n, c); });
+    const vergeben = new Set(fest.keys());
+    garage.forEach((c) => {
+      let n = carNummerOk(c.nummerWahl);
+      if (!(n && fest.get(n) === c)) { n = 1; while (vergeben.has(n)) n++; vergeben.add(n); }
+      c.nummer = n;
+      c.tag = '#' + n;
+      c.tagChar = String(n);
     });
+  }
+  // Garage: choose a car number (0 = automatic). Numbers other cars use are skipped.
+  function garageNummerSetzen(car, n) {
+    n = carNummerOk(n);
+    if (n && garage.some((c) => c !== car && c.nummer === n)) {
+      const wer = garage.find((c) => c !== car && c.nummer === n);
+      if (carNummerOk(wer.nummerWahl) === n) { showHudToast('#' + n + ' · ' + garageLabel(wer)); return false; }
+    }
+    car.nummerWahl = n;
+    carRetag();
+    carRemember(car);
+    renderGarage();
+    if (typeof renderRaceGrid === 'function') renderRaceGrid();
+    return true;
+  }
+  function garageNummerSchritt(car, d) {
+    const frei = (n) => !garage.some((c) => c !== car && carNummerOk(c.nummerWahl) === n);
+    let n = carNummerOk(car.nummerWahl) || car.nummer || 1;
+    for (let i = 0; i < CAR_NUMMER_MAX; i++) {
+      n += d;
+      if (n < 1) n = CAR_NUMMER_MAX; if (n > CAR_NUMMER_MAX) n = 1;
+      if (frei(n)) break;
+    }
+    garageNummerSetzen(car, n);
   }
 
   function carColor(car) {
@@ -1784,6 +1821,24 @@
     const fi = CAR_COLORS.findIndex((c) => c.id === f.id);
     const farbe = (d) => garageFarbeSetzen(car, CAR_COLORS[(fi + d + CAR_COLORS.length) % CAR_COLORS.length].id);
     box.appendChild(garWertZeile((lang === 'de' ? 'Farbe ' : t('Farbe') + ' · ') + garageLabel(car), f.name, () => farbe(-1), () => farbe(1)));
+    // HybridDash: the car number, with a field to type it and "auto" to go back to automatic.
+    {
+      const feld = document.createElement('input');
+      feld.type = 'number'; feld.min = '1'; feld.max = String(CAR_NUMMER_MAX); feld.className = 'gk-nummer-feld';
+      feld.value = String(car.nummer || ''); feld.setAttribute('aria-label', t('Startnummer'));
+      feld.addEventListener('click', (e) => e.stopPropagation());
+      feld.addEventListener('change', () => { if (!garageNummerSetzen(car, feld.value)) feld.value = String(car.nummer || ''); });
+      feld.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); feld.blur(); } });
+      const auto = document.createElement('button');
+      auto.type = 'button'; auto.className = 'gk-nummer-auto'; auto.textContent = t('auto');
+      auto.title = t('Automatische Nummer');
+      auto.hidden = !carNummerOk(car.nummerWahl);
+      auto.onclick = (e) => { e.stopPropagation(); garageNummerSetzen(car, 0); };
+      const span = document.createElement('span'); span.className = 'gk-nummer-extra'; span.append(feld, auto);
+      const zeile = garWertZeile(t('Startnummer'), '#' + (car.nummer || ''), () => garageNummerSchritt(car, -1), () => garageNummerSchritt(car, 1), span);
+      zeile.classList.add('gk-nummer');
+      box.appendChild(zeile);
+    }
     box.appendChild(garWertZeile('Marke / Modell', t(carModellName(car.modellId)),
       () => garageModellWechsel(car, -1), () => garageModellWechsel(car, 1)));
     if (car.role === 'ghost') {
