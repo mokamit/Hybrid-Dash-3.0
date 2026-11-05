@@ -731,6 +731,16 @@
     s.appendChild(p); s.appendChild(document.createTextNode(text));
     return s;
   }
+  // HybridDash: a car in the summary list - number badge in the car's colour, then the name.
+  function kNummerZeile(c) {
+    const s = document.createElement('span'); s.className = 'k-nr-zeile';
+    const b = document.createElement('i'); b.className = 'k-nr';
+    const f = carColor(c);
+    b.style.background = f.hex; b.style.color = f.ink || '#fff';
+    b.textContent = c.tagChar || '';
+    s.appendChild(b); s.appendChild(document.createTextNode(garageLabel(c)));
+    return s;
+  }
   function kTeile() {
     try { return currentTrackTiles.length; } catch (e) { return 0; }
   }
@@ -747,8 +757,11 @@
     // v0.9.31, GEMELDET: "mit 2 Autos 'Steuern' und 'Spieler 2' wurde nur eins angezeigt" -
     // die Galerie kam erst ab ZWEI FOTOS. Jetzt ab zwei verbundenen Autos; eines ohne Foto
     // steht als Farbflaeche mit seinem Zeichen darin.
-    const mitFotos = autos.filter((c) => c.role !== 'none').slice(0, 4);
-    const galerieAn = mitFotos.length >= 2;
+    // HybridDash: the gallery is the tile's background picture. With more than three cars the
+    // driver list ran over it, so it shows only for 2-3 cars, at the bottom of the tile; every
+    // list row carries the car's number badge instead.
+    const mitFotos = autos.filter((c) => c.role !== 'none').slice(0, 3);
+    const galerieAn = mitFotos.length >= 2 && autos.length <= 3;
     const faAuto = $('fa-auto');
     if (faAuto) faAuto.classList.toggle('k-auto-mehr', galerieAn);
     // Das eigene Foto des Fahrer-Autos (Garage) statt des Beispielbilds.
@@ -795,7 +808,7 @@
     }
     konsoleMpStatus();
     kZeilen($('fa-auto-info'), autos.length
-      ? autos.map((c) => [kPunkt(carColor(c).hex, garageLabel(c)), t(K_ROLLE[c.role] || c.role)])
+      ? autos.map((c) => [kNummerZeile(c), t(K_ROLLE[c.role] || c.role)])
       : [[t('Status'), t('nicht verbunden')]]);
     const rm = $('race-mode');
     const modus = rm.selectedOptions[0] ? rm.selectedOptions[0].textContent : '';

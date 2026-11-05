@@ -164,11 +164,22 @@
     try { if (typeof ovScreenRender === 'function') ovScreenRender(); } catch (e) { /* not ready */ }
     try { if (typeof renderRaceResults === 'function' && raceState === 'finished') renderRaceResults(); } catch (e) { /* not ready */ }
   }
+  // REPORTED: the race froze while the DSQ / DNF question was open - window.confirm() blocks
+  // the whole page (timers, car commands, sound). Now the app's own dialog asks: the race keeps
+  // running and the action happens when you confirm. hdRl.ohneFrage: tests answer "yes" at once.
+  function hdRlFrage(titel, text, ja, tun) {
+    if (hdRl.ohneFrage || typeof konsoleFrage !== 'function') { tun(); return; }
+    konsoleFrage(titel, text, [[ja, tun], ['Cancel', null]]);
+  }
   function hdRlWieder(id) {
     id = String(id);
     if (!hdRl.dnf.has(id)) return;
+    const { name } = hdRlName(id);
+    hdRlFrage('Reinstate ' + name + '?', 'The car can drive again.', 'Reinstate', () => hdRlWiederJa(id));
+  }
+  function hdRlWiederJa(id) {
+    if (!hdRl.dnf.has(id)) return;
     const { car, name } = hdRlName(id);
-    if (!window.confirm('Reinstate ' + name + '? The car can drive again.')) return;
     hdRl.dnf.delete(id);
     if (car && car.ghost && car.role === 'ghost' && hdRlRennt() && typeof startGhost === 'function') startGhost(car);
     hdRlLog(name + ' reinstated', 'dnf');
@@ -180,10 +191,17 @@
     const { car, name } = hdRlName(id);
     const alt = hdRl.dnf.get(id);
     if (alt && alt.art === art) return;
-    const frage = art === 'dsq'
-      ? 'BLACK FLAG: disqualify ' + name + '?\n\nThe car is stopped and the race continues without it. It stays in the results as DSQ, below every finisher and DNF. Remove it from the track yourself.'
-      : 'DNF: take ' + name + ' out of the race?\n\nThe car is stopped and the race continues without it. It stays in the results as DNF. Remove it from the track yourself.';
-    if (!window.confirm(frage)) return;
+    if (art === 'dsq') hdRlFrage('Black flag: disqualify ' + name + '?',
+      'The car is stopped and the race continues without it. It stays in the results as DSQ, below every finisher and DNF. Remove it from the track yourself.',
+      'Black flag (DSQ)', () => hdRlAusJa(id, art));
+    else hdRlFrage('DNF: take ' + name + ' out of the race?',
+      'The car is stopped and the race continues without it. It stays in the results as DNF. Remove it from the track yourself.',
+      'DNF – retire', () => hdRlAusJa(id, art));
+  }
+  function hdRlAusJa(id, art) {
+    const { car, name } = hdRlName(id);
+    const alt = hdRl.dnf.get(id);
+    if (alt && alt.art === art) return;
     let runden = alt ? alt.runden : 0;
     if (!alt) { try { const x = raceAllCars().find((c) => c.id === id); runden = x ? x.laps.length : 0; } catch (e) { runden = 0; } }
     hdRl.dnf.set(id, { runden, zeit: alt ? alt.zeit : hdRlZeit(), art });
@@ -454,6 +472,7 @@
   async function hdRlSelbsttest() {
     const out = [], ok = (n, b, m) => out.push({ name: n, ok: !!b, mass: m });
     const merk = { raceState, flagState, limitYellow, garage: garage.slice(), confirm: window.confirm, scRaus: safetyCarRaus, modus: hdRl.modus };
+    hdRl.ohneFrage = true;
     let scRausGerufen = 0;
     safetyCarRaus = () => { scRausGerufen++; };
     window.confirm = () => true;
@@ -540,7 +559,7 @@
     } catch (e) {
       ok('self-test ran', false, String(e && e.stack || e));
     } finally {
-      safetyCarRaus = merk.scRaus; window.confirm = merk.confirm;
+      safetyCarRaus = merk.scRaus; window.confirm = merk.confirm; hdRl.ohneFrage = false;
       if (flagState !== 'green') gelbBeenden();
       raceState = merk.raceState; flagState = merk.flagState; limitYellow = merk.limitYellow; hdRl.modus = merk.modus;
       garage.length = 0; merk.garage.forEach((c) => garage.push(c));
@@ -559,8 +578,9 @@
       garage.push(mk('d1', 'Mara Kovac', 'rot', [9100, 8800, 8750]), mk('d2', 'Diego Reyes', 'blau', [9300, 9000, 8900]),
                   mk('d3', 'Noor Rahimi', 'gelb', [9600, 9400]), mk('d4', 'Emil Strand', 'gruen', [9800, 9500]));
       raceState = 'racing'; raceStartedAt = rennZeitJetzt() - 184000;
-      window.confirm = () => true;
+      hdRl.ohneFrage = true;
       hdRlFlagge('vsc'); hdRlDnf('d4'); hdRlWetter('rain'); hdRlStrafe('d2', 5); hdRlAus('d3', 'dsq');
+      hdRl.ohneFrage = false;
     },
     // Tests/screenshots only: one stand-in car in the garage (reload the page afterwards).
     _garage: (farbe, id, name) => {

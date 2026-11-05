@@ -1630,12 +1630,15 @@
       row.className = 'grid-row ' + (i % 2 ? 'grid-links' : 'grid-rechts');
       row.draggable = false;
       row.dataset.id = String(car.device.id);
+      // HybridDash: two-column grid like a TV starting grid - every car one half row lower
+      // than the one before, on the side of the track it stands on (#grid-liste CSS).
+      row.style.gridRow = (i + 1) + ' / span 2';
       // v1.0.25: dazu, wo der Platz liegt (Reihe, Seite) - so stellt man von Hand richtig auf.
       const wo = t('Reihe {r}').replace('{r}', Math.floor(i / 2) + 1) + ' · ' + (i % 2 ? t('links') : t('rechts'));
       row.innerHTML = `<span class="grid-pos">${i + 1}.</span>`
         + `<span class="grid-handle" draggable="true" title="Ziehen zum Umsortieren">&#8942;&#8942;</span>`
         + gridAutoBild(car)
-        + `<span class="grid-name">${carDot(car)}${garageLabel(car)} <small class="grid-wo">${wo}</small></span>`
+        + `<span class="grid-name" data-pos="${i + 1}">${carDot(car)}${garageLabel(car)}</span><small class="grid-wo">${wo}</small>`
         + `<span class="grid-move">`
         + `<button data-mv="up" ${i === 0 ? 'disabled' : ''} aria-label="nach vorn">&#9650;</button>`
         + `<button data-mv="down" ${i === cars.length - 1 ? 'disabled' : ''} aria-label="nach hinten">&#9660;</button>`
@@ -1692,6 +1695,7 @@
     if (sc) {
       const row = document.createElement('div');
       row.className = 'grid-row grid-sc';
+      row.style.gridRow = (cars.length + 2) + ' / span 2';
       row.innerHTML = `<span class="grid-pos">SC</span>`
         + `<span class="grid-name">${carDot(sc)}${garageLabel(sc)} <small class="grid-wo">${t('Safety Car · steht rechts am Rand, fährt bei Gelb')}</small></span>`;
       host.appendChild(row);

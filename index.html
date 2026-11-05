@@ -437,6 +437,34 @@
     box-shadow: 0 3px 0 var(--k-blau, #00a6e8), 0 0 12px rgba(0,166,232,.55), 0 5px 10px rgba(0,0,0,.45); transform: translateY(-1px); }
   #tab-fahren .k-kachel:active > .k-kt, #tab-fahren .k-kachel:active > .k-kopf { transform: translateY(2px); box-shadow: 0 1px 0 #8a93a3, 0 2px 4px rgba(0,0,0,.4); }
   #grid-start { text-transform: uppercase; letter-spacing: .06em; }
+  /* v2.2: starting grid as two staggered columns (like a TV grid graphic): smaller cards, each
+     car half a row below the one before, on its side of the track (P1 right, P2 left, ...). */
+  #grid-liste { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: clamp(30px, 4.2vh, 40px);
+    column-gap: clamp(10px, 2vw, 28px); row-gap: 0; align-content: start; overflow-y: auto; }
+  #grid-liste .grid-row { margin: 3px 0 !important; min-width: 0; display: grid; align-items: center; gap: 2px 10px;
+    grid-template-columns: auto 1fr auto; grid-template-areas: "auto name move" "auto wo move";
+    padding: 5px 8px; border-radius: 6px; border-left: 3px solid transparent; }
+  #grid-liste .grid-row.grid-rechts { grid-column: 2; }
+  #grid-liste .grid-row.grid-links { grid-column: 1; }
+  #grid-liste .grid-row.grid-sc { grid-column: 1 / -1; }
+  #grid-liste .grid-row:not(.grid-sc) .car-dot { display: none; }
+  #grid-liste .grid-pos { position: absolute; opacity: 0; width: 1px; height: 1px; overflow: hidden; }
+  #grid-liste .grid-handle { display: none; }
+  #grid-liste .grid-row { position: relative; }
+  #grid-liste .grid-auto { grid-area: auto; width: clamp(46px, 5.4vw, 64px) !important; height: clamp(30px, 3.6vw, 42px) !important;
+    font-size: clamp(15px, 1.8vw, 22px); font-weight: 900; border-radius: 4px; display: grid; place-items: center; }
+  #grid-liste .grid-name { grid-area: name; font-weight: 800; text-transform: uppercase; letter-spacing: .03em;
+    font-size: clamp(12px, 1.25vw, 16px); display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+  #grid-liste .grid-name::before { content: attr(data-pos); font-style: italic; font-weight: 900; color: #fff; font-size: 1.15em; }
+  #grid-liste .grid-wo { grid-area: wo; margin: 0; font-size: clamp(10px, .95vw, 12px); text-transform: none; letter-spacing: 0; }
+  #grid-liste .grid-move { grid-area: move; gap: 4px; }
+  #grid-liste .grid-move button { width: clamp(28px, 3vw, 36px) !important; height: clamp(28px, 3vw, 36px) !important; font-size: clamp(11px, 1.2vw, 14px) !important; }
+  /* v2.2: Car summary - number badges in the list; the 2-3 car gallery sits at the bottom. */
+  .k-nr-zeile { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+  .k-nr { display: inline-grid; place-items: center; flex: 0 0 auto; min-width: 1.9em; height: 1.45em; padding: 0 3px; border-radius: 3px;
+    font: 800 .85em/1 var(--k-font, Inter, sans-serif); font-style: normal; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+  #fa-auto .k-auto-galerie { align-items: flex-end !important; padding-bottom: 52px !important; }
+  #fa-auto .k-auto-zelle { width: clamp(70px, 9vw, 120px) !important; }
   /* v2.2: car number row in the garage - the field replaces the plain value. */
   .gk-nummer .gk-w > b { display: none; }
   .gk-nummer .gk-w { display: inline-flex; align-items: center; gap: 6px; }
@@ -31002,6 +31030,16 @@
     s.appendChild(p); s.appendChild(document.createTextNode(text));
     return s;
   }
+  // HybridDash: a car in the summary list - number badge in the car's colour, then the name.
+  function kNummerZeile(c) {
+    const s = document.createElement('span'); s.className = 'k-nr-zeile';
+    const b = document.createElement('i'); b.className = 'k-nr';
+    const f = carColor(c);
+    b.style.background = f.hex; b.style.color = f.ink || '#fff';
+    b.textContent = c.tagChar || '';
+    s.appendChild(b); s.appendChild(document.createTextNode(garageLabel(c)));
+    return s;
+  }
   function kTeile() {
     try { return currentTrackTiles.length; } catch (e) { return 0; }
   }
@@ -31018,8 +31056,11 @@
     // v0.9.31, GEMELDET: "mit 2 Autos 'Steuern' und 'Spieler 2' wurde nur eins angezeigt" -
     // die Galerie kam erst ab ZWEI FOTOS. Jetzt ab zwei verbundenen Autos; eines ohne Foto
     // steht als Farbflaeche mit seinem Zeichen darin.
-    const mitFotos = autos.filter((c) => c.role !== 'none').slice(0, 4);
-    const galerieAn = mitFotos.length >= 2;
+    // HybridDash: the gallery is the tile's background picture. With more than three cars the
+    // driver list ran over it, so it shows only for 2-3 cars, at the bottom of the tile; every
+    // list row carries the car's number badge instead.
+    const mitFotos = autos.filter((c) => c.role !== 'none').slice(0, 3);
+    const galerieAn = mitFotos.length >= 2 && autos.length <= 3;
     const faAuto = $('fa-auto');
     if (faAuto) faAuto.classList.toggle('k-auto-mehr', galerieAn);
     // Das eigene Foto des Fahrer-Autos (Garage) statt des Beispielbilds.
@@ -31066,7 +31107,7 @@
     }
     konsoleMpStatus();
     kZeilen($('fa-auto-info'), autos.length
-      ? autos.map((c) => [kPunkt(carColor(c).hex, garageLabel(c)), t(K_ROLLE[c.role] || c.role)])
+      ? autos.map((c) => [kNummerZeile(c), t(K_ROLLE[c.role] || c.role)])
       : [[t('Status'), t('nicht verbunden')]]);
     const rm = $('race-mode');
     const modus = rm.selectedOptions[0] ? rm.selectedOptions[0].textContent : '';
@@ -44270,12 +44311,15 @@
       row.className = 'grid-row ' + (i % 2 ? 'grid-links' : 'grid-rechts');
       row.draggable = false;
       row.dataset.id = String(car.device.id);
+      // HybridDash: two-column grid like a TV starting grid - every car one half row lower
+      // than the one before, on the side of the track it stands on (#grid-liste CSS).
+      row.style.gridRow = (i + 1) + ' / span 2';
       // v1.0.25: dazu, wo der Platz liegt (Reihe, Seite) - so stellt man von Hand richtig auf.
       const wo = t('Reihe {r}').replace('{r}', Math.floor(i / 2) + 1) + ' · ' + (i % 2 ? t('links') : t('rechts'));
       row.innerHTML = `<span class="grid-pos">${i + 1}.</span>`
         + `<span class="grid-handle" draggable="true" title="Ziehen zum Umsortieren">&#8942;&#8942;</span>`
         + gridAutoBild(car)
-        + `<span class="grid-name">${carDot(car)}${garageLabel(car)} <small class="grid-wo">${wo}</small></span>`
+        + `<span class="grid-name" data-pos="${i + 1}">${carDot(car)}${garageLabel(car)}</span><small class="grid-wo">${wo}</small>`
         + `<span class="grid-move">`
         + `<button data-mv="up" ${i === 0 ? 'disabled' : ''} aria-label="nach vorn">&#9650;</button>`
         + `<button data-mv="down" ${i === cars.length - 1 ? 'disabled' : ''} aria-label="nach hinten">&#9660;</button>`
@@ -44332,6 +44376,7 @@
     if (sc) {
       const row = document.createElement('div');
       row.className = 'grid-row grid-sc';
+      row.style.gridRow = (cars.length + 2) + ' / span 2';
       row.innerHTML = `<span class="grid-pos">SC</span>`
         + `<span class="grid-name">${carDot(sc)}${garageLabel(sc)} <small class="grid-wo">${t('Safety Car · steht rechts am Rand, fährt bei Gelb')}</small></span>`;
       host.appendChild(row);
@@ -117952,11 +117997,22 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     try { if (typeof ovScreenRender === 'function') ovScreenRender(); } catch (e) { /* not ready */ }
     try { if (typeof renderRaceResults === 'function' && raceState === 'finished') renderRaceResults(); } catch (e) { /* not ready */ }
   }
+  // REPORTED: the race froze while the DSQ / DNF question was open - window.confirm() blocks
+  // the whole page (timers, car commands, sound). Now the app's own dialog asks: the race keeps
+  // running and the action happens when you confirm. hdRl.ohneFrage: tests answer "yes" at once.
+  function hdRlFrage(titel, text, ja, tun) {
+    if (hdRl.ohneFrage || typeof konsoleFrage !== 'function') { tun(); return; }
+    konsoleFrage(titel, text, [[ja, tun], ['Cancel', null]]);
+  }
   function hdRlWieder(id) {
     id = String(id);
     if (!hdRl.dnf.has(id)) return;
+    const { name } = hdRlName(id);
+    hdRlFrage('Reinstate ' + name + '?', 'The car can drive again.', 'Reinstate', () => hdRlWiederJa(id));
+  }
+  function hdRlWiederJa(id) {
+    if (!hdRl.dnf.has(id)) return;
     const { car, name } = hdRlName(id);
-    if (!window.confirm('Reinstate ' + name + '? The car can drive again.')) return;
     hdRl.dnf.delete(id);
     if (car && car.ghost && car.role === 'ghost' && hdRlRennt() && typeof startGhost === 'function') startGhost(car);
     hdRlLog(name + ' reinstated', 'dnf');
@@ -117968,10 +118024,17 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const { car, name } = hdRlName(id);
     const alt = hdRl.dnf.get(id);
     if (alt && alt.art === art) return;
-    const frage = art === 'dsq'
-      ? 'BLACK FLAG: disqualify ' + name + '?\n\nThe car is stopped and the race continues without it. It stays in the results as DSQ, below every finisher and DNF. Remove it from the track yourself.'
-      : 'DNF: take ' + name + ' out of the race?\n\nThe car is stopped and the race continues without it. It stays in the results as DNF. Remove it from the track yourself.';
-    if (!window.confirm(frage)) return;
+    if (art === 'dsq') hdRlFrage('Black flag: disqualify ' + name + '?',
+      'The car is stopped and the race continues without it. It stays in the results as DSQ, below every finisher and DNF. Remove it from the track yourself.',
+      'Black flag (DSQ)', () => hdRlAusJa(id, art));
+    else hdRlFrage('DNF: take ' + name + ' out of the race?',
+      'The car is stopped and the race continues without it. It stays in the results as DNF. Remove it from the track yourself.',
+      'DNF – retire', () => hdRlAusJa(id, art));
+  }
+  function hdRlAusJa(id, art) {
+    const { car, name } = hdRlName(id);
+    const alt = hdRl.dnf.get(id);
+    if (alt && alt.art === art) return;
     let runden = alt ? alt.runden : 0;
     if (!alt) { try { const x = raceAllCars().find((c) => c.id === id); runden = x ? x.laps.length : 0; } catch (e) { runden = 0; } }
     hdRl.dnf.set(id, { runden, zeit: alt ? alt.zeit : hdRlZeit(), art });
@@ -118242,6 +118305,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   async function hdRlSelbsttest() {
     const out = [], ok = (n, b, m) => out.push({ name: n, ok: !!b, mass: m });
     const merk = { raceState, flagState, limitYellow, garage: garage.slice(), confirm: window.confirm, scRaus: safetyCarRaus, modus: hdRl.modus };
+    hdRl.ohneFrage = true;
     let scRausGerufen = 0;
     safetyCarRaus = () => { scRausGerufen++; };
     window.confirm = () => true;
@@ -118328,7 +118392,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     } catch (e) {
       ok('self-test ran', false, String(e && e.stack || e));
     } finally {
-      safetyCarRaus = merk.scRaus; window.confirm = merk.confirm;
+      safetyCarRaus = merk.scRaus; window.confirm = merk.confirm; hdRl.ohneFrage = false;
       if (flagState !== 'green') gelbBeenden();
       raceState = merk.raceState; flagState = merk.flagState; limitYellow = merk.limitYellow; hdRl.modus = merk.modus;
       garage.length = 0; merk.garage.forEach((c) => garage.push(c));
@@ -118347,8 +118411,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       garage.push(mk('d1', 'Mara Kovac', 'rot', [9100, 8800, 8750]), mk('d2', 'Diego Reyes', 'blau', [9300, 9000, 8900]),
                   mk('d3', 'Noor Rahimi', 'gelb', [9600, 9400]), mk('d4', 'Emil Strand', 'gruen', [9800, 9500]));
       raceState = 'racing'; raceStartedAt = rennZeitJetzt() - 184000;
-      window.confirm = () => true;
+      hdRl.ohneFrage = true;
       hdRlFlagge('vsc'); hdRlDnf('d4'); hdRlWetter('rain'); hdRlStrafe('d2', 5); hdRlAus('d3', 'dsq');
+      hdRl.ohneFrage = false;
     },
     // Tests/screenshots only: one stand-in car in the garage (reload the page afterwards).
     _garage: (farbe, id, name) => {
