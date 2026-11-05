@@ -60,21 +60,35 @@
   const HD_SC_SCHARF_KACHELN = 2;
   const HD_SC_GNADE_MS = 6000;
   const hdSc = { offSeit: new Map(), gruenSeit: 0, letzterStatus: '', sperreBis: 0, letzterFlag: 'green',
-                 zaehler: new Map(), frage: null, ignoriert: new Map() };
+                 zaehler: new Map(), frage: null, ignoriert: new Map(), box: new Map() };
 
   function hdAutoScAn() { return !!hd.autoSc; }
   function hdAutoScFenster() { return Math.max(1000, Math.min(15000, Number(hd.autoScMs) || HD_AUTO_SC_MS)); }
 
+  // REQUESTED: a car stopped in the pit never triggers the safety car prompt. In the pit =
+  // its pit stop is running, it stands on the pit marker tile, or it has not moved since its
+  // stop ended (it still stands in the box: the stagnant timer would fire the moment the
+  // stop is over). The memory clears on the car's first tile change after the stop.
+  function hdInBox(car, boxAktiv) {
+    if (boxAktiv) { hdSc.box.set(car, car.tileAt || 0); return true; }
+    try { if (pitMarkerCode !== null && car.tileCode === pitMarkerCode) return true; } catch (e) { /* no marker */ }
+    if (hdSc.box.has(car)) {
+      if ((car.tileAt || 0) === hdSc.box.get(car)) return true;
+      hdSc.box.delete(car);
+    }
+    return false;
+  }
   function hdRenntAuto(car) {
     if (!car || !car.device) return false;
     if (typeof hdDnfAuto === 'function' && hdDnfAuto(car)) return false;   // retired by race control
-    if (car.role === 'player') return pitState === 'off';
+    if (car.role === 'player') return !hdInBox(car, pitState !== 'off');
     const z = zusatzPlatzVonRolle(car.role);
-    if (z) return !(z.box && z.box.lage && z.box.lage !== 'aus');
+    if (z) return !hdInBox(car, !!(z.box && z.box.lage && z.box.lage !== 'aus'));
     if (car.role === 'ghost' || car.role === 'challenger') {
       const g = car.ghost;
       if (!g || !g.running) return false;
-      if (g.pit || g.nachZiel || g.auslauf) return false;
+      if (hdInBox(car, !!g.pit)) return false;
+      if (g.nachZiel || g.auslauf) return false;
       if (g.aufstellZiel !== undefined && g.aufstellZiel !== null) return false;
       return true;
     }
@@ -109,7 +123,7 @@
   }
 
   function hdAutoScRuecksetzen(now) {
-    hdSc.gruenSeit = now; hdSc.offSeit.clear(); hdSc.zaehler.clear(); hdSc.ignoriert.clear();
+    hdSc.gruenSeit = now; hdSc.offSeit.clear(); hdSc.zaehler.clear(); hdSc.ignoriert.clear(); hdSc.box.clear();
     hdScFrageZu();
   }
 
@@ -177,7 +191,9 @@
     if (box) {
       $('hd-sc-frage-wer').textContent = garageLabel(car) + ' · ' + hdGrundText(grund);
       const b = typeof bindings === 'object' && bindings && bindings.confirm;
-      $('hd-sc-frage-taste').textContent = (b && b.type !== 'none' ? bindingDescription(b) + ' / ' : '') + 'Enter';
+      $('hd-sc-frage-taste').textContent = (b && b.type !== 'none' ? (b.type === 'button' && b.index === 0 ? 'A' : t(bindingDescription(b))) + ' / ' : '') + 'Enter';
+      const n = $('hd-sc-frage-nein-taste'); if (n) n.textContent = (b && b.type === 'button' && b.index === 1 ? '' : 'B / ') + 'Esc';
+      const v = $('hd-sc-frage-vsc-taste'); if (v) v.textContent = (b && b.type === 'button' && b.index === 2 ? '' : 'X / ') + 'V';
       box.hidden = false;
     }
     hdSprechen(hdSatz('frage', { name: garageLabel(car), grund }), 25);
@@ -194,6 +210,20 @@
     hdScFrageZu();
     hdAutoScAusloesen(f.car, f.grund, rennZeitJetzt());
   }
+  // REQUESTED: a virtual safety car as the third answer - the whole field slows to the
+  // safety-car pace, gaps kept, but no safety car goes out (Race Director's VSC).
+  function hdScVsc() {
+    const f = hdSc.frage;
+    if (!f) return;
+    hdScFrageZu();
+    const now = rennZeitJetzt();
+    hdSc.sperreBis = now + HD_AUTO_SC_COOLDOWN_MS;
+    hdSc.offSeit.clear();
+    hdSc.letzterStatus = garageLabel(f.car) + ' – ' + hdGrundText(f.grund) + ' (VSC)';
+    log('HybridDash: virtual safety car – ' + garageLabel(f.car) + ' (' + f.grund + ').', 'err');
+    if (typeof hdRlFlagge === 'function') hdRlFlagge('vsc');
+    hdEinstellungenMalen();
+  }
   function hdScIgnorieren() {
     const f = hdSc.frage;
     if (!f) return;
@@ -203,29 +233,50 @@
     log('HybridDash: safety car dismissed for ' + garageLabel(f.car) + '.', 'info');
   }
   // Confirmation Button on any connected controller (rising edge), and Enter / Esc.
+  // REQUESTED: Ignore on the B button (Xbox; Circle on PlayStation) too. B is upshift by
+  // default, so while the prompt is open - and until B is let go after ignoring - the gearbox
+  // does not see it (hdScTasteB, read by the pad loop in 90-ghosts.js).
+  // Likewise X (Xbox; Square on PlayStation) answers VSC; X is downshift by default.
   let hdPadVorher = false;
+  const HD_B = 1, HD_X = 2;   // standard gamepad mapping: B / Circle, X / Square
+  const hdTaste = { [HD_B]: { vorher: false, gesperrt: false, tun: () => hdScIgnorieren() },
+                    [HD_X]: { vorher: false, gesperrt: false, tun: () => hdScVsc() } };
+  function hdScTasteGesperrt(i) { const k = hdTaste[i]; return !!k && (!!hdSc.frage || k.gesperrt); }
+  function hdScTasteB() { return hdScTasteGesperrt(HD_B); }
   setInterval(() => {
     let jetzt = false;
+    const gedrueckt = {};
     try {
       const b = typeof bindings === 'object' && bindings && bindings.confirm;
-      if (b && b.type !== 'none' && navigator.getGamepads) {
+      const bestIndex = b && b.type === 'button' ? b.index : -1;
+      if (navigator.getGamepads) {
         for (const pad of navigator.getGamepads()) {
-          if (pad && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) { jetzt = true; break; }
+          if (!pad) continue;
+          if (b && b.type !== 'none' && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) jetzt = true;
+          for (const i of [HD_B, HD_X]) if (i !== bestIndex && pad.buttons[i] && pad.buttons[i].pressed) gedrueckt[i] = true;
         }
       }
     } catch (e) { /* no gamepad API */ }
     if (jetzt && !hdPadVorher && hdSc.frage) hdScBestaetigen();
+    for (const i of [HD_B, HD_X]) {
+      const k = hdTaste[i], an = !!gedrueckt[i];
+      if (an && !k.vorher && hdSc.frage) { k.tun(); k.gesperrt = true; }
+      if (!an) k.gesperrt = false;
+      k.vorher = an;
+    }
     hdPadVorher = jetzt;
   }, 40);
   document.addEventListener('keydown', (e) => {
     if (!hdSc.frage) return;
     if (e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); hdScBestaetigen(); }
     else if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); hdScIgnorieren(); }
+    else if (e.key === 'v' || e.key === 'V') { e.preventDefault(); e.stopImmediatePropagation(); hdScVsc(); }
   }, true);
   (function () {
     const j = $('hd-sc-frage-ja'), n = $('hd-sc-frage-nein');
     if (j) j.addEventListener('click', hdScBestaetigen);
     if (n) n.addEventListener('click', hdScIgnorieren);
+    const v = $('hd-sc-frage-vsc'); if (v) v.addEventListener('click', hdScVsc);
   })();
 
   setInterval(hdAutoScTick, 200);
@@ -559,7 +610,7 @@
       raceState = merk.raceState; flagState = merk.flagState; trackMode = merk.trackMode;
       raceFormationLap = merk.raceFormationLap; pitState = merk.pitState;
       garage.length = 0; merk.garage.forEach(c => garage.push(c));
-      Object.assign(hd, JSON.parse(merk.hd)); Object.assign(hdSc, merk.sc); hdSc.offSeit = new Map(); hdSc.zaehler = new Map(); hdSc.ignoriert = new Map(); hdScFrageZu();
+      Object.assign(hd, JSON.parse(merk.hd)); Object.assign(hdSc, merk.sc); hdSc.offSeit = new Map(); hdSc.zaehler = new Map(); hdSc.ignoriert = new Map(); hdSc.box = new Map(); hdScFrageZu();
       carStoreSchreiben(JSON.parse(merk.store));
     };
     try {
@@ -641,6 +692,17 @@
       prüfen('setting off, pit lane and the safety car itself are ignored', aus && pit && sc, 'off ' + aus + ', pit ' + pit + ', sc ' + sc);
       reset();
 
+      // J2: stop over, the car still stands in the box -> nothing; once it has driven off
+      // and then stops on track -> asked again.
+      gruen(); fahren(a, 3); a.tileAt = now - 5000;
+      pitState = 'servicing'; hdAutoScTick(); pitState = 'off'; hdAutoScTick();
+      const stehtInBox = !hdScFrageOffen();
+      fahren(a, 1); a.tileAt = now - 5000; hdAutoScTick();
+      const danachGefragt = hdScFrageOffen();
+      prüfen('standing in the box after the stop: no prompt until it drives off', stehtInBox && danachGefragt,
+             'quiet in box ' + stehtInBox + ', asked after driving off ' + danachGefragt);
+      reset();
+
       // K: while the prompt is open, A/Cross does not also call a pit stop / yellow flag.
       gruen(); fahren(a, 3); a.tileAt = now - 4000; hdAutoScTick();
       const merkPrev = prevYellowFlag;
@@ -706,6 +768,9 @@
     avatarSvg: hdAvatarSvg,
     tick: hdAutoScTick,
     selbsttest: hdSelbsttest,
+    // Tests only: open the safety-car prompt for a stand-in car, read its state.
+    _frage: { auf: () => hdScFrageAuf({ role: 'player', alias: 'Test', device: { id: 'hd-q' } }, 'stand'), offen: hdScFrageOffen, b: hdScTasteB,
+              gesperrt: hdScTasteGesperrt, vsc: hdScVsc },
     // Race simulation hooks for the yellow-flag measurement (tests only).
     sim: { start: () => simStart(), stop: () => simStop('test'), gelb: () => setFlag('yellow'), gruen: () => gelbBeenden(),
            folge: (an) => { hd.gelbFolge = !!an; }, kacheln: () => (currentTrackTiles || []).length, param: (o) => Object.assign(hdFolge, o || {}) },

@@ -475,6 +475,8 @@
   .hd-sc-frage-knoepfe { display: flex; gap: 10px; flex-wrap: wrap; }
   .hd-sc-frage-knoepfe button { flex: 1; min-width: 140px; }
   .hd-sc-frage-knoepfe small { opacity: .75; margin-left: .4em; font-weight: 400; }
+  .hd-sc-frage-knoepfe button.hd-sc-frage-vsc { background: #ffd23f; color: #1a1405; border-color: #ffd23f; font-weight: 700; }
+  .hd-sc-frage-knoepfe button.hd-sc-frage-vsc:hover { background: #ffe27a; }
   .hd-relay { position: fixed; inset: 0; z-index: 9100; background: rgba(3,5,9,.82); display: grid; place-items: center;
               padding: 16px; box-sizing: border-box; overflow: auto; }
   .hd-relay[hidden] { display: none; }
@@ -9787,7 +9789,8 @@
       <span class="hd-sc-frage-wer" id="hd-sc-frage-wer" data-i18n-skip></span>
       <div class="hd-sc-frage-knoepfe">
         <button type="button" class="primary" id="hd-sc-frage-ja">Losschicken <small id="hd-sc-frage-taste" data-i18n-skip></small></button>
-        <button type="button" id="hd-sc-frage-nein">Ignorieren <small data-i18n-skip>Esc</small></button>
+        <button type="button" id="hd-sc-frage-vsc" class="hd-sc-frage-vsc">VSC <small id="hd-sc-frage-vsc-taste" data-i18n-skip>X / V</small></button>
+        <button type="button" id="hd-sc-frage-nein">Ignorieren <small id="hd-sc-frage-nein-taste" data-i18n-skip>B / Esc</small></button>
       </div>
     </div>
   </div>

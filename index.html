@@ -475,6 +475,8 @@
   .hd-sc-frage-knoepfe { display: flex; gap: 10px; flex-wrap: wrap; }
   .hd-sc-frage-knoepfe button { flex: 1; min-width: 140px; }
   .hd-sc-frage-knoepfe small { opacity: .75; margin-left: .4em; font-weight: 400; }
+  .hd-sc-frage-knoepfe button.hd-sc-frage-vsc { background: #ffd23f; color: #1a1405; border-color: #ffd23f; font-weight: 700; }
+  .hd-sc-frage-knoepfe button.hd-sc-frage-vsc:hover { background: #ffe27a; }
   .hd-relay { position: fixed; inset: 0; z-index: 9100; background: rgba(3,5,9,.82); display: grid; place-items: center;
               padding: 16px; box-sizing: border-box; overflow: auto; }
   .hd-relay[hidden] { display: none; }
@@ -9787,7 +9789,8 @@
       <span class="hd-sc-frage-wer" id="hd-sc-frage-wer" data-i18n-skip></span>
       <div class="hd-sc-frage-knoepfe">
         <button type="button" class="primary" id="hd-sc-frage-ja">Losschicken <small id="hd-sc-frage-taste" data-i18n-skip></small></button>
-        <button type="button" id="hd-sc-frage-nein">Ignorieren <small data-i18n-skip>Esc</small></button>
+        <button type="button" id="hd-sc-frage-vsc" class="hd-sc-frage-vsc">VSC <small id="hd-sc-frage-vsc-taste" data-i18n-skip>X / V</small></button>
+        <button type="button" id="hd-sc-frage-nein">Ignorieren <small id="hd-sc-frage-nein-taste" data-i18n-skip>B / Esc</small></button>
       </div>
     </div>
   </div>
@@ -14807,6 +14810,15 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "Weiß": "White",
+    "Schwarz": "Black",
+    "Rot": "Red",
+    "Blau": "Blue",
+    "Grün": "Green",
+    "Gelb": "Yellow",
+    "Lila": "Purple",
+    "Orange": "Orange",
+    "Farbe": "Colour",
     "ACC (Vorgabe)": "ACC (default)",
     "Fahrer am Rand": "Driver at the edge",
     "Eiche hell": "Light oak",
@@ -18706,6 +18718,16 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "Weiß": "Blanco",
+    "Schwarz": "Negro",
+    "Rot": "Rojo",
+    "Blau": "Azul",
+    "Grün": "Verde",
+    "Gelb": "Amarillo",
+    "Lila": "Morado",
+    "Orange": "Naranja",
+    "Farbe": "Color",
+    "keine Autos verbunden": "ningún coche conectado",
     "ACC (Vorgabe)": "ACC (predeterminado)",
     "Nur das Aussehen des Cockpit-Schirms – Anzeigen, Tasten und Physik bleiben, wie sie sind. „ACC“ ist die Vorgabe und an das Rennspiel Assetto Corsa Competizione angelehnt: fast schwarze, kantige Felder mit schmalen blauen Akzentlinien, segmentierte Drehzahlleiste, der Gang groß in der Mitte und die Zeiten wie im Timing-Fenster des Spiels. „Omega“ ist Carbon und weiße Schrift auf Schwarz. „GT3“ sind schwarze Kacheln mit weißer Schrift, auf größten Kontrast getrimmt. „Oldschool“ ist Bernstein auf Schwarz mit sichtbaren Pixelzeilen, breiter Kunststoffblende und Messingschrauben, wie die Vakuumfluoreszenz-Armaturen der 1980er. „Modern“ ist ein weißer Schirm mit schwarzen Bedienflächen und schmaler Alublende, wie die ersten Farb-TFT der 2000er – Regenradar und G-Plot behalten dort ihren dunklen Einsatz, weil sie hell auf dunkel zeichnen und auf Weiß unsichtbar wären. „Klassiker“ ist Walnussfurnier mit Chromschrauben und cremefarbener Schrift auf Schwarzbraun, wie das Armaturenbrett eines Gran Turismo der Sechziger. Die Bedeutungsfarben bleiben in allen Ansichten gleich: der Tankbalken ist grün und der Schaden rot, auch in der Retro-Ansicht – eine Ansicht darf ändern, wie es aussieht, nicht was eine Farbe sagt. Die Voreinstellungen fassen die Ansicht nicht an.": "Solo el aspecto de la pantalla del cockpit – indicadores, botones y física se quedan como están. «ACC» es la opción predeterminada y se inspira en el juego de carreras Assetto Corsa Competizione: paneles casi negros y rectos con finas líneas de acento azules, barra de revoluciones segmentada, la marcha grande en el centro y los tiempos como en la ventana de cronometraje del juego. «Omega» es carbono y letra blanca sobre negro. «GT3» son casillas negras con letra blanca, ajustadas al máximo contraste. «Oldschool» es ámbar sobre negro con líneas de píxeles visibles, un marco ancho de plástico y tornillos de latón, como los instrumentos fluorescentes de vacío de los años 80. «Modern» es una pantalla blanca con controles negros y un marco estrecho de aluminio, como los primeros TFT en color de los años 2000 – el radar de lluvia y el gráfico G conservan ahí su fondo oscuro, porque dibujan claro sobre oscuro y serían invisibles sobre blanco. «Clásico» es chapa de nogal con tornillos cromados y letra crema sobre marrón oscuro, como el salpicadero de un gran turismo de los años sesenta. Los colores con significado son iguales en todas las vistas: la barra del depósito es verde y el daño rojo, también en la vista retro – una vista puede cambiar cómo se ve algo, no lo que dice un color. Los preajustes no tocan la vista.",
     "Fahrer am Rand": "Piloto en el borde",
@@ -60696,6 +60718,12 @@
     { id: 'keine', name: 'keine', hex: '#7a7a7a', ink: '#ffffff', auto: false },
     { id: 'mehrfarbig', name: 'mehrfarbig', hex: '#b0b0b0', ink: '#14161c', auto: false },
   ];
+  // HybridDash: the colour names follow the app language (the list stays German inside, `de`).
+  CAR_COLORS.forEach((c) => {
+    const de = c.name;
+    Object.defineProperty(c, 'de', { value: de, enumerable: false });
+    Object.defineProperty(c, 'name', { get() { try { return lang === 'de' ? de : t(de); } catch (e) { return de; } }, enumerable: true });
+  });
   const CAR_AUTO_COLORS = CAR_COLORS.filter((c) => c.auto !== false);
   // Ausgeschrieben, nicht als Zeichen: "Alpha" liest sich in einer Ergebnisliste, ein
   // einzelnes Alpha sieht dort nach einem Tippfehler aus. Das Zeichen steht im Farbklecks,
@@ -61451,7 +61479,7 @@
     const f = carColor(car);
     const fi = CAR_COLORS.findIndex((c) => c.id === f.id);
     const farbe = (d) => garageFarbeSetzen(car, CAR_COLORS[(fi + d + CAR_COLORS.length) % CAR_COLORS.length].id);
-    box.appendChild(garWertZeile('Farbe ' + garageLabel(car), f.name, () => farbe(-1), () => farbe(1)));
+    box.appendChild(garWertZeile((lang === 'de' ? 'Farbe ' : t('Farbe') + ' · ') + garageLabel(car), f.name, () => farbe(-1), () => farbe(1)));
     box.appendChild(garWertZeile('Marke / Modell', t(carModellName(car.modellId)),
       () => garageModellWechsel(car, -1), () => garageModellWechsel(car, 1)));
     if (car.role === 'ghost') {
@@ -61668,7 +61696,7 @@
       if (fb.id === 'keine') { b.textContent = '∅'; b.style.color = fb.ink; }
       b.className = fb.id === car.colorId ? 'on' : '';
       const wer = fb.auto === false ? null : garage.find(c => c !== car && c.colorId === fb.id);
-      b.title = t(fb.name) + (wer ? ' (schon ' + garageLabel(wer) + ')' : '');
+      b.title = fb.name + (wer ? (lang === 'de' ? ' (schon ' : lang === 'es' ? ' (ya ' : ' (taken by ') + garageLabel(wer) + ')' : '');
       b.setAttribute('aria-label', b.title);
       b.onclick = (ev) => { ev.stopPropagation(); garageFarbeSetzen(car, fb.id); pal.remove(); };
       pal.appendChild(b);
@@ -61755,8 +61783,10 @@
     // Anzeige, drin in der Rechnung.
     const echte = garage.filter((c) => !c.sim);
     $('gar-count').textContent = echte.length
-      ? `${echte.length} Auto${echte.length === 1 ? '' : 's'} verbunden`
-      : 'keine Autos verbunden';
+      ? (lang === 'de' ? `${echte.length} Auto${echte.length === 1 ? '' : 's'} verbunden`
+                       : lang === 'es' ? `${echte.length} coche${echte.length === 1 ? '' : 's'} conectado${echte.length === 1 ? '' : 's'}`
+                       : `${echte.length} car${echte.length === 1 ? '' : 's'} connected`)
+      : t('keine Autos verbunden');
     // ---- DIE GARAGE ALS KARTEN (v0.8.26, Vorschlag B aus mockup/garage-mp.html) --------
     //
     // BESTELLT: "Garage: Implementiere Vorschlag B. Als Bilder nimm die Farben wie vorher
@@ -72414,8 +72444,12 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (resetNow && !prevResetCar) resetCarState();
       prevResetCar = resetNow;
 
-      const downshiftNow = readBindingValue(pad, bindings.downshift) > BUTTON_CAPTURE_THRESHOLD;
-      const upshiftNow = readBindingValue(pad, bindings.upshift) > BUTTON_CAPTURE_THRESHOLD;
+      // HybridDash: X answers VSC in the safety-car prompt; it must not shift down at the same time.
+      const downshiftNow = readBindingValue(pad, bindings.downshift) > BUTTON_CAPTURE_THRESHOLD
+        && !(typeof hdScTasteGesperrt === 'function' && bindings.downshift && bindings.downshift.index === 2 && hdScTasteGesperrt(2));
+      // HybridDash: B ignores the safety-car prompt; it must not shift up at the same time.
+      const upshiftNow = readBindingValue(pad, bindings.upshift) > BUTTON_CAPTURE_THRESHOLD
+        && !(typeof hdScTasteB === 'function' && bindings.upshift && bindings.upshift.index === 1 && hdScTasteB());
       // No gear-range guards here any more: triggerShift() does its own bounds checking
       // and needs to see a downshift AT gear 0 (that is how manual mode selects reverse)
       // and an upshift while in reverse (how it comes back out).
@@ -115500,21 +115534,35 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   const HD_SC_SCHARF_KACHELN = 2;
   const HD_SC_GNADE_MS = 6000;
   const hdSc = { offSeit: new Map(), gruenSeit: 0, letzterStatus: '', sperreBis: 0, letzterFlag: 'green',
-                 zaehler: new Map(), frage: null, ignoriert: new Map() };
+                 zaehler: new Map(), frage: null, ignoriert: new Map(), box: new Map() };
 
   function hdAutoScAn() { return !!hd.autoSc; }
   function hdAutoScFenster() { return Math.max(1000, Math.min(15000, Number(hd.autoScMs) || HD_AUTO_SC_MS)); }
 
+  // REQUESTED: a car stopped in the pit never triggers the safety car prompt. In the pit =
+  // its pit stop is running, it stands on the pit marker tile, or it has not moved since its
+  // stop ended (it still stands in the box: the stagnant timer would fire the moment the
+  // stop is over). The memory clears on the car's first tile change after the stop.
+  function hdInBox(car, boxAktiv) {
+    if (boxAktiv) { hdSc.box.set(car, car.tileAt || 0); return true; }
+    try { if (pitMarkerCode !== null && car.tileCode === pitMarkerCode) return true; } catch (e) { /* no marker */ }
+    if (hdSc.box.has(car)) {
+      if ((car.tileAt || 0) === hdSc.box.get(car)) return true;
+      hdSc.box.delete(car);
+    }
+    return false;
+  }
   function hdRenntAuto(car) {
     if (!car || !car.device) return false;
     if (typeof hdDnfAuto === 'function' && hdDnfAuto(car)) return false;   // retired by race control
-    if (car.role === 'player') return pitState === 'off';
+    if (car.role === 'player') return !hdInBox(car, pitState !== 'off');
     const z = zusatzPlatzVonRolle(car.role);
-    if (z) return !(z.box && z.box.lage && z.box.lage !== 'aus');
+    if (z) return !hdInBox(car, !!(z.box && z.box.lage && z.box.lage !== 'aus'));
     if (car.role === 'ghost' || car.role === 'challenger') {
       const g = car.ghost;
       if (!g || !g.running) return false;
-      if (g.pit || g.nachZiel || g.auslauf) return false;
+      if (hdInBox(car, !!g.pit)) return false;
+      if (g.nachZiel || g.auslauf) return false;
       if (g.aufstellZiel !== undefined && g.aufstellZiel !== null) return false;
       return true;
     }
@@ -115549,7 +115597,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   }
 
   function hdAutoScRuecksetzen(now) {
-    hdSc.gruenSeit = now; hdSc.offSeit.clear(); hdSc.zaehler.clear(); hdSc.ignoriert.clear();
+    hdSc.gruenSeit = now; hdSc.offSeit.clear(); hdSc.zaehler.clear(); hdSc.ignoriert.clear(); hdSc.box.clear();
     hdScFrageZu();
   }
 
@@ -115617,7 +115665,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (box) {
       $('hd-sc-frage-wer').textContent = garageLabel(car) + ' · ' + hdGrundText(grund);
       const b = typeof bindings === 'object' && bindings && bindings.confirm;
-      $('hd-sc-frage-taste').textContent = (b && b.type !== 'none' ? bindingDescription(b) + ' / ' : '') + 'Enter';
+      $('hd-sc-frage-taste').textContent = (b && b.type !== 'none' ? (b.type === 'button' && b.index === 0 ? 'A' : t(bindingDescription(b))) + ' / ' : '') + 'Enter';
+      const n = $('hd-sc-frage-nein-taste'); if (n) n.textContent = (b && b.type === 'button' && b.index === 1 ? '' : 'B / ') + 'Esc';
+      const v = $('hd-sc-frage-vsc-taste'); if (v) v.textContent = (b && b.type === 'button' && b.index === 2 ? '' : 'X / ') + 'V';
       box.hidden = false;
     }
     hdSprechen(hdSatz('frage', { name: garageLabel(car), grund }), 25);
@@ -115634,6 +115684,20 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     hdScFrageZu();
     hdAutoScAusloesen(f.car, f.grund, rennZeitJetzt());
   }
+  // REQUESTED: a virtual safety car as the third answer - the whole field slows to the
+  // safety-car pace, gaps kept, but no safety car goes out (Race Director's VSC).
+  function hdScVsc() {
+    const f = hdSc.frage;
+    if (!f) return;
+    hdScFrageZu();
+    const now = rennZeitJetzt();
+    hdSc.sperreBis = now + HD_AUTO_SC_COOLDOWN_MS;
+    hdSc.offSeit.clear();
+    hdSc.letzterStatus = garageLabel(f.car) + ' – ' + hdGrundText(f.grund) + ' (VSC)';
+    log('HybridDash: virtual safety car – ' + garageLabel(f.car) + ' (' + f.grund + ').', 'err');
+    if (typeof hdRlFlagge === 'function') hdRlFlagge('vsc');
+    hdEinstellungenMalen();
+  }
   function hdScIgnorieren() {
     const f = hdSc.frage;
     if (!f) return;
@@ -115643,29 +115707,50 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     log('HybridDash: safety car dismissed for ' + garageLabel(f.car) + '.', 'info');
   }
   // Confirmation Button on any connected controller (rising edge), and Enter / Esc.
+  // REQUESTED: Ignore on the B button (Xbox; Circle on PlayStation) too. B is upshift by
+  // default, so while the prompt is open - and until B is let go after ignoring - the gearbox
+  // does not see it (hdScTasteB, read by the pad loop in 90-ghosts.js).
+  // Likewise X (Xbox; Square on PlayStation) answers VSC; X is downshift by default.
   let hdPadVorher = false;
+  const HD_B = 1, HD_X = 2;   // standard gamepad mapping: B / Circle, X / Square
+  const hdTaste = { [HD_B]: { vorher: false, gesperrt: false, tun: () => hdScIgnorieren() },
+                    [HD_X]: { vorher: false, gesperrt: false, tun: () => hdScVsc() } };
+  function hdScTasteGesperrt(i) { const k = hdTaste[i]; return !!k && (!!hdSc.frage || k.gesperrt); }
+  function hdScTasteB() { return hdScTasteGesperrt(HD_B); }
   setInterval(() => {
     let jetzt = false;
+    const gedrueckt = {};
     try {
       const b = typeof bindings === 'object' && bindings && bindings.confirm;
-      if (b && b.type !== 'none' && navigator.getGamepads) {
+      const bestIndex = b && b.type === 'button' ? b.index : -1;
+      if (navigator.getGamepads) {
         for (const pad of navigator.getGamepads()) {
-          if (pad && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) { jetzt = true; break; }
+          if (!pad) continue;
+          if (b && b.type !== 'none' && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) jetzt = true;
+          for (const i of [HD_B, HD_X]) if (i !== bestIndex && pad.buttons[i] && pad.buttons[i].pressed) gedrueckt[i] = true;
         }
       }
     } catch (e) { /* no gamepad API */ }
     if (jetzt && !hdPadVorher && hdSc.frage) hdScBestaetigen();
+    for (const i of [HD_B, HD_X]) {
+      const k = hdTaste[i], an = !!gedrueckt[i];
+      if (an && !k.vorher && hdSc.frage) { k.tun(); k.gesperrt = true; }
+      if (!an) k.gesperrt = false;
+      k.vorher = an;
+    }
     hdPadVorher = jetzt;
   }, 40);
   document.addEventListener('keydown', (e) => {
     if (!hdSc.frage) return;
     if (e.key === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); hdScBestaetigen(); }
     else if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); hdScIgnorieren(); }
+    else if (e.key === 'v' || e.key === 'V') { e.preventDefault(); e.stopImmediatePropagation(); hdScVsc(); }
   }, true);
   (function () {
     const j = $('hd-sc-frage-ja'), n = $('hd-sc-frage-nein');
     if (j) j.addEventListener('click', hdScBestaetigen);
     if (n) n.addEventListener('click', hdScIgnorieren);
+    const v = $('hd-sc-frage-vsc'); if (v) v.addEventListener('click', hdScVsc);
   })();
 
   setInterval(hdAutoScTick, 200);
@@ -115999,7 +116084,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       raceState = merk.raceState; flagState = merk.flagState; trackMode = merk.trackMode;
       raceFormationLap = merk.raceFormationLap; pitState = merk.pitState;
       garage.length = 0; merk.garage.forEach(c => garage.push(c));
-      Object.assign(hd, JSON.parse(merk.hd)); Object.assign(hdSc, merk.sc); hdSc.offSeit = new Map(); hdSc.zaehler = new Map(); hdSc.ignoriert = new Map(); hdScFrageZu();
+      Object.assign(hd, JSON.parse(merk.hd)); Object.assign(hdSc, merk.sc); hdSc.offSeit = new Map(); hdSc.zaehler = new Map(); hdSc.ignoriert = new Map(); hdSc.box = new Map(); hdScFrageZu();
       carStoreSchreiben(JSON.parse(merk.store));
     };
     try {
@@ -116081,6 +116166,17 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       prüfen('setting off, pit lane and the safety car itself are ignored', aus && pit && sc, 'off ' + aus + ', pit ' + pit + ', sc ' + sc);
       reset();
 
+      // J2: stop over, the car still stands in the box -> nothing; once it has driven off
+      // and then stops on track -> asked again.
+      gruen(); fahren(a, 3); a.tileAt = now - 5000;
+      pitState = 'servicing'; hdAutoScTick(); pitState = 'off'; hdAutoScTick();
+      const stehtInBox = !hdScFrageOffen();
+      fahren(a, 1); a.tileAt = now - 5000; hdAutoScTick();
+      const danachGefragt = hdScFrageOffen();
+      prüfen('standing in the box after the stop: no prompt until it drives off', stehtInBox && danachGefragt,
+             'quiet in box ' + stehtInBox + ', asked after driving off ' + danachGefragt);
+      reset();
+
       // K: while the prompt is open, A/Cross does not also call a pit stop / yellow flag.
       gruen(); fahren(a, 3); a.tileAt = now - 4000; hdAutoScTick();
       const merkPrev = prevYellowFlag;
@@ -116146,6 +116242,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     avatarSvg: hdAvatarSvg,
     tick: hdAutoScTick,
     selbsttest: hdSelbsttest,
+    // Tests only: open the safety-car prompt for a stand-in car, read its state.
+    _frage: { auf: () => hdScFrageAuf({ role: 'player', alias: 'Test', device: { id: 'hd-q' } }, 'stand'), offen: hdScFrageOffen, b: hdScTasteB,
+              gesperrt: hdScTasteGesperrt, vsc: hdScVsc },
     // Race simulation hooks for the yellow-flag measurement (tests only).
     sim: { start: () => simStart(), stop: () => simStop('test'), gelb: () => setFlag('yellow'), gruen: () => gelbBeenden(),
            folge: (an) => { hd.gelbFolge = !!an; }, kacheln: () => (currentTrackTiles || []).length, param: (o) => Object.assign(hdFolge, o || {}) },
@@ -118127,6 +118226,12 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       raceState = 'racing'; raceStartedAt = rennZeitJetzt() - 184000;
       window.confirm = () => true;
       hdRlFlagge('vsc'); hdRlDnf('d4'); hdRlWetter('rain'); hdRlStrafe('d2', 5); hdRlAus('d3', 'dsq');
+    },
+    // Tests/screenshots only: one stand-in car in the garage (reload the page afterwards).
+    _garage: (farbe) => {
+      garage.push({ role: 'player', alias: 'Mo Kamit', device: { id: 'hd-g1', name: 'HYBRID-G1', gatt: { connected: true } }, colorId: farbe || 'gelb',
+        tileCode: 2, tileCount: 0, tileAt: 0, rx: null, tx: null, ghost: null });
+      carRetag(); renderGarage();
     },
     flagge: hdRlFlagge, gruen: hdRlGruen, rot: hdRlRot, ziel: hdRlZiel, wetter: hdRlWetter, dnf: hdRlDnf, dsq: (id) => hdRlAus(id, 'dsq'), strafe: hdRlStrafe, wieder: hdRlWieder,
     status: () => ({ modus: hdRl.modus, flag: flagState, rot: typeof rennPauseAktiv === 'function' && rennPauseAktiv(),
