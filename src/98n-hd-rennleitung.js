@@ -178,11 +178,11 @@
     if (art === 'dsq') {
       showHudToast('BLACK FLAG · ' + name + ' · DSQ');
       hdRlLog('Black flag: ' + name + ' disqualified', 'dsq');
-      hdRlSag('Black flag. ' + name + ' is disqualified.');
+      hdRlSag('Black flag. ' + (car ? hdSprechName(car, true, 'en') : name) + ' is disqualified.');
     } else {
       showHudToast('DNF · ' + name);
       hdRlLog(name + ' – DNF after ' + runden + ' lap' + (runden === 1 ? '' : 's'), 'dnf');
-      hdRlSag(name + ' is out of the race.');
+      hdRlSag((car ? hdSprechName(car, true, 'en') : name) + ' is out of the race.');
     }
     hdRlNeuMalen();
   }
@@ -191,7 +191,7 @@
   // Time penalty in seconds; 0 clears them all.
   function hdRlStrafe(id, s) {
     id = String(id);
-    const { name } = hdRlName(id);
+    const { car, name } = hdRlName(id);
     if (!s) {
       if (!hdRl.strafe.has(id)) return;
       hdRl.strafe.delete(id);
@@ -203,7 +203,7 @@
       const summe = Math.round(hdStrafeMs(id) / 1000);
       hdRlLog(s + ' second penalty: ' + name + (summe !== s ? ' (total +' + summe + ' s)' : ''), 'strafe');
       showHudToast('+' + s + ' s · ' + name);
-      hdRlSag(s + ' second time penalty for ' + name + '.');
+      hdRlSag(s + ' second time penalty for ' + (car ? hdSprechName(car, false, 'en', true) : name) + '.');
     }
     hdRlNeuMalen();
   }
