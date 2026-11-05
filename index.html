@@ -14810,6 +14810,8 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "Charakter": "Character",
+    "wird beim Start gewürfelt": "rolled at the start",
     "Weiß": "White",
     "Schwarz": "Black",
     "Rot": "Red",
@@ -18718,6 +18720,8 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "Charakter": "Carácter",
+    "wird beim Start gewürfelt": "se sortea en la salida",
     "Weiß": "Blanco",
     "Schwarz": "Negro",
     "Rot": "Rojo",
@@ -60725,17 +60729,6 @@
     Object.defineProperty(c, 'name', { get() { try { return lang === 'de' ? de : t(de); } catch (e) { return de; } }, enumerable: true });
   });
   const CAR_AUTO_COLORS = CAR_COLORS.filter((c) => c.auto !== false);
-  // Ausgeschrieben, nicht als Zeichen: "Alpha" liest sich in einer Ergebnisliste, ein
-  // einzelnes Alpha sieht dort nach einem Tippfehler aus. Das Zeichen steht im Farbklecks,
-  // wo der Platz fuer ein Wort fehlt. Zwoelf, weil acht Farben plus Doppelbelegung.
-  const CAR_TAGS = [
-    { wort: 'Alpha', zeichen: '\u03b1' }, { wort: 'Beta', zeichen: '\u03b2' },
-    { wort: 'Gamma', zeichen: '\u03b3' }, { wort: 'Delta', zeichen: '\u03b4' },
-    { wort: 'Epsilon', zeichen: '\u03b5' }, { wort: 'Zeta', zeichen: '\u03b6' },
-    { wort: 'Eta', zeichen: '\u03b7' }, { wort: 'Theta', zeichen: '\u03b8' },
-    { wort: 'Iota', zeichen: '\u03b9' }, { wort: 'Kappa', zeichen: '\u03ba' },
-    { wort: 'Lambda', zeichen: '\u03bb' }, { wort: 'My', zeichen: '\u03bc' },
-  ];
 
   // Fahrzeugidentitaet, unabhaengig von Alias, Motorsound und Physik.
   const CAR_MODELLE = [
@@ -60977,11 +60970,12 @@
   // Der Buchstabe folgt der Position in der Garage und wird deshalb NICHT gespeichert: er
   // ist die Reihenfolge des Verbindens, keine Eigenschaft des Autos. Trennt man eines aus
   // der Mitte, ruecken die dahinter auf.
+  // HybridDash: car NUMBERS instead of Greek letters - #1, #2, ... in garage order.
   function carRetag() {
     garage.forEach((c, i) => {
-      const t = CAR_TAGS[i] || { wort: 'Auto ' + (i + 1), zeichen: String(i + 1) };
-      c.tag = t.wort;
-      c.tagChar = t.zeichen;
+      c.nummer = i + 1;
+      c.tag = '#' + (i + 1);
+      c.tagChar = String(i + 1);
     });
   }
 
@@ -60996,6 +60990,7 @@
   // auf dem Tisch das war.
   function garageLabel(car) {
     if (car.alias) return car.alias;
+    if (car.nummer) return (lang === 'de' ? 'Auto ' : lang === 'es' ? 'Coche ' : 'Car ') + car.nummer;
     if (car.tag) return car.tag;
     return car.device.name || ('Auto ' + String(car.device.id).slice(0, 6));
   }
@@ -61663,8 +61658,8 @@
     if (car.role !== 'ghost' || !ghostCfg.charakter) return '';
     const ch = car.ghost && car.ghost.charakter;
     if (!ch) {
-      return '<div class="gar-speed"><label>Charakter</label>'
-           + '<b>wird beim Start gewürfelt</b></div>';
+      return '<div class="gar-speed"><label>' + t('Charakter') + '</label>'
+           + '<b>' + t('wird beim Start gewürfelt') + '</b></div>';
     }
     const p = (x) => Math.round(x * 100) + '%';
     const versatz = ch.pitVersatz > 0 ? '+' + ch.pitVersatz : String(ch.pitVersatz);
@@ -66885,7 +66880,12 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // GELB_ABSTAND_MIN nur noch GELB_ABSTAND_BODEN des Gelb-Tempos - ganz anhalten wuerde das
   // Auto unter die Leseschwelle bringen und den Abgangsmelder ausloesen.
   // v1.0.32: Boden 0,7 statt 0,55 (BESTELLT: "damit sie nicht verhungern").
-  const GELB_ABSTAND_VOLL = 1.5, GELB_ABSTAND_MIN = 0.5, GELB_ABSTAND_BODEN = 0.7;
+  // HybridDash v2.2 BESTELLT: "closer bunching under yellow / safety car, about 1-2 car lengths".
+  // A car is 9.5 cm, a tile 43 cm; the gap is measured front to front:
+  // 0.35 tiles leaves ~5 cm of air, 0.65 tiles ~18 cm (two car lengths).
+  // Simulator, 7 cars, 60 s yellow: queue median 0.72 tiles (~2 car lengths of air), closest 0.48,
+  // no contacts, no overtakes. Was 1.5 / 0.5 (queue median ~2 tiles, ~9 car lengths).
+  const GELB_ABSTAND_VOLL = 0.65, GELB_ABSTAND_MIN = 0.35, GELB_ABSTAND_BODEN = 0.7;
   function gelbVordermann(car) {
     const n = currentTrackTiles ? currentTrackTiles.length : 0;
     const a = ghostOrt(car);
@@ -99717,7 +99717,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (mit.farbpunkte !== 2) maengel.push('mit: ' + mit.farbpunkte + ' Farbpunkte statt 2');
     if (mit.leer) maengel.push('mit: als leer gekennzeichnet');
     // 2. Die leere Lage muss die FOLGE nennen, nicht nur schweigen.
-    if (!/Alpha/.test(ohne.text)) maengel.push('ohne: "Alpha" nicht genannt');
+    if (!/Nummer 1|number 1|número 1/i.test(ohne.text)) maengel.push('ohne: "Nummer 1" nicht genannt');
     // Und sie muss sagen, dass keine Autos gemerkt sind - auch wenn sonst etwas liegt
     // (Einstellungen zaehlen nicht als Auto).
     if (!/[Kk]eine? Auto/.test(ohne.text)) maengel.push('ohne: sagt nicht "keine Autos"');
@@ -99731,7 +99731,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     }
     return { ok: !maengel.length,
              mass: 'mit 2 Autos: ' + JSON.stringify(mit.autoNamen)
-                 + ' | leer: ' + (/Alpha/.test(ohne.text) ? 'nennt Alpha' : 'schweigt')
+                 + ' | leer: ' + (/Nummer 1|number 1|número 1/i.test(ohne.text) ? 'nennt Nummer 1' : 'schweigt')
                  + ' | ohne Namen: ' + JSON.stringify(namenlos.autoNamen)
                  + (maengel.length ? ' | ' + maengel.join(', ') : '') };
   });
@@ -103271,9 +103271,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       a.alias = 'Testfahrer';
       const mit = garageLabel(a);
       const ok = !doppelt
-                 && tags.join(',') === 'Alpha,Beta,Gamma'
-                 && nachAbgang.join(',') === 'Alpha,Beta'
-                 && ohne === 'Alpha' && mit === 'Testfahrer';
+                 // HybridDash: car numbers instead of Greek letters.
+                 && tags.join(',') === '#1,#2,#3'
+                 && nachAbgang.join(',') === '#1,#2'
+                 && /^(Auto|Car|Coche) 1$/.test(ohne) && mit === 'Testfahrer';
       return { ok,
                mass: 'Farben ' + farben.join('/') + (doppelt ? ' DOPPELT' : ' verschieden')
                      + ', Buchstaben ' + tags.join('/')
@@ -106053,7 +106054,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       ghostFieldRacing = () => [ich, vorn];
       vorn._o = 2 + GELB_ABSTAND_VOLL + 0.1;
       if (gelbAbstandFaktor(ich) !== 1) f.push('mit Abstand trotzdem gedrosselt');
-      vorn._o = 3;
+      vorn._o = 2 + (GELB_ABSTAND_MIN + GELB_ABSTAND_VOLL) / 2;   // HybridDash: relative to the (closer) limits
       const mitte = gelbAbstandFaktor(ich);
       if (!(mitte > GELB_ABSTAND_BODEN && mitte < 1)) f.push('Zwischenbereich ' + mitte);
       // Ueber die Ziellinie gewickelt: ich auf n-0.2, vorn auf 0.1.
@@ -106963,19 +106964,20 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       let lage = { sc: 5, auto: 5 - 1.0 };
       ghostOrt = (c) => (c === sc ? lage.sc : c === auto ? lage.auto : null);
       const deckel = (abstand) => { lage = { sc: 5, auto: 5 - abstand }; return scFolgeDeckel(auto); };
-      const nahe = deckel(0.4), mitte = deckel(1.0), grenze = deckel(1.49);
-      if (Math.abs(nahe - 0.34 * 0.9) > 1e-9) f.push('0,4 Kacheln dahinter: Grenze ' + nahe + ' statt ' + (0.34 * 0.9));
-      if (!(mitte > nahe && mitte < 0.34)) f.push('1,0 Kachel dahinter: Grenze nicht zwischen 90 und 100 %: ' + mitte);
-      if (!(grenze > mitte && grenze <= 0.34 + 1e-9)) f.push('1,49 Kacheln dahinter: Grenze ' + grenze);
-      if (deckel(1.5) !== Infinity || deckel(3) !== Infinity) f.push('weiter als 1,5 Kacheln dahinter gilt die Grenze noch');
+      // HybridDash v2.2: distances relative to GELB_ABSTAND_MIN / _VOLL (closer queue: 0.35 / 0.65).
+      const nahe = deckel(GELB_ABSTAND_MIN - 0.05), mitte = deckel((GELB_ABSTAND_MIN + GELB_ABSTAND_VOLL) / 2), grenze = deckel(GELB_ABSTAND_VOLL - 0.01);
+      if (Math.abs(nahe - 0.34 * 0.9) > 1e-9) f.push('dicht dahinter: Grenze ' + nahe + ' statt ' + (0.34 * 0.9));
+      if (!(mitte > nahe && mitte < 0.34)) f.push('Mitte: Grenze nicht zwischen 90 und 100 %: ' + mitte);
+      if (!(grenze > mitte && grenze <= 0.34 + 1e-9)) f.push('knapp vor VOLL: Grenze ' + grenze);
+      if (deckel(GELB_ABSTAND_VOLL) !== Infinity || deckel(3) !== Infinity) f.push('weiter als GELB_ABSTAND_VOLL dahinter gilt die Grenze noch');
       // Das Auto liegt VOR dem Safety Car: keine Grenze.
       lage = { sc: 5, auto: 6.0 };
       if (scFolgeDeckel(auto) !== Infinity) f.push('Auto vor dem Safety Car wird begrenzt');
       // Ueber das Rundenende hinweg (das Safety Car kurz hinter Start/Ziel, das Auto davor).
-      lage = { sc: 0.3, auto: n - 0.5 };
-      if (!(scFolgeDeckel(auto) < 0.34)) f.push('Rundenende: keine Grenze bei 0,8 Kacheln Abstand: ' + scFolgeDeckel(auto));
+      lage = { sc: 0.3, auto: n - 0.2 };
+      if (!(scFolgeDeckel(auto) < 0.34)) f.push('Rundenende: keine Grenze bei 0,5 Kacheln Abstand: ' + scFolgeDeckel(auto));
       // Das Safety Car faehrt nicht (parkt/steht): keine Grenze. Das Auto selbst ist das Safety Car: keine Grenze.
-      lage = { sc: 5, auto: 4.5 };
+      lage = { sc: 5, auto: 5 - GELB_ABSTAND_MIN };
       sc.ghost.randHalt = { phase: 'halt' };
       if (scFolgeDeckel(auto) !== Infinity) f.push('geparktes Safety Car begrenzt');
       sc.ghost.randHalt = null;
@@ -112835,7 +112837,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (leer) {
       el.innerHTML = '<b>Im Browser liegt nichts.</b> Ein neu verbundenes Auto bekommt '
                    + 'den n\u00e4chsten freien Namen und die n\u00e4chste freie Farbe '
-                   + '\u2013 das erste also &bdquo;Alpha&ldquo; in Wei\u00df.';
+                   + '\u2013 das erste also Nummer 1 in Wei\u00df.';
     } else {
       let kopf = '<b>Im Browser liegt:</b>';
       // UND DIE FOLGE FUER DAS NAECHSTE AUTO, ausgesprochen. Ohne sie muss man aus
@@ -112844,7 +112846,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
         ? 'Ein bekanntes Auto bekommt seinen Namen und seine Farbe zur\u00fcck; ein neues '
           + 'den n\u00e4chsten freien.'
         : '<b>Keine Autos gemerkt</b> \u2013 ein neu verbundenes bekommt '
-          + '&bdquo;Alpha&ldquo; in Wei\u00df.';
+          + 'Nummer 1 in Wei\u00df.';
       el.innerHTML = kopf + '<div class="sich-punkte">' + teile.join('') + '</div>'
                    + '<div style="margin-top:5px">' + fuss + '</div>';
     }
@@ -115773,7 +115775,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // read threshold for a moment is allowed - the off-track detector gets grace for it (gnadeBis),
   // and the car ahead pulls away, so it never lasts long. Used for NPCs (ghostTick) and for your
   // car's autopilot under yellow (50-drive.js).
-  const hdFolge = { voll: 2.2, eng: 0.8, boden: 0.82, min: 0.26 };
+  // v2.2: closer queue, 1-2 car lengths of air (was voll 2.2, eng 0.8 tiles); see GELB_ABSTAND_* in 90-ghosts.js.
+  const hdFolge = { voll: 0.65, eng: 0.35, boden: 0.82, min: 0.26 };
   function hdFuehrTempo(o, now) {
     if (!o) return null;
     if (o.ghost && o.ghost.running && o.ghost.lastTarget > 0) return o.ghost.lastTarget;
@@ -115839,14 +115842,16 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     es: { weiss: 'blanco', schwarz: 'negro', rot: 'rojo', blau: 'azul', gruen: 'verde', gelb: 'amarillo', lila: 'morado', orange: 'naranja' },
   };
   function hdFarbName(id) { return (HD_FARBEN[lang] || HD_FARBEN.en)[id] || ''; }
-  // What the announcer calls the car: colour + model if a model is set, else colour + tag.
+  // What the announcer calls the car: colour + make and model ("yellow BMW M4 GT3"); without
+  // a model, colour + "car". The car NUMBER is said separately (hdSatz).
   function hdAutoBeschreibung(car) {
     const farbe = carColor(car);
     const farbName = farbe && farbe.auto !== false ? hdFarbName(farbe.id) : '';
     const modell = carModellWert(car.modellId) ? carModellName(car.modellId) : '';
-    if (modell) return (farbName ? farbName + ' ' : '') + modell;
-    return (farbName ? farbName + ' ' : '') + (lang === 'de' ? 'Auto ' : lang === 'es' ? 'coche ' : 'car ') + (car.tag || '');
+    if (lang === 'es') return (modell || 'coche') + (farbName ? ' ' + farbName : '');
+    return (farbName ? farbName + ' ' : '') + (modell || (lang === 'de' ? 'Auto' : 'car'));
   }
+  function hdNummer(car) { return car && car.nummer ? car.nummer : (garage.indexOf(car) + 1 || ''); }
 
   // Hook, called at the end of setCarRole() in 90-ghosts.js.
   function hdRolleGesetzt(car, role) {
@@ -115858,7 +115863,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // While a car is being connected and "Announce all drivers" is on, the connect
     // announcement (hdAutoVerbunden) names it - no second sentence here.
     const imVerbinden = hd.alleAnsagen && garVerbindetGerade.has(String(car.device.id));
-    if (hd.npcAnsage && !imVerbinden) hdSprechen(hdSatz('fahrer', { name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
+    if (hd.npcAnsage && !imVerbinden) hdSprechen(hdSatz('fahrer', { nr: hdNummer(car), name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
     if (typeof renderGarage === 'function') renderGarage();
     if (typeof renderRaceGrid === 'function') renderRaceGrid();
   }
@@ -115867,15 +115872,14 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // colour. Hook, called at the end of garageGeraetAufnehmen() in 90-ghosts.js.
   function hdAutoVerbunden(car) {
     if (!hd.alleAnsagen || !car) return;
-    hdSprechen(hdSatz('verbunden', { name: garageLabel(car), tag: car.tag, auto: hdAutoBeschreibung(car),
-                                     farbe: hdFarbName(carColor(car).id), modell: carModellWert(car.modellId) ? carModellName(car.modellId) : '' }), 10);
+    hdSprechen(hdSatz('verbunden', { nr: hdNummer(car), name: car.alias || '', auto: hdAutoBeschreibung(car) }), 10);
   }
 
   // Give a car a fresh random name (the dice button in the garage).
   function hdNeuerName(car) {
     car.alias = hdZufallsName(hdBelegteNamen(car));
     carRemember(car);
-    if (hd.npcAnsage && car.role === 'ghost') hdSprechen(hdSatz('fahrer', { name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
+    if (hd.npcAnsage && car.role === 'ghost') hdSprechen(hdSatz('fahrer', { nr: hdNummer(car), name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
     renderGarage();
     if (typeof renderRaceGrid === 'function') renderRaceGrid();
   }
@@ -115885,25 +115889,19 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // or the race intro, and obeys the sound switch and the pause.
   function hdSatz(art, x) {
     if (lang === 'de') {
-      if (art === 'fahrer') return 'Neu im Feld: ' + x.name + ', im ' + x.auto + '.';
-      if (art === 'verbunden') return x.name === x.tag
-        ? 'Auto ' + x.tag + ' verbunden' + (x.farbe || x.modell ? ': ' + [x.farbe && x.farbe.replace(/en$/, ''), x.modell].filter(Boolean).join(' ') : '') + '.'
-        : x.name + ' ist verbunden, im ' + x.auto + '.';
+      if (art === 'fahrer') return 'Neu im Feld: ' + x.name + ', Auto Nummer ' + x.nr + ', im ' + x.auto + '.';
+      if (art === 'verbunden') return 'Auto Nummer ' + x.nr + ' verbunden: ' + (x.name ? x.name + ', ' : '') + 'im ' + x.auto + '.';
       if (art === 'frage') return 'Safety Car? ' + x.name + (x.grund === 'off' ? ' ist neben der Strecke.' : ' steht.');
       return 'Safety Car! ' + x.name + (x.grund === 'off' ? ' ist von der Strecke abgekommen.' : ' steht auf der Strecke.');
     }
     if (lang === 'es') {
-      if (art === 'fahrer') return 'Nuevo piloto: ' + x.name + ', en el ' + x.auto + '.';
-      if (art === 'verbunden') return x.name === x.tag
-        ? 'Coche ' + x.tag + ' conectado' + (x.farbe || x.modell ? ': ' + [x.modell, x.farbe].filter(Boolean).join(' ') : '') + '.'
-        : x.name + ' está conectado, en el ' + x.auto + '.';
+      if (art === 'fahrer') return 'Nuevo piloto: ' + x.name + ', coche número ' + x.nr + ', en el ' + x.auto + '.';
+      if (art === 'verbunden') return 'Coche número ' + x.nr + ' conectado: ' + (x.name ? x.name + ', ' : '') + 'el ' + x.auto + '.';
       if (art === 'frage') return '¿Coche de seguridad? ' + x.name + (x.grund === 'off' ? ' está fuera de pista.' : ' está detenido.');
       return '¡Coche de seguridad! ' + x.name + (x.grund === 'off' ? ' se ha salido de la pista.' : ' está detenido en la pista.');
     }
-    if (art === 'fahrer') return 'New driver: ' + x.name + ', driving the ' + x.auto + '.';
-    if (art === 'verbunden') return x.name === x.tag
-      ? 'Car ' + x.tag + ' connected' + (x.farbe || x.modell ? ': ' + [x.farbe, x.modell].filter(Boolean).join(' ') : '') + '.'
-      : x.name + ' is connected, driving the ' + x.auto + '.';
+    if (art === 'fahrer') return 'New driver: ' + x.name + ', car number ' + x.nr + ', driving the ' + x.auto + '.';
+    if (art === 'verbunden') return 'Car number ' + x.nr + ' connected: ' + (x.name ? x.name + ', ' : '') + 'the ' + x.auto + '.';
     if (art === 'frage') return 'Safety car? ' + x.name + (x.grund === 'off' ? ' is off track.' : ' has stopped.');
     return 'Safety car deployed! ' + x.name + (x.grund === 'off' ? ' has gone off track.' : ' has stopped on track.');
   }
@@ -116203,8 +116201,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       prüfen('NPC gets a random driver name', /^\S+ \S+$/.test(nameB) && nameB.length <= 18, nameB);
       prüfen('names are unique and stay', b.alias === nameB && c.alias && c.alias !== b.alias, b.alias + ' / ' + c.alias);
       prüfen('new drivers are announced', jobs === 2, jobs + ' announcements queued');
-      const satz = lang === 'en' ? hdSatz('fahrer', { name: b.alias, auto: hdAutoBeschreibung(b) }) : '';
-      prüfen('announcement names the car', !satz || satz === 'New driver: ' + b.alias + ', driving the red car ' + b.tag + '.', satz);
+      const satz = lang === 'en' ? hdSatz('fahrer', { nr: 2, name: b.alias, auto: hdAutoBeschreibung(b) }) : '';
+      prüfen('announcement names number, driver and car', !satz || satz === 'New driver: ' + b.alias + ', car number 2, driving the red car.', satz);
 
       // G3: "Announce all drivers": a connecting car is announced with driver, car and colour.
       hd.alleAnsagen = true; soundEnabled = true;
@@ -116213,11 +116211,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       hdAutoVerbunden(d);
       const alle = rennAnsagen.jobs.filter(j => j.art === 'hybriddash').length - vorAlle;
       rennAnsagen.jobs = rennAnsagen.jobs.filter(j => j.art !== 'hybriddash');
-      const satzAlle = hdSatz('verbunden', { name: 'Mara Kovac', tag: 'Gamma', auto: 'blue Porsche 911', farbe: 'blue', modell: 'Porsche 911' });
-      const satzTag = hdSatz('verbunden', { name: 'Gamma', tag: 'Gamma', auto: 'blue car Gamma', farbe: 'blue', modell: '' });
+      const satzAlle = hdSatz('verbunden', { nr: 3, name: 'Mara Kovac', auto: 'blue Porsche 911' });
+      const satzTag = hdSatz('verbunden', { nr: 3, name: '', auto: 'blue car' });
       soundEnabled = merkSound; hd.alleAnsagen = false;
       prüfen('announce all drivers: connecting car is announced', alle === 1 && (lang !== 'en' ||
-             (satzAlle === 'Mara Kovac is connected, driving the blue Porsche 911.' && satzTag === 'Car Gamma connected: blue.')),
+             (satzAlle === 'Car number 3 connected: Mara Kovac, the blue Porsche 911.' && satzTag === 'Car number 3 connected: the blue car.')),
              satzAlle + ' | ' + satzTag);
 
       // H: avatar.

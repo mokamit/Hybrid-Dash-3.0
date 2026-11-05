@@ -476,7 +476,7 @@
     if (leer) {
       el.innerHTML = '<b>Im Browser liegt nichts.</b> Ein neu verbundenes Auto bekommt '
                    + 'den n\u00e4chsten freien Namen und die n\u00e4chste freie Farbe '
-                   + '\u2013 das erste also &bdquo;Alpha&ldquo; in Wei\u00df.';
+                   + '\u2013 das erste also Nummer 1 in Wei\u00df.';
     } else {
       let kopf = '<b>Im Browser liegt:</b>';
       // UND DIE FOLGE FUER DAS NAECHSTE AUTO, ausgesprochen. Ohne sie muss man aus
@@ -485,7 +485,7 @@
         ? 'Ein bekanntes Auto bekommt seinen Namen und seine Farbe zur\u00fcck; ein neues '
           + 'den n\u00e4chsten freien.'
         : '<b>Keine Autos gemerkt</b> \u2013 ein neu verbundenes bekommt '
-          + '&bdquo;Alpha&ldquo; in Wei\u00df.';
+          + 'Nummer 1 in Wei\u00df.';
       el.innerHTML = kopf + '<div class="sich-punkte">' + teile.join('') + '</div>'
                    + '<div style="margin-top:5px">' + fuss + '</div>';
     }

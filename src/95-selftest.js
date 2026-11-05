@@ -15828,7 +15828,7 @@
     if (mit.farbpunkte !== 2) maengel.push('mit: ' + mit.farbpunkte + ' Farbpunkte statt 2');
     if (mit.leer) maengel.push('mit: als leer gekennzeichnet');
     // 2. Die leere Lage muss die FOLGE nennen, nicht nur schweigen.
-    if (!/Alpha/.test(ohne.text)) maengel.push('ohne: "Alpha" nicht genannt');
+    if (!/Nummer 1|number 1|número 1/i.test(ohne.text)) maengel.push('ohne: "Nummer 1" nicht genannt');
     // Und sie muss sagen, dass keine Autos gemerkt sind - auch wenn sonst etwas liegt
     // (Einstellungen zaehlen nicht als Auto).
     if (!/[Kk]eine? Auto/.test(ohne.text)) maengel.push('ohne: sagt nicht "keine Autos"');
@@ -15842,7 +15842,7 @@
     }
     return { ok: !maengel.length,
              mass: 'mit 2 Autos: ' + JSON.stringify(mit.autoNamen)
-                 + ' | leer: ' + (/Alpha/.test(ohne.text) ? 'nennt Alpha' : 'schweigt')
+                 + ' | leer: ' + (/Nummer 1|number 1|número 1/i.test(ohne.text) ? 'nennt Nummer 1' : 'schweigt')
                  + ' | ohne Namen: ' + JSON.stringify(namenlos.autoNamen)
                  + (maengel.length ? ' | ' + maengel.join(', ') : '') };
   });
@@ -19382,9 +19382,10 @@
       a.alias = 'Testfahrer';
       const mit = garageLabel(a);
       const ok = !doppelt
-                 && tags.join(',') === 'Alpha,Beta,Gamma'
-                 && nachAbgang.join(',') === 'Alpha,Beta'
-                 && ohne === 'Alpha' && mit === 'Testfahrer';
+                 // HybridDash: car numbers instead of Greek letters.
+                 && tags.join(',') === '#1,#2,#3'
+                 && nachAbgang.join(',') === '#1,#2'
+                 && /^(Auto|Car|Coche) 1$/.test(ohne) && mit === 'Testfahrer';
       return { ok,
                mass: 'Farben ' + farben.join('/') + (doppelt ? ' DOPPELT' : ' verschieden')
                      + ', Buchstaben ' + tags.join('/')
@@ -22164,7 +22165,7 @@
       ghostFieldRacing = () => [ich, vorn];
       vorn._o = 2 + GELB_ABSTAND_VOLL + 0.1;
       if (gelbAbstandFaktor(ich) !== 1) f.push('mit Abstand trotzdem gedrosselt');
-      vorn._o = 3;
+      vorn._o = 2 + (GELB_ABSTAND_MIN + GELB_ABSTAND_VOLL) / 2;   // HybridDash: relative to the (closer) limits
       const mitte = gelbAbstandFaktor(ich);
       if (!(mitte > GELB_ABSTAND_BODEN && mitte < 1)) f.push('Zwischenbereich ' + mitte);
       // Ueber die Ziellinie gewickelt: ich auf n-0.2, vorn auf 0.1.
@@ -23074,19 +23075,20 @@
       let lage = { sc: 5, auto: 5 - 1.0 };
       ghostOrt = (c) => (c === sc ? lage.sc : c === auto ? lage.auto : null);
       const deckel = (abstand) => { lage = { sc: 5, auto: 5 - abstand }; return scFolgeDeckel(auto); };
-      const nahe = deckel(0.4), mitte = deckel(1.0), grenze = deckel(1.49);
-      if (Math.abs(nahe - 0.34 * 0.9) > 1e-9) f.push('0,4 Kacheln dahinter: Grenze ' + nahe + ' statt ' + (0.34 * 0.9));
-      if (!(mitte > nahe && mitte < 0.34)) f.push('1,0 Kachel dahinter: Grenze nicht zwischen 90 und 100 %: ' + mitte);
-      if (!(grenze > mitte && grenze <= 0.34 + 1e-9)) f.push('1,49 Kacheln dahinter: Grenze ' + grenze);
-      if (deckel(1.5) !== Infinity || deckel(3) !== Infinity) f.push('weiter als 1,5 Kacheln dahinter gilt die Grenze noch');
+      // HybridDash v2.2: distances relative to GELB_ABSTAND_MIN / _VOLL (closer queue: 0.35 / 0.65).
+      const nahe = deckel(GELB_ABSTAND_MIN - 0.05), mitte = deckel((GELB_ABSTAND_MIN + GELB_ABSTAND_VOLL) / 2), grenze = deckel(GELB_ABSTAND_VOLL - 0.01);
+      if (Math.abs(nahe - 0.34 * 0.9) > 1e-9) f.push('dicht dahinter: Grenze ' + nahe + ' statt ' + (0.34 * 0.9));
+      if (!(mitte > nahe && mitte < 0.34)) f.push('Mitte: Grenze nicht zwischen 90 und 100 %: ' + mitte);
+      if (!(grenze > mitte && grenze <= 0.34 + 1e-9)) f.push('knapp vor VOLL: Grenze ' + grenze);
+      if (deckel(GELB_ABSTAND_VOLL) !== Infinity || deckel(3) !== Infinity) f.push('weiter als GELB_ABSTAND_VOLL dahinter gilt die Grenze noch');
       // Das Auto liegt VOR dem Safety Car: keine Grenze.
       lage = { sc: 5, auto: 6.0 };
       if (scFolgeDeckel(auto) !== Infinity) f.push('Auto vor dem Safety Car wird begrenzt');
       // Ueber das Rundenende hinweg (das Safety Car kurz hinter Start/Ziel, das Auto davor).
-      lage = { sc: 0.3, auto: n - 0.5 };
-      if (!(scFolgeDeckel(auto) < 0.34)) f.push('Rundenende: keine Grenze bei 0,8 Kacheln Abstand: ' + scFolgeDeckel(auto));
+      lage = { sc: 0.3, auto: n - 0.2 };
+      if (!(scFolgeDeckel(auto) < 0.34)) f.push('Rundenende: keine Grenze bei 0,5 Kacheln Abstand: ' + scFolgeDeckel(auto));
       // Das Safety Car faehrt nicht (parkt/steht): keine Grenze. Das Auto selbst ist das Safety Car: keine Grenze.
-      lage = { sc: 5, auto: 4.5 };
+      lage = { sc: 5, auto: 5 - GELB_ABSTAND_MIN };
       sc.ghost.randHalt = { phase: 'halt' };
       if (scFolgeDeckel(auto) !== Infinity) f.push('geparktes Safety Car begrenzt');
       sc.ghost.randHalt = null;

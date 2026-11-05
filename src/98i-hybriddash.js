@@ -299,7 +299,8 @@
   // read threshold for a moment is allowed - the off-track detector gets grace for it (gnadeBis),
   // and the car ahead pulls away, so it never lasts long. Used for NPCs (ghostTick) and for your
   // car's autopilot under yellow (50-drive.js).
-  const hdFolge = { voll: 2.2, eng: 0.8, boden: 0.82, min: 0.26 };
+  // v2.2: closer queue, 1-2 car lengths of air (was voll 2.2, eng 0.8 tiles); see GELB_ABSTAND_* in 90-ghosts.js.
+  const hdFolge = { voll: 0.65, eng: 0.35, boden: 0.82, min: 0.26 };
   function hdFuehrTempo(o, now) {
     if (!o) return null;
     if (o.ghost && o.ghost.running && o.ghost.lastTarget > 0) return o.ghost.lastTarget;
@@ -365,14 +366,16 @@
     es: { weiss: 'blanco', schwarz: 'negro', rot: 'rojo', blau: 'azul', gruen: 'verde', gelb: 'amarillo', lila: 'morado', orange: 'naranja' },
   };
   function hdFarbName(id) { return (HD_FARBEN[lang] || HD_FARBEN.en)[id] || ''; }
-  // What the announcer calls the car: colour + model if a model is set, else colour + tag.
+  // What the announcer calls the car: colour + make and model ("yellow BMW M4 GT3"); without
+  // a model, colour + "car". The car NUMBER is said separately (hdSatz).
   function hdAutoBeschreibung(car) {
     const farbe = carColor(car);
     const farbName = farbe && farbe.auto !== false ? hdFarbName(farbe.id) : '';
     const modell = carModellWert(car.modellId) ? carModellName(car.modellId) : '';
-    if (modell) return (farbName ? farbName + ' ' : '') + modell;
-    return (farbName ? farbName + ' ' : '') + (lang === 'de' ? 'Auto ' : lang === 'es' ? 'coche ' : 'car ') + (car.tag || '');
+    if (lang === 'es') return (modell || 'coche') + (farbName ? ' ' + farbName : '');
+    return (farbName ? farbName + ' ' : '') + (modell || (lang === 'de' ? 'Auto' : 'car'));
   }
+  function hdNummer(car) { return car && car.nummer ? car.nummer : (garage.indexOf(car) + 1 || ''); }
 
   // Hook, called at the end of setCarRole() in 90-ghosts.js.
   function hdRolleGesetzt(car, role) {
@@ -384,7 +387,7 @@
     // While a car is being connected and "Announce all drivers" is on, the connect
     // announcement (hdAutoVerbunden) names it - no second sentence here.
     const imVerbinden = hd.alleAnsagen && garVerbindetGerade.has(String(car.device.id));
-    if (hd.npcAnsage && !imVerbinden) hdSprechen(hdSatz('fahrer', { name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
+    if (hd.npcAnsage && !imVerbinden) hdSprechen(hdSatz('fahrer', { nr: hdNummer(car), name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
     if (typeof renderGarage === 'function') renderGarage();
     if (typeof renderRaceGrid === 'function') renderRaceGrid();
   }
@@ -393,15 +396,14 @@
   // colour. Hook, called at the end of garageGeraetAufnehmen() in 90-ghosts.js.
   function hdAutoVerbunden(car) {
     if (!hd.alleAnsagen || !car) return;
-    hdSprechen(hdSatz('verbunden', { name: garageLabel(car), tag: car.tag, auto: hdAutoBeschreibung(car),
-                                     farbe: hdFarbName(carColor(car).id), modell: carModellWert(car.modellId) ? carModellName(car.modellId) : '' }), 10);
+    hdSprechen(hdSatz('verbunden', { nr: hdNummer(car), name: car.alias || '', auto: hdAutoBeschreibung(car) }), 10);
   }
 
   // Give a car a fresh random name (the dice button in the garage).
   function hdNeuerName(car) {
     car.alias = hdZufallsName(hdBelegteNamen(car));
     carRemember(car);
-    if (hd.npcAnsage && car.role === 'ghost') hdSprechen(hdSatz('fahrer', { name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
+    if (hd.npcAnsage && car.role === 'ghost') hdSprechen(hdSatz('fahrer', { nr: hdNummer(car), name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
     renderGarage();
     if (typeof renderRaceGrid === 'function') renderRaceGrid();
   }
@@ -411,25 +413,19 @@
   // or the race intro, and obeys the sound switch and the pause.
   function hdSatz(art, x) {
     if (lang === 'de') {
-      if (art === 'fahrer') return 'Neu im Feld: ' + x.name + ', im ' + x.auto + '.';
-      if (art === 'verbunden') return x.name === x.tag
-        ? 'Auto ' + x.tag + ' verbunden' + (x.farbe || x.modell ? ': ' + [x.farbe && x.farbe.replace(/en$/, ''), x.modell].filter(Boolean).join(' ') : '') + '.'
-        : x.name + ' ist verbunden, im ' + x.auto + '.';
+      if (art === 'fahrer') return 'Neu im Feld: ' + x.name + ', Auto Nummer ' + x.nr + ', im ' + x.auto + '.';
+      if (art === 'verbunden') return 'Auto Nummer ' + x.nr + ' verbunden: ' + (x.name ? x.name + ', ' : '') + 'im ' + x.auto + '.';
       if (art === 'frage') return 'Safety Car? ' + x.name + (x.grund === 'off' ? ' ist neben der Strecke.' : ' steht.');
       return 'Safety Car! ' + x.name + (x.grund === 'off' ? ' ist von der Strecke abgekommen.' : ' steht auf der Strecke.');
     }
     if (lang === 'es') {
-      if (art === 'fahrer') return 'Nuevo piloto: ' + x.name + ', en el ' + x.auto + '.';
-      if (art === 'verbunden') return x.name === x.tag
-        ? 'Coche ' + x.tag + ' conectado' + (x.farbe || x.modell ? ': ' + [x.modell, x.farbe].filter(Boolean).join(' ') : '') + '.'
-        : x.name + ' está conectado, en el ' + x.auto + '.';
+      if (art === 'fahrer') return 'Nuevo piloto: ' + x.name + ', coche número ' + x.nr + ', en el ' + x.auto + '.';
+      if (art === 'verbunden') return 'Coche número ' + x.nr + ' conectado: ' + (x.name ? x.name + ', ' : '') + 'el ' + x.auto + '.';
       if (art === 'frage') return '¿Coche de seguridad? ' + x.name + (x.grund === 'off' ? ' está fuera de pista.' : ' está detenido.');
       return '¡Coche de seguridad! ' + x.name + (x.grund === 'off' ? ' se ha salido de la pista.' : ' está detenido en la pista.');
     }
-    if (art === 'fahrer') return 'New driver: ' + x.name + ', driving the ' + x.auto + '.';
-    if (art === 'verbunden') return x.name === x.tag
-      ? 'Car ' + x.tag + ' connected' + (x.farbe || x.modell ? ': ' + [x.farbe, x.modell].filter(Boolean).join(' ') : '') + '.'
-      : x.name + ' is connected, driving the ' + x.auto + '.';
+    if (art === 'fahrer') return 'New driver: ' + x.name + ', car number ' + x.nr + ', driving the ' + x.auto + '.';
+    if (art === 'verbunden') return 'Car number ' + x.nr + ' connected: ' + (x.name ? x.name + ', ' : '') + 'the ' + x.auto + '.';
     if (art === 'frage') return 'Safety car? ' + x.name + (x.grund === 'off' ? ' is off track.' : ' has stopped.');
     return 'Safety car deployed! ' + x.name + (x.grund === 'off' ? ' has gone off track.' : ' has stopped on track.');
   }
@@ -729,8 +725,8 @@
       prüfen('NPC gets a random driver name', /^\S+ \S+$/.test(nameB) && nameB.length <= 18, nameB);
       prüfen('names are unique and stay', b.alias === nameB && c.alias && c.alias !== b.alias, b.alias + ' / ' + c.alias);
       prüfen('new drivers are announced', jobs === 2, jobs + ' announcements queued');
-      const satz = lang === 'en' ? hdSatz('fahrer', { name: b.alias, auto: hdAutoBeschreibung(b) }) : '';
-      prüfen('announcement names the car', !satz || satz === 'New driver: ' + b.alias + ', driving the red car ' + b.tag + '.', satz);
+      const satz = lang === 'en' ? hdSatz('fahrer', { nr: 2, name: b.alias, auto: hdAutoBeschreibung(b) }) : '';
+      prüfen('announcement names number, driver and car', !satz || satz === 'New driver: ' + b.alias + ', car number 2, driving the red car.', satz);
 
       // G3: "Announce all drivers": a connecting car is announced with driver, car and colour.
       hd.alleAnsagen = true; soundEnabled = true;
@@ -739,11 +735,11 @@
       hdAutoVerbunden(d);
       const alle = rennAnsagen.jobs.filter(j => j.art === 'hybriddash').length - vorAlle;
       rennAnsagen.jobs = rennAnsagen.jobs.filter(j => j.art !== 'hybriddash');
-      const satzAlle = hdSatz('verbunden', { name: 'Mara Kovac', tag: 'Gamma', auto: 'blue Porsche 911', farbe: 'blue', modell: 'Porsche 911' });
-      const satzTag = hdSatz('verbunden', { name: 'Gamma', tag: 'Gamma', auto: 'blue car Gamma', farbe: 'blue', modell: '' });
+      const satzAlle = hdSatz('verbunden', { nr: 3, name: 'Mara Kovac', auto: 'blue Porsche 911' });
+      const satzTag = hdSatz('verbunden', { nr: 3, name: '', auto: 'blue car' });
       soundEnabled = merkSound; hd.alleAnsagen = false;
       prüfen('announce all drivers: connecting car is announced', alle === 1 && (lang !== 'en' ||
-             (satzAlle === 'Mara Kovac is connected, driving the blue Porsche 911.' && satzTag === 'Car Gamma connected: blue.')),
+             (satzAlle === 'Car number 3 connected: Mara Kovac, the blue Porsche 911.' && satzTag === 'Car number 3 connected: the blue car.')),
              satzAlle + ' | ' + satzTag);
 
       // H: avatar.
