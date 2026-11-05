@@ -12758,7 +12758,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       prevResetCar = resetNow;
 
       const downshiftNow = readBindingValue(pad, bindings.downshift) > BUTTON_CAPTURE_THRESHOLD;
-      const upshiftNow = readBindingValue(pad, bindings.upshift) > BUTTON_CAPTURE_THRESHOLD;
+      // HybridDash: B ignores the safety-car prompt; it must not shift up at the same time.
+      const upshiftNow = readBindingValue(pad, bindings.upshift) > BUTTON_CAPTURE_THRESHOLD
+        && !(typeof hdScTasteB === 'function' && bindings.upshift && bindings.upshift.index === 1 && hdScTasteB());
       // No gear-range guards here any more: triggerShift() does its own bounds checking
       // and needs to see a downshift AT gear 0 (that is how manual mode selects reverse)
       // and an upshift while in reverse (how it comes back out).

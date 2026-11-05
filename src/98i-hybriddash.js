@@ -178,6 +178,7 @@
       $('hd-sc-frage-wer').textContent = garageLabel(car) + ' · ' + hdGrundText(grund);
       const b = typeof bindings === 'object' && bindings && bindings.confirm;
       $('hd-sc-frage-taste').textContent = (b && b.type !== 'none' ? bindingDescription(b) + ' / ' : '') + 'Enter';
+      const n = $('hd-sc-frage-nein-taste'); if (n) n.textContent = (b && b.type === 'button' && b.index === 1 ? '' : 'B / ') + 'Esc';
       box.hidden = false;
     }
     hdSprechen(hdSatz('frage', { name: garageLabel(car), grund }), 25);
@@ -203,19 +204,29 @@
     log('HybridDash: safety car dismissed for ' + garageLabel(f.car) + '.', 'info');
   }
   // Confirmation Button on any connected controller (rising edge), and Enter / Esc.
-  let hdPadVorher = false;
+  // REQUESTED: Ignore on the B button (Xbox; Circle on PlayStation) too. B is upshift by
+  // default, so while the prompt is open - and until B is let go after ignoring - the gearbox
+  // does not see it (hdScTasteB, read by the pad loop in 90-ghosts.js).
+  let hdPadVorher = false, hdPadBVorher = false, hdBGesperrt = false;
+  const HD_B = 1;   // standard gamepad mapping: B (Xbox) / Circle (PlayStation)
+  function hdScTasteB() { return !!hdSc.frage || hdBGesperrt; }
   setInterval(() => {
-    let jetzt = false;
+    let jetzt = false, bJetzt = false;
     try {
       const b = typeof bindings === 'object' && bindings && bindings.confirm;
-      if (b && b.type !== 'none' && navigator.getGamepads) {
+      const bIstBestaetigen = b && b.type === 'button' && b.index === HD_B;
+      if (navigator.getGamepads) {
         for (const pad of navigator.getGamepads()) {
-          if (pad && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) { jetzt = true; break; }
+          if (!pad) continue;
+          if (b && b.type !== 'none' && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) jetzt = true;
+          if (!bIstBestaetigen && pad.buttons[HD_B] && pad.buttons[HD_B].pressed) bJetzt = true;
         }
       }
     } catch (e) { /* no gamepad API */ }
     if (jetzt && !hdPadVorher && hdSc.frage) hdScBestaetigen();
-    hdPadVorher = jetzt;
+    else if (bJetzt && !hdPadBVorher && hdSc.frage) { hdScIgnorieren(); hdBGesperrt = true; }
+    if (!bJetzt) hdBGesperrt = false;
+    hdPadVorher = jetzt; hdPadBVorher = bJetzt;
   }, 40);
   document.addEventListener('keydown', (e) => {
     if (!hdSc.frage) return;
@@ -706,6 +717,8 @@
     avatarSvg: hdAvatarSvg,
     tick: hdAutoScTick,
     selbsttest: hdSelbsttest,
+    // Tests only: open the safety-car prompt for a stand-in car, read its state.
+    _frage: { auf: () => hdScFrageAuf({ role: 'player', alias: 'Test', device: { id: 'hd-q' } }, 'stand'), offen: hdScFrageOffen, b: hdScTasteB },
     // Race simulation hooks for the yellow-flag measurement (tests only).
     sim: { start: () => simStart(), stop: () => simStop('test'), gelb: () => setFlag('yellow'), gruen: () => gelbBeenden(),
            folge: (an) => { hd.gelbFolge = !!an; }, kacheln: () => (currentTrackTiles || []).length, param: (o) => Object.assign(hdFolge, o || {}) },
