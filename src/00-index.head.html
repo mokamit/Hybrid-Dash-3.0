@@ -6133,7 +6133,9 @@
   html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kt { all: unset; font: 400 13.5px/1.2 var(--b-font); color: var(--c-dim); text-transform: none; letter-spacing: 0; }
   html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kt::before, html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kt::after,
   html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf::before, html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf::after { display: none; }
-  .hdhm-bar .k-quad-punkte { font-size: 11px; }
+  .hdhm-bar .k-quad-punkte { font-size: 11px; min-width: 2.8em; text-align: center; }
+  /* fixed width for the value between the arrows, so the › stays put whatever the mode is called */
+  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf .k-kt { display: inline-block; width: 9.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
   /* ‹ › on the cards that switch */
   html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil { all: unset; box-sizing: border-box; cursor: pointer; display: inline-grid; place-items: center; width: 26px; height: 26px;
     font: 700 20px/1 var(--c-head); color: #fff; background: rgba(225,6,50,.85); border: 0; }
@@ -6152,7 +6154,7 @@
   html body #tab-fahren .k-fahren.hdhm .k-kachel > .k-knopfreihe .k-knopf { font-size: 12px; padding: 4px 8px; background: rgba(10,8,12,.8); }
   /* START: photo with a crimson bar */
   html body #tab-fahren .k-fahren.hdhm #fa-start { clip-path: polygon(0 0, 100% 0, 100% 94%, 95% 100%, 0 100%); justify-content: flex-end; align-items: stretch;
-    background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,.55) 100%), url(img/start.jpg) 40% center / cover no-repeat; text-transform: none; }
+    background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,.55) 100%), var(--hd-start-bild, url(img/start.jpg)) var(--hd-start-pos, center) / cover no-repeat; text-transform: none; }
   html body #tab-fahren .k-fahren.hdhm #fa-start .k-start-innen { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; text-align: left;
     min-height: 82px; padding: 10px 22px; box-sizing: border-box; background: linear-gradient(90deg, #e10632, #a30d2a); width: 100%; }
   #fa-start .k-start-innen .hdhm-icon { border: 0; width: auto; height: auto; } #fa-start .k-start-innen .hdhm-icon svg { width: 38px; height: 38px; }
