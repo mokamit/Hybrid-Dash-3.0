@@ -618,7 +618,7 @@
       const [vor, nach] = hdNameTeile(name);
       const nr = typeof hdNummer === 'function' ? hdNummer(car) : (car.tagChar || i + 1);
       const avatar = typeof hdAvatarSvg === 'function'
-        ? hdAvatarSvg(name, f.hex, typeof hdAvatarStil === 'function' ? hdAvatarStil(car) : 0, 64, carModellWert(car.modellId)) : '';
+        ? (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(car, 64) : hdAvatarSvg(name, f.hex, 0, 64, carModellWert(car.modellId))) : '';
       const ctrl = document.createElement('span');
       ctrl.className = 'hd-sg-ctrl';
       ['.grid-box', '.grid-move'].forEach((sel) => { const el = row.querySelector(sel); if (el) ctrl.appendChild(el); });

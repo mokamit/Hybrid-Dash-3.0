@@ -530,17 +530,71 @@
     h = (h * 60 + 360) % 360;
     return h < 15 || h >= 335 ? 'rot' : h < 42 ? 'orange' : h < 68 ? 'gelb' : h < 170 ? 'gruen' : h < 250 ? 'blau' : 'lila';
   }
-  function hdFotoNr(name, farbeHex, stil) {
+  // The portraits a car colour may use, in order of preference, and where this driver starts in that list.
+  function hdFotoPool(name, farbeHex, stil) {
     const k = hdFarbKlasse(farbeHex);
     const alle = HD_FOTOS.map((_, i) => i);
     const haupt = k ? alle.filter((i) => HD_FOTOS[i][0] === k) : alle;
     const neben = k ? alle.filter((i) => HD_FOTOS[i][0] !== k && HD_FOTOS[i].indexOf(k) > 0) : [];
     const pool = haupt.concat(neben);
-    if (!pool.length) return hdHash(String(name)) % HD_FOTOS.length;
-    return pool[(hdHash(String(name)) % Math.max(1, haupt.length) + (stil || 0)) % pool.length];
+    const start = pool.length ? (hdHash(String(name)) % Math.max(1, haupt.length) + (stil || 0)) % pool.length : 0;
+    return { pool, start };
   }
-  function hdAvatarSvg(name, farbeHex, stil, px, marke) {
-    const nr = hdFotoNr(name, farbeHex, stil);
+  // The preferred portrait (no knowledge of the other cars) - and the first one from there that is still free.
+  function hdFotoNr(name, farbeHex, stil, belegt) {
+    const { pool, start } = hdFotoPool(name, farbeHex, stil);
+    const frei = (i) => !belegt || !belegt.has(i);
+    for (let j = 0; j < pool.length; j++) { const i = pool[(start + j) % pool.length]; if (frei(i)) return i; }
+    // Every portrait of this colour is taken: any free one, starting from the driver's own spot in the full list.
+    const s0 = hdHash(String(name)) % HD_FOTOS.length;
+    for (let j = 0; j < HD_FOTOS.length; j++) { const i = (s0 + j) % HD_FOTOS.length; if (frei(i)) return i; }
+    return pool.length ? pool[start] : s0;       // more cars than portraits: share is unavoidable
+  }
+  // v3.0 BESTELLT: "make sure that no two drivers use the same avatar". Each garage car is GIVEN a portrait once and
+  // keeps it (remembered per car in hd.fotos, saved with the HybridDash settings): a new car takes its preferred
+  // portrait, or the next free one of its colour, or any free one. A car keeps its portrait until its colour no
+  // longer fits it or another car got it first (garage order); a tap moves only that car to the next free one.
+  // So nobody's avatar changes because someone else's did.
+  function hdFotoPasst(nr, hex) { const k = hdFarbKlasse(hex); return !k || HD_FOTOS[nr].indexOf(k) >= 0; }
+  function hdFotoBelegung() {
+    let autos = [];
+    try { autos = garage.filter((c) => c && c.device); } catch (e) { return new Map(); }
+    hd.fotos = hd.fotos || {};
+    const belegt = new Set(), map = new Map();
+    let neu = false;
+    autos.forEach((c) => {
+      const id = String(c.device.id), hex = carColor(c).hex;
+      let nr = hd.fotos[id];
+      if (!(Number.isInteger(nr) && nr >= 0 && nr < HD_FOTOS.length && !belegt.has(nr) && hdFotoPasst(nr, hex))) {
+        nr = hdFotoNr(c.alias || c.tag || garageLabel(c), hex, 0, belegt);
+        hd.fotos[id] = nr; neu = true;
+      }
+      belegt.add(nr); map.set(id, nr);
+    });
+    if (neu) { try { hdSpeichern(); } catch (e) { /* start-up */ } }
+    return map;
+  }
+  // Tap: the next portrait of this car's colour that no other car has (then any free one).
+  function hdFotoWeiter(car) {
+    const id = String(car.device.id), hex = carColor(car).hex;
+    const belegung = hdFotoBelegung();
+    const andere = new Set([...belegung].filter(([cid]) => cid !== id).map(([, nr]) => nr));
+    const { pool } = hdFotoPool(car.alias || car.tag || garageLabel(car), hex, 0);
+    const jetzt = belegung.get(id);
+    const reihe = pool.length ? pool : HD_FOTOS.map((_, i) => i);
+    const ab = Math.max(0, reihe.indexOf(jetzt));
+    for (let j = 1; j <= reihe.length; j++) { const nr = reihe[(ab + j) % reihe.length]; if (!andere.has(nr) && nr !== jetzt) { hd.fotos[id] = nr; return nr; } }
+    for (let j = 1; j <= HD_FOTOS.length; j++) { const nr = ((jetzt || 0) + j) % HD_FOTOS.length; if (!andere.has(nr)) { hd.fotos[id] = nr; return nr; } }
+    return jetzt;
+  }
+  // The avatar of a garage car - unique across the garage.
+  function hdAvatarFuerAuto(car, px) {
+    const name = car.alias || car.tag || garageLabel(car);
+    const nr = hdFotoBelegung().get(String(car.device && car.device.id));
+    return hdAvatarSvg(name, carColor(car).hex, hdAvatarStil(car), px, carModellWert(car.modellId), nr);
+  }
+  function hdAvatarSvg(name, farbeHex, stil, px, marke, festNr) {
+    const nr = Number.isInteger(festNr) ? festNr : hdFotoNr(name, farbeHex, stil);
     const id = 'hdfo' + (++hdAvatarNr);
     const datei = 'img/fahrer/p' + String(nr).padStart(2, '0') + '.jpg';
     return `<svg class="hd-avatar hd-avatar-foto" width="${px}" height="${px}" viewBox="0 0 100 100" aria-hidden="true" data-foto="${nr}">`
@@ -680,7 +734,7 @@
     if (!car || !car.device) return '';
     const name = car.alias || car.tag || garageLabel(car);
     return `<button type="button" class="hd-avatar-knopf" data-hd-avatar="${String(car.device.id).replace(/"/g, '')}" `
-      + `title="${t('Avatar ändern')}">${hdAvatarSvg(name, carColor(car).hex, hdAvatarStil(car), px || 34, carModellWert(car.modellId))}</button>`;
+      + `title="${t('Avatar ändern')}">${hdAvatarFuerAuto(car, px || 34)}</button>`;
   }
   // v3.0: the garage's "Driver and Car Settings" header as a race-weekend grid card - large portrait, the name
   // (the given h3, kept for everything that reads it), the car number on a plate in the car colour, make / model.
@@ -694,7 +748,7 @@
     // A picture, not a button: the controller's menu navigation walks the buttons of this column, and the
     // small avatar in the car list already rolls a new look.
     const name = car.alias || car.tag || garageLabel(car);
-    box.innerHTML = `<span class="hd-gk-bild">${hdAvatarSvg(name, f.hex, hdAvatarStil(car), 112, carModellWert(car.modellId))}</span>`
+    box.innerHTML = `<span class="hd-gk-bild">${hdAvatarFuerAuto(car, 112)}</span>`
       + '<div class="hd-gk-text"></div>';
     const text = box.querySelector('.hd-gk-text');
     text.appendChild(kopf);
@@ -713,6 +767,10 @@
     e.preventDefault(); e.stopPropagation();
     const id = k.getAttribute('data-hd-avatar');
     hd.avatare = hd.avatare || {};
+    // Photos: the next free portrait for this car only (hdFotoWeiter). The style number still counts on for the
+    // drawn fallback.
+    const car = garage.find((c) => c.device && String(c.device.id) === id);
+    if (car) hdFotoWeiter(car);
     hd.avatare[id] = (hd.avatare[id] || 0) + 1;
     hdSpeichern();
     if (typeof renderGarage === 'function') renderGarage();
@@ -918,6 +976,26 @@
              HD_FOTOS[rotNr].indexOf('rot') >= 0 && HD_FOTOS[blauNr].indexOf('blau') >= 0 && HD_FOTOS[weissNr].indexOf('weiss') >= 0
              && rotNr === rot2 && rotNr !== rot3 && /img\/fahrer\/p\d\d\.jpg/.test(svg) && HD_FOTOS.length === 72,
              'red ' + rotNr + ', blue ' + blauNr + ', white ' + weissNr + ', red tap ' + rot3);
+      // H2: no two drivers share an avatar (garage-wide), also when one colour has fewer portraits than cars.
+      {
+        const merkG = garage.slice();
+        try {
+          garage.length = 0; hd.fotos = {};
+          for (let i = 0; i < 12; i++) garage.push(fake('hd-av-' + i, 'ghost', { alias: 'Fahrer ' + (i % 3), colorId: 'rot' }));
+          const nrs = garage.map((c) => hdFotoBelegung().get(String(c.device.id)));
+          // a tap on the first car moves only that car; nobody else's portrait changes
+          hdFotoWeiter(garage[0]);
+          const nach = garage.map((c) => hdFotoBelegung().get(String(c.device.id)));
+          const stabil = nach[0] !== nrs[0] && nach.slice(1).every((n, i) => n === nrs[i + 1]) && new Set(nach).size === 12;
+          const rote = nrs.filter((n) => HD_FOTOS[n].indexOf('rot') >= 0).length;
+          garage.length = 0; hd.fotos = {};
+          for (let i = 0; i < 80; i++) garage.push(fake('hd-av-x' + i, 'ghost', { alias: 'X', colorId: ['rot', 'blau', 'gelb', 'weiss'][i % 4] }));
+          const viele = garage.map((c) => hdFotoBelegung().get(String(c.device.id)));
+          prüfen('avatars: no two drivers share one, a tap changes only that driver - 12 red cars with repeated names get 12 different portraits (red ones first); with 80 cars all 72 are used before any repeats',
+                 new Set(nrs).size === 12 && rote >= 6 && new Set(viele).size === HD_FOTOS.length && stabil,
+                 new Set(nrs).size + ' different of 12 (' + rote + ' red); tap moves only that car: ' + stabil + '; 80 cars -> ' + new Set(viele).size + ' different');
+        } finally { garage.length = 0; merkG.forEach((c) => garage.push(c)); }
+      }
       // I: garage label - which laptop a car is connected to (two-laptop mode only).
       const rolleMerk = hdRelay.rolle;
       try {
