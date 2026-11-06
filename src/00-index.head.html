@@ -400,6 +400,11 @@
   .hdr-manuell summary { cursor: pointer; color: #9aa1b0; font-size: 13px; }
   .hdr-autos-schritt { list-style: none; padding-left: 0; }
   .hdr-paar-status { color: #7cd8ff; }
+  .hdr-vergessen-zeile { display: flex; align-items: center; gap: 10px; margin: 10px 0 0; }
+  .hdr-vergessen-zeile small { color: var(--muted, #a9b2c4); line-height: 1.35; }
+  #hdr-paar-vergessen-host { flex: none; border-color: var(--b-red, #e10600); }
+  .hdr-vergessen-zeile small { margin-top: 0; }
+  .hd-relay[data-zeige="host"] #hdr-paar-vergessen { display: none; }   /* the host has its own, in Quick pairing */
   .hd-relay-chip { cursor: pointer; }
   .hd-relay-chip.an { border-color: #35b45a; color: #7cff9b; }
   .hd-relay-chip.gelb { border-color: #ffd23f; color: #ffd23f; }
@@ -10407,6 +10412,8 @@
           <div class="hdr-code-zeile"><span class="hdr-code" id="hdr-paar-code">&mdash;&mdash;</span>
             <button type="button" class="primary" id="hdr-paar-host">Create pairing code</button>
             <button type="button" id="hdr-paar-neu">New code</button></div>
+          <p class="hdr-vergessen-zeile"><button type="button" id="hdr-paar-vergessen-host">Forget pairing</button>
+            <small>Pairing clash &ndash; the wrong laptop linked, two hosts, or a helper stuck on an old code? Forget the pairing here, then create a new code and type it on the helper.</small></p>
         </div>
         <details class="hdr-manuell"><summary>Pair without internet (copy two codes)</summary>
         <ol>

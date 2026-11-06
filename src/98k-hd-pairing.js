@@ -211,6 +211,22 @@
     hdPaarMerken();
     hdPaarMalen();
   }
+  // v3.0 BESTELLT: "forget pairing on the host laptop in case there is a pairing clash" (two laptops both
+  // acting as host, a helper still on an old code, the wrong laptop linked). A clean slate: the remembered code
+  // and role are dropped, the pairing service is left, the current link is closed and this laptop is neither
+  // host nor helper until you choose again. Pairing again = create a new code and type it on the helper.
+  function hdPaarAllesVergessen() {
+    hdPaarVergessen();
+    try { hdRelaySchliessen(true); } catch (e) { /* not ready */ }
+    try { hdRelay.rolle = null; hdRelay.offen = false; } catch (e) { /* not ready */ }
+    try { localStorage.removeItem(HD_PAAR_STORE); } catch (e) { /* private */ }
+    const box = $('hd-relay'); if (box) delete box.dataset.zeige;
+    const ein = $('hdr-paar-eingabe'); if (ein) ein.value = '';
+    hdPaarStatus('Pairing forgotten. Choose HOST or HELPER and pair again with a new code.');
+    try { hdRelayMalen(); } catch (e) { /* not ready */ }
+    hdPaarMalen();
+    log('Two-laptop mode: pairing forgotten on this laptop.', 'info');
+  }
 
   // After a reload of a HELPER page, reconnect the cars this laptop had permission for (Chrome
   // remembers the Web Bluetooth permission; getDevices() returns them without the chooser).
@@ -236,7 +252,7 @@
     const hc = $('hdr-paar-code');
     if (hc) hc.textContent = hdPaar.rolle === 'host' && hdPaar.code ? hdCodeZeigen(hdPaar.code) : '——';
     const vg = $('hdr-paar-vergessen');
-    if (vg) vg.hidden = !hdPaar.code;
+    if (vg) vg.hidden = !(hdPaar.code || hdRelay.rolle);
     const st = $('hdr-paar-status');
     if (st) st.textContent = hdPaar.status;
     const ein = $('hdr-paar-eingabe');
@@ -254,7 +270,11 @@
     an('hdr-paar-helper', () => hdPaarStarten('helper', ($('hdr-paar-eingabe') || {}).value).catch(fehler));
     const ein = $('hdr-paar-eingabe');
     if (ein) ein.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('hdr-paar-helper').click(); } });
-    an('hdr-paar-vergessen', () => { hdPaarVergessen(); hdRelaySchliessen(false); });
+    const vergessenFragen = () => {
+      if (window.confirm('Forget the pairing on this laptop?\n\nThe link closes and the saved code is deleted. To pair again, create a new code here and type it on the helper laptop.')) hdPaarAllesVergessen();
+    };
+    an('hdr-paar-vergessen', vergessenFragen);
+    an('hdr-paar-vergessen-host', vergessenFragen);
     an('hdr-helper-bekannte', () => hdHelperBekannteVerbinden());
     // Unlink also stops the automatic reconnect (the code stays remembered for "Reconnect").
     an('hdr-trennen', () => { hdPaarStoppen(); hdPaarStatus('Unlinked. Press Pair / Create code to link again.'); });
@@ -271,7 +291,7 @@
   })();
 
   window.HYBRIDDASH_PAAR = Object.freeze({
-    starten: hdPaarStarten, stoppen: () => hdPaarStoppen(), vergessen: hdPaarVergessen, neuerCode: hdCodeNeu,
+    starten: hdPaarStarten, stoppen: () => hdPaarStoppen(), vergessen: hdPaarVergessen, allesVergessen: hdPaarAllesVergessen, neuerCode: hdCodeNeu,
     status: () => ({ code: hdPaar.code, rolle: hdPaar.rolle, aktiv: hdPaar.aktiv, beigetreten: hdPaar.beigetreten,
                      status: hdPaar.status, topic: hdPaar.topic }),
   });
