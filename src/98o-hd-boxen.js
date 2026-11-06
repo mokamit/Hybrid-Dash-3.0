@@ -413,13 +413,13 @@
     try { autopilotZuruecksetzen(1); } catch (e) { /* not ready */ }
     if (text) showHudToast(text);
   }
-  function hdAutoBoxAbbrechen() {
+  function hdAutoBoxAbbrechen(text) {
     if (!hdAuto.stopp) return;
     const vorParken = hdAuto.stopp.phase === 'anfahrt';
-    hdAutoBoxEnde(t('Automatischer Boxenstopp abgebrochen'));
+    hdAutoBoxEnde(text || t('Automatischer Boxenstopp abgebrochen'));
     if (vorParken && pitState === 'limited') setPitState('off');
   }
-  // Hold detection: LB / L1 (or whatever is mapped) held for 1 s starts - or, before parking, cancels.
+  // Hold detection: LB / L1 (or whatever is mapped) held for 1 s starts; it must stay held to the box (released = cancel).
   setInterval(() => {
     let an = false;
     try {
@@ -429,14 +429,20 @@
       }
     } catch (e) { /* no pad */ }
     const imCockpit = (() => { try { return document.body.classList.contains('race-fs') || document.querySelector('.tabpage.active') === $('tab-race'); } catch (e) { return false; } })();
+    hdAutoBoxTaste(an, imCockpit, performance.now());
+  }, 40);
+  // One step of the button logic (40 ms): an = button down, imCockpit = cockpit on screen.
+  function hdAutoBoxTaste(an, imCockpit, now) {
+    // v3.0 BESTELLT: "only if LB is pressed down until it reaches the pit box. If LB is released, the auto pit
+    // stop is cancelled and the car goes back to regular speed." Started by the button: on the way to the box
+    // the button must stay held; letting go cancels (limiter off). Once parking has begun it no longer matters.
+    if (!an && hdAuto.stopp && hdAuto.stopp.perTaste && hdAuto.stopp.phase === 'anfahrt') hdAutoBoxAbbrechen(t('Automatischer Boxenstopp abgebrochen – Taste losgelassen'));
     if (!an || !imCockpit) { hdAuto.gedrueckt = 0; hdAuto.ausgeloest = false; return; }
-    const now = performance.now();
     if (!hdAuto.gedrueckt) { hdAuto.gedrueckt = now; return; }
     if (hdAuto.ausgeloest || now - hdAuto.gedrueckt < HD_AUTOBOX_HALTEN_MS) return;
     hdAuto.ausgeloest = true;
-    if (hdAuto.stopp) { if (hdAuto.stopp.phase === 'anfahrt') hdAutoBoxAbbrechen(); }
-    else hdAutoBoxStarten();
-  }, 40);
+    if (!hdAuto.stopp && hdAutoBoxStarten()) hdAuto.stopp.perTaste = true;
+  }
   // The autopilot for the stop (called from autopilot() in 50-drive.js). null = not active.
   function hdAutoBoxPilot(car, st, motor, regler, fahrerBremse) {
     // Called every physics step - also while the app is still loading, before this file ran.
@@ -588,14 +594,26 @@
       hdAuto.stopp.at -= 2100;
       const a5 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('after the set time (2 s): the car is yours again', a5 === null && !hdAuto.stopp, 'still ' + (hdAuto.stopp && hdAuto.stopp.phase));
-      // Cancel before parking.
-      pitState = 'off'; pitReady = false; ort = 0.2;
-      hdAutoBoxStarten(); hdAutoBoxAbbrechen();
-      ok('hold again before parking: cancelled', !hdAuto.stopp && pitState === 'off', 'pit ' + pitState);
+      // v3.0: the button must stay held until the car reaches its box; released on the way = cancelled.
+      pitState = 'off'; pitReady = false; ort = 0.2; hdAuto.gedrueckt = 0; hdAuto.ausgeloest = false;
+      hdAutoBoxTaste(true, true, 1000); hdAutoBoxTaste(true, true, 1500);
+      const zuFrueh = !hdAuto.stopp;
+      hdAutoBoxTaste(true, true, 2050);
+      ok('button: held 1 s starts (not before)', zuFrueh && hdAuto.stopp && hdAuto.stopp.perTaste && pitState === 'limited', 'stopp ' + !!hdAuto.stopp);
+      hdAutoBoxTaste(true, true, 2500); hdAutoBoxTaste(true, true, 4000);
+      const nochDa = !!hdAuto.stopp;
+      hdAutoBoxTaste(false, true, 4040);
+      ok('released on the way to the box: cancelled, limiter off (back to normal speed)', nochDa && !hdAuto.stopp && pitState === 'off', 'stopp ' + !!hdAuto.stopp + ', pit ' + pitState);
+      hdAutoBoxTaste(true, true, 5000); hdAutoBoxTaste(true, true, 6100);
+      ort = box.k + 0.1; hdAutoBoxPilot(car, st, motor, regler, 0);
+      const parkt = hdAuto.stopp && hdAuto.stopp.phase === 'einparken';
+      hdAutoBoxTaste(false, true, 6200);
+      ok('released once parking has begun: the stop carries on', parkt && hdAuto.stopp && hdAuto.stopp.phase === 'einparken', 'phase ' + (hdAuto.stopp && hdAuto.stopp.phase));
+      hdAutoBoxEnde(null);
     } catch (e) {
       ok('automatic pit stop self-test ran', false, String(e && e.stack || e));
     } finally {
-      hdAuto.stopp = null; hdAuto.sekunden = merk.sek;
+      hdAuto.stopp = null; hdAuto.sekunden = merk.sek; hdAuto.gedrueckt = 0; hdAuto.ausgeloest = false;
       currentTrackTiles = merk.tiles; playerCar = merk.pc; trackMode = merk.tm; flagState = merk.fl; raceFormationLap = merk.form;
       pitReady = merk.pr; ghostOrt = merk.ort;
       if (pitState !== merk.ps) { try { setPitState(merk.ps); } catch (e) { pitState = merk.ps; } }
