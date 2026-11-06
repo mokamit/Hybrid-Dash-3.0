@@ -591,6 +591,17 @@
                      border-radius: 50%; line-height: 0; }
   .hd-avatar-knopf:focus-visible { outline: 2px solid #00d6ff; outline-offset: 2px; }
   .hd-avatar { display: block; }
+  /* v3.0: grid card at the top of "Driver and Car Settings" */
+  .hd-gridkarte { display: flex; align-items: center; gap: 14px; margin: 6px 0 10px; padding: 8px 12px 8px 8px;
+    background: linear-gradient(100deg, rgba(255,255,255,.04), transparent 70%); border-left: 4px solid var(--hd-gk-farbe, #e10600); }
+  .hd-gridkarte .hd-gk-bild { flex: none; }
+  .hd-gridkarte .hd-avatar { border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+  .hd-gk-text { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .hd-gridkarte .gar-a-titel { margin: 0; font-size: clamp(20px, 2vw, 28px); line-height: 1.05; }
+  .hd-gk-zeile { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .hd-gk-nr { min-width: 34px; padding: 2px 10px; text-align: center; font: italic 900 18px/1.2 var(--k-font, sans-serif);
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); }
+  .hd-gk-modell { font: italic 700 14px var(--k-font, sans-serif); color: var(--muted, #a8adb8); text-transform: uppercase; letter-spacing: .06em; }
   .hd-wuerfel { margin-left: .4em; }
   .home-omega { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     font-size: clamp(110px, min(34vw, 50vh), 480px); font-weight: 700; line-height: 1;
@@ -64350,7 +64361,7 @@
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
         <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
-        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
+        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 52) : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
           <b>${t(rolle.name)}</b>
@@ -64433,7 +64444,9 @@
       kopf.className = 'gar-a-titel';
       kopf.setAttribute('data-i18n-skip', '');
       kopf.textContent = car.alias || car.tag || garageLabel(car);
-      rechts.appendChild(kopf);
+      // HybridDash 3.0: a broadcast-style grid card - the large driver portrait beside the name.
+      const gk = typeof hdGridKarte === 'function' ? hdGridKarte(car, kopf) : null;
+      rechts.appendChild(gk || kopf);
       rechts.appendChild(garRollenZeile(car));
       const zb = document.createElement('div');
       zb.className = 'opt-row opt-breit gar-a-aktion gar-a-blinken';
@@ -120284,6 +120297,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const c = (v) => Math.max(0, Math.min(255, Math.round(v * f)));
     return '#' + [c(n >> 16), c((n >> 8) & 255), c(n & 255)].map((v) => v.toString(16).padStart(2, '0')).join('');
   }
+  function hdHeller(hex, f) {
+    const n = parseInt(String(hex).slice(1), 16); if (!(n >= 0)) return hex;
+    const c = (v) => Math.max(0, Math.min(255, Math.round(v + (255 - v) * f)));
+    return '#' + [c(n >> 16), c((n >> 8) & 255), c(n & 255)].map((v) => v.toString(16).padStart(2, '0')).join('');
+  }
   function hdHell(hex) {
     const n = parseInt(String(hex).slice(1), 16); if (!(n >= 0)) return 0.5;
     return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
@@ -120295,65 +120313,114 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const pick = (a) => a[Math.floor(r() * a.length) % a.length];
     const pal = HD_MARKEN_FARBEN[marke] || HD_MARKEN_FARBEN[''];
     const basis = farbeHex && !/^#(7a7a7a|b0b0b0)$/i.test(farbeHex) ? farbeHex : pal[0];
-    // Accents: brand colours that differ from the base (and from each other).
     const akz = pal.filter((c) => c.toLowerCase() !== basis.toLowerCase());
     const a1 = akz[Math.floor(r() * akz.length)];
     const a2 = akz.filter((c) => c !== a1)[Math.floor(r() * (akz.length - 1))] || '#ffffff';
-    // Helmet: car colour most of the time, sometimes a brand colour or white.
-    const helm = r() < 0.65 ? basis : pick([pal[0], '#f4f5f7', '#1c1f24'].filter((c) => c.toLowerCase() !== a1.toLowerCase()));
     const haut = pick(HD_HAUT), haar = pick(HD_HAARE);
-    const helmMuster = Math.floor(r() * 6), anzugMuster = Math.floor(r() * 5);
-    const kante = hdHell(basis) > 0.8 ? 'rgba(0,0,0,.28)' : 'rgba(0,0,0,.18)';
+    const frisur = Math.floor(r() * 6), anzugMuster = Math.floor(r() * 5), bart = r() < 0.3, augen = pick(['#3b2a1e', '#2a1d14', '#4a6a82', '#3f5a3a', '#5b3b24']);
     const id = 'hdav' + (++hdAvatarNr) + '-' + (hdHash(String(name)) % 9973);
     const nummer = 1 + (hdHash(String(name)) % 99);
-    const helmPfad = 'M24 46 C23 25 35 13 51 13 C67 13 78 25 77 44 C76.5 55 73 62 66 66 L35 66 C28 62 24.5 55 24 46 Z';
-    const torso = 'M3 104 C4 85 17 74 36 70.5 L64 70.5 C83 74 96 85 97 104 Z';
-    // Helmet patterns (clipped to the shell) - on the sides, crown and chin, where the raised
-    // visor and the face opening leave the shell visible.
-    const spiegel = (d) => `<path d="${d}" fill="CF"/><path d="${d}" fill="CF" transform="translate(101 0) scale(-1 1)"/>`;
-    const hm = [
-      spiegel('M23 40 L31 35 L37 63 L28 64 Z').replace(/CF/g, a1) + spiegel('M30 36 L32 35 L38 63 L36 63 Z').replace(/CF/g, a2),
-      `<path d="M20 53 C30 60 72 60 82 53 L82 72 L20 72 Z" fill="${a1}"/><path d="M22 51 C32 57.5 70 57.5 80 51" fill="none" stroke="${a2}" stroke-width="1.8"/>`,
-      `<path d="M47 8 H55 V24 H47 Z" fill="${a1}"/>` + spiegel('M24 44 L31 40 L33 47 L25 51 Z').replace(/CF/g, a2) + spiegel('M25 54 L33 50 L35 57 L27 61 Z').replace(/CF/g, a1),
-      spiegel('M22 34 C30 38 26 46 32 50 C27 54 30 60 34 66 L22 66 Z').replace(/CF/g, a1),
-      spiegel(Array.from({ length: 4 }, (_, i) => `M${23 + (i % 2) * 4.5} ${38 + i * 6} h4.5 v6 h-4.5 Z M${27.5 - (i % 2) * 4.5} ${41 + i * 6} h4.5 v3 h-4.5 Z`).join(' ')).replace(/CF/g, a1),
-      `<path d="M10 8 H51 V72 H10 Z" fill="${a1}" opacity=".95"/><path d="M50 8 H52.5 V72 H50 Z" fill="${a2}"/>`,
-    ][helmMuster];
-    // Suit patterns (clipped to the torso).
+    const hautD = hdDunkler(haut, 0.78), hautDD = hdDunkler(haut, 0.62), hautH = hdHeller(haut, 0.12);
+    const haarD = hdDunkler(haar, 0.7), haarH = hdHeller(haar, 0.18);
+    const anzugH = hdHeller(basis, 0.22), anzugD = hdDunkler(basis, 0.58), anzugDD = hdDunkler(basis, 0.42);
+    const patch = hdHell(basis) > 0.7 ? '#2a2e35' : '#f1f2f4';
+    // ---- shapes (viewBox 100 x 100) ----
+    const torso = 'M-3 101 L-1 84 C2 72 13 66 28 63 L40 60.6 L60 60.6 L72 63 C87 66 98 72 101 84 L103 101 Z';
+    const gesicht = 'M33.5 33 C33.5 20.5 41 14 50 14 C59 14 66.5 20.5 66.5 33 C66.5 43.5 63.5 51.5 58 55.5 C55.5 57.4 52.8 58.4 50 58.4 C47.2 58.4 44.5 57.4 42 55.5 C36.5 51.5 33.5 43.5 33.5 33 Z';
+    const haare = [
+      // short crop with a little texture
+      'M32.6 34 C31.6 19 39.5 11 50 11 C60.5 11 68.4 19 67.4 34 C66.5 28 64 24.5 59.5 23 C55 25.6 45.5 26.2 40.6 23.2 C36.6 25 34 28.6 32.6 34 Z',
+      // side part, swept
+      'M32.2 36 C29.6 18.5 40.5 9.4 52 10.2 C62.6 10.8 69.6 18.5 68.2 33 C64.5 23.5 57.5 19.8 48 21.2 C42.5 22.2 37.5 25.6 34.8 31 Z',
+      // buzz cut
+      'M33.4 31.5 C33.4 20.2 41 13.4 50 13.4 C59 13.4 66.6 20.2 66.6 31.5 C62.8 25.4 56.8 22.6 50 22.6 C43.2 22.6 37.2 25.4 33.4 31.5 Z',
+      // curly top
+      'M32.4 34 C31 22 37 12.5 44 11.8 C46 9 51 8.6 53.4 10.6 C57 9 62.5 11.4 64 15 C68 17.5 69 25 67.6 34 C66 28 63 24.6 59 23.6 C54 26.2 45.4 26.4 41 23.6 C36.8 25.4 34 28.8 32.4 34 Z',
+      // longer quiff
+      'M31.4 38 C29.2 20 38.6 8.4 51 8.4 C63.4 8.4 71.2 19 68.8 38 L67 31 C65.6 24.6 61 20.8 54 21.6 C46 19.6 38.8 23.4 34.8 30.4 Z',
+      // fade with a parting line
+      'M33 33 C32.4 19.6 40.4 11.6 50.4 11.8 C60.4 12 67.6 19.6 67 33 C65.8 27 62.4 23.4 57.6 22.2 L44 22.4 C39 23.6 35 27.4 33 33 Z',
+    ];
+    // suit panels (clipped to the torso): shoulder yoke, side panels, chest band, diagonal sash, centre stripe
     const am = [
-      `<path d="M3 92 C9 80 21 73.5 36 70.5 L32 80 C21 82 12 87 6 98 Z M97 92 C91 80 79 73.5 64 70.5 L68 80 C79 82 88 87 94 98 Z" fill="${a1}"/>`,
-      `<path d="M36 70.5 L50 90 L64 70.5 L58.5 70.5 L50 82.5 L41.5 70.5 Z" fill="${a1}"/><path d="M12 104 L18 82 L23.5 82 L18 104 Z M88 104 L82 82 L76.5 82 L82 104 Z" fill="${a2}"/>`,
-      `<path d="M15 76 L25 72.5 L62 104 L50 104 Z" fill="${a1}"/>`,
-      `<path d="M3 93 H97 V98 H3 Z" fill="${a1}"/><path d="M3 100 H97 V103 H3 Z" fill="${a2}"/>`,
-      `<path d="M5 94 C11 82 23 75 36 71.5 L34 76.5 C23 79.5 14 86 9.5 96 Z M95 94 C89 82 77 75 64 71.5 L66 76.5 C77 79.5 86 86 90.5 96 Z" fill="${a1}"/><path d="M44 71 H56 L54 104 H46 Z" fill="${a2}"/>`,
+      `<path d="M1 84 C8 74 20 69.5 34 67 L36 73 C22 75 12 79 4 90 Z M99 84 C92 74 80 69.5 66 67 L64 73 C78 75 88 79 96 90 Z" fill="${a1}"/>`,
+      `<path d="M2 101 L7 80 L13 77 L10 101 Z M98 101 L93 80 L87 77 L90 101 Z" fill="${a1}"/><path d="M13 101 L15 79 L17 78 L16 101 Z M87 101 L85 79 L83 78 L84 101 Z" fill="${a2}"/>`,
+      `<path d="M0 78 H100 V83 H0 Z" fill="${a1}"/><path d="M0 84.5 H100 V86.5 H0 Z" fill="${a2}"/>`,
+      `<path d="M18 70 L27 67.5 L70 101 L56 101 Z" fill="${a1}"/><path d="M27 67.5 L30.5 66.8 L74 101 L70 101 Z" fill="${a2}"/>`,
+      `<path d="M44 66 H56 L55 101 H45 Z" fill="${a1}"/><path d="M42.5 66 H44 L43.6 101 H42 Z M56 66 H57.5 L58 101 H56.4 Z" fill="${a2}"/>`,
     ][anzugMuster];
-    const patch = hdHell(basis) > 0.7 ? '#2a2e35' : '#f1f2f4';   // always readable on the suit
+    // arms crossed: the far forearm (right arm) under, the near one (left arm) over it, a hand on each bicep
+    const armHinten = 'M101 89 C88 87.4 54 84 32 81.4 C25.6 80.8 24.4 90.4 30.6 91.8 C52 95.6 86 99.8 101 101.4 Z';
+    const armVorn = 'M-1 95.6 C3 90 10 88.8 19 88.2 C37 86.6 59 83 71.6 81.2 C78.6 80.2 80.4 89.4 74.4 91 C58 95 34 99.8 14 101.8 L-1 101.8 Z';
+    const handR = 'M72.4 80.8 C75.8 78.2 81.4 78.4 83 81.8 C84.6 85.4 82.4 89.6 78.4 90.4 C75.6 91 73.8 89.4 74.2 87.4 Z';
+    const handL = 'M32.2 81.4 C28.4 79.8 23.8 81.2 23.4 85 C23 88.6 26 91.4 29.6 91 C32 90.6 33.2 88.6 32.4 86.6 Z';
     return `<svg class="hd-avatar" width="${px}" height="${px}" viewBox="0 0 100 100" aria-hidden="true">`
-      + `<defs><clipPath id="${id}-k"><rect x="1" y="1" width="98" height="98" rx="18"/></clipPath>`
-      + `<clipPath id="${id}-h"><path d="${helmPfad}"/></clipPath><clipPath id="${id}-t"><path d="${torso}"/></clipPath></defs>`
+      + `<defs>`
+      + `<clipPath id="${id}-k"><rect x="0.5" y="0.5" width="99" height="99" rx="14"/></clipPath>`
+      + `<clipPath id="${id}-t"><path d="${torso}"/></clipPath>`
+      + `<linearGradient id="${id}-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2e37"/><stop offset="1" stop-color="#0b0d11"/></linearGradient>`
+      + `<radialGradient id="${id}-glow" cx=".5" cy=".95" r=".6"><stop offset="0" stop-color="${basis}" stop-opacity=".55"/><stop offset="1" stop-color="${basis}" stop-opacity="0"/></radialGradient>`
+      + `<linearGradient id="${id}-anzug" x1="0" y1="0" x2="1" y2=".35"><stop offset="0" stop-color="${anzugH}"/><stop offset=".45" stop-color="${basis}"/><stop offset="1" stop-color="${anzugD}"/></linearGradient>`
+      + `<radialGradient id="${id}-haut" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="${hautH}"/><stop offset=".55" stop-color="${haut}"/><stop offset="1" stop-color="${hautD}"/></radialGradient>`
+      + `<linearGradient id="${id}-haar" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="${haarH}"/><stop offset="1" stop-color="${haarD}"/></linearGradient>`
+      + `<linearGradient id="${id}-arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${anzugH}"/><stop offset=".5" stop-color="${basis}"/><stop offset="1" stop-color="${anzugD}"/></linearGradient>`
+      + `<linearGradient id="${id}-armH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${basis}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
+      + `<linearGradient id="${id}-rand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".85" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".35"/></linearGradient>`
+      + `</defs>`
       + `<g clip-path="url(#${id}-k)">`
-      + `<rect width="100" height="100" fill="#eef0f3"/>`
-      // suit
-      + `<path d="${torso}" fill="${basis}" stroke="${kante}" stroke-width="1"/>`
-      + `<g clip-path="url(#${id}-t)">${am}</g>`
-      + `<rect x="25" y="84" width="14" height="6.5" rx="1.2" fill="${patch}"/><rect x="61" y="84" width="14" height="6.5" rx="1.2" fill="${patch}"/>`
-      + `<text x="68" y="89.4" font-family="Inter,system-ui,sans-serif" font-size="5" font-weight="800" text-anchor="middle" fill="${hdHell(patch) > 0.6 ? '#14161c' : '#ffffff'}">${nummer}</text>`
-      // collar and neck
-      + `<path d="M38 63 H62 L64.5 72.5 C58 75.5 42 75.5 35.5 72.5 Z" fill="${hdDunkler(basis, 0.55)}"/>`
-      + `<path d="M43.5 62 H56.5 V69 C53.5 71 46.5 71 43.5 69 Z" fill="${hdDunkler(haut, 0.85)}"/>`
-      // helmet shell + pattern
-      + `<path d="${helmPfad}" fill="${helm}" stroke="${hdHell(helm) > 0.8 ? 'rgba(0,0,0,.3)' : 'rgba(0,0,0,.2)'}" stroke-width="1"/>`
-      + `<g clip-path="url(#${id}-h)">${hm}<path d="M24 52 C30 66 72 66 77 52 L77 70 L24 70 Z" fill="${hdDunkler(helm, 0.82)}"/></g>`
-      // face opening, face, fringe
-      + `<path d="M32 38 C33 31 42 29 51 29 C60 29 68 31 69 38 L68 50 C66 57 58 60 50.5 60 C43 60 35 57 33 50 Z" fill="#1c1f24"/>`
-      + `<path d="M34 39 C35 33 43 31.5 51 31.5 C59 31.5 66 33 67 39 L66 49 C64.5 55 57.5 58 50.5 58 C43.5 58 36.5 55 35 49 Z" fill="${haut}"/>`
-      + `<path d="M34 41 C35 33 43 31.5 51 31.5 C59 31.5 66 33 67 41 C62 36 57 39 52 37 C47 40 41 36 34 41 Z" fill="${haar}"/>`
-      // raised visor
-      + `<path d="M28 34 C31 22 40 18 51 18 C62 18 71 22 74 34 C67 29 60 27.5 51 27.5 C42 27.5 35 29 28 34 Z" fill="#2a2e35"/>`
-      + `<path d="M33 27 C38 22 44 20.5 51 20.5" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.6" stroke-linecap="round"/>`
-      // chin guard vent
-      + `<path d="M44 61.5 H57" stroke="rgba(0,0,0,.35)" stroke-width="1.6" stroke-linecap="round"/>`
-      + `</g></svg>`;
+      // background: dark studio, car-colour glow and two slanted broadcast stripes
+      + `<rect width="100" height="100" fill="url(#${id}-bg)"/>`
+      + `<path d="M64 -2 L80 -2 L44 102 L28 102 Z" fill="${basis}" opacity=".85"/>`
+      + `<path d="M83 -2 L88 -2 L52 102 L47 102 Z" fill="${a1}" opacity=".7"/>`
+      + `<rect width="100" height="100" fill="url(#${id}-glow)"/>`
+      // neck and its shadow
+      + `<path d="M43.4 44 L56.6 44 L57.8 61 C54 64 46 64 42.2 61 Z" fill="${hautD}"/>`
+      + `<path d="M43 48.4 C46.4 53 53.6 53 57 48.4 L57.4 56 C53.6 59 46.4 59 42.6 56 Z" fill="${hautDD}" opacity=".7"/>`
+      // suit, panels, shading, rim light
+      + `<path d="${torso}" fill="url(#${id}-anzug)"/>`
+      + `<g clip-path="url(#${id}-t)">${am}<path d="M0 0 H100 V101 H0 Z" fill="url(#${id}-rand)"/>`
+      + `<rect x="24" y="66.6" width="10" height="4.2" rx="0.8" fill="${patch}"/><rect x="24" y="71.4" width="6.4" height="2.4" rx="0.6" fill="${a2}"/>`
+      + `<rect x="65" y="66.2" width="12" height="5.8" rx="0.9" fill="${patch}"/>`
+      + `<text x="71" y="70.8" font-family="Inter,system-ui,sans-serif" font-size="5" font-weight="900" font-style="italic" text-anchor="middle" fill="${hdHell(patch) > 0.6 ? '#14161c' : '#ffffff'}">${nummer}</text></g>`
+      // high fireproof collar with a zip
+      + `<path d="M39.4 55.6 H60.6 L61.8 64.6 C56.8 67.6 43.2 67.6 38.2 64.6 Z" fill="${anzugDD}"/>`
+      + `<path d="M39.2 62.8 C43.8 65.2 56.2 65.2 60.8 62.8" fill="none" stroke="${a1}" stroke-width="1.2"/>`
+      + `<path d="M50 66 V80" stroke="rgba(0,0,0,.35)" stroke-width="1"/>`
+      // arms crossed
+      + `<g transform="translate(0 -7) translate(0 90) scale(1 1.22) translate(0 -90)">`
+      + `<ellipse cx="2" cy="94" rx="9" ry="9" fill="${anzugD}"/><ellipse cx="98" cy="91" rx="9" ry="9" fill="${anzugDD}"/>`
+      + `<path d="${armHinten}" fill="url(#${id}-armH)"/>`
+      + `<path d="M34 83.6 C52 86 80 89.4 101 91.4" fill="none" stroke="rgba(255,255,255,.18)" stroke-width=".9"/>`
+      + `<path d="${handL}" fill="url(#${id}-haut)"/><path d="M22 86.6 C23.4 86.2 24.8 86.4 26 87" stroke="${hautDD}" stroke-width=".6" fill="none" opacity=".7"/>`
+      + `<path d="M8 99 C30 96.6 56 92.4 76 88.6 L76 92.6 C58 96.6 34 101 12 102.4 Z" fill="rgba(0,0,0,.35)"/>`
+      + `<path d="${armVorn}" fill="url(#${id}-arm)"/>`
+      + `<path d="M62.4 82.6 C65.4 82.1 68.2 81.6 71 81.2 L72.6 90.6 C69.6 91.4 66.8 92.2 63.8 93 Z" fill="${a1}"/>`
+      + `<path d="M4 92.4 C12 89.6 34 88 52 85.4" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1"/>`
+      + `<path d="M10 99.4 C30 97.4 54 93.6 70 90.4" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="1"/>`
+      + `<path d="${handR}" fill="url(#${id}-haut)"/><path d="M76.6 82.6 C78.4 82.2 80 82.8 81 84" stroke="${hautDD}" stroke-width=".6" fill="none" opacity=".7"/>`
+      + `</g>`
+      // head: ears, face, features, hair
+      + `<g transform="translate(8 0.6) scale(.84)">`
+      + `<ellipse cx="33.6" cy="37.5" rx="3.1" ry="5" fill="${hautD}"/><ellipse cx="66.4" cy="37.5" rx="3.1" ry="5" fill="${hautD}"/>`
+      + `<path d="${gesicht}" fill="url(#${id}-haut)"/>`
+      + `<path d="M62.5 30 C64.6 38 63.6 47 58 54 C61.8 50 64.6 43 66 34 Z" fill="${hautDD}" opacity=".35"/>`
+      + (bart ? `<path d="M37.6 45 C39.6 53 45 57.8 50 57.8 C55 57.8 60.4 53 62.4 45 C60 51.6 56 54 50 54 C44 54 40 51.6 37.6 45 Z" fill="${haar}" opacity=".55"/>` : '')
+      // brows, eyes, nose, mouth
+      + `<path d="M39.6 31.6 C41.6 30.2 44.8 30 47 31" stroke="${haarD}" stroke-width="1.5" fill="none" stroke-linecap="round"/>`
+      + `<path d="M53 31 C55.2 30 58.4 30.2 60.4 31.6" stroke="${haarD}" stroke-width="1.5" fill="none" stroke-linecap="round"/>`
+      + `<ellipse cx="43.4" cy="36" rx="2.7" ry="1.45" fill="#f4f1ec"/><ellipse cx="56.6" cy="36" rx="2.7" ry="1.45" fill="#f4f1ec"/>`
+      + `<circle cx="43.6" cy="36" r="1.15" fill="${augen}"/><circle cx="56.4" cy="36" r="1.15" fill="${augen}"/>`
+      + `<circle cx="43.9" cy="35.6" r=".35" fill="#fff"/><circle cx="56.7" cy="35.6" r=".35" fill="#fff"/>`
+      + `<path d="M40.6 35 C42 34 45 34 46.2 35.2 M53.8 35.2 C55 34 58 34 59.4 35" stroke="${hautDD}" stroke-width=".7" fill="none"/>`
+      + `<path d="M50.6 37.4 C51 41.4 52.4 43.6 52 45.2 C51.2 46 49.6 46.2 48.4 45.6" stroke="${hautDD}" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".8"/>`
+      + `<path d="M45.4 49.6 C48 50.8 52 50.8 54.6 49.6" stroke="${hdDunkler(haut, 0.5)}" stroke-width="1.1" fill="none" stroke-linecap="round"/>`
+      + `<path d="M46.8 51.6 C48.6 52.4 51.4 52.4 53.2 51.6" stroke="${hautH}" stroke-width=".8" fill="none" stroke-linecap="round" opacity=".7"/>`
+      // hair
+      + `<path d="${haare[frisur]}" fill="url(#${id}-haar)"/>`
+      + `<path d="M64.6 22 C67.6 28 67.8 38 65.6 46 C64.4 50.4 62 53.6 59.6 55.4" fill="none" stroke="${basis}" stroke-width="1.6" opacity=".55" stroke-linecap="round"/>`
+      + (frisur === 5 ? `<path d="M44 22.4 C47 18 52 15.4 58 15" stroke="${haarH}" stroke-width=".8" fill="none" opacity=".7"/>` : '')
+      + (frisur === 2 ? '' : `<path d="M40 17 C45 13.6 54 13 60 16" stroke="${haarH}" stroke-width=".9" fill="none" opacity=".45" stroke-linecap="round"/>`)
+      + `</g></g></svg>`;
   }
   function hdAvatarStil(car) { return (hd.avatare && hd.avatare[String(car.device.id)]) || 0; }
   // Hook used by the garage card (90-ghosts.js).
@@ -120362,6 +120429,30 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const name = car.alias || car.tag || garageLabel(car);
     return `<button type="button" class="hd-avatar-knopf" data-hd-avatar="${String(car.device.id).replace(/"/g, '')}" `
       + `title="${t('Avatar ändern')}">${hdAvatarSvg(name, carColor(car).hex, hdAvatarStil(car), px || 34, carModellWert(car.modellId))}</button>`;
+  }
+  // v3.0: the garage's "Driver and Car Settings" header as a race-weekend grid card - large portrait, the name
+  // (the given h3, kept for everything that reads it), the car number on a plate in the car colour, make / model.
+  function hdGridKarte(car, kopf) {
+    if (!car || !car.device) return null;
+    const box = document.createElement('div');
+    box.className = 'hd-gridkarte';
+    const f = carColor(car);
+    box.style.setProperty('--hd-gk-farbe', f.hex);
+    const modell = typeof carModellName === 'function' ? carModellName(car.modellId) : '';
+    // A picture, not a button: the controller's menu navigation walks the buttons of this column, and the
+    // small avatar in the car list already rolls a new look.
+    const name = car.alias || car.tag || garageLabel(car);
+    box.innerHTML = `<span class="hd-gk-bild">${hdAvatarSvg(name, f.hex, hdAvatarStil(car), 112, carModellWert(car.modellId))}</span>`
+      + '<div class="hd-gk-text"></div>';
+    const text = box.querySelector('.hd-gk-text');
+    text.appendChild(kopf);
+    const zeile = document.createElement('div');
+    zeile.className = 'hd-gk-zeile';
+    zeile.setAttribute('data-i18n-skip', '');
+    zeile.innerHTML = `<span class="hd-gk-nr" style="background:${f.hex};color:${f.ink || '#fff'}">${hdNummer(car)}</span>`
+      + (modell && !/^(–|-|Nicht zugeordnet|Not assigned)$/i.test(modell) ? `<span class="hd-gk-modell">${String(modell).replace(/[&<>]/g, '')}</span>` : '');
+    text.appendChild(zeile);
+    return box;
   }
   // One delegated listener: garage cards are re-rendered often.
   document.addEventListener('click', (e) => {

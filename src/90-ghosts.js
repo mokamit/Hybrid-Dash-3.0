@@ -2208,7 +2208,7 @@
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
         <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
-        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
+        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 52) : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
           <b>${t(rolle.name)}</b>
@@ -2291,7 +2291,9 @@
       kopf.className = 'gar-a-titel';
       kopf.setAttribute('data-i18n-skip', '');
       kopf.textContent = car.alias || car.tag || garageLabel(car);
-      rechts.appendChild(kopf);
+      // HybridDash 3.0: a broadcast-style grid card - the large driver portrait beside the name.
+      const gk = typeof hdGridKarte === 'function' ? hdGridKarte(car, kopf) : null;
+      rechts.appendChild(gk || kopf);
       rechts.appendChild(garRollenZeile(car));
       const zb = document.createElement('div');
       zb.className = 'opt-row opt-breit gar-a-aktion gar-a-blinken';
