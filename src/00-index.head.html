@@ -6139,8 +6139,12 @@
   /* fixed width for the value between the arrows, so the › stays put whatever the mode is called */
   html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf .k-kt { display: inline-block; width: 9.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
   /* ‹ › on the cards that switch */
-  html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil { all: unset; box-sizing: border-box; cursor: pointer; display: inline-grid; place-items: center; width: 26px; height: 26px;
-    font: 700 20px/1 var(--c-head); color: #fff; background: rgba(225,6,50,.85); border: 0; }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil { all: unset; box-sizing: border-box; cursor: pointer; display: inline-grid; place-items: center; flex: none;
+    width: 30px; height: 30px; color: #fff; background: var(--c-red); border: 0; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil svg { display: block; width: 18px; height: 18px; }
+  /* nothing in the row may shrink, so the arrows stand still on every card and for every value */
+  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf > * { flex: none; }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-text { flex: none; }
   html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil:hover { background: #ff1f4b; }
   html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil:focus-visible { outline: 2px solid #fff; }
   /* details on the right of the bar (Race options: duration · weather · pit stops; Track: pieces · code) */

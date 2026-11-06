@@ -61,7 +61,7 @@
         const b = document.createElement('button');
         b.type = 'button'; b.className = 'k-arrow hdhm-pfeil'; b.dataset.quad = k.dataset.quad; b.dataset.dir = String(dir);
         b.setAttribute('aria-label', dir < 0 ? t('Vorherige') : t('Nächste'));
-        b.textContent = dir < 0 ? '‹' : '›';
+        b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="' + (dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         b.addEventListener('click', (e) => { e.stopPropagation(); konsoleQuadWechsel(k.dataset.quad, dir); });
         return b;
       };
