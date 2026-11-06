@@ -819,13 +819,30 @@
     const modus = rm.selectedOptions[0] ? rm.selectedOptions[0].textContent : '';
     $('fa-renn-titel').textContent = modus;
     // Rennoptionen-Kachel wechselt mit dem Rennmodus das Bild (BESTELLT v0.8.53).
-    const rmBild = { practice: 'rennoptionen-practice', endurance: 'rennoptionen-endurance',
-                     qualifying: 'rennoptionen-qualifying', laps: 'rennoptionen-laps',
-                     knockout: 'knockout', derby: 'derby', bestzeit: 'rennoptionen-bestzeit' }[rm.value];
+    // v3.0 BESTELLT: "Every time you change the race option, the picture in the start race card should also change, to a
+    // similar corresponding picture for that race mode" and "change the picture for the qualifying card". Two photos per
+    // mode: a wide HD one for the wide Race options card, a tall one for the tall START card.
+    const rmBilder = {
+      practice: ['rennoptionen-practice-bg', 'rennoptionen-practice'],
+      bestzeit: ['fahren', 'rennoptionen-bestzeit'],
+      qualifying: ['rennen', 'haupt-bg'],
+      laps: ['rennoptionen-laps-bg', 'rennoptionen-laps'],
+      endurance: ['rennoptionen-endurance-bg', 'rennoptionen-endurance'],
+      knockout: ['titel-bg', 'knockout'],
+      derby: ['auto', 'derby'],
+    }[rm.value];
+    const rmBild = rmBilder && rmBilder[0];
     const rb = $('fa-renn-bild');
     if (rb && rmBild && rb.dataset.bild !== rmBild) {
       rb.style.backgroundImage = 'url(img/' + rmBild + '.jpg)';
       rb.dataset.bild = rmBild;
+    }
+    const sb = $('fa-start');
+    if (sb && rmBilder && sb.dataset.bild !== rmBilder[1]) {
+      sb.style.setProperty('--hd-start-bild', 'url(img/' + rmBilder[1] + '.jpg)');
+      // where the subject sits in a wide photo cropped to the tall card
+      sb.style.setProperty('--hd-start-pos', rmBilder[1] === 'haupt-bg' ? '24% center' : 'center');
+      sb.dataset.bild = rmBilder[1];
     }
     const wx = $('race-wx-start');
     kZeilen($('fa-renn-info'), [
