@@ -822,15 +822,11 @@
     // v3.0 BESTELLT: "Every time you change the race option, the picture in the start race card should also change, to a
     // similar corresponding picture for that race mode" and "change the picture for the qualifying card". Two photos per
     // mode: a wide HD one for the wide Race options card, a tall one for the tall START card.
-    const rmBilder = {
-      practice: ['rennoptionen-practice-bg', 'rennoptionen-practice'],
-      bestzeit: ['fahren', 'rennoptionen-bestzeit'],
-      qualifying: ['rennen', 'haupt-bg'],
-      laps: ['rennoptionen-laps-bg', 'rennoptionen-laps'],
-      endurance: ['rennoptionen-endurance-bg', 'rennoptionen-endurance'],
-      knockout: ['titel-bg', 'knockout'],
-      derby: ['auto', 'derby'],
-    }[rm.value];
+    // v3.0 GEMELDET: "I found some more blurry, pixelated photos." The old card photos were upscaled from about 500 px;
+    // these come from the owner's HD originals (2752 x 1536): img/modus/<mode>-breit (Race options) and -hoch (START,
+    // already cut around the subject).
+    const rmBilder = ['practice', 'bestzeit', 'qualifying', 'laps', 'endurance', 'knockout', 'derby'].includes(rm.value)
+      ? ['modus/' + rm.value + '-breit', 'modus/' + rm.value + '-hoch'] : null;
     const rmBild = rmBilder && rmBilder[0];
     const rb = $('fa-renn-bild');
     if (rb && rmBild && rb.dataset.bild !== rmBild) {
@@ -840,8 +836,6 @@
     const sb = $('fa-start');
     if (sb && rmBilder && sb.dataset.bild !== rmBilder[1]) {
       sb.style.setProperty('--hd-start-bild', 'url(img/' + rmBilder[1] + '.jpg)');
-      // where the subject sits in a wide photo cropped to the tall card
-      sb.style.setProperty('--hd-start-pos', rmBilder[1] === 'haupt-bg' ? '24% center' : 'center');
       sb.dataset.bild = rmBilder[1];
     }
     const wx = $('race-wx-start');

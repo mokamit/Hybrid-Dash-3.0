@@ -6119,6 +6119,8 @@
   html body #tab-fahren .k-fahren.hdhm .k-kachel { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
     min-height: 150px; padding: 0; border: 1px solid rgba(255,255,255,.14); outline: 0; background: #120d12; }
   html body #tab-fahren .k-fahren.hdhm .k-kachel > .k-kb { position: absolute; inset: 0; height: auto; filter: none !important; margin: 0; border: 0; }
+  /* the old dark overlay (text used to sit on the photo) - the label bar now carries the text */
+  html body #tab-fahren .k-fahren.hdhm .k-kachel > .k-kb::after { background: linear-gradient(180deg, rgba(10,8,12,0) 55%, rgba(10,8,12,.45) 100%) !important; }
   html body #tab-fahren .k-fahren.hdhm .k-kachel.menu-nav-sel, html body #tab-fahren .k-fahren.hdhm .k-kachel:hover { outline: 3px solid var(--c-red); outline-offset: -3px; }
   html body #tab-fahren #fa-profil.k-meister { background: url(img/meisterschaft-bg.jpg) 36% center / cover no-repeat; }
   /* the bottom bar */
