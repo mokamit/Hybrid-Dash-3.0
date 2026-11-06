@@ -12789,7 +12789,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // Spieler 2 zuerst, und ohne Bedingung auf `pad`: sein Eingang muss auch dann auf null
     // gehen, wenn Spieler 1 gar kein Pad hat (der Rumpf darunter kehrt dann frueh zurueck).
     for (const z of zusatzPlaetze()) {
-      if (zweiSpieler) pollPadZusatz(spieler['p' + z.nr] || null, z);
+      // v3.0 multiplayer (98r-hd-mehrspieler.js): a remote player's controller snapshot drives this slot instead of a local pad.
+      const fern = typeof hdMpPadFuer === 'function' ? hdMpPadFuer(z.nr) : null;
+      if (zweiSpieler) pollPadZusatz(fern || spieler['p' + z.nr] || null, z);
       else {
         z.steer = 0; z.throttle = 0;
         if (typeof gasBremseRueckwaertsPruefen === 'function') gasBremseRueckwaertsPruefen(0, 0, z);
