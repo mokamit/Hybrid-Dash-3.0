@@ -33,10 +33,10 @@
   // BESTELLT (v0.9.20): "Tausche die Tabs WLAN MEHRSPIELER und CHALLENGES (zuerst CHALLENGES)".
   // v1.3.5 BESTELLT: "WLAN-Mehrspieler nicht als eigenen Tab, sondern als Button in der
   // FAHREN -> Garage-Kachel" - mp ist jetzt eine tiefe Seite unter Fahren (#fa-mp).
-  const K_EBENE1 = ['fahren', 'challenges', 'garage', 'options', 'misc'];   // v3.0: Garage on the top bar (Crimson Paddock mock-up)
+  const K_EBENE1 = ['fahren', 'challenges', 'garage', 'hdmp', 'options', 'misc'];   // v3.0: Garage on the top bar (Crimson Paddock mock-up)
   const K_NAME = {
     home: 'Titel', fahren: 'Rennleitung', garage: 'Garage', race: 'Cockpit',
-    options: 'Optionen', control: 'Renneinstellungen', track: 'Strecke', mp: 'WLAN Mehrspieler',
+    options: 'Optionen', control: 'Renneinstellungen', track: 'Strecke', mp: 'WLAN Mehrspieler', hdmp: 'Mehrspieler',
     info: 'Info', challenges: 'Challenges', misc: 'Entwickler', doc: 'Doku', school: 'Programmierschule',
     dev: 'BLE-Werkbank', selftest: 'Selbsttest', probe: 'Code-Sonde', numtrain: 'Zahlensysteme',
     record: 'Aufnahme-Modus',
@@ -44,13 +44,13 @@
   // Zu welchem Reiter der Ebene 1 eine tiefe Seite gehoert: der Reiter bleibt hervorgehoben,
   // und Kreis fuehrt dorthin, wenn der Stapel leer ist.
   const K_ELTERN = {
-    info: 'options', control: 'fahren', track: 'fahren', mp: 'fahren',
+    info: 'options', control: 'fahren', track: 'fahren', mp: 'hdmp',
     doc: 'misc', school: 'misc', dev: 'misc', selftest: 'misc', probe: 'misc',
     numtrain: 'misc', record: 'misc',
   };
   const K_BILD = {
     home: 'titel', fahren: 'fahren', garage: 'garage', control: 'rennen',
-    mp: 'mehrspieler', options: 'optionen', info: 'info', challenges: 'challenges', misc: 'mehrspieler',
+    mp: 'mehrspieler', hdmp: 'mehrspieler', options: 'optionen', info: 'info', challenges: 'challenges', misc: 'mehrspieler',
   };
 
   let kStapel = [];
@@ -1104,7 +1104,7 @@
     kn('fa-auto', (e) => { if (!e.target.closest('.k-knopf')) konsoleAuto(); });
     kn('fa-verbinden', () => { konsoleVerbinden(); });
     kn('fa-garage', () => konsoleZeige('garage'));
-    kn('fa-mp', () => konsoleZeige('mp'));
+    kn('fa-mp', () => konsoleZeige('hdmp'));   // v3.0: the new Multiplayer tab (the older phone-hosted modes are linked from it)
     kn('fa-start', () => { konsoleLosfahren(); });
     // v1.1.3 BESTELLT: "Tippe ich bei der Kachel STRECKE auf STRECKE oder AUF DER BAHN, soll
     // umgeschaltet werden; tippe ich auf das Bild, oeffnet sich das Menue dazu." Vorher schaltete nur

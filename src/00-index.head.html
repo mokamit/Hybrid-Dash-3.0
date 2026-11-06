@@ -6097,6 +6097,97 @@
   #hd-tasten .hdt i.sq { border-radius: 5px; width: auto; padding: 0 5px; border: 2px solid var(--c-dim); color: var(--c-dim); height: 18px; }
   body.hd-tasten-an main { padding-bottom: 44px; }
 
+  /* ---- Multiplayer tab and the player window (98r-hd-mehrspieler.js) ---- */
+  .hdmp-karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin: 16px 0; }
+  .hdmp-karte { padding: 18px 20px; background: rgba(255,255,255,.03); border: 1px solid var(--c-line-2); }
+  .hdmp-karte h3 { margin: 0 0 10px; font-size: 26px; }
+  .hdmp-gross { font: 700 20px/1 var(--c-head); letter-spacing: .04em; text-transform: uppercase; padding: 12px 22px; border-radius: 0; cursor: pointer; }
+  .hdmp-code { display: flex; flex-direction: column; margin: 4px 0 10px; }
+  .hdmp-code small { font: 700 12px/1 var(--b-font); letter-spacing: .16em; color: var(--c-pink); text-transform: uppercase; }
+  .hdmp-code b { font: 700 clamp(48px, 6vw, 84px)/1 var(--c-head); letter-spacing: .08em; color: #fff; }
+  .hdmp-link { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--c-dim); word-break: break-all; }
+  .hdmp-liste { list-style: none; padding: 0; margin: 8px 0 14px; }
+  .hdmp-liste li { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.4fr) auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid rgba(255,255,255,.12); margin-bottom: 6px; }
+  .hdmp-mess { font-variant-numeric: tabular-nums; color: var(--c-dim); font-size: 13px; }
+  .hdmp-feld-ein { display: flex; flex-direction: column; gap: 4px; margin: 0 0 12px; }
+  .hdmp-feld-ein span { font: 700 12px/1 var(--b-font); letter-spacing: .14em; text-transform: uppercase; color: var(--c-pink); }
+  .hdmp-feld-ein input { font: 600 22px/1.2 var(--c-head); letter-spacing: .06em; padding: 8px 12px; background: rgba(10,8,12,.7); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 0; }
+  #hdmp-code { text-transform: uppercase; letter-spacing: .2em; }
+  .hdmp-status { color: #ffd166; }
+  .hdmp-fuss { font-size: 12.5px; }
+  .hd-mp-fenster { position: fixed; inset: 0; z-index: 9000; background: radial-gradient(120% 90% at 0% 0%, rgba(90,7,22,.9), rgba(10,8,12,.97) 55%), #0a080c;
+    color: var(--c-text); font-family: var(--b-font); overflow: auto; touch-action: manipulation; }
+  .hd-mp-fenster[hidden] { display: none; }
+  body.hd-mp-fenster-an { overflow: hidden; }
+  .hdmp-rahmen { min-height: 100%; display: flex; flex-direction: column; }
+  .hdmp-kopf { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; padding: 10px clamp(12px, 3vw, 40px); background: rgba(10,8,12,.8); border-bottom: 2px solid var(--c-red-2); }
+  .hdmp-marke { font: italic 700 22px/1 var(--c-head); letter-spacing: .02em; }
+  .hdmp-marke i { font-style: normal; background: var(--c-red); padding: 0 6px; margin-left: 4px; font-size: 15px; vertical-align: 2px; }
+  .hdmp-raum { font-size: 13px; color: var(--c-dim); } .hdmp-raum b { color: #fff; font-family: var(--c-head); font-size: 18px; letter-spacing: .1em; }
+  .hdmp-verb { font-size: 13px; } .hdmp-verb.an { color: #3ddc84; } .hdmp-verb.aus { color: #ff8a99; }
+  .hdmp-tabs { display: inline-flex; gap: 6px; margin-left: auto; }
+  .hdmp-tabs button, .hdmp-raus { font: 600 17px/1 var(--c-head); letter-spacing: .04em; text-transform: uppercase; padding: 8px 14px; color: #f0eaec; background: rgba(20,6,10,.55); border: 2px solid var(--c-red-2); border-radius: 0; cursor: pointer; }
+  .hdmp-tabs button.an { background: var(--c-red); border-color: var(--c-red); color: #fff; }
+  .hdmp-tabs button:disabled { opacity: .4; cursor: default; }
+  .hdmp-raus { border-color: rgba(255,255,255,.3); }
+  .hdmp-inhalt { flex: 1; padding: clamp(12px, 3vw, 36px); display: flex; flex-direction: column; gap: 14px; }
+  .hdmp-inhalt h2 { margin: 0; font-size: clamp(30px, 4vw, 56px); }
+  .hdmp-warten { margin: auto; max-width: 520px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .hdmp-spinner { width: 54px; height: 54px; border-radius: 50%; border: 5px solid rgba(255,255,255,.15); border-top-color: var(--c-red); animation: hdmp-dreh 1s linear infinite; }
+  @keyframes hdmp-dreh { to { transform: rotate(360deg); } }
+  .hdmp-autos { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .hdmp-auto { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px; text-align: left; color: #fff; cursor: pointer;
+    background: rgba(16,12,16,.85); border: 1px solid var(--c-line-2); border-left: 5px solid var(--f); border-radius: 0; font: inherit; }
+  .hdmp-auto:hover:not(:disabled), .hdmp-auto:focus-visible { outline: 3px solid var(--c-red); }
+  .hdmp-auto.meins { outline: 3px solid var(--c-red); box-shadow: 0 0 18px var(--c-glow); }
+  .hdmp-auto:disabled { opacity: .45; cursor: not-allowed; }
+  .hdmp-auto b { font: 700 22px/1.1 var(--c-head); } .hdmp-auto span:not(.hdmp-bild) { color: var(--c-dim); font-size: 14px; }
+  .hdmp-auto small { color: var(--c-pink); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+  .hdmp-bild { width: 96px; height: 96px; overflow: hidden; display: block; } .hdmp-bild > * { width: 100%; height: 100%; }
+  .hdmp-setup { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .hdmp-setup label { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.03); }
+  .hdmp-setup label span { font-weight: 600; } .hdmp-setup select { font: 600 19px/1.2 var(--c-head); padding: 8px 10px; background: rgba(10,8,12,.7); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 0; }
+  .hdmp-hinweis { color: var(--c-dim); font-size: 13px; margin: 0; }
+  .hdmp-band { font: 700 clamp(18px, 2.4vw, 28px)/1 var(--c-head); letter-spacing: .06em; text-transform: uppercase; padding: 10px 16px; background: rgba(255,255,255,.06); border-left: 6px solid var(--c-red); }
+  .hdmp-band.sc { background: #ffc400; color: #15171c; border-color: #15171c; }
+  .hdmp-cp-gitter { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 12px; margin-top: 12px; }
+  .hdmp-cp-gitter > div { background: rgba(16,12,16,.85); border: 1px solid var(--c-line); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+  .hdmp-cp-gitter small { font: 700 12px/1 var(--b-font); letter-spacing: .16em; color: var(--c-pink); text-transform: uppercase; }
+  .hdmp-pos b, .hdmp-runde b { font: 700 clamp(44px, 7vw, 96px)/1 var(--c-head); }
+  .hdmp-runde b span { font-size: .45em; color: var(--c-dim); }
+  .hdmp-gang { align-items: center; text-align: center; } .hdmp-gang b { font: 700 clamp(70px, 12vw, 160px)/1 var(--c-head); }
+  .hdmp-gang > span:not(.hdmp-balken) { font: 600 clamp(20px, 2.6vw, 34px)/1 var(--c-head); }
+  .hdmp-runde .beste { color: #b05cff; }
+  .hdmp-balken { display: block; width: 100%; height: 8px; background: rgba(255,255,255,.12); margin-top: 6px; } .hdmp-balken i { display: block; height: 100%; }
+  .hdmp-werte { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+  .hdmp-werte > span { padding: 10px 12px; background: rgba(16,12,16,.85); border: 1px solid var(--c-line); font-weight: 600; }
+  .hdmp-feld { list-style: none; padding: 0; margin: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
+  .hdmp-feld li { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(16,12,16,.8); border: 1px solid var(--c-line); }
+  .hdmp-feld li.ich { border-color: var(--c-red); } .hdmp-feld li b { font-family: var(--c-head); font-size: 18px; width: 22px; }
+  .hdmp-feld li i { width: 5px; align-self: stretch; } .hdmp-feld li span { margin-left: auto; color: var(--c-dim); }
+  .hdmp-touch { display: none; }
+  @media (pointer: coarse) {
+    .hdmp-touch { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: end; position: fixed; left: 0; right: 0; bottom: 0; z-index: 2;
+      padding: 10px clamp(12px, 3vw, 36px) calc(12px + env(safe-area-inset-bottom)); background: rgba(10,8,12,.97); border-top: 2px solid var(--c-red-2);
+      user-select: none; -webkit-user-select: none; }
+    .hdmp-inhalt:has(.hdmp-touch) { padding-bottom: 300px; }
+    .hdmp-touch button { font: 700 18px/1 var(--c-head); text-transform: uppercase; color: #fff; background: #1a0a10; border: 2px solid var(--c-red-2); border-radius: 0; touch-action: none; }
+    .hdmp-touch button.an, .hdmp-gas.an { background: var(--c-red); }
+    .hdmp-t-links { display: flex; gap: 10px; } .hdmp-t-links button { width: 78px; height: 78px; font-size: 28px; }
+    .hdmp-t-mitte { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .hdmp-t-mitte button { padding: 12px 10px; font-size: 14px; }
+    .hdmp-t-rechts { display: flex; gap: 10px; justify-content: flex-end; align-items: end; } .hdmp-t-rechts button { width: 78px; height: 78px; font-size: 15px; }
+    .hdmp-gas { position: relative; width: 84px; height: 170px; border: 2px solid var(--c-red-2); background: rgba(20,6,10,.75); touch-action: none; display: flex; align-items: flex-end; justify-content: center; }
+    .hdmp-gas i { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: linear-gradient(0deg, var(--c-red), #ff6a2b); }
+    .hdmp-gas span { position: relative; font: 700 18px/1 var(--c-head); text-transform: uppercase; padding-bottom: 8px; }
+  }
+  @media (max-width: 700px) { .hdmp-cp-gitter { grid-template-columns: 1fr 1fr; } .hdmp-gang { grid-column: 1 / -1; order: -1; } .hdmp-tabs { margin-left: 0; } }
+  @media (pointer: coarse) and (max-width: 640px) {
+    .hdmp-touch { grid-template-columns: 1fr 1fr; }
+    .hdmp-t-mitte { grid-column: 1 / -1; order: -1; grid-template-columns: repeat(4, 1fr); }
+    .hdmp-t-links button, .hdmp-t-rechts button { width: 72px; height: 72px; }
+    .hdmp-gas { width: 80px; height: 150px; }
+  }
+
   /* Inner tabs as the mock-up's category list: on a wide screen the option categories (and every other inner
      tab bar) stand as a column on the left, the chosen one crimson-to-orange with a glow; the page moves right. */
   @media (min-width: 1200px) and (min-height: 600px) {
@@ -6205,7 +6296,9 @@
   <button class="tab-btn" data-tab="challenges">Challenges</button>
   <!-- v1.3.5 BESTELLT: "WLAN-Mehrspieler nicht als eigenen Tab, sondern als Button in der
        FAHREN -> Garage-Kachel." Der Reiter bleibt als tabpage, erreichbar ueber #fa-mp. -->
-  <button class="tab-btn" data-tab="mp" data-parent="fahren" hidden style="display:none">WLAN Mehrspieler</button>
+  <button class="tab-btn" data-tab="mp" data-parent="hdmp" hidden style="display:none">WLAN Mehrspieler</button>
+  <!-- v3.0: Multiplayer as its own top tab (98r-hd-mehrspieler.js). -->
+  <button class="tab-btn" data-tab="hdmp">Mehrspieler</button>
   <button class="tab-btn" data-tab="info" data-parent="options" hidden style="display:none">Info</button>
   <button class="tab-btn" data-tab="misc">Entwicklertools</button>
   <!-- Nicht in der Leiste, aber weiter als Tab-Knopf vorhanden: showTab() sucht genau
@@ -10525,6 +10618,27 @@
        Renneinstellungen: die sagen, WIE ein Rennen laeuft, dieser hier sagt, WER
        mitfaehrt und ueber welche Leitung. Als erste Karte in den Renneinstellungen
        schob er ausserdem Rennmodus, Rundenlogik und Ergebnisse unter den Rand. -->
+  <!-- v3.0 BESTELLT: "Create a separate tab for Multiplayer. A laptop is required to be the host ..." The two cards
+       are filled by hdMpMalen() (98r-hd-mehrspieler.js). -->
+  <section class="tabpage" id="tab-hdmp">
+    <div class="card hdmp-seite">
+      <h2>Mehrspieler</h2>
+      <p class="muted">Ein Laptop ist der Host: er ist mit den Autos verbunden und führt das Rennen. Mitspieler fahren mit ihrem Handy oder einem zweiten Laptop &ndash; im selben WLAN, über einen kurzen Raumcode.</p>
+      <div class="hdmp-karten">
+        <div class="hdmp-karte">
+          <h3>Host (Laptop)</h3>
+          <div id="hdmp-host" data-i18n-skip></div>
+        </div>
+        <div class="hdmp-karte">
+          <h3>Mitfahren (Handy oder Laptop)</h3>
+          <div id="hdmp-join" data-i18n-skip></div>
+        </div>
+      </div>
+      <p class="muted hdmp-fuss">Die Steuerung läuft direkt von Gerät zu Gerät im WLAN; nur das Kennenlernen über den Code geht einmal über einen Treffpunkt im Netz, verschlüsselt. Bis zu zwei Mitspieler.</p>
+      <p><button type="button" class="k-knopf goto-tab" data-tab="mp">Ältere Wege: Handy als Host (Android-App) oder PC mit Python</button></p>
+    </div>
+  </section>
+
   <section class="tabpage" id="tab-mp">
     <!-- BESTELLT: "In Mehrspieler Menü: erstmal weitere Kacheln für die Modi: Über PC mit
          Python, Über Android App, und dann darunter jeweils die Einstellungen". Beitreten,

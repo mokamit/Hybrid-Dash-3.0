@@ -14765,8 +14765,9 @@
       menuNavEnsureContext();
       if (!menuNavRows().some((r) => r.el === kn)) f.push('Steuerkreuz erreicht den Knopf nicht');
       if (kn) kn.click();
-      if (kAktiverTab() !== 'mp') f.push('Knopf fuehrt nach ' + kAktiverTab());
-      if (!(konsoleReiterEbene1() || []).some((x) => x.an && x.text === t(K_NAME.fahren))) f.push('im Mehrspieler ist oben nicht FAHREN hervorgehoben');
+      // v3.0: the button leads to the new Multiplayer tab (98r-hd-mehrspieler.js), which is on the top bar.
+      if (kAktiverTab() !== 'hdmp') f.push('Knopf fuehrt nach ' + kAktiverTab());
+      if (!(konsoleReiterEbene1() || []).some((x) => x.an && x.text === t(K_NAME.hdmp))) f.push('im Mehrspieler ist oben nicht MEHRSPIELER hervorgehoben');
       konsoleZurueck();
       if (kAktiverTab() !== 'fahren') f.push('Kreis im Mehrspieler fuehrt nach ' + kAktiverTab());
       // Stand: nichts, beigetreten, Host, Info-Screen.
