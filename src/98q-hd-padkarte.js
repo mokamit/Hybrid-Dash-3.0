@@ -184,12 +184,15 @@
     if (!pad) { try { pad = [...(navigator.getGamepads ? navigator.getGamepads() : [])].some((p) => p) ? 'ps' : null; } catch (e) { pad = null; } }
     let tab = '';
     try { tab = kAktiverTab(); } catch (e) { tab = ''; }
-    const aus = !pad || tab === 'race' || document.body.classList.contains('track-fs');
+    // The main menu shows them always on a desktop, as in the mock-up; elsewhere only while a controller is connected.
+    let menue = false;
+    try { menue = tab === 'fahren' && !matchMedia('(pointer: coarse)').matches; } catch (e) { menue = false; }
+    const aus = (!pad && !menue) || tab === 'race' || document.body.classList.contains('track-fs');
     el.hidden = aus;
     document.body.classList.toggle('hd-tasten-an', !aus);
     document.body.classList.toggle('hd-pad-ps', (typeof hdPadStil === 'function' && hdPadStil()) === 'ps');
     if (aus) return;
-    const stil = (typeof hdPadStil === 'function' && hdPadStil()) || pad;
+    const stil = (typeof hdPadStil === 'function' && hdPadStil()) || pad || 'xbox';
     const f = HD_PK_FARBE[stil] || HD_PK_FARBE.xbox, k = HD_PK_KURZ[stil] || HD_PK_KURZ.xbox;
     const rund = (id, text) => '<span class="hdt"><i style="background:' + (stil === 'ps' ? 'transparent;border:2px solid ' + f[id] + ';color:' + f[id] : f[id]) + '">' + hdPkEsc(k[id]) + '</i>' + hdPkEsc(t(text)) + '</span>';
     const html = rund('cross', 'Auswählen') + rund('circ', 'Zurückgehen')

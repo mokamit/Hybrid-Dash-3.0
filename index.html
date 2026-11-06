@@ -6008,7 +6008,7 @@
     html body #k-leiste .k-reiter button, .k-reiter button { min-width: 0; flex: 1 1 0; padding: 4px 4px; font-size: 13px; letter-spacing: 0; }
     #k-reiter:not(:empty)::before, #k-reiter:not(:empty)::after { display: none; }
     #k-reiter { gap: 4px; width: 100%; }
-    #hd-tasten { display: none; }
+    #hd-tasten { display: none !important; }
   }
   /* Inner tabs (option categories ...): flat capitals, the chosen one underlined crimson */
   .k-leiste2 { background: rgba(10,8,12,.7); }
@@ -6096,6 +6096,116 @@
   #hd-tasten .hdt i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 700 12px/1 var(--b-font); color: #fff; }
   #hd-tasten .hdt i.sq { border-radius: 5px; width: auto; padding: 0 5px; border: 2px solid var(--c-dim); color: var(--c-dim); height: 18px; }
   body.hd-tasten-an main { padding-bottom: 44px; }
+
+  /* ---- Main menu as in the mock-up (98s-hd-hauptmenue.js) ----
+     START tall on the left, RACE OPTIONS wide in the middle with TRACK and CHAMPIONSHIP under it, CARS & DRIVERS tall
+     on the right. Every card: its photo filling the card, a dark bar at the bottom with a round icon, the title in
+     Barlow Condensed and a line of details. The banner carries the logo; car count, Host and language sit top right. */
+  @media (min-width: 900px) {
+    html body.k-kacheln #tab-fahren .k-fahren.hdhm { display: grid; gap: 18px; min-height: 0;
+      grid-template-columns: minmax(0, 1.33fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: "start renn renn fahrer" "start strecke meister fahrer"; }
+    html body.k-kacheln #tab-fahren .k-fahren.hdhm > .k-fahren-unten { display: contents; }
+    html body.k-kacheln #fa-start { grid-area: start; } html body.k-kacheln #fa-renn { grid-area: renn; }
+    html body.k-kacheln #fa-strecke { grid-area: strecke; } html body.k-kacheln #fa-profil { grid-area: meister; }
+    html body.k-kacheln #fa-auto { grid-area: fahrer; }
+    html body.k-kacheln main { max-width: none; padding-left: 56px; padding-right: 56px; padding-bottom: 56px; }
+    body.k-kacheln > #hd-banner { padding-left: 56px !important; padding-right: 56px !important; }
+    body.k-kacheln header#k-kopf { padding-left: 44px; }
+    body.k-kacheln .hd-fuss { position: fixed; right: 0; bottom: 0; z-index: 41; padding: 0 56px 18px !important; }
+    body.k-kacheln #hd-tasten { padding-left: 56px; padding-bottom: 16px; }
+  }
+  html body #tab-fahren .k-fahren.hdhm .k-kachel { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+    min-height: 150px; padding: 0; border: 1px solid rgba(255,255,255,.14); outline: 0; background: #120d12; }
+  html body #tab-fahren .k-fahren.hdhm .k-kachel > .k-kb { position: absolute; inset: 0; height: auto; filter: none !important; margin: 0; border: 0; }
+  html body #tab-fahren .k-fahren.hdhm .k-kachel.menu-nav-sel, html body #tab-fahren .k-fahren.hdhm .k-kachel:hover { outline: 3px solid var(--c-red); outline-offset: -3px; }
+  html body #tab-fahren #fa-profil.k-meister { background: url(img/meisterschaft.jpg) center 30% / cover no-repeat; }
+  /* the bottom bar */
+  .hdhm-bar { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 8px 18px; box-sizing: border-box;
+    background: rgba(28,24,28,.88); border-top: 1px solid rgba(255,255,255,.08); }
+  .hdhm-icon { flex: none; width: 38px; height: 38px; border-radius: 50%; border: 2px solid #fff; display: grid; place-items: center; color: #fff; }
+  .hdhm-text { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kk { all: unset; font: 600 clamp(20px, 2vw, 30px)/1 var(--c-head); letter-spacing: .02em; text-transform: uppercase; color: #fff; }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf, html body #tab-fahren .k-fahren.hdhm .hdhm-bar > .hdhm-text > .k-kt,
+  html body #tab-fahren .k-fahren.hdhm .k-kachel.menu-nav-sel:not(:hover) .hdhm-bar .k-kopf, html body #tab-fahren .k-fahren.hdhm .k-kachel:hover .hdhm-bar .k-kopf {
+    all: unset; display: flex; align-items: center; gap: 8px; color: var(--c-dim); }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kt { all: unset; font: 400 13.5px/1.2 var(--b-font); color: var(--c-dim); text-transform: none; letter-spacing: 0; }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kt::before, html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kt::after,
+  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf::before, html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf::after { display: none; }
+  .hdhm-bar .k-quad-punkte { font-size: 11px; }
+  /* details on the right of the bar (Race options: duration · weather · pit stops; Track: pieces · code) */
+  html body #tab-fahren .k-fahren.hdhm .hdhm-ki { all: unset; margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 0;
+    font: 400 13.5px/1.2 var(--b-font); color: var(--c-dim); text-align: right; }
+  .hdhm-ki .k-l { display: none; }
+  .hdhm-ki .k-w { font-weight: 600; color: #f4f2f3; }
+  .hdhm-ki .k-w + .k-l + .k-w::before { content: ' · '; color: var(--c-dim); font-weight: 400; white-space: pre; }
+  #fa-strecke .hdhm-ki .k-l:first-child { display: inline; margin-right: 4px; }
+  #fa-strecke .hdhm-ki .k-l:first-child ~ .k-l { display: none; }
+  /* the card's buttons (Scan, Editor, Connect, Garage ...) as a small row on the photo */
+  html body #tab-fahren .k-fahren.hdhm .k-kachel > .k-knopfreihe { position: absolute; z-index: 2; left: 10px; right: 10px; top: 10px; margin: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+  html body #tab-fahren .k-fahren.hdhm .k-kachel > .k-knopfreihe .k-knopf { font-size: 12px; padding: 4px 8px; background: rgba(10,8,12,.8); }
+  /* START: photo with a crimson bar */
+  html body #tab-fahren .k-fahren.hdhm #fa-start { clip-path: polygon(0 0, 100% 0, 100% 94%, 95% 100%, 0 100%); justify-content: flex-end; align-items: stretch;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,.55) 100%), url(img/start.jpg) 40% center / cover no-repeat; text-transform: none; }
+  html body #tab-fahren .k-fahren.hdhm #fa-start .k-start-innen { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 16px; text-align: left;
+    min-height: 82px; padding: 10px 22px; box-sizing: border-box; background: linear-gradient(90deg, #e10632, #a30d2a); width: 100%; }
+  #fa-start .k-start-innen .hdhm-icon { border: 0; width: auto; height: auto; } #fa-start .k-start-innen .hdhm-icon svg { width: 38px; height: 38px; }
+  html body #tab-fahren .k-fahren.hdhm #fa-start-titel { font: 700 clamp(26px, 2.6vw, 38px)/1 var(--c-head); text-transform: uppercase; text-shadow: none; display: block; }
+  html body #tab-fahren .k-fahren.hdhm #fa-start-unter { display: block; color: #ffd9de; font: 400 14px/1.3 var(--b-font); letter-spacing: 0; text-transform: none; margin-top: 3px; }
+  #fa-start .hdhm-text { display: flex; flex-direction: column; align-items: flex-start; }
+  html body #tab-fahren .k-fahren.hdhm #fa-start::before, html body #tab-fahren .k-fahren.hdhm #fa-start::after { display: none; }
+  html body #tab-fahren .k-fahren.hdhm #fa-start.menu-nav-sel, html body #tab-fahren .k-fahren.hdhm #fa-start:hover { outline: 3px solid var(--c-red); box-shadow: none; }
+  /* CARS & DRIVERS: the driver panel */
+  html body #tab-fahren .k-fahren.hdhm #fa-auto { justify-content: flex-start; background: rgba(16,10,14,.9); }
+  html body #tab-fahren .k-fahren.hdhm #fa-auto > .k-kb, html body #tab-fahren .k-fahren.hdhm #fa-auto > .k-ki { display: none; }
+  #fa-auto .hdhm-bar { margin-top: auto; }
+  .hdhm-fahrer { display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 1 1 auto; }
+  .hdhm-portrait { display: block; width: 100%; aspect-ratio: 1.1; max-height: 52%; overflow: hidden; background: color-mix(in srgb, var(--f, #444) 35%, #0a080c); }
+  .hdhm-portrait svg { width: 100% !important; height: 100% !important; display: block; }
+  .hdhm-portrait .hd-avatar { border-radius: 0 !important; }
+  .hdhm-leer { display: grid; place-items: center; color: rgba(255,255,255,.35); background: rgba(255,255,255,.04); }
+  .hdhm-rolle { padding: 0 18px; margin-top: 6px; font: 700 12px/1 var(--b-font); letter-spacing: .16em; color: var(--c-pink); text-transform: uppercase; }
+  .hdhm-name { padding: 0 18px; display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+  .hdhm-name b { font: italic 700 clamp(28px, 2.6vw, 40px)/1 var(--c-head); }
+  .hdhm-name span { font: 600 clamp(20px, 1.9vw, 28px)/1 var(--c-head); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hdhm-reihe { padding: 0 18px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .hdhm-mini { width: 52px; height: 52px; display: block; overflow: hidden; border: 2px solid var(--f, #888); box-sizing: border-box; }
+  .hdhm-mini svg { width: 100% !important; height: 100% !important; display: block; }
+  .hdhm-plus { width: 52px; height: 52px; display: grid; place-items: center; font-size: 26px; color: #fff; background: transparent; border: 2px dashed rgba(255,255,255,.4); border-radius: 0; cursor: pointer; }
+  .hdhm-plus:hover { border-color: var(--c-red); color: var(--c-red); }
+  html body #tab-fahren .k-fahren.hdhm #fa-auto > .k-knopfreihe { position: static; padding: 8px 18px 0; }
+  /* header on the main menu: logo row, then the tabs with « LB ... RB »; status and language top right */
+  body.k-kacheln > #hd-banner { background: transparent; border: 0; padding-top: 18px; padding-bottom: 4px; }
+  body.k-kacheln > #hd-banner .hd-banner-logo { font: italic 700 clamp(22px, 2vw, 28px)/1 var(--c-head); letter-spacing: .02em; }
+  body.k-kacheln > #hd-banner .hd-banner-logo img { height: 36px; }
+  body.k-kacheln header#k-kopf { background: transparent; }
+  body.k-kacheln header#k-kopf::after { display: none; }
+  @media (min-width: 900px) {
+    body.k-kacheln #k-status, body.k-kacheln #hd-lang { position: fixed; top: 22px; z-index: 70; }
+    body.k-kacheln #k-status { right: 100px; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; background: rgba(10,8,12,.7); border: 1px solid rgba(255,255,255,.12); }
+    body.k-kacheln #hd-lang { right: 56px; height: 38px; }
+    html body #k-leiste .k-reiter button { flex: 0 1 auto; width: clamp(130px, 13vw, 230px); }
+    html body #k-leiste .k-reiter { justify-content: flex-start; }
+    body.k-kacheln #k-leiste { border-bottom: 2px solid var(--c-red-2); padding-bottom: 10px; margin-right: auto; }
+    #k-reiter:not(:empty)::before { content: '«   LB'; white-space: pre; border: 0; font-size: 22px; padding: 0; }
+    #k-reiter:not(:empty)::after { content: 'RB   »'; white-space: pre; border: 0; font-size: 22px; padding: 0; }
+  }
+  /* footer: credits and links on the right, controller hints on the left (#hd-tasten) */
+  body.k-kacheln .hd-fuss { background: transparent; border: 0; justify-content: flex-end; font-size: 12.5px; color: var(--c-dim); max-width: none; padding: 6px 56px 10px; }
+  .hd-fuss .hdhm-links { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+  .hd-fuss .hdhm-links > * { all: unset; cursor: pointer; color: #ff8a99; text-decoration: underline; font-size: 12.5px; }
+  .hd-fuss .hdhm-links > *:hover { color: #fff; }
+  .hd-fuss .hdhm-links > .k-fokus, .hd-fuss .hdhm-links > .menu-nav-sel { background: var(--c-red); color: #fff; text-decoration: none; padding: 1px 6px; }
+  .hd-fuss .hdhm-links svg { display: none; }
+  .hd-fuss .hdhm-links .app-update, .hd-fuss .hdhm-links [hidden] { display: none; }
+  body.k-kacheln::before { width: min(52vw, 860px); height: 300px; opacity: .9; }
+  body.k-kacheln::after { width: min(44vw, 720px); height: 260px; opacity: .85; }
+  html::before, html::after { content: ''; position: fixed; pointer-events: none; z-index: 0; display: none; }
+  html:has(body.k-kacheln)::before { display: block; right: -80px; top: -60px; width: min(36vw, 560px); height: 320px; opacity: .8;
+    background: linear-gradient(270deg, #5a0716, #c3133a); clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 0); }
+  html:has(body.k-kacheln)::after { display: block; left: -40px; bottom: -30px; width: min(30vw, 440px); height: 150px; opacity: .7;
+    background: #8a0d24; clip-path: polygon(0 0, 70% 0, 100% 100%, 0 100%); }
 
   /* ---- Multiplayer tab and the player window (98r-hd-mehrspieler.js) ---- */
   .hdmp-karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin: 16px 0; }
@@ -6425,7 +6535,7 @@
     <input type="file" id="fa-foto-datei" accept="image/*" hidden>
     <div class="k-gitter k-fahren">
       <div class="k-kachel " id="fa-auto" role="button" tabindex="0">
-        <span class="k-kk">Fahrzeugübersicht</span>
+        <span class="k-kk">Autos &amp; Fahrer</span>
         <span class="k-kt" id="fa-auto-titel"></span>
         <span class="k-kb" id="fa-auto-bild" style="background-image:url(img/garage.jpg)"></span>
         <span class="k-ki" id="fa-auto-info"></span>
@@ -17951,7 +18061,7 @@
     "← Optionen": "← Options",
     "Autos verbinden": "Connect cars",
     "Keine Autos verbunden.": "No cars connected.",
-    "Fahrzeugübersicht": "Car summary",
+    "Autos & Fahrer": "Cars & drivers",
     "Über PC mit Python": "Via PC with Python",
     "Der PC trägt die Rangliste, die Telefone treten im WLAN bei.": "The PC holds the leaderboard, the phones join over Wi-Fi.",
     "Über Android-App": "Via Android app",
@@ -21244,7 +21354,7 @@
     "← Optionen": "← Opciones",
     "Autos verbinden": "Conectar coches",
     "Keine Autos verbunden.": "No hay coches conectados.",
-    "Fahrzeugübersicht": "Resumen de coches",
+    "Autos & Fahrer": "Coches y pilotos",
     "Über PC mit Python": "Vía PC con Python",
     "Der PC trägt die Rangliste, die Telefone treten im WLAN bei.": "El PC lleva la clasificación, los teléfonos se unen por WiFi.",
     "Über Android-App": "Vía app de Android",
@@ -125145,12 +125255,15 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (!pad) { try { pad = [...(navigator.getGamepads ? navigator.getGamepads() : [])].some((p) => p) ? 'ps' : null; } catch (e) { pad = null; } }
     let tab = '';
     try { tab = kAktiverTab(); } catch (e) { tab = ''; }
-    const aus = !pad || tab === 'race' || document.body.classList.contains('track-fs');
+    // The main menu shows them always on a desktop, as in the mock-up; elsewhere only while a controller is connected.
+    let menue = false;
+    try { menue = tab === 'fahren' && !matchMedia('(pointer: coarse)').matches; } catch (e) { menue = false; }
+    const aus = (!pad && !menue) || tab === 'race' || document.body.classList.contains('track-fs');
     el.hidden = aus;
     document.body.classList.toggle('hd-tasten-an', !aus);
     document.body.classList.toggle('hd-pad-ps', (typeof hdPadStil === 'function' && hdPadStil()) === 'ps');
     if (aus) return;
-    const stil = (typeof hdPadStil === 'function' && hdPadStil()) || pad;
+    const stil = (typeof hdPadStil === 'function' && hdPadStil()) || pad || 'xbox';
     const f = HD_PK_FARBE[stil] || HD_PK_FARBE.xbox, k = HD_PK_KURZ[stil] || HD_PK_KURZ.xbox;
     const rund = (id, text) => '<span class="hdt"><i style="background:' + (stil === 'ps' ? 'transparent;border:2px solid ' + f[id] + ';color:' + f[id] : f[id]) + '">' + hdPkEsc(k[id]) + '</i>' + hdPkEsc(t(text)) + '</span>';
     const html = rund('cross', 'Auswählen') + rund('circ', 'Zurückgehen')
@@ -125904,6 +126017,123 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     fenster: { auf: hdMpFensterAuf, zu: hdMpFensterZu },
     _pad: { packen: hdMpPadPacken, fuer: hdMpPadFuer, slot: (nr) => { const z = zusatzPlatz(nr); return z ? { throttle: z.throttle, steer: z.steer, car: z.car ? String(z.car.device.id) : null } : null; } },
   });
+  // =====================================================================================
+  // Hybrid-Dash 3.0: THE MAIN MENU AS IN THE "CRIMSON PADDOCK" MOCK-UP
+  // =====================================================================================
+  //
+  // BESTELLT (with the mock-up): "I want the main menu to look like this, follow the menu tab style and everything.
+  // With a cars and drivers card on the right side. I like that feature/look."
+  //
+  // The cards stay the same elements (ids, handlers, menu navigation, the quad switching left / right): this only
+  //   - gathers each card's label, title and details into one bar at the bottom (span.hdhm-bar) with a round icon,
+  //   - builds the driver panel of the Cars & Drivers card: the player's portrait, "PLAYER 1", number and name, the
+  //     other cars as small portraits and a "+" that connects one more,
+  //   - moves the banner's links (Wiki, Tutorial, Controls, Android app, install) into the footer line.
+  // The grid itself (START tall on the left, RACE OPTIONS wide, TRACK and CHAMPIONSHIP under it, CARS & DRIVERS tall
+  // on the right) is CSS: #hd3-crimson, "main menu".
+
+  const HD_HM_ICON = {
+    'fa-renn': '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+    'fa-strecke': '<path d="M4 18c0-8 16-4 16-12"/><path d="M8 20c0-8 14-4 14-12" opacity=".5"/>',
+    'fa-profil': '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M12 13v4M8 21h8"/>',
+    'fa-auto': '<path d="M5 16h14l-2-6H7z"/><circle cx="8" cy="16" r="2"/><circle cx="16" cy="16" r="2"/>',
+    'fa-start': '<path d="M5 21V4"/><path d="M5 4h12l-2 4 2 4H5"/>',
+  };
+  function hdHmIcon(id) {
+    return '<span class="hdhm-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
+      + (HD_HM_ICON[id] || '') + '</svg></span>';
+  }
+  function hdHmBalken() {
+    for (const id of ['fa-renn', 'fa-strecke', 'fa-profil', 'fa-auto']) {
+      const k = $(id);
+      if (!k || k.querySelector('.hdhm-bar')) continue;
+      const bar = document.createElement('span');
+      bar.className = 'hdhm-bar';
+      bar.insertAdjacentHTML('afterbegin', hdHmIcon(id));
+      const text = document.createElement('span'); text.className = 'hdhm-text';
+      const kk = k.querySelector(':scope > .k-kk'), kopf = k.querySelector(':scope > .k-kopf') || k.querySelector(':scope > .k-kt');
+      const ki = k.querySelector(':scope > .k-ki');
+      if (kk) text.appendChild(kk);
+      if (kopf) text.appendChild(kopf);
+      bar.appendChild(text);
+      if (ki && id !== 'fa-auto') { ki.classList.add('hdhm-ki'); bar.appendChild(ki); }
+      k.appendChild(bar);
+    }
+    const st = $('fa-start');
+    if (st && !st.querySelector('.hdhm-icon')) {
+      const innen = st.querySelector('.k-start-innen');
+      if (innen) {
+        const text = document.createElement('span'); text.className = 'hdhm-text';
+        while (innen.firstChild) text.appendChild(innen.firstChild);
+        innen.appendChild(text);
+        innen.insertAdjacentHTML('afterbegin', hdHmIcon('fa-start'));
+      }
+    }
+  }
+  // ---- Cars & Drivers: the driver panel ----------------------------------------------------------------------------
+  let hdHmSchluessel = '';
+  function hdHmFahrer() {
+    const k = $('fa-auto');
+    if (!k) return;
+    let box = k.querySelector('.hdhm-fahrer');
+    if (!box) {
+      box = document.createElement('span');
+      box.className = 'hdhm-fahrer';
+      const bild = k.querySelector(':scope > .k-kb');
+      k.insertBefore(box, bild ? bild.nextSibling : k.firstChild);
+      box.addEventListener('click', (e) => {
+        const plus = e.target.closest('[data-hdhm="plus"]');
+        if (!plus) return;
+        e.stopPropagation();
+        if (typeof hdGepaartOeffnen === 'function') hdGepaartOeffnen(); else if ($('fa-verbinden')) $('fa-verbinden').click();
+      });
+    }
+    let autos = [];
+    try { autos = garage.filter((c) => c && c.device && c.role !== 'safetycar' && c.role !== 'reinig'); } catch (e) { autos = []; }
+    let ich = null;
+    try { ich = playerCar && autos.includes(playerCar) ? playerCar : (autos[0] || null); } catch (e) { ich = autos[0] || null; }
+    const andere = autos.filter((c) => c !== ich).slice(0, 3);
+    const schl = [lang, ich ? [ich.device.id, ich.alias, ich.colorId, ich.modellId, ich.role, typeof hdNummer === 'function' ? hdNummer(ich) : ''].join(':') : '-',
+      andere.map((c) => c.device.id + ':' + c.colorId + ':' + c.alias).join(',')].join('|');
+    if (schl === hdHmSchluessel && box.firstChild) return;
+    hdHmSchluessel = schl;
+    const esc = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    const portrait = (car, px) => (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(car, px) : '');
+    let html = '';
+    if (ich) {
+      const rolle = ich.role === 'player' ? t('Spieler 1') : /^player([2-9])$/.test(ich.role || '') ? t('Spieler') + ' ' + ich.role.slice(6) : t('Auto');
+      const nr = typeof hdNummer === 'function' ? hdNummer(ich) : (ich.nummer || '');
+      const name = ich.alias || ich.tag || garageLabel(ich);
+      html += '<span class="hdhm-portrait" style="--f:' + esc(carColor(ich).hex) + '">' + portrait(ich, 330) + '</span>'
+        + '<span class="hdhm-rolle">' + esc(rolle) + '</span>'
+        + '<span class="hdhm-name">' + (nr ? '<b>#' + esc(nr) + '</b>' : '') + '<span>' + esc(name) + '</span></span>';
+    } else {
+      html += '<span class="hdhm-portrait hdhm-leer"><svg viewBox="0 0 100 100" width="120" height="120" aria-hidden="true"><path d="M50 14c-20 0-34 14-34 34v14c0 6 4 10 10 10h48c6 0 10-4 10-10V48c0-20-14-34-34-34z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M22 48h56v10H22z" fill="currentColor" opacity=".5"/><path d="M28 86h44" stroke="currentColor" stroke-width="4"/></svg></span>'
+        + '<span class="hdhm-rolle">' + esc(t('Kein Auto verbunden')) + '</span>';
+    }
+    html += '<span class="hdhm-reihe">' + andere.map((c) => '<span class="hdhm-mini" title="' + esc(c.alias || garageLabel(c)) + '" style="--f:' + esc(carColor(c).hex) + '">' + portrait(c, 52) + '</span>').join('')
+      + '<button type="button" class="hdhm-plus" data-hdhm="plus" title="' + esc(t('Auto verbinden')) + '" aria-label="' + esc(t('Auto verbinden')) + '">+</button></span>';
+    box.innerHTML = html;
+  }
+  // ---- banner links into the footer ----------------------------------------------------------------------------------
+  function hdHmFuss() {
+    const fuss = $('hd-fuss'), knoepfe = document.querySelector('#hd-banner .hd-banner-knoepfe');
+    if (!fuss || !knoepfe || fuss.querySelector('.hd-banner-knoepfe')) return;
+    knoepfe.classList.add('hdhm-links');
+    fuss.appendChild(knoepfe);
+  }
+  function hdHauptmenue() {
+    const g = document.querySelector('#tab-fahren .k-fahren');
+    if (!g) return;
+    g.classList.add('hdhm');
+    hdHmBalken();
+    hdHmFuss();
+    hdHmFahrer();
+  }
+  setTimeout(hdHauptmenue, 0);
+  setInterval(() => { try { if (kAktiverTab() === 'fahren') hdHmFahrer(); } catch (e) { /* not ready */ } }, 1000);
+  if (typeof i18nOnLangChange === 'function') i18nOnLangChange(() => { hdHmSchluessel = ''; hdHmFahrer(); });
+  window.HYBRIDDASH_HAUPTMENUE = Object.freeze({ malen: () => { hdHmSchluessel = ''; hdHauptmenue(); } });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------
   //
