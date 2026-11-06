@@ -7997,6 +7997,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const w = npcMotorWerte(art);
     const neuKalib = w.launchAnchorTimeS !== e.config.launchAnchorTimeS || w.coastDragPerS !== e.config.coastDragPerS;
     Object.assign(e.config, w);
+    // (HybridDash 3.0: the per-gear caps of shorter gear ratios, downshiftJeGang, still apply on top - see update().)
     e.config.downshiftRpm = NPC_RUECKSCHALT_RPM;
     e.config.shiftMs = art === 'max' ? 0 : g.basisShiftMs;
     e.config.npcMotorArt = art;

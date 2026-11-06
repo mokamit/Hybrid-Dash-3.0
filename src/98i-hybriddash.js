@@ -1014,6 +1014,32 @@
                /hd-link-an/.test(hdLaptopEtikett(eigen)) && /hd-link-aus/.test(hdLaptopEtikett(fremd)) && /Not connected/.test(hdLaptopEtikett(fremd)),
                hdLaptopEtikett(fremd).replace(/<svg[\s\S]*?<\/svg>/, '[svg]'));
       } finally { hdRelay.rolle = rolleMerk; }
+      // J: gear ratios (Short / Medium / Long / Auto).
+      {
+        const e = physEngine, merkName = e.gearboxName || 'gt3', merkF = e.gangStufe || 1;
+        const sel = $('hd-gangstufe'), merkSel = sel ? sel.value : null, merkTiles = currentTrackTiles;
+        try {
+          e.applyGearbox('gt3', 1);
+          const lang = e.config.gears.map((g) => g.topFrac), rpmLang = e.config.rpmScale, runterLang = e.config.downshiftRpm;
+          e.applyGearbox('gt3', 0.45);
+          const kurz = e.config.gears, n = kurz.length;
+          const grenze = (i) => Math.min(e.config.downshiftRpm, e.config.downshiftJeGang[i]);
+          const landungOk = kurz.slice(1).every((g, i) => e.config.upshiftRpm * g.ratio / kurz[i].ratio > grenze(i + 1)) && grenze(2) === 4200;
+          prüfen('gear ratios: Short packs gears 1-5 into the low speeds, top gear and top speed unchanged, no gear hunting',
+                 Math.abs(kurz[n - 2].topFrac - lang[n - 2] * 0.45) < 1e-9 && kurz[n - 1].topFrac === 1 && Math.abs(e.config.rpmScale - rpmLang) < 1e-6
+                 && landungOk && runterLang === 4200,
+                 '5th ends ' + kurz[n - 2].topFrac.toFixed(3) + ' (long ' + lang[n - 2] + '), downshift ' + e.config.downshiftJeGang.slice(1).map((x, i) => grenze(i + 1)).join('/') + ' rpm');
+          if (sel) {
+            sel.value = 'auto';
+            const auto = (k) => { currentTrackTiles = Array.from({ length: k }, () => ({ type: TILE_TYPE.STRAIGHT })); return hdGangStufeFaktorTest(); };
+            const a = [auto(13), auto(20), auto(30)];
+            prüfen('gear ratios: Auto by track length - 13 pieces short, 20 medium, 30 long', a[0] === 0.45 && a[1] === 0.65 && a[2] === 1, a.join(' / '));
+          }
+        } finally {
+          currentTrackTiles = merkTiles; if (sel && merkSel) sel.value = merkSel;
+          e.applyGearbox(merkName, merkF);
+        }
+      }
     } catch (e) {
       prüfen('self-test ran', false, String(e && e.stack || e));
     } finally { zurueck(); }
@@ -1034,6 +1060,8 @@
     // Race simulation hooks for the yellow-flag measurement (tests only).
     sim: { start: () => simStart(), stop: () => simStop('test'), gelb: () => setFlag('yellow'), gruen: () => gelbBeenden(),
            folge: (an) => { hd.gelbFolge = !!an; }, kacheln: () => (currentTrackTiles || []).length, param: (o) => Object.assign(hdFolge, o || {}),
+           // Current gear of every simulated car (gear-ratio measurement).
+           gaenge: () => garage.filter((c) => c.sim && c.ghost && c.ghost.engine).map((c) => c.ghost.engine.state.currentGear),
            // Make simulated car i the safety car (role), or take the role back (i < 0).
            sc: (i) => { const autos = garage.filter((c) => c.sim); autos.forEach((c) => { if (c.role === 'safetycar') c.role = 'ghost'; });
                         if (i >= 0 && autos[i]) autos[i].role = 'safetycar'; return autos.map((c) => c.alias + ':' + c.role); } },

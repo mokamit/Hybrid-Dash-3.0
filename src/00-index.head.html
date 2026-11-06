@@ -11552,6 +11552,18 @@
           <option value="f1">Formel 1, 8-Gang</option>
           <option value="p412">Ferrari 412P, 5-Gang Transaxle</option>
         </select></div>
+      <div class="opt-row"><div class="opt-label">Gear ratios<small>How the gears are spread over the speed range.
+          <b>Short</b> packs all gears except the top one into the low speeds a short track reaches &ndash; the car
+          shifts up through every gear, revs higher and pulls hard; the top gear stays as a tall overdrive, so the
+          top speed is the same. <b>Medium</b> is in between. <b>Long</b> is the gearbox as built &ndash; on a short
+          track the car stays in 1st and 2nd. <b>Auto</b> picks by the track: from its length at first, then from the
+          top speed actually reached on it (changes only between races). Applies to every car, NPCs too.</small></div>
+        <select id="hd-gangstufe" data-preset-skip data-i18n-skip>
+          <option value="auto" selected>Auto (fits the track)</option>
+          <option value="kurz">Short</option>
+          <option value="mittel">Medium</option>
+          <option value="lang">Long</option>
+        </select></div>
       <div class="opt-row"><div class="opt-label">Daten des Getriebes<small>Bis zu welchem
           Tempo jeder Gang reicht. Gerechnet aus den &Uuml;bersetzungen und der
           H&ouml;chstgeschwindigkeit, nicht eingetippt.</small></div>
