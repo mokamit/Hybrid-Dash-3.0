@@ -5806,6 +5806,46 @@
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
 
+  /* ---- Hybrid-Dash 3.0: the starting grid as a TV board (hdStartgridBoard) ---- */
+  #race-gridscreen #grid-liste.hd-sg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-auto-rows: auto;
+    gap: 14px 8px; padding: 0 0 4px; align-content: start; overflow: auto; }
+  #grid-liste.hd-sg .hd-sg-kopf { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 0;
+    padding: 6px 12px 7px; margin-bottom: 4px; background: linear-gradient(180deg, #23262e, #15171c); border-top: 3px solid var(--b-red, #e10600);
+    clip-path: polygon(2% 0, 98% 0, 100% 100%, 0 100%); }
+  #grid-liste.hd-sg .hd-sg-kopf b { font: italic 900 clamp(18px, 2.2vw, 30px)/1.05 var(--b-font, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: #fff; }
+  #grid-liste.hd-sg .hd-sg-kopf span { font: 700 clamp(10px, 1vw, 13px)/1.2 var(--b-font, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: var(--b-yellow, #ffc400); }
+  #race-gridscreen #grid-liste.hd-sg .grid-row.hd-sg-karte { margin: 0 !important; padding: 0; display: block; min-height: 0; border: 0; border-radius: 0;
+    background: repeating-linear-gradient(-60deg, rgba(255,255,255,.025) 0 2px, transparent 2px 7px), linear-gradient(180deg, #2b2f39 0%, #171a20 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); overflow: hidden; }
+  #race-gridscreen #grid-liste.hd-sg .grid-row.hd-sg-l { grid-column: 1; }
+  #race-gridscreen #grid-liste.hd-sg .grid-row.hd-sg-r { grid-column: 2; }
+  #grid-liste.hd-sg .hd-sg-karte > :not(.hd-sg-inhalt) { display: none !important; }
+  #grid-liste.hd-sg .hd-sg-inhalt { display: grid; align-items: center; gap: 0 10px; height: clamp(58px, 8.4vh, 78px); padding: 0 10px 0 0; position: relative; }
+  #grid-liste.hd-sg .hd-sg-l .hd-sg-inhalt { grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "nr bild name ctrl"; border-left: 5px solid var(--hd-sg-farbe); }
+  #grid-liste.hd-sg .hd-sg-r .hd-sg-inhalt { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "ctrl name bild nr"; padding: 0 0 0 10px; border-right: 5px solid var(--hd-sg-farbe); }
+  #grid-liste.hd-sg .hd-sg-nr { grid-area: nr; min-width: 1.6em; padding: 0 6px; text-align: center; font: italic 900 clamp(28px, 3.6vw, 48px)/1 var(--b-font, sans-serif); color: #fff;
+    text-shadow: 0 2px 0 rgba(0,0,0,.5); }
+  #grid-liste.hd-sg .hd-sg-bild { grid-area: bild; align-self: end; height: 100%; display: flex; align-items: flex-end; }
+  #grid-liste.hd-sg .hd-sg-bild .hd-avatar { width: auto; height: 100%; border-radius: 0; }
+  #grid-liste.hd-sg .hd-sg-name { grid-area: name; min-width: 0; display: flex; flex-direction: column; line-height: 1.02; }
+  #grid-liste.hd-sg .hd-sg-r .hd-sg-name { text-align: right; }
+  #grid-liste.hd-sg .hd-sg-name small { font: 700 clamp(11px, 1.15vw, 16px)/1.1 var(--b-font, sans-serif); text-transform: uppercase; letter-spacing: .04em; color: #e6e8ec; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #grid-liste.hd-sg .hd-sg-name b { font: italic 900 clamp(15px, 1.7vw, 24px)/1.05 var(--b-font, sans-serif); text-transform: uppercase; letter-spacing: .02em; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #grid-liste.hd-sg .hd-sg-ctrl { grid-area: ctrl; display: flex; align-items: center; gap: 6px; }
+  #grid-liste.hd-sg .hd-sg-ctrl .grid-move { display: flex; flex-direction: column; gap: 3px; }
+  #grid-liste.hd-sg .hd-sg-ctrl .grid-move button { width: 26px !important; height: 22px !important; font-size: 10px !important; padding: 0; }
+  #grid-liste.hd-sg .hd-sg-ctrl .grid-box { display: flex; }
+  #grid-liste.hd-sg .hd-sg-reihe { grid-column: 1 / -1; justify-self: center; align-self: start; z-index: 2; transform: translateY(-62%);
+    display: flex; align-items: stretch; height: 18px; font: 800 11px/18px var(--b-font, sans-serif); text-transform: uppercase; letter-spacing: .08em; pointer-events: none; }
+  #grid-liste.hd-sg .hd-sg-reihe b { padding: 0 14px; background: var(--b-yellow, #ffc400); color: #15171c; font-style: italic; clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%); }
+  #grid-liste.hd-sg .hd-sg-reihe i { min-width: 18px; padding: 0 4px; text-align: center; font-style: normal; background: #f2f3f5; color: #15171c; margin: 0 3px; }
+  #grid-liste.hd-sg .hd-sg-reihe i:empty { visibility: hidden; }
+  #grid-liste.hd-sg .grid-row.grid-sc { grid-column: 1 / -1; margin: 0 !important; }
+  #grid-liste.hd-sg .hd-sg-fuss { grid-column: 1 / -1; padding: 6px 12px; text-align: center; font: italic 800 clamp(11px, 1.15vw, 15px)/1.2 var(--b-font, sans-serif);
+    letter-spacing: .1em; color: #fff; background: linear-gradient(180deg, #23262e, #0e1014); border-bottom: 3px solid var(--b-red, #e10600); }
+  #grid-liste.hd-sg .grid-row.grid-blinkt { animation: hd-sg-blink .6s 2; }
+  @keyframes hd-sg-blink { 50% { box-shadow: inset 0 0 0 2px var(--hd-sg-farbe), 0 0 18px var(--hd-sg-farbe); } }
+
   /* Flag band (yellow / SC / VSC): solid flag-yellow TV bar with a cut corner */
   html body #gt3-flag { background: var(--b-yellow); color: var(--b-asphalt); font-family: var(--b-font); font-style: italic; font-weight: 900;
     letter-spacing: .08em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, calc(100% - 22px) 100%, 0 100%); }
@@ -45725,6 +45765,7 @@
       });
       host.appendChild(row);
     });
+    if (typeof hdStartgridBoard === 'function') hdStartgridBoard(host, cars);   // HybridDash 3.0: TV starting-grid board
     gridGleiten(host, alt, bewegt);
     const sc = garage.find(c => c.role === 'safetycar' && c.device);
     if (sc) {
@@ -120317,6 +120358,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const a1 = akz[Math.floor(r() * akz.length)];
     const a2 = akz.filter((c) => c !== a1)[Math.floor(r() * (akz.length - 1))] || '#ffffff';
     const haut = pick(HD_HAUT), haar = pick(HD_HAARE);
+    const helm = r() < 0.65 ? basis : pick([pal[0], '#f4f5f7', '#1c1f24'].filter((c) => c.toLowerCase() !== a1.toLowerCase()));
+    const helmMuster = Math.floor(r() * 5);
     const frisur = Math.floor(r() * 6), anzugMuster = Math.floor(r() * 5), bart = r() < 0.3, augen = pick(['#3b2a1e', '#2a1d14', '#4a6a82', '#3f5a3a', '#5b3b24']);
     const id = 'hdav' + (++hdAvatarNr) + '-' + (hdHash(String(name)) % 9973);
     const nummer = 1 + (hdHash(String(name)) % 99);
@@ -120341,6 +120384,16 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // fade with a parting line
       'M33 33 C32.4 19.6 40.4 11.6 50.4 11.8 C60.4 12 67.6 19.6 67 33 C65.8 27 62.4 23.4 57.6 22.2 L44 22.4 C39 23.6 35 27.4 33 33 Z',
     ];
+    // helmet shell and eye port (head coordinates, before the head group's scale)
+    const helmSchale = 'M25.4 40 C24.6 19.6 35.6 6.4 50 6.4 C64.4 6.4 75.4 19.6 74.6 40 C74.4 52 71 60.4 65.6 64.6 L34.4 64.6 C29 60.4 25.6 52 25.4 40 Z';
+    const helmAuge = 'M35.6 30.6 C36 26.6 40.4 25.2 50 25.2 C59.6 25.2 64 26.6 64.4 30.6 L63.8 41 C63 44.2 59.6 45.6 50 45.6 C40.4 45.6 37 44.2 36.2 41 Z';
+    const helmDeko = [
+      `<path d="M46 0 H54 V26 H46 Z" fill="${a1}"/><path d="M44 0 H45.4 V26 H44 Z M54.6 0 H56 V26 H54.6 Z" fill="${a2}"/>`,
+      `<path d="M20 44 C34 50 40 58 44 70 L34 70 C30 60 26 54 20 50 Z M80 44 C66 50 60 58 56 70 L66 70 C70 60 74 54 80 50 Z" fill="${a1}"/>`,
+      `<path d="M20 34 C30 30 38 31 44 36 L36 40 C31 37 26 37 20 39 Z M80 34 C70 30 62 31 56 36 L64 40 C69 37 74 37 80 39 Z" fill="${a1}"/><path d="M20 41 C27 39 32 40 36 42.6 L34.6 44 C30 42 26 42 20 43.4 Z M80 41 C73 39 68 40 64 42.6 L65.4 44 C70 42 74 42 80 43.4 Z" fill="${a2}"/>`,
+      `<path d="M20 52 H80 V58 H20 Z" fill="${a1}"/><path d="M20 59.4 H80 V61.4 H20 Z" fill="${a2}"/>`,
+      `<path d="M50 4 L80 20 V34 L50 18 L20 34 V20 Z" fill="${a1}"/>`,
+    ][helmMuster];
     // suit panels (clipped to the torso): shoulder yoke, side panels, chest band, diagonal sash, centre stripe
     const am = [
       `<path d="M1 84 C8 74 20 69.5 34 67 L36 73 C22 75 12 79 4 90 Z M99 84 C92 74 80 69.5 66 67 L64 73 C78 75 88 79 96 90 Z" fill="${a1}"/>`,
@@ -120365,6 +120418,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       + `<linearGradient id="${id}-haar" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="${haarH}"/><stop offset="1" stop-color="${haarD}"/></linearGradient>`
       + `<linearGradient id="${id}-arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${anzugH}"/><stop offset=".5" stop-color="${basis}"/><stop offset="1" stop-color="${anzugD}"/></linearGradient>`
       + `<linearGradient id="${id}-armH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${basis}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
+      + `<linearGradient id="${id}-helm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${hdHeller(helm, 0.3)}"/><stop offset=".5" stop-color="${helm}"/><stop offset="1" stop-color="${hdDunkler(helm, 0.6)}"/></linearGradient>`
+      + `<linearGradient id="${id}-visier" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a4250"/><stop offset="1" stop-color="#0f1217"/></linearGradient>`
+      + `<clipPath id="${id}-hc"><path d="${helmSchale} ${helmAuge}" clip-rule="evenodd"/></clipPath>`
       + `<linearGradient id="${id}-rand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".85" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".35"/></linearGradient>`
       + `</defs>`
       + `<g clip-path="url(#${id}-k)">`
@@ -120415,11 +120471,18 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       + `<path d="M50.6 37.4 C51 41.4 52.4 43.6 52 45.2 C51.2 46 49.6 46.2 48.4 45.6" stroke="${hautDD}" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".8"/>`
       + `<path d="M45.4 49.6 C48 50.8 52 50.8 54.6 49.6" stroke="${hdDunkler(haut, 0.5)}" stroke-width="1.1" fill="none" stroke-linecap="round"/>`
       + `<path d="M46.8 51.6 C48.6 52.4 51.4 52.4 53.2 51.6" stroke="${hautH}" stroke-width=".8" fill="none" stroke-linecap="round" opacity=".7"/>`
-      // hair
-      + `<path d="${haare[frisur]}" fill="url(#${id}-haar)"/>`
-      + `<path d="M64.6 22 C67.6 28 67.8 38 65.6 46 C64.4 50.4 62 53.6 59.6 55.4" fill="none" stroke="${basis}" stroke-width="1.6" opacity=".55" stroke-linecap="round"/>`
-      + (frisur === 5 ? `<path d="M44 22.4 C47 18 52 15.4 58 15" stroke="${haarH}" stroke-width=".8" fill="none" opacity=".7"/>` : '')
-      + (frisur === 2 ? '' : `<path d="M40 17 C45 13.6 54 13 60 16" stroke="${haarH}" stroke-width=".9" fill="none" opacity=".45" stroke-linecap="round"/>`)
+      // helmet (v3.0 BESTELLT: "Put helmets on the new avatars"): full-face shell in the helmet colour with a
+      // brand-colour pattern, the eye port cut out (evenodd) so eyes and nose show, the visor raised on top,
+      // visor pivots, a chin bar with vents, a gloss highlight and the car-colour rim light.
+      + `<path d="${helmSchale} ${helmAuge}" fill="url(#${id}-helm)" fill-rule="evenodd"/>`
+      + `<g clip-path="url(#${id}-hc)">${helmDeko}</g>`
+      + `<path d="${helmAuge}" fill="none" stroke="${hdDunkler(helm, 0.45)}" stroke-width="1.4"/>`
+      + `<path d="M31 24.6 C33.6 16 41 12.6 50 12.6 C59 12.6 66.4 16 69 24.6 C63.4 22 57.4 21 50 21 C42.6 21 36.6 22 31 24.6 Z" fill="url(#${id}-visier)"/>`
+      + `<path d="M35 19.6 C39.6 16.2 44.6 15.2 50 15.2" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.1" stroke-linecap="round"/>`
+      + `<circle cx="31.4" cy="30.6" r="2.2" fill="${hdDunkler(helm, 0.5)}"/><circle cx="68.6" cy="30.6" r="2.2" fill="${hdDunkler(helm, 0.5)}"/>`
+      + `<path d="M44 52.6 H56 M45.2 55.6 H54.8" stroke="rgba(0,0,0,.45)" stroke-width="1.5" stroke-linecap="round"/>`
+      + `<path d="M31.6 30 C31 20 38 10.6 48 9.6" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2.2" stroke-linecap="round"/>`
+      + `<path d="M71.6 26 C74.2 34 74 46 69.6 55 C67.6 59 65 61.6 62.6 63" fill="none" stroke="${basis}" stroke-width="1.8" opacity=".6" stroke-linecap="round"/>`
       + `</g></g></svg>`;
   }
   function hdAvatarStil(car) { return (hd.avatare && hd.avatare[String(car.device.id)]) || 0; }
@@ -123417,6 +123480,79 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     try { z(t('Zufallsevents'), $('race-zev') && $('race-zev').checked ? t('an') : t('aus')); } catch (e) { /* older build */ }
     try { z(t('Automatisches Safety Car'), hd.autoSc ? t('an') : t('aus')); } catch (e) { /* not loaded */ }
     box.innerHTML = '<div class="hd-gi-titel">' + t('Rennen') + '</div><div class="hd-gi-raster">' + zeilen.join('') + '</div>';
+  }
+
+  // ---- STARTING GRID AS A TV BOARD (Hybrid-Dash 3.0) ----
+  // BESTELLT: "change the cards to something like this" (a TV "Starting Grid" graphic): a title bar, one band per
+  // grid row with a "ROW n" tab and the two positions, the car on the left of the track in the left card and the
+  // car on the right in the right card (mirrored: big car number on the outer edge, portrait, first name over the
+  // surname), and a footer strip. The rows that raceGridZeilen() built stay the same elements - their arrows, Pit
+  // Box picker, click-to-blink and drag handlers keep working; only their content is regrouped.
+  function hdNameTeile(name) {
+    const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (w.length < 2) return ['', w[0] || ''];
+    return [w.slice(0, -1).join(' '), w[w.length - 1]];
+  }
+  function hdStartgridBoard(host, cars) {
+    if (!host || !cars || !cars.length) return;
+    const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    host.classList.add('hd-sg');
+    // title bar
+    let titel = '', unter = [];
+    try {
+      const m = RACE_MODES[raceMode];
+      titel = t(m.label);
+      if (raceLimit > 0) unter.push(raceLimit + ' ' + t(m.unit));
+      unter.push(raceFlying ? t('Fliegend') : t('Stehend'));
+      unter.push(cars.length + ' ' + t('Autos'));
+    } catch (e) { /* settings not ready */ }
+    const kopf = document.createElement('div');
+    kopf.className = 'hd-sg-kopf'; kopf.setAttribute('data-i18n-skip', '');
+    kopf.style.gridRow = '1';
+    kopf.innerHTML = '<b>' + esc(t('Startaufstellung')) + '</b><span>' + esc(titel) + '</span>';
+    host.insertBefore(kopf, host.firstChild);
+    // rows: car i stands in grid row floor(i/2); even index on the right of the track, odd on the left
+    const reihen = Math.ceil(cars.length / 2);
+    host.querySelectorAll('.grid-row:not(.grid-sc)').forEach((row, i) => {
+      const car = cars[i];
+      if (!car) return;
+      const r = Math.floor(i / 2), rechts = i % 2 === 0;
+      row.style.gridRow = String(r + 2);
+      row.classList.add('hd-sg-karte', rechts ? 'hd-sg-r' : 'hd-sg-l');
+      const f = carColor(car);
+      row.style.setProperty('--hd-sg-farbe', f.hex);
+      const name = car.alias || car.tag || garageLabel(car);
+      const [vor, nach] = hdNameTeile(name);
+      const nr = typeof hdNummer === 'function' ? hdNummer(car) : (car.tagChar || i + 1);
+      const avatar = typeof hdAvatarSvg === 'function'
+        ? hdAvatarSvg(name, f.hex, typeof hdAvatarStil === 'function' ? hdAvatarStil(car) : 0, 64, carModellWert(car.modellId)) : '';
+      const ctrl = document.createElement('span');
+      ctrl.className = 'hd-sg-ctrl';
+      ['.grid-box', '.grid-move'].forEach((sel) => { const el = row.querySelector(sel); if (el) ctrl.appendChild(el); });
+      const inhalt = document.createElement('span');
+      inhalt.className = 'hd-sg-inhalt'; inhalt.setAttribute('data-i18n-skip', '');
+      inhalt.innerHTML = `<span class="hd-sg-nr">${esc(nr)}</span><span class="hd-sg-bild">${avatar}</span>`
+        + `<span class="hd-sg-name"><small>${esc(vor)}</small><b>${esc(nach)}</b></span>`;
+      inhalt.appendChild(ctrl);
+      row.appendChild(inhalt);
+    });
+    for (let r = 0; r < reihen; r++) {
+      const tab = document.createElement('div');
+      tab.className = 'hd-sg-reihe'; tab.setAttribute('data-i18n-skip', '');
+      tab.style.gridRow = String(r + 2);
+      const links = 2 * r + 2 <= cars.length ? 2 * r + 2 : '';
+      tab.innerHTML = `<i>${links}</i><b>${esc(t('Reihe {r}').replace('{r}', r + 1))}</b><i>${2 * r + 1}</i>`;
+      host.appendChild(tab);
+    }
+    const sc = host.querySelector('.grid-row.grid-sc');
+    if (sc) sc.style.gridRow = String(reihen + 2);
+    const fuss = document.createElement('div');
+    fuss.className = 'hd-sg-fuss'; fuss.setAttribute('data-i18n-skip', '');
+    fuss.style.gridRow = String(reihen + (sc ? 3 : 2));
+    let strecke = t('frei');
+    try { if (($('setting-ontrack') || {}).checked && currentTrackTiles && currentTrackTiles.length > 1) strecke = currentTrackTiles.length + ' ' + t('Teile') + (typeof trackLaengeText === 'function' ? ' · ' + trackLaengeText(currentTrackTiles) : ''); } catch (e) { /* no track */ }
+    fuss.textContent = (t('Strecke') + ': ' + strecke + (unter.length ? ' · ' + unter.join(' · ') : '')).toUpperCase();
+    host.appendChild(fuss);
   }
 
   // Self-test of the automatic pit stop: a stand-in player car walked through the four phases.

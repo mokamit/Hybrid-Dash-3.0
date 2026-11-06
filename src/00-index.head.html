@@ -5806,6 +5806,46 @@
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
 
+  /* ---- Hybrid-Dash 3.0: the starting grid as a TV board (hdStartgridBoard) ---- */
+  #race-gridscreen #grid-liste.hd-sg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-auto-rows: auto;
+    gap: 14px 8px; padding: 0 0 4px; align-content: start; overflow: auto; }
+  #grid-liste.hd-sg .hd-sg-kopf { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 0;
+    padding: 6px 12px 7px; margin-bottom: 4px; background: linear-gradient(180deg, #23262e, #15171c); border-top: 3px solid var(--b-red, #e10600);
+    clip-path: polygon(2% 0, 98% 0, 100% 100%, 0 100%); }
+  #grid-liste.hd-sg .hd-sg-kopf b { font: italic 900 clamp(18px, 2.2vw, 30px)/1.05 var(--b-font, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: #fff; }
+  #grid-liste.hd-sg .hd-sg-kopf span { font: 700 clamp(10px, 1vw, 13px)/1.2 var(--b-font, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: var(--b-yellow, #ffc400); }
+  #race-gridscreen #grid-liste.hd-sg .grid-row.hd-sg-karte { margin: 0 !important; padding: 0; display: block; min-height: 0; border: 0; border-radius: 0;
+    background: repeating-linear-gradient(-60deg, rgba(255,255,255,.025) 0 2px, transparent 2px 7px), linear-gradient(180deg, #2b2f39 0%, #171a20 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); overflow: hidden; }
+  #race-gridscreen #grid-liste.hd-sg .grid-row.hd-sg-l { grid-column: 1; }
+  #race-gridscreen #grid-liste.hd-sg .grid-row.hd-sg-r { grid-column: 2; }
+  #grid-liste.hd-sg .hd-sg-karte > :not(.hd-sg-inhalt) { display: none !important; }
+  #grid-liste.hd-sg .hd-sg-inhalt { display: grid; align-items: center; gap: 0 10px; height: clamp(58px, 8.4vh, 78px); padding: 0 10px 0 0; position: relative; }
+  #grid-liste.hd-sg .hd-sg-l .hd-sg-inhalt { grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "nr bild name ctrl"; border-left: 5px solid var(--hd-sg-farbe); }
+  #grid-liste.hd-sg .hd-sg-r .hd-sg-inhalt { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "ctrl name bild nr"; padding: 0 0 0 10px; border-right: 5px solid var(--hd-sg-farbe); }
+  #grid-liste.hd-sg .hd-sg-nr { grid-area: nr; min-width: 1.6em; padding: 0 6px; text-align: center; font: italic 900 clamp(28px, 3.6vw, 48px)/1 var(--b-font, sans-serif); color: #fff;
+    text-shadow: 0 2px 0 rgba(0,0,0,.5); }
+  #grid-liste.hd-sg .hd-sg-bild { grid-area: bild; align-self: end; height: 100%; display: flex; align-items: flex-end; }
+  #grid-liste.hd-sg .hd-sg-bild .hd-avatar { width: auto; height: 100%; border-radius: 0; }
+  #grid-liste.hd-sg .hd-sg-name { grid-area: name; min-width: 0; display: flex; flex-direction: column; line-height: 1.02; }
+  #grid-liste.hd-sg .hd-sg-r .hd-sg-name { text-align: right; }
+  #grid-liste.hd-sg .hd-sg-name small { font: 700 clamp(11px, 1.15vw, 16px)/1.1 var(--b-font, sans-serif); text-transform: uppercase; letter-spacing: .04em; color: #e6e8ec; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #grid-liste.hd-sg .hd-sg-name b { font: italic 900 clamp(15px, 1.7vw, 24px)/1.05 var(--b-font, sans-serif); text-transform: uppercase; letter-spacing: .02em; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #grid-liste.hd-sg .hd-sg-ctrl { grid-area: ctrl; display: flex; align-items: center; gap: 6px; }
+  #grid-liste.hd-sg .hd-sg-ctrl .grid-move { display: flex; flex-direction: column; gap: 3px; }
+  #grid-liste.hd-sg .hd-sg-ctrl .grid-move button { width: 26px !important; height: 22px !important; font-size: 10px !important; padding: 0; }
+  #grid-liste.hd-sg .hd-sg-ctrl .grid-box { display: flex; }
+  #grid-liste.hd-sg .hd-sg-reihe { grid-column: 1 / -1; justify-self: center; align-self: start; z-index: 2; transform: translateY(-62%);
+    display: flex; align-items: stretch; height: 18px; font: 800 11px/18px var(--b-font, sans-serif); text-transform: uppercase; letter-spacing: .08em; pointer-events: none; }
+  #grid-liste.hd-sg .hd-sg-reihe b { padding: 0 14px; background: var(--b-yellow, #ffc400); color: #15171c; font-style: italic; clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%); }
+  #grid-liste.hd-sg .hd-sg-reihe i { min-width: 18px; padding: 0 4px; text-align: center; font-style: normal; background: #f2f3f5; color: #15171c; margin: 0 3px; }
+  #grid-liste.hd-sg .hd-sg-reihe i:empty { visibility: hidden; }
+  #grid-liste.hd-sg .grid-row.grid-sc { grid-column: 1 / -1; margin: 0 !important; }
+  #grid-liste.hd-sg .hd-sg-fuss { grid-column: 1 / -1; padding: 6px 12px; text-align: center; font: italic 800 clamp(11px, 1.15vw, 15px)/1.2 var(--b-font, sans-serif);
+    letter-spacing: .1em; color: #fff; background: linear-gradient(180deg, #23262e, #0e1014); border-bottom: 3px solid var(--b-red, #e10600); }
+  #grid-liste.hd-sg .grid-row.grid-blinkt { animation: hd-sg-blink .6s 2; }
+  @keyframes hd-sg-blink { 50% { box-shadow: inset 0 0 0 2px var(--hd-sg-farbe), 0 0 18px var(--hd-sg-farbe); } }
+
   /* Flag band (yellow / SC / VSC): solid flag-yellow TV bar with a cut corner */
   html body #gt3-flag { background: var(--b-yellow); color: var(--b-asphalt); font-family: var(--b-font); font-style: italic; font-weight: 900;
     letter-spacing: .08em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, calc(100% - 22px) 100%, 0 100%); }

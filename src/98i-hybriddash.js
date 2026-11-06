@@ -505,6 +505,8 @@
     const a1 = akz[Math.floor(r() * akz.length)];
     const a2 = akz.filter((c) => c !== a1)[Math.floor(r() * (akz.length - 1))] || '#ffffff';
     const haut = pick(HD_HAUT), haar = pick(HD_HAARE);
+    const helm = r() < 0.65 ? basis : pick([pal[0], '#f4f5f7', '#1c1f24'].filter((c) => c.toLowerCase() !== a1.toLowerCase()));
+    const helmMuster = Math.floor(r() * 5);
     const frisur = Math.floor(r() * 6), anzugMuster = Math.floor(r() * 5), bart = r() < 0.3, augen = pick(['#3b2a1e', '#2a1d14', '#4a6a82', '#3f5a3a', '#5b3b24']);
     const id = 'hdav' + (++hdAvatarNr) + '-' + (hdHash(String(name)) % 9973);
     const nummer = 1 + (hdHash(String(name)) % 99);
@@ -529,6 +531,16 @@
       // fade with a parting line
       'M33 33 C32.4 19.6 40.4 11.6 50.4 11.8 C60.4 12 67.6 19.6 67 33 C65.8 27 62.4 23.4 57.6 22.2 L44 22.4 C39 23.6 35 27.4 33 33 Z',
     ];
+    // helmet shell and eye port (head coordinates, before the head group's scale)
+    const helmSchale = 'M25.4 40 C24.6 19.6 35.6 6.4 50 6.4 C64.4 6.4 75.4 19.6 74.6 40 C74.4 52 71 60.4 65.6 64.6 L34.4 64.6 C29 60.4 25.6 52 25.4 40 Z';
+    const helmAuge = 'M35.6 30.6 C36 26.6 40.4 25.2 50 25.2 C59.6 25.2 64 26.6 64.4 30.6 L63.8 41 C63 44.2 59.6 45.6 50 45.6 C40.4 45.6 37 44.2 36.2 41 Z';
+    const helmDeko = [
+      `<path d="M46 0 H54 V26 H46 Z" fill="${a1}"/><path d="M44 0 H45.4 V26 H44 Z M54.6 0 H56 V26 H54.6 Z" fill="${a2}"/>`,
+      `<path d="M20 44 C34 50 40 58 44 70 L34 70 C30 60 26 54 20 50 Z M80 44 C66 50 60 58 56 70 L66 70 C70 60 74 54 80 50 Z" fill="${a1}"/>`,
+      `<path d="M20 34 C30 30 38 31 44 36 L36 40 C31 37 26 37 20 39 Z M80 34 C70 30 62 31 56 36 L64 40 C69 37 74 37 80 39 Z" fill="${a1}"/><path d="M20 41 C27 39 32 40 36 42.6 L34.6 44 C30 42 26 42 20 43.4 Z M80 41 C73 39 68 40 64 42.6 L65.4 44 C70 42 74 42 80 43.4 Z" fill="${a2}"/>`,
+      `<path d="M20 52 H80 V58 H20 Z" fill="${a1}"/><path d="M20 59.4 H80 V61.4 H20 Z" fill="${a2}"/>`,
+      `<path d="M50 4 L80 20 V34 L50 18 L20 34 V20 Z" fill="${a1}"/>`,
+    ][helmMuster];
     // suit panels (clipped to the torso): shoulder yoke, side panels, chest band, diagonal sash, centre stripe
     const am = [
       `<path d="M1 84 C8 74 20 69.5 34 67 L36 73 C22 75 12 79 4 90 Z M99 84 C92 74 80 69.5 66 67 L64 73 C78 75 88 79 96 90 Z" fill="${a1}"/>`,
@@ -553,6 +565,9 @@
       + `<linearGradient id="${id}-haar" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="${haarH}"/><stop offset="1" stop-color="${haarD}"/></linearGradient>`
       + `<linearGradient id="${id}-arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${anzugH}"/><stop offset=".5" stop-color="${basis}"/><stop offset="1" stop-color="${anzugD}"/></linearGradient>`
       + `<linearGradient id="${id}-armH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${basis}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
+      + `<linearGradient id="${id}-helm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${hdHeller(helm, 0.3)}"/><stop offset=".5" stop-color="${helm}"/><stop offset="1" stop-color="${hdDunkler(helm, 0.6)}"/></linearGradient>`
+      + `<linearGradient id="${id}-visier" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a4250"/><stop offset="1" stop-color="#0f1217"/></linearGradient>`
+      + `<clipPath id="${id}-hc"><path d="${helmSchale} ${helmAuge}" clip-rule="evenodd"/></clipPath>`
       + `<linearGradient id="${id}-rand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".85" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".35"/></linearGradient>`
       + `</defs>`
       + `<g clip-path="url(#${id}-k)">`
@@ -603,11 +618,18 @@
       + `<path d="M50.6 37.4 C51 41.4 52.4 43.6 52 45.2 C51.2 46 49.6 46.2 48.4 45.6" stroke="${hautDD}" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".8"/>`
       + `<path d="M45.4 49.6 C48 50.8 52 50.8 54.6 49.6" stroke="${hdDunkler(haut, 0.5)}" stroke-width="1.1" fill="none" stroke-linecap="round"/>`
       + `<path d="M46.8 51.6 C48.6 52.4 51.4 52.4 53.2 51.6" stroke="${hautH}" stroke-width=".8" fill="none" stroke-linecap="round" opacity=".7"/>`
-      // hair
-      + `<path d="${haare[frisur]}" fill="url(#${id}-haar)"/>`
-      + `<path d="M64.6 22 C67.6 28 67.8 38 65.6 46 C64.4 50.4 62 53.6 59.6 55.4" fill="none" stroke="${basis}" stroke-width="1.6" opacity=".55" stroke-linecap="round"/>`
-      + (frisur === 5 ? `<path d="M44 22.4 C47 18 52 15.4 58 15" stroke="${haarH}" stroke-width=".8" fill="none" opacity=".7"/>` : '')
-      + (frisur === 2 ? '' : `<path d="M40 17 C45 13.6 54 13 60 16" stroke="${haarH}" stroke-width=".9" fill="none" opacity=".45" stroke-linecap="round"/>`)
+      // helmet (v3.0 BESTELLT: "Put helmets on the new avatars"): full-face shell in the helmet colour with a
+      // brand-colour pattern, the eye port cut out (evenodd) so eyes and nose show, the visor raised on top,
+      // visor pivots, a chin bar with vents, a gloss highlight and the car-colour rim light.
+      + `<path d="${helmSchale} ${helmAuge}" fill="url(#${id}-helm)" fill-rule="evenodd"/>`
+      + `<g clip-path="url(#${id}-hc)">${helmDeko}</g>`
+      + `<path d="${helmAuge}" fill="none" stroke="${hdDunkler(helm, 0.45)}" stroke-width="1.4"/>`
+      + `<path d="M31 24.6 C33.6 16 41 12.6 50 12.6 C59 12.6 66.4 16 69 24.6 C63.4 22 57.4 21 50 21 C42.6 21 36.6 22 31 24.6 Z" fill="url(#${id}-visier)"/>`
+      + `<path d="M35 19.6 C39.6 16.2 44.6 15.2 50 15.2" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.1" stroke-linecap="round"/>`
+      + `<circle cx="31.4" cy="30.6" r="2.2" fill="${hdDunkler(helm, 0.5)}"/><circle cx="68.6" cy="30.6" r="2.2" fill="${hdDunkler(helm, 0.5)}"/>`
+      + `<path d="M44 52.6 H56 M45.2 55.6 H54.8" stroke="rgba(0,0,0,.45)" stroke-width="1.5" stroke-linecap="round"/>`
+      + `<path d="M31.6 30 C31 20 38 10.6 48 9.6" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2.2" stroke-linecap="round"/>`
+      + `<path d="M71.6 26 C74.2 34 74 46 69.6 55 C67.6 59 65 61.6 62.6 63" fill="none" stroke="${basis}" stroke-width="1.8" opacity=".6" stroke-linecap="round"/>`
       + `</g></g></svg>`;
   }
   function hdAvatarStil(car) { return (hd.avatare && hd.avatare[String(car.device.id)]) || 0; }
