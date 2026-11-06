@@ -73,8 +73,10 @@
     try {
       for (const p of (navigator.getGamepads ? navigator.getGamepads() : [])) {
         if (!p || !p.id) continue;
-        if (/054c|dualsense|dualshock|playstation|wireless controller/i.test(p.id)) return 'ps';
+        // Xbox first: an Xbox pad reports itself as "Xbox Wireless Controller", which the PlayStation
+        // pattern ("wireless controller", the DualShock 4's name) would otherwise claim.
         if (/045e|xbox|xinput/i.test(p.id)) return 'xbox';
+        if (/054c|dualsense|dualshock|playstation|wireless controller/i.test(p.id)) return 'ps';
       }
     } catch (e) { /* no API */ }
     return null;

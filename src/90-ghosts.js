@@ -600,6 +600,7 @@
     // Gelegenheit, eine zu vergessen.
     padDiagramRender();
     if (typeof hdPadBildAnwenden === 'function') hdPadBildAnwenden();
+    if (typeof hdPadKarteRender === 'function') hdPadKarteRender();   // v3.0: Xbox / PS button map
     bindPlayerRowZeichnen();
     const ab = activeBindings();
     const body = $('bind-table-body');
