@@ -6028,8 +6028,9 @@
     // und der Selbsttest konnte es nicht melden, weil er dieselbe Liste benutzt: ein
     // blinder Fleck, der sich selbst versteckt. Gefunden hat es ein Abzug ueber das ganze
     // body, nicht ueber diese Liste.
+    // Hybrid-Dash 3.0: the main-menu banner sits above the header, outside main - translated like the rest.
     return [document.querySelector('header'), document.querySelector('main'),
-            $('lb-wrap')].filter(Boolean);
+            $('lb-wrap'), $('hd-banner')].filter(Boolean);
   }
 
   // Einen Teilbaum in die aktuelle Sprache bringen. Wird beim Umschalten fuer alles und

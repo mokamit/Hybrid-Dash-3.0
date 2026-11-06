@@ -203,8 +203,11 @@
     const knoepfe = banner.querySelector('.hd-banner-knoepfe');
     ['k-wiki', 'k-tutorial-start', 'k-steuerung-start', 'home-apk', 'home-install'].forEach((id) => { const el = $(id); if (el) knoepfe.appendChild(el); });
     const upd = $('app-update'); if (upd) banner.appendChild(upd);
-    const erstes = fahren.querySelector('.k-fahren') || fahren.firstElementChild;
-    fahren.insertBefore(banner, erstes);
+    // At the very top of the page, above the tabs (only shown on the main menu - CSS body.k-kacheln).
+    banner.querySelector('.hd-banner-logo').insertAdjacentHTML('afterbegin', '<img src="icons/hd-mark.png" alt="" width="82" height="34">');
+    const kopfEl = $('k-kopf');
+    if (kopfEl && kopfEl.parentNode) kopfEl.parentNode.insertBefore(banner, kopfEl);
+    else fahren.insertBefore(banner, fahren.querySelector('.k-fahren') || fahren.firstElementChild);
     const fussAlt = document.querySelector('#tab-home .k-titel-fuss');
     if (fussAlt) { const fuss = document.createElement('div'); fuss.className = 'hd-fuss'; fuss.id = 'hd-fuss'; while (fussAlt.firstChild) fuss.appendChild(fussAlt.firstChild); fahren.appendChild(fuss); }
     // language button in the header
