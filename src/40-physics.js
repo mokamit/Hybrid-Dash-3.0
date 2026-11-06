@@ -1494,17 +1494,32 @@
     // und welcher Gang zieht. Nicht die Schlagzeilenzahl - calibrateAccel() loest gegen die
     // eingestellte Zeit von null auf Hoechstgeschwindigkeit, und die bleibt. Genau wie das
     // Layout die Balance aendert und nicht die Geradeausleistung.
-    applyGearbox(name) {
+    // HybridDash 3.0: `stufe` = GEAR RATIO factor (1 = long, as the gearbox was built; <1 = shorter). It packs
+    // every gear except the top one into the lower part of the speed range (topFrac * stufe, ratio / stufe -
+    // the product, and with it rpmScale, stays the same), so a short track uses all the gears. The top gear and
+    // ratioRef are untouched: top speed and the acceleration anchor stay, the top gear becomes an overdrive.
+    // REPORTED: "The car stays mostly in 1st and 2nd gear during the race... maybe because the track is too short."
+    applyGearbox(name, stufe) {
       const G = GEARBOXES[name] || GEARBOXES.gt3;
       const cfg = this.config;
+      const f = Math.max(0.4, Math.min(1, Number(stufe) || 1));
       if (this.calibRef && cfg.gears === this.calibRef.gears) {
         cfg.gears = cfg.gears.map(g => ({ ratio: g.ratio, topFrac: g.topFrac }));
       }
       cfg.gears.splice(0, cfg.gears.length,
-        ...G.gears.map(g => ({ ratio: g.ratio, topFrac: g.topFrac })));
+        ...G.gears.map((g, i, a) => (i < a.length - 1 && f < 1
+          ? { ratio: g.ratio / f, topFrac: g.topFrac * f } : { ratio: g.ratio, topFrac: g.topFrac })));
       cfg.ratioRef = cfg.gears[cfg.gears.length - 1].ratio;
       cfg.upshiftRpm = G.upshiftRpm;
+      // The downshift point of a gear must sit below the rpm an upshift INTO that gear lands on, or the car hunts
+      // between the two. With shorter ratios the step into the (unchanged) top gear is big, so each gear gets its
+      // own cap: 90 % of its landing rpm (downshiftJeGang, read in update(); gear 0 has none). With the gearboxes
+      // as built nothing changes (GT3: every cap is above 6400 rpm, the downshift point is 4200).
       cfg.downshiftRpm = G.downshiftRpm;
+      cfg.downshiftJeGang = cfg.gears.map((g, i) => (i === 0 ? Infinity
+        : Math.round(0.9 * G.upshiftRpm * g.ratio / cfg.gears[i - 1].ratio)));
+      cfg.downshiftSicher = Math.min.apply(null, cfg.downshiftJeGang);
+      this.gangStufe = f;
       // MINDESTENS EIN SENDETAKT. Gemessen sind die 40 ms des F1-Getriebes 0,89 Takte bei
       // 45 ms Sendeintervall - eine Schaltpause, die kuerzer ist als ein Paket, kann zwischen
       // zwei Takten komplett verschwinden, und dann sieht weder die Simulation noch das Auto
@@ -2278,7 +2293,7 @@
         const r = this.rpmRawAt(st.speedKmh, st.currentGear);
         if (st.currentGear < cfg.gears.length - 1 && r >= cfg.upshiftRpm && inputs.throttle > 0.05) {
           this.triggerShift(1, 'auto');
-        } else if (st.currentGear > 0 && r <= cfg.downshiftRpm) {
+        } else if (st.currentGear > 0 && r <= Math.min(cfg.downshiftRpm, (cfg.downshiftJeGang && cfg.downshiftJeGang[st.currentGear]) || Infinity)) {
           this.triggerShift(-1, 'auto');
         }
       }

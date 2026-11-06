@@ -11490,6 +11490,18 @@
           <option value="f1">Formel 1, 8-Gang</option>
           <option value="p412">Ferrari 412P, 5-Gang Transaxle</option>
         </select></div>
+      <div class="opt-row"><div class="opt-label">Gear ratios<small>How the gears are spread over the speed range.
+          <b>Short</b> packs all gears except the top one into the low speeds a short track reaches &ndash; the car
+          shifts up through every gear, revs higher and pulls hard; the top gear stays as a tall overdrive, so the
+          top speed is the same. <b>Medium</b> is in between. <b>Long</b> is the gearbox as built &ndash; on a short
+          track the car stays in 1st and 2nd. <b>Auto</b> picks by the track: from its length at first, then from the
+          top speed actually reached on it (changes only between races). Applies to every car, NPCs too.</small></div>
+        <select id="hd-gangstufe" data-preset-skip data-i18n-skip>
+          <option value="auto" selected>Auto (fits the track)</option>
+          <option value="kurz">Short</option>
+          <option value="mittel">Medium</option>
+          <option value="lang">Long</option>
+        </select></div>
       <div class="opt-row"><div class="opt-label">Daten des Getriebes<small>Bis zu welchem
           Tempo jeder Gang reicht. Gerechnet aus den &Uuml;bersetzungen und der
           H&ouml;chstgeschwindigkeit, nicht eingetippt.</small></div>
@@ -24790,17 +24802,32 @@
     // und welcher Gang zieht. Nicht die Schlagzeilenzahl - calibrateAccel() loest gegen die
     // eingestellte Zeit von null auf Hoechstgeschwindigkeit, und die bleibt. Genau wie das
     // Layout die Balance aendert und nicht die Geradeausleistung.
-    applyGearbox(name) {
+    // HybridDash 3.0: `stufe` = GEAR RATIO factor (1 = long, as the gearbox was built; <1 = shorter). It packs
+    // every gear except the top one into the lower part of the speed range (topFrac * stufe, ratio / stufe -
+    // the product, and with it rpmScale, stays the same), so a short track uses all the gears. The top gear and
+    // ratioRef are untouched: top speed and the acceleration anchor stay, the top gear becomes an overdrive.
+    // REPORTED: "The car stays mostly in 1st and 2nd gear during the race... maybe because the track is too short."
+    applyGearbox(name, stufe) {
       const G = GEARBOXES[name] || GEARBOXES.gt3;
       const cfg = this.config;
+      const f = Math.max(0.4, Math.min(1, Number(stufe) || 1));
       if (this.calibRef && cfg.gears === this.calibRef.gears) {
         cfg.gears = cfg.gears.map(g => ({ ratio: g.ratio, topFrac: g.topFrac }));
       }
       cfg.gears.splice(0, cfg.gears.length,
-        ...G.gears.map(g => ({ ratio: g.ratio, topFrac: g.topFrac })));
+        ...G.gears.map((g, i, a) => (i < a.length - 1 && f < 1
+          ? { ratio: g.ratio / f, topFrac: g.topFrac * f } : { ratio: g.ratio, topFrac: g.topFrac })));
       cfg.ratioRef = cfg.gears[cfg.gears.length - 1].ratio;
       cfg.upshiftRpm = G.upshiftRpm;
+      // The downshift point of a gear must sit below the rpm an upshift INTO that gear lands on, or the car hunts
+      // between the two. With shorter ratios the step into the (unchanged) top gear is big, so each gear gets its
+      // own cap: 90 % of its landing rpm (downshiftJeGang, read in update(); gear 0 has none). With the gearboxes
+      // as built nothing changes (GT3: every cap is above 6400 rpm, the downshift point is 4200).
       cfg.downshiftRpm = G.downshiftRpm;
+      cfg.downshiftJeGang = cfg.gears.map((g, i) => (i === 0 ? Infinity
+        : Math.round(0.9 * G.upshiftRpm * g.ratio / cfg.gears[i - 1].ratio)));
+      cfg.downshiftSicher = Math.min.apply(null, cfg.downshiftJeGang);
+      this.gangStufe = f;
       // MINDESTENS EIN SENDETAKT. Gemessen sind die 40 ms des F1-Getriebes 0,89 Takte bei
       // 45 ms Sendeintervall - eine Schaltpause, die kuerzer ist als ein Paket, kann zwischen
       // zwei Takten komplett verschwinden, und dann sieht weder die Simulation noch das Auto
@@ -25574,7 +25601,7 @@
         const r = this.rpmRawAt(st.speedKmh, st.currentGear);
         if (st.currentGear < cfg.gears.length - 1 && r >= cfg.upshiftRpm && inputs.throttle > 0.05) {
           this.triggerShift(1, 'auto');
-        } else if (st.currentGear > 0 && r <= cfg.downshiftRpm) {
+        } else if (st.currentGear > 0 && r <= Math.min(cfg.downshiftRpm, (cfg.downshiftJeGang && cfg.downshiftJeGang[st.currentGear]) || Infinity)) {
           this.triggerShift(-1, 'auto');
         }
       }
@@ -26648,6 +26675,56 @@
     ansichtAnwenden(false);
   }
 
+  // ---- Gear ratios (HybridDash 3.0) -----------------------------------------------------
+  // Factor for applyGearbox(): Short 0.45, Medium 0.65, Long 1. Auto: before anything is measured, by the track
+  // length (up to 14 pieces short, up to 24 medium, else long); once the car has driven on this track, from the top
+  // speed it actually reached - the second-highest gear ends just below it, so the top gear is reached on the
+  // straights (factor = 0.92 x reached / end of that gear in the long gearbox, 0.4 to 1). Measured per track;
+  // Auto only re-applies between races.
+  const HD_GANGSTUFE_STORE = 'hybriddash.gangstufe.v1';
+  const HD_GANGSTUFEN = { kurz: 0.45, mittel: 0.65, lang: 1 };
+  let hdGetriebeNeu = null;
+  const hdGangTempo = { key: '', max: 0, ms: 0 };
+  function hdStreckenKey() {
+    try { const t = currentTrackTiles || []; return t.length ? t.length + ':' + t.map((x) => x.type).join('') : ''; } catch (e) { return ''; }
+  }
+  // While the app's own self-test runs (its start button is disabled), the gearbox stays as built: the original
+  // physics tests are calibrated against it, and Auto must not re-fit the gears to each stand-in track.
+  function hdSuiteLaeuft() { const b = $('st-run'); return !!(b && b.disabled); }
+  function hdGangStufeFaktor(ohneSuite) {
+    if (!ohneSuite && hdSuiteLaeuft()) return 1;
+    const sel = $('hd-gangstufe');
+    const wahl = sel ? sel.value : 'auto';
+    if (HD_GANGSTUFEN[wahl]) return HD_GANGSTUFEN[wahl];
+    let n = 0;
+    try { n = (currentTrackTiles || []).length; } catch (e) { n = 0; }
+    if (hdGangTempo.key && hdGangTempo.key === hdStreckenKey() && hdGangTempo.ms > 20000 && hdGangTempo.max > 0.05) {
+      const G = GEARBOXES[$('setting-gearbox') ? $('setting-gearbox').value : 'gt3'] || GEARBOXES.gt3;
+      const ende = G.gears.length > 1 ? G.gears[G.gears.length - 2].topFrac : 1;
+      return Math.max(0.4, Math.min(1, Math.round((0.92 * hdGangTempo.max / ende) * 20) / 20));
+    }
+    if (!n) return 1;
+    return n <= 14 ? 0.45 : n <= 24 ? 0.65 : 1;
+  }
+  // Tests only: the Auto rule without a measurement (the track the test sets up has never been driven).
+  function hdGangStufeFaktorTest() { const m = Object.assign({}, hdGangTempo); hdGangTempo.key = ''; try { return hdGangStufeFaktor(true); } finally { Object.assign(hdGangTempo, m); } }
+  function hdGangStufeName(f) { return f <= 0.5 ? t('short') : f < 0.95 ? t('medium') : t('long'); }
+  // Measure the reached top speed on this track (player car, while driving) and re-apply Auto between races.
+  setInterval(() => {
+    try {
+      const key = hdStreckenKey();
+      if (key !== hdGangTempo.key) { hdGangTempo.key = key; hdGangTempo.max = 0; hdGangTempo.ms = 0; }
+      const st = physEngine.state, frac = Math.abs(st.speedKmh) / physEngine.config.topSpeedKmh;
+      if (key && typeof playerCar !== 'undefined' && playerCar && frac > 0.03) {
+        hdGangTempo.ms += 500;
+        if (frac > hdGangTempo.max) hdGangTempo.max = frac;
+      }
+      const sel = $('hd-gangstufe');
+      const zwischen = typeof raceState === 'undefined' || !['racing', 'countdown', 'finishing'].includes(raceState);
+      if (sel && sel.value === 'auto' && zwischen && hdGetriebeNeu && Math.abs(hdGangStufeFaktor() - (physEngine.gangStufe || 1)) > 0.01) hdGetriebeNeu();
+    } catch (e) { /* start-up */ }
+  }, 500);
+
   // ---- Getriebeart -------------------------------------------------------------------
   //
   // Dieselbe Bauform wie das Layout darueber, und aus demselben Grund eine EIGENE Ablage:
@@ -26672,7 +26749,7 @@
     // was die ganze IIFE mitnimmt und OMEGA_TEST verschwinden laesst. Beim Laden gibt es
     // ausserdem keine Ghosts, also ist der Verzicht nicht nur sicher, sondern richtig.
     const getriebeAnwenden = (melden, mitGhosts) => {
-      const name = physEngine.applyGearbox($('setting-gearbox').value);
+      const name = physEngine.applyGearbox($('setting-gearbox').value, hdGangStufeFaktor());
       // Wie beim Layout: war der abgelegte Name unbekannt, faellt applyGearbox auf gt3
       // zurueck, und dann muss die Auswahl mitkommen.
       if ($('setting-gearbox').value !== name) $('setting-gearbox').value = name;
@@ -26688,6 +26765,8 @@
           gc.ratioRef = pc.ratioRef;
           gc.upshiftRpm = pc.upshiftRpm;
           gc.downshiftRpm = pc.downshiftRpm;
+          gc.downshiftSicher = pc.downshiftSicher;
+          gc.downshiftJeGang = pc.downshiftJeGang;
           gc.shiftMs = pc.shiftMs;
           gc.rpmScale = pc.rpmScale;
           // v1.3.5: der NPC-Motor (ghostMaxMotor) setzt Schaltzeit und Rueckschaltpunkt nur beim
@@ -26712,6 +26791,18 @@
       if (gespeichert) $('setting-gearbox').value = gespeichert;
     } catch (e) { /* privater Modus */ }
     $('setting-gearbox').addEventListener('change', () => getriebeAnwenden(true, true));
+    // HybridDash 3.0: gear ratios (Short / Medium / Long / Auto), see hdGangStufeFaktor() below.
+    const gs = $('hd-gangstufe');
+    if (gs) {
+      try { const v = localStorage.getItem(HD_GANGSTUFE_STORE); if (v && [...gs.options].some((o) => o.value === v)) gs.value = v; } catch (e) { /* private */ }
+      gs.addEventListener('change', () => {
+        try { localStorage.setItem(HD_GANGSTUFE_STORE, gs.value); } catch (e) { /* private */ }
+        getriebeAnwenden(false, true);
+        const f = physEngine.gangStufe;
+        showHudToast(t('Gear ratios') + ': ' + gs.selectedOptions[0].textContent + (gs.value === 'auto' ? ' (' + hdGangStufeName(f) + ')' : ''));
+      });
+    }
+    hdGetriebeNeu = () => getriebeAnwenden(false, true);
     if (typeof i18nOnLangChange === 'function') i18nOnLangChange(zeigeGetriebeDaten);
     getriebeAnwenden(false, false);
   }
@@ -70126,6 +70217,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const w = npcMotorWerte(art);
     const neuKalib = w.launchAnchorTimeS !== e.config.launchAnchorTimeS || w.coastDragPerS !== e.config.coastDragPerS;
     Object.assign(e.config, w);
+    // (HybridDash 3.0: the per-gear caps of shorter gear ratios, downshiftJeGang, still apply on top - see update().)
     e.config.downshiftRpm = NPC_RUECKSCHALT_RPM;
     e.config.shiftMs = art === 'max' ? 0 : g.basisShiftMs;
     e.config.npcMotorArt = art;
@@ -120563,6 +120655,32 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       prüfen('avatar: driver in the car colour, brand accents, same look every time, new look on tap',
              svg.includes('fill="#e23b3b"') && /#(d5001c|111111|ffffff|c9a227)/i.test(svg)
              && ohneId(svg) === ohneId(svg2) && ohneId(svg) !== ohneId(svg3), svg.length + ' chars');
+      // J: gear ratios (Short / Medium / Long / Auto).
+      {
+        const e = physEngine, merkName = e.gearboxName || 'gt3', merkF = e.gangStufe || 1;
+        const sel = $('hd-gangstufe'), merkSel = sel ? sel.value : null, merkTiles = currentTrackTiles;
+        try {
+          e.applyGearbox('gt3', 1);
+          const lang = e.config.gears.map((g) => g.topFrac), rpmLang = e.config.rpmScale, runterLang = e.config.downshiftRpm;
+          e.applyGearbox('gt3', 0.45);
+          const kurz = e.config.gears, n = kurz.length;
+          const grenze = (i) => Math.min(e.config.downshiftRpm, e.config.downshiftJeGang[i]);
+          const landungOk = kurz.slice(1).every((g, i) => e.config.upshiftRpm * g.ratio / kurz[i].ratio > grenze(i + 1)) && grenze(2) === 4200;
+          prüfen('gear ratios: Short packs gears 1-5 into the low speeds, top gear and top speed unchanged, no gear hunting',
+                 Math.abs(kurz[n - 2].topFrac - lang[n - 2] * 0.45) < 1e-9 && kurz[n - 1].topFrac === 1 && Math.abs(e.config.rpmScale - rpmLang) < 1e-6
+                 && landungOk && runterLang === 4200,
+                 '5th ends ' + kurz[n - 2].topFrac.toFixed(3) + ' (long ' + lang[n - 2] + '), downshift ' + e.config.downshiftJeGang.slice(1).map((x, i) => grenze(i + 1)).join('/') + ' rpm');
+          if (sel) {
+            sel.value = 'auto';
+            const auto = (k) => { currentTrackTiles = Array.from({ length: k }, () => ({ type: TILE_TYPE.STRAIGHT })); return hdGangStufeFaktorTest(); };
+            const a = [auto(13), auto(20), auto(30)];
+            prüfen('gear ratios: Auto by track length - 13 pieces short, 20 medium, 30 long', a[0] === 0.45 && a[1] === 0.65 && a[2] === 1, a.join(' / '));
+          }
+        } finally {
+          currentTrackTiles = merkTiles; if (sel && merkSel) sel.value = merkSel;
+          e.applyGearbox(merkName, merkF);
+        }
+      }
     } catch (e) {
       prüfen('self-test ran', false, String(e && e.stack || e));
     } finally { zurueck(); }
@@ -120583,6 +120701,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // Race simulation hooks for the yellow-flag measurement (tests only).
     sim: { start: () => simStart(), stop: () => simStop('test'), gelb: () => setFlag('yellow'), gruen: () => gelbBeenden(),
            folge: (an) => { hd.gelbFolge = !!an; }, kacheln: () => (currentTrackTiles || []).length, param: (o) => Object.assign(hdFolge, o || {}),
+           // Current gear of every simulated car (gear-ratio measurement).
+           gaenge: () => garage.filter((c) => c.sim && c.ghost && c.ghost.engine).map((c) => c.ghost.engine.state.currentGear),
            // Make simulated car i the safety car (role), or take the role back (i < 0).
            sc: (i) => { const autos = garage.filter((c) => c.sim); autos.forEach((c) => { if (c.role === 'safetycar') c.role = 'ghost'; });
                         if (i >= 0 && autos[i]) autos[i].role = 'safetycar'; return autos.map((c) => c.alias + ':' + c.role); } },

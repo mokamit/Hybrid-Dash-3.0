@@ -370,6 +370,56 @@
     ansichtAnwenden(false);
   }
 
+  // ---- Gear ratios (HybridDash 3.0) -----------------------------------------------------
+  // Factor for applyGearbox(): Short 0.45, Medium 0.65, Long 1. Auto: before anything is measured, by the track
+  // length (up to 14 pieces short, up to 24 medium, else long); once the car has driven on this track, from the top
+  // speed it actually reached - the second-highest gear ends just below it, so the top gear is reached on the
+  // straights (factor = 0.92 x reached / end of that gear in the long gearbox, 0.4 to 1). Measured per track;
+  // Auto only re-applies between races.
+  const HD_GANGSTUFE_STORE = 'hybriddash.gangstufe.v1';
+  const HD_GANGSTUFEN = { kurz: 0.45, mittel: 0.65, lang: 1 };
+  let hdGetriebeNeu = null;
+  const hdGangTempo = { key: '', max: 0, ms: 0 };
+  function hdStreckenKey() {
+    try { const t = currentTrackTiles || []; return t.length ? t.length + ':' + t.map((x) => x.type).join('') : ''; } catch (e) { return ''; }
+  }
+  // While the app's own self-test runs (its start button is disabled), the gearbox stays as built: the original
+  // physics tests are calibrated against it, and Auto must not re-fit the gears to each stand-in track.
+  function hdSuiteLaeuft() { const b = $('st-run'); return !!(b && b.disabled); }
+  function hdGangStufeFaktor(ohneSuite) {
+    if (!ohneSuite && hdSuiteLaeuft()) return 1;
+    const sel = $('hd-gangstufe');
+    const wahl = sel ? sel.value : 'auto';
+    if (HD_GANGSTUFEN[wahl]) return HD_GANGSTUFEN[wahl];
+    let n = 0;
+    try { n = (currentTrackTiles || []).length; } catch (e) { n = 0; }
+    if (hdGangTempo.key && hdGangTempo.key === hdStreckenKey() && hdGangTempo.ms > 20000 && hdGangTempo.max > 0.05) {
+      const G = GEARBOXES[$('setting-gearbox') ? $('setting-gearbox').value : 'gt3'] || GEARBOXES.gt3;
+      const ende = G.gears.length > 1 ? G.gears[G.gears.length - 2].topFrac : 1;
+      return Math.max(0.4, Math.min(1, Math.round((0.92 * hdGangTempo.max / ende) * 20) / 20));
+    }
+    if (!n) return 1;
+    return n <= 14 ? 0.45 : n <= 24 ? 0.65 : 1;
+  }
+  // Tests only: the Auto rule without a measurement (the track the test sets up has never been driven).
+  function hdGangStufeFaktorTest() { const m = Object.assign({}, hdGangTempo); hdGangTempo.key = ''; try { return hdGangStufeFaktor(true); } finally { Object.assign(hdGangTempo, m); } }
+  function hdGangStufeName(f) { return f <= 0.5 ? t('short') : f < 0.95 ? t('medium') : t('long'); }
+  // Measure the reached top speed on this track (player car, while driving) and re-apply Auto between races.
+  setInterval(() => {
+    try {
+      const key = hdStreckenKey();
+      if (key !== hdGangTempo.key) { hdGangTempo.key = key; hdGangTempo.max = 0; hdGangTempo.ms = 0; }
+      const st = physEngine.state, frac = Math.abs(st.speedKmh) / physEngine.config.topSpeedKmh;
+      if (key && typeof playerCar !== 'undefined' && playerCar && frac > 0.03) {
+        hdGangTempo.ms += 500;
+        if (frac > hdGangTempo.max) hdGangTempo.max = frac;
+      }
+      const sel = $('hd-gangstufe');
+      const zwischen = typeof raceState === 'undefined' || !['racing', 'countdown', 'finishing'].includes(raceState);
+      if (sel && sel.value === 'auto' && zwischen && hdGetriebeNeu && Math.abs(hdGangStufeFaktor() - (physEngine.gangStufe || 1)) > 0.01) hdGetriebeNeu();
+    } catch (e) { /* start-up */ }
+  }, 500);
+
   // ---- Getriebeart -------------------------------------------------------------------
   //
   // Dieselbe Bauform wie das Layout darueber, und aus demselben Grund eine EIGENE Ablage:
@@ -394,7 +444,7 @@
     // was die ganze IIFE mitnimmt und OMEGA_TEST verschwinden laesst. Beim Laden gibt es
     // ausserdem keine Ghosts, also ist der Verzicht nicht nur sicher, sondern richtig.
     const getriebeAnwenden = (melden, mitGhosts) => {
-      const name = physEngine.applyGearbox($('setting-gearbox').value);
+      const name = physEngine.applyGearbox($('setting-gearbox').value, hdGangStufeFaktor());
       // Wie beim Layout: war der abgelegte Name unbekannt, faellt applyGearbox auf gt3
       // zurueck, und dann muss die Auswahl mitkommen.
       if ($('setting-gearbox').value !== name) $('setting-gearbox').value = name;
@@ -410,6 +460,8 @@
           gc.ratioRef = pc.ratioRef;
           gc.upshiftRpm = pc.upshiftRpm;
           gc.downshiftRpm = pc.downshiftRpm;
+          gc.downshiftSicher = pc.downshiftSicher;
+          gc.downshiftJeGang = pc.downshiftJeGang;
           gc.shiftMs = pc.shiftMs;
           gc.rpmScale = pc.rpmScale;
           // v1.3.5: der NPC-Motor (ghostMaxMotor) setzt Schaltzeit und Rueckschaltpunkt nur beim
@@ -434,6 +486,18 @@
       if (gespeichert) $('setting-gearbox').value = gespeichert;
     } catch (e) { /* privater Modus */ }
     $('setting-gearbox').addEventListener('change', () => getriebeAnwenden(true, true));
+    // HybridDash 3.0: gear ratios (Short / Medium / Long / Auto), see hdGangStufeFaktor() below.
+    const gs = $('hd-gangstufe');
+    if (gs) {
+      try { const v = localStorage.getItem(HD_GANGSTUFE_STORE); if (v && [...gs.options].some((o) => o.value === v)) gs.value = v; } catch (e) { /* private */ }
+      gs.addEventListener('change', () => {
+        try { localStorage.setItem(HD_GANGSTUFE_STORE, gs.value); } catch (e) { /* private */ }
+        getriebeAnwenden(false, true);
+        const f = physEngine.gangStufe;
+        showHudToast(t('Gear ratios') + ': ' + gs.selectedOptions[0].textContent + (gs.value === 'auto' ? ' (' + hdGangStufeName(f) + ')' : ''));
+      });
+    }
+    hdGetriebeNeu = () => getriebeAnwenden(false, true);
     if (typeof i18nOnLangChange === 'function') i18nOnLangChange(zeigeGetriebeDaten);
     getriebeAnwenden(false, false);
   }
