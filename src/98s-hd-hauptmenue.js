@@ -51,6 +51,24 @@
       }
     }
   }
+  // ---- ‹ › arrows on the cards that switch (Race options: race type, Track: on the rail / free) -------------------
+  // BESTELLT: "For Race Options and Track cards, make it obvious you can change sub tabs, maybe with some arrows."
+  function hdHmPfeile() {
+    for (const k of document.querySelectorAll('#tab-fahren .k-kachel[data-quad]')) {
+      const kopf = k.querySelector('.k-kopf');
+      if (!kopf || kopf.querySelector('.hdhm-pfeil')) continue;
+      const pfeil = (dir) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'k-arrow hdhm-pfeil'; b.dataset.quad = k.dataset.quad; b.dataset.dir = String(dir);
+        b.setAttribute('aria-label', dir < 0 ? t('Vorherige') : t('Nächste'));
+        b.textContent = dir < 0 ? '‹' : '›';
+        b.addEventListener('click', (e) => { e.stopPropagation(); konsoleQuadWechsel(k.dataset.quad, dir); });
+        return b;
+      };
+      kopf.insertBefore(pfeil(-1), kopf.firstChild);
+      kopf.appendChild(pfeil(1));
+    }
+  }
   // ---- Cars & Drivers: the driver panel ----------------------------------------------------------------------------
   let hdHmSchluessel = '';
   function hdHmFahrer() {
@@ -108,6 +126,7 @@
     if (!g) return;
     g.classList.add('hdhm');
     hdHmBalken();
+    hdHmPfeile();
     hdHmFuss();
     hdHmFahrer();
   }

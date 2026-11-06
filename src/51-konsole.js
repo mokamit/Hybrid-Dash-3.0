@@ -656,6 +656,8 @@
     document.body.classList.toggle('k-kacheln', tab === 'fahren');
     // v1.1.3: die Garage mit fester Hoehe und zwei Bildlaeufen (CSS: body.k-garage).
     document.body.classList.toggle('k-garage', tab === 'garage');
+    // v3.0: every menu tab (not the cockpit) gets the main menu's header - logo row, fixed tabs, status top right.
+    document.body.classList.toggle('k-menue', !!tab && tab !== 'race' && tab !== 'home');
     // Hintergrund
     const bg = $('k-bg');
     if (bg) {
@@ -1115,9 +1117,11 @@
     // beiden Ueberschriften druecke, aendere den Modus." Die Infozeile (.k-ki) liegt ueber dem groessten
     // Teil des Bildes, und ein Tipp dort schaltete bisher um. Jetzt umgekehrt: NUR die beiden
     // Ueberschriften (.k-kk, .k-kopf) schalten, alles andere auf der Kachel oeffnet die Optionen.
+    // v3.0 BESTELLT: "Make the menu more standardised between clicking the whole card and clicking on the name under
+    // the card." The whole card - photo and name alike - opens its page; switching is the ‹ › arrows next to the
+    // value (98s-hd-hauptmenue.js) and, as before, left / right on the gamepad and keyboard.
     const kachelKlick = (quad, oeffnen) => (e) => {
-      if (e.target.closest('.k-knopf')) return;
-      if (e.target.closest('.k-kk, .k-kopf')) { konsoleQuadWechsel(quad, 1); return; }
+      if (e.target.closest('.k-knopf, .k-arrow')) return;
       oeffnen();
     };
     kn('fa-renn', kachelKlick('renntyp', () => konsoleZeige('control')));

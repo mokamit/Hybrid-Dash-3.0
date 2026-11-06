@@ -5842,8 +5842,8 @@
   body > #hd-banner { margin: 0 auto; max-width: none; width: 100%; border-bottom-width: 2px;
     padding: max(6px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 6px max(16px, env(safe-area-inset-left));
     background: linear-gradient(90deg, #0b0d11, #15171c 60%, #0b0d11); position: relative; z-index: 61; }
-  body:not(.k-kacheln) > #hd-banner { display: none; }
-  body.k-kacheln header#k-kopf .hdr-logo { display: none; }   /* the banner above carries the logo */
+  body:not(.k-menue) > #hd-banner { display: none; }
+  body.k-menue header#k-kopf .hdr-logo { display: none; }   /* the banner above carries the logo */
   body > #hd-banner .hd-banner-logo { gap: 0; align-items: center; }
   body > #hd-banner .hd-banner-logo img { height: 34px; width: auto; margin-right: 12px; }
 
@@ -6111,8 +6111,8 @@
     html body.k-kacheln #fa-strecke { grid-area: strecke; } html body.k-kacheln #fa-profil { grid-area: meister; }
     html body.k-kacheln #fa-auto { grid-area: fahrer; }
     html body.k-kacheln main { max-width: none; padding-left: 56px; padding-right: 56px; padding-bottom: 56px; }
-    body.k-kacheln > #hd-banner { padding-left: 56px !important; padding-right: 56px !important; }
-    body.k-kacheln header#k-kopf { padding-left: 44px; }
+    body.k-menue > #hd-banner { padding-left: 56px !important; padding-right: 56px !important; }
+    body.k-menue header#k-kopf { padding-left: 44px; }
     body.k-kacheln .hd-fuss { position: fixed; right: 0; bottom: 0; z-index: 41; padding: 0 56px 18px !important; }
     body.k-kacheln #hd-tasten { padding-left: 56px; padding-bottom: 16px; }
   }
@@ -6120,7 +6120,7 @@
     min-height: 150px; padding: 0; border: 1px solid rgba(255,255,255,.14); outline: 0; background: #120d12; }
   html body #tab-fahren .k-fahren.hdhm .k-kachel > .k-kb { position: absolute; inset: 0; height: auto; filter: none !important; margin: 0; border: 0; }
   html body #tab-fahren .k-fahren.hdhm .k-kachel.menu-nav-sel, html body #tab-fahren .k-fahren.hdhm .k-kachel:hover { outline: 3px solid var(--c-red); outline-offset: -3px; }
-  html body #tab-fahren #fa-profil.k-meister { background: url(img/meisterschaft.jpg) center 30% / cover no-repeat; }
+  html body #tab-fahren #fa-profil.k-meister { background: url(img/meisterschaft-bg.jpg) 36% center / cover no-repeat; }
   /* the bottom bar */
   .hdhm-bar { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 8px 18px; box-sizing: border-box;
     background: rgba(28,24,28,.88); border-top: 1px solid rgba(255,255,255,.08); }
@@ -6134,6 +6134,11 @@
   html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kt::before, html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kt::after,
   html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf::before, html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf::after { display: none; }
   .hdhm-bar .k-quad-punkte { font-size: 11px; }
+  /* ‹ › on the cards that switch */
+  html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil { all: unset; box-sizing: border-box; cursor: pointer; display: inline-grid; place-items: center; width: 26px; height: 26px;
+    font: 700 20px/1 var(--c-head); color: #fff; background: rgba(225,6,50,.85); border: 0; }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil:hover { background: #ff1f4b; }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil:focus-visible { outline: 2px solid #fff; }
   /* details on the right of the bar (Race options: duration · weather · pit stops; Track: pieces · code) */
   html body #tab-fahren .k-fahren.hdhm .hdhm-ki { all: unset; margin-left: auto; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 0;
     font: 400 13.5px/1.2 var(--b-font); color: var(--c-dim); text-align: right; }
@@ -6176,18 +6181,19 @@
   .hdhm-plus:hover { border-color: var(--c-red); color: var(--c-red); }
   html body #tab-fahren .k-fahren.hdhm #fa-auto > .k-knopfreihe { position: static; padding: 8px 18px 0; }
   /* header on the main menu: logo row, then the tabs with « LB ... RB »; status and language top right */
-  body.k-kacheln > #hd-banner { background: transparent; border: 0; padding-top: 18px; padding-bottom: 4px; }
-  body.k-kacheln > #hd-banner .hd-banner-logo { font: italic 700 clamp(22px, 2vw, 28px)/1 var(--c-head); letter-spacing: .02em; }
-  body.k-kacheln > #hd-banner .hd-banner-logo img { height: 36px; }
-  body.k-kacheln header#k-kopf { background: transparent; }
-  body.k-kacheln header#k-kopf::after { display: none; }
+  body.k-menue > #hd-banner { background: transparent; border: 0; padding-top: 18px; padding-bottom: 4px; }
+  body.k-menue > #hd-banner .hd-banner-logo { font: italic 700 clamp(22px, 2vw, 28px)/1 var(--c-head); letter-spacing: .02em; }
+  body.k-menue > #hd-banner .hd-banner-logo img { height: 36px; }
+  body.k-menue header#k-kopf { background: transparent; }
+  body.k-menue header#k-kopf::after { display: none; }
+  body.k-menue:not(.k-kacheln) > #hd-banner .hd-banner-knoepfe { display: none; }
   @media (min-width: 900px) {
-    body.k-kacheln #k-status, body.k-kacheln #hd-lang { position: fixed; top: 22px; z-index: 70; }
-    body.k-kacheln #k-status { right: 100px; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; background: rgba(10,8,12,.7); border: 1px solid rgba(255,255,255,.12); }
-    body.k-kacheln #hd-lang { right: 56px; height: 38px; }
+    body.k-menue #k-status, body.k-menue #hd-lang { position: fixed; top: 22px; z-index: 70; }
+    body.k-menue #k-status { right: 100px; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; background: rgba(10,8,12,.7); border: 1px solid rgba(255,255,255,.12); }
+    body.k-menue #hd-lang { right: 56px; height: 38px; }
     html body #k-leiste .k-reiter button { flex: 0 1 auto; width: clamp(130px, 13vw, 230px); }
     html body #k-leiste .k-reiter { justify-content: flex-start; }
-    body.k-kacheln #k-leiste { border-bottom: 2px solid var(--c-red-2); padding-bottom: 10px; margin-right: auto; }
+    body.k-menue #k-leiste { border-bottom: 2px solid var(--c-red-2); padding-bottom: 10px; margin-right: auto; }
     #k-reiter:not(:empty)::before { content: '«   LB'; white-space: pre; border: 0; font-size: 22px; padding: 0; }
     #k-reiter:not(:empty)::after { content: 'RB   »'; white-space: pre; border: 0; font-size: 22px; padding: 0; }
   }
@@ -6301,8 +6307,8 @@
   /* Inner tabs as the mock-up's category list: on a wide screen the option categories (and every other inner
      tab bar) stand as a column on the left, the chosen one crimson-to-orange with a glow; the page moves right. */
   @media (min-width: 1200px) and (min-height: 600px) {
-    html body.k-innen:not(.k-garage) header#k-kopf .k-leiste2 { position: fixed; left: 24px; top: 66px; width: 250px; margin: 0; padding: 18px 14px;
-      max-height: calc(100vh - 90px); overflow-y: auto; background: var(--c-panel); border: 1px solid var(--c-line); z-index: 5; }
+    html body.k-innen:not(.k-garage) header#k-kopf .k-leiste2 { position: fixed; left: 24px; top: 136px; width: 250px; margin: 0; padding: 18px 14px;
+      max-height: calc(100vh - 160px); overflow-y: auto; background: var(--c-panel); border: 1px solid var(--c-line); z-index: 5; }
     html body.k-innen:not(.k-garage) header#k-kopf .k-leiste2::before { left: 0; right: auto; top: 0; width: 90px; height: 8px;
       background: linear-gradient(90deg, var(--c-red), var(--c-red) 60%, transparent 60%, transparent 70%, var(--c-red) 70%, var(--c-red) 80%, transparent 80%); }
     html body.k-innen:not(.k-garage) #k-reiter2 { display: flex; flex-direction: column; align-items: stretch; gap: 8px; width: 100%; }
@@ -16064,6 +16070,8 @@
     "Kopplung vergessen?": "Forget this pairing?",
     "Auswählen": "Select",
     "Zurückgehen": "Back",
+    "Nächste": "Next",
+    "Vorherige": "Previous",
     "Alle Plätze für Mitspieler sind belegt (höchstens zwei).": "All player places are taken (two at most).",
     "Am Host ist noch kein Auto verbunden.": "No car is connected to the host yet.",
     "Ampel!": "Lights!",
@@ -20181,6 +20189,8 @@
     "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
     "Auswählen": "Elegir",
     "Zurückgehen": "Atrás",
+    "Nächste": "Siguiente",
+    "Vorherige": "Anterior",
     "Alle Plätze für Mitspieler sind belegt (höchstens zwei).": "Todas las plazas están ocupadas (dos como máximo).",
     "Am Host ist noch kein Auto verbunden.": "Aún no hay ningún coche conectado al anfitrión.",
     "Ampel!": "¡Semáforo!",
@@ -32679,6 +32689,8 @@
     document.body.classList.toggle('k-kacheln', tab === 'fahren');
     // v1.1.3: die Garage mit fester Hoehe und zwei Bildlaeufen (CSS: body.k-garage).
     document.body.classList.toggle('k-garage', tab === 'garage');
+    // v3.0: every menu tab (not the cockpit) gets the main menu's header - logo row, fixed tabs, status top right.
+    document.body.classList.toggle('k-menue', !!tab && tab !== 'race' && tab !== 'home');
     // Hintergrund
     const bg = $('k-bg');
     if (bg) {
@@ -33138,9 +33150,11 @@
     // beiden Ueberschriften druecke, aendere den Modus." Die Infozeile (.k-ki) liegt ueber dem groessten
     // Teil des Bildes, und ein Tipp dort schaltete bisher um. Jetzt umgekehrt: NUR die beiden
     // Ueberschriften (.k-kk, .k-kopf) schalten, alles andere auf der Kachel oeffnet die Optionen.
+    // v3.0 BESTELLT: "Make the menu more standardised between clicking the whole card and clicking on the name under
+    // the card." The whole card - photo and name alike - opens its page; switching is the ‹ › arrows next to the
+    // value (98s-hd-hauptmenue.js) and, as before, left / right on the gamepad and keyboard.
     const kachelKlick = (quad, oeffnen) => (e) => {
-      if (e.target.closest('.k-knopf')) return;
-      if (e.target.closest('.k-kk, .k-kopf')) { konsoleQuadWechsel(quad, 1); return; }
+      if (e.target.closest('.k-knopf, .k-arrow')) return;
       oeffnen();
     };
     kn('fa-renn', kachelKlick('renntyp', () => konsoleZeige('control')));
@@ -126070,6 +126084,24 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       }
     }
   }
+  // ---- ‹ › arrows on the cards that switch (Race options: race type, Track: on the rail / free) -------------------
+  // BESTELLT: "For Race Options and Track cards, make it obvious you can change sub tabs, maybe with some arrows."
+  function hdHmPfeile() {
+    for (const k of document.querySelectorAll('#tab-fahren .k-kachel[data-quad]')) {
+      const kopf = k.querySelector('.k-kopf');
+      if (!kopf || kopf.querySelector('.hdhm-pfeil')) continue;
+      const pfeil = (dir) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'k-arrow hdhm-pfeil'; b.dataset.quad = k.dataset.quad; b.dataset.dir = String(dir);
+        b.setAttribute('aria-label', dir < 0 ? t('Vorherige') : t('Nächste'));
+        b.textContent = dir < 0 ? '‹' : '›';
+        b.addEventListener('click', (e) => { e.stopPropagation(); konsoleQuadWechsel(k.dataset.quad, dir); });
+        return b;
+      };
+      kopf.insertBefore(pfeil(-1), kopf.firstChild);
+      kopf.appendChild(pfeil(1));
+    }
+  }
   // ---- Cars & Drivers: the driver panel ----------------------------------------------------------------------------
   let hdHmSchluessel = '';
   function hdHmFahrer() {
@@ -126127,6 +126159,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (!g) return;
     g.classList.add('hdhm');
     hdHmBalken();
+    hdHmPfeile();
     hdHmFuss();
     hdHmFahrer();
   }
