@@ -225,6 +225,9 @@
       kopf.appendChild(b);
     }
     // the app opens on the main menu
-    setTimeout(() => { try { if (kAktiverTab() === 'home') konsoleTitelWeiter(); } catch (e) { /* not ready */ } }, 0);
+    setTimeout(() => {
+      try { if (kAktiverTab() === 'home') konsoleTitelWeiter(); } catch (e) { /* not ready */ }
+      document.body.classList.remove('hd-start');   // the start-up cover (CSS) is no longer needed
+    }, 0);
   })();
 

@@ -6137,14 +6137,21 @@
   html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf::before, html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf::after { display: none; }
   .hdhm-bar .k-quad-punkte { font-size: 11px; min-width: 2.8em; text-align: center; }
   /* fixed width for the value between the arrows, so the › stays put whatever the mode is called */
-  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf .k-kt { display: inline-block; width: 9.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf .k-kt { display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
   /* ‹ › on the cards that switch */
   html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil { all: unset; box-sizing: border-box; cursor: pointer; display: inline-grid; place-items: center; flex: none;
     width: 30px; height: 30px; color: #fff; background: var(--c-red); border: 0; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
   html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil svg { display: block; width: 18px; height: 18px; }
-  /* nothing in the row may shrink, so the arrows stand still on every card and for every value */
-  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf > * { flex: none; }
-  html body #tab-fahren .k-fahren.hdhm .hdhm-text { flex: none; }
+  /* The arrow row is a fixed grid sized by the card, not by the value: ‹ | value (… if long) | dots | ›. The arrows stand
+     still for every value and never get pushed out of a narrow card. */
+  html body #tab-fahren .k-fahren.hdhm .hdhm-text { flex: 1 1 auto; min-width: 0; }
+  html body #tab-fahren .k-fahren.hdhm .hdhm-bar .k-kopf, html body #tab-fahren .k-fahren.hdhm .k-kachel.menu-nav-sel:not(:hover) .hdhm-bar .k-kopf,
+  html body #tab-fahren .k-fahren.hdhm .k-kachel:hover .hdhm-bar .k-kopf {
+    display: grid; grid-template-columns: 30px minmax(0, 1fr) auto 30px; align-items: center; gap: 8px; width: min(100%, 280px); }
+  /* Track: the details (pieces, code) on their own line under the arrows; a long code wraps instead of being cut off */
+  html body #tab-fahren .k-fahren.hdhm #fa-strecke .hdhm-bar { display: grid; grid-template-columns: 38px minmax(0, 1fr); column-gap: 14px; row-gap: 4px; align-items: center; }
+  html body #tab-fahren .k-fahren.hdhm #fa-strecke .hdhm-ki { grid-column: 2; margin-left: 0; min-width: 0; justify-content: flex-start; text-align: left; }
+  html body #tab-fahren .k-fahren.hdhm #fa-strecke .hdhm-ki > * { white-space: normal; overflow-wrap: anywhere; min-width: 0; }
   html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil:hover { background: #ff1f4b; }
   html body #tab-fahren .k-fahren.hdhm .hdhm-pfeil:focus-visible { outline: 2px solid #fff; }
   /* details on the right of the bar (Race options: duration · weather · pit stops; Track: pieces · code) */
@@ -6196,6 +6203,10 @@
   /* The car count, link, mute and language buttons sit in the logo row (position: fixed) but belong to the header: the header
      must stack above the banner (z-index 61), or the transparent banner swallows every click on them. */
   body.k-menue header#k-kopf { z-index: 62; }
+  /* Start-up (until the scripts have opened the main menu): the old title screen never shows - the main menu does,
+     from the first frame. hd-start is removed by hdOhneTitel (98l-hd-ui.js). */
+  body.hd-start #tab-home { display: none !important; }
+  body.hd-start #tab-fahren { display: flex !important; }
   body.k-menue header#k-kopf::after { display: none; }
   body.k-menue:not(.k-kacheln) > #hd-banner .hd-banner-knoepfe { display: none; }
   @media (min-width: 900px) {
@@ -6369,7 +6380,7 @@
   @media (max-width: 760px) { .hdpk-legende { display: none; } .hdpk-svg { max-height: 260px; } .hdpk-liste { display: block; } }
 </style>
 </head>
-<body>
+<body class="hd-start k-kacheln k-menue">
 
 <!-- Das Omega-Sprite: nur die Formen, die anderswo per <use href="#om"> und
      mask="url(#om-sN)" wiederverwendet werden (Startseite, Info-Tab). Unsichtbar (0x0,
