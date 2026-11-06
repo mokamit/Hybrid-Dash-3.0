@@ -400,6 +400,11 @@
   .hdr-manuell summary { cursor: pointer; color: #9aa1b0; font-size: 13px; }
   .hdr-autos-schritt { list-style: none; padding-left: 0; }
   .hdr-paar-status { color: #7cd8ff; }
+  .hdr-vergessen-zeile { display: flex; align-items: center; gap: 10px; margin: 10px 0 0; }
+  .hdr-vergessen-zeile small { color: var(--muted, #a9b2c4); line-height: 1.35; }
+  #hdr-paar-vergessen-host { flex: none; border-color: var(--b-red, #e10600); }
+  .hdr-vergessen-zeile small { margin-top: 0; }
+  .hd-relay[data-zeige="host"] #hdr-paar-vergessen { display: none; }   /* the host has its own, in Quick pairing */
   .hd-relay-chip { cursor: pointer; }
   .hd-relay-chip.an { border-color: #35b45a; color: #7cff9b; }
   .hd-relay-chip.gelb { border-color: #ffd23f; color: #ffd23f; }
@@ -10407,6 +10412,8 @@
           <div class="hdr-code-zeile"><span class="hdr-code" id="hdr-paar-code">&mdash;&mdash;</span>
             <button type="button" class="primary" id="hdr-paar-host">Create pairing code</button>
             <button type="button" id="hdr-paar-neu">New code</button></div>
+          <p class="hdr-vergessen-zeile"><button type="button" id="hdr-paar-vergessen-host">Forget pairing</button>
+            <small>Pairing clash &ndash; the wrong laptop linked, two hosts, or a helper stuck on an old code? Forget the pairing here, then create a new code and type it on the helper.</small></p>
         </div>
         <details class="hdr-manuell"><summary>Pair without internet (copy two codes)</summary>
         <ol>
@@ -10625,7 +10632,7 @@
         <label class="tgl"><input type="checkbox" id="hd-sc-fragen" checked><span></span></label></div>
       <div class="opt-row hd-row"><div class="opt-label">Safety Car nach<small>Wie lange ein Auto neben der Strecke stehen oder stillstehen muss.</small></div>
         <span class="hd-slider"><input type="range" id="hd-auto-sc-sek" min="1" max="10" step="0.5" value="3"><b id="hd-auto-sc-sek-wert" data-i18n-skip>3.0 s</b></span></div>
-      <div class="opt-row hd-row"><div class="opt-label">Boxenbegrenzer nach automatischem Boxenstopp<span class="hd-tag">HybridDash</span><small>So lange f&auml;hrt dein Auto nach dem automatischen Boxenstopp noch selbst am Rand mit Boxentempo, bevor du wieder steuerst. Den automatischen Boxenstopp startest du, indem du L1 / LB 1 s h&auml;ltst (kurz tippen w&auml;hlt weiter die Reifen; die Taste l&auml;sst sich unter Optionen &rarr; Controller &auml;ndern).</small></div>
+      <div class="opt-row hd-row"><div class="opt-label">Boxenbegrenzer nach automatischem Boxenstopp<span class="hd-tag">HybridDash</span><small>So lange f&auml;hrt dein Auto nach dem automatischen Boxenstopp noch selbst am Rand mit Boxentempo, bevor du wieder steuerst. Den automatischen Boxenstopp startest du, indem du L1 / LB 1 s h&auml;ltst; halte die Taste, bis das Auto an seiner Pit Box ist &ndash; loslassen bricht ab (kurz tippen w&auml;hlt weiter die Reifen; die Taste l&auml;sst sich unter Optionen &rarr; Controller &auml;ndern).</small></div>
         <span class="hd-slider"><input type="range" id="hd-autobox-sek" min="0" max="10" step="0.5" value="2"><b id="hd-autobox-sek-wert" data-i18n-skip>2.0 s</b></span></div>
       <div class="opt-row hd-row"><div class="opt-label">Zuf&auml;llige NPC-Fahrernamen<span class="hd-tag">HybridDash</span><small>Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zuf&auml;lligen Fahrernamen.</small></div>
         <label class="tgl"><input type="checkbox" id="hd-npc-namen" checked><span></span></label></div>
@@ -15459,6 +15466,7 @@
     "AUTOMATISCHER BOXENSTOPP": "AUTOMATIC PIT STOP",
     "Auto noch nicht geortet – eine Runde fahren": "Car not located yet – drive one lap",
     "Automatischer Boxenstopp abgebrochen": "Automatic pit stop cancelled",
+    "Automatischer Boxenstopp abgebrochen – Taste losgelassen": "Automatic pit stop cancelled – button released",
     "Automatischer Boxenstopp erst bei Grün": "Automatic pit stop only under green",
     "Automatischer Boxenstopp nur auf der Bahn": "Automatic pit stop only on the track",
     "Boxenstopp läuft schon": "Pit stop already under way",
@@ -15467,7 +15475,7 @@
     "Keine Pit Box auf dieser Strecke – im Streckeneditor festlegen": "No Pit Box on this track – set them in the track editor",
     "Automatischer Boxenstopp (1 s halten)": "Automatic pit stop (hold 1 s)",
     "Boxenbegrenzer nach automatischem Boxenstopp": "Pit limiter after an automatic pit stop",
-    "So lange fährt dein Auto nach dem automatischen Boxenstopp noch selbst am Rand mit Boxentempo, bevor du wieder steuerst. Den automatischen Boxenstopp startest du, indem du L1 / LB 1 s hältst (kurz tippen wählt weiter die Reifen; die Taste lässt sich unter Optionen → Controller ändern).": "How long your car keeps driving itself along the edge at pit speed after an automatic pit stop, before you take over. Start an automatic pit stop by holding L1 / LB for 1 s (a short tap still selects tyres; the button can be changed under Options → Controller).",
+    "So lange fährt dein Auto nach dem automatischen Boxenstopp noch selbst am Rand mit Boxentempo, bevor du wieder steuerst. Den automatischen Boxenstopp startest du, indem du L1 / LB 1 s hältst; halte die Taste, bis das Auto an seiner Pit Box ist – loslassen bricht ab (kurz tippen wählt weiter die Reifen; die Taste lässt sich unter Optionen → Controller ändern).": "How long your car keeps driving itself along the edge at pit speed after an automatic pit stop, before you take over. Start an automatic pit stop by holding L1 / LB for 1 s; keep holding until the car reaches its Pit Box – letting go cancels it (a short tap still selects tyres; the button can be changed under Options → Controller).",
     "Auf Start/Ziel steht die Startaufstellung": "The starting grid stands on start/finish",
     "Automatisch: so viele Plätze wie Autos im Rennen, verteilt über die Runde, am Rand von Geraden und Kurven. Manuell: Teile antippen – erst rechts, nochmal links, nochmal beide Seiten, nochmal entfernt. Automatisch gesetzte Plätze lassen sich danach manuell ändern.": "Automatic: as many Pit Boxes as cars in the race, spread around the lap, at the edge of straights and curves. Manual: tap pieces – first right, again left, again both sides, again removed. Automatic Pit Boxes can be changed manually afterwards.",
     "Autos im Rennen": "Cars in the race",
@@ -19487,6 +19495,7 @@
     "AUTOMATISCHER BOXENSTOPP": "PARADA AUTOMÁTICA",
     "Auto noch nicht geortet – eine Runde fahren": "Coche aún sin localizar – da una vuelta",
     "Automatischer Boxenstopp abgebrochen": "Parada automática cancelada",
+    "Automatischer Boxenstopp abgebrochen – Taste losgelassen": "Parada automática cancelada – botón soltado",
     "Automatischer Boxenstopp erst bei Grün": "Parada automática solo con bandera verde",
     "Automatischer Boxenstopp nur auf der Bahn": "Parada automática solo en la pista",
     "Boxenstopp läuft schon": "La parada ya está en marcha",
@@ -19495,7 +19504,7 @@
     "Keine Pit Box auf dieser Strecke – im Streckeneditor festlegen": "No hay box en este circuito – fíjalos en el editor",
     "Automatischer Boxenstopp (1 s halten)": "Parada automática (mantener 1 s)",
     "Boxenbegrenzer nach automatischem Boxenstopp": "Limitador tras la parada automática",
-    "So lange fährt dein Auto nach dem automatischen Boxenstopp noch selbst am Rand mit Boxentempo, bevor du wieder steuerst. Den automatischen Boxenstopp startest du, indem du L1 / LB 1 s hältst (kurz tippen wählt weiter die Reifen; die Taste lässt sich unter Optionen → Controller ändern).": "Cuánto tiempo sigue tu coche conduciendo solo por el borde a velocidad de box tras la parada automática. Inicia la parada automática manteniendo L1 / LB 1 s (un toque corto sigue eligiendo neumáticos; el botón se cambia en Opciones → Mando).",
+    "So lange fährt dein Auto nach dem automatischen Boxenstopp noch selbst am Rand mit Boxentempo, bevor du wieder steuerst. Den automatischen Boxenstopp startest du, indem du L1 / LB 1 s hältst; halte die Taste, bis das Auto an seiner Pit Box ist – loslassen bricht ab (kurz tippen wählt weiter die Reifen; die Taste lässt sich unter Optionen → Controller ändern).": "Cuánto tiempo sigue tu coche conduciendo solo por el borde a velocidad de box tras la parada automática. Inicia la parada automática manteniendo L1 / LB 1 s; mantenlo hasta que el coche llegue a su Pit Box – soltarlo la cancela (un toque corto sigue eligiendo neumáticos; el botón se cambia en Opciones → Mando).",
     "Auf Start/Ziel steht die Startaufstellung": "En la salida/meta está la parrilla",
     "Automatisch: so viele Plätze wie Autos im Rennen, verteilt über die Runde, am Rand von Geraden und Kurven. Manuell: Teile antippen – erst rechts, nochmal links, nochmal beide Seiten, nochmal entfernt. Automatisch gesetzte Plätze lassen sich danach manuell ändern.": "Automático: tantos puestos como coches en la carrera, repartidos por la vuelta, al borde de rectas y curvas. Manual: toca las piezas – primero derecha, otra vez izquierda, otra vez ambos lados, otra vez quitar. Los puestos automáticos se pueden cambiar después a mano.",
     "Autos im Rennen": "Coches en la carrera",
@@ -68280,6 +68289,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // Nur auf der Bahn mit Strecke und nur fuer fahrende NPCs; sonst wie bisher ausrollen.
     const nStr = currentTrackTiles ? currentTrackTiles.length : 0;
     // v1.1.3: nur nach einem Rennen. Der Knopf "NPCs anhalten" schickte sie sonst auf eine Runde.
+    // Hybrid-Dash 3.0: instead of the lap back to the grid, the NPC drives off the track 2 pieces after the
+    // finish line (98o-hd-boxen.js, hdZielAbfahrtStarten). The grid return below stays as the fallback.
+    if (rollt && g.running && trackMode === 'on' && nStr >= 3 && car.role === 'ghost' && raceState === 'finished'
+        && typeof hdZielAbfahrtStarten === 'function' && hdZielAbfahrtStarten(car)) return;
     if (rollt && g.running && trackMode === 'on' && nStr >= 3 && car.role === 'ghost' && raceState === 'finished') {
       const menschen = [playerCar].concat((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => z.car))
         .filter((c) => c && c.device).length;
@@ -68343,6 +68356,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     //
     // Also wird `seit` beim Phasenwechsel mitgesetzt. Eine Uhr, die nach dem Umschalten
     // noch die alte Phase misst, ist keine Uhr fuer die neue.
+    if (f.phase === 'hdWeg' || f.phase === 'hdRaus') { hdZielAbfahrtTick(car); return; }   // Hybrid-Dash 3.0
     let seit = now - f.at;
     const bit = trackModeBit();
     // Die Seite gilt in BEIDEN Fahrphasen. Nur in der Rollphase zu lenken waere ein
@@ -109350,10 +109364,17 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       garage.length = 0; garage.push(ich, a, b); playerCar = ich;
       finishSeitenZaehlerZuruecksetzen(2);
       finishGhost(a); finishGhost(b);
-      if (a.ghost.finish || b.ghost.finish) f.push('rollt noch nach der alten Folge aus');
-      if (a.ghost.aufstellZiel !== aufstellZielKachel(1, n)) f.push('Erster nicht auf Platz 2: ' + a.ghost.aufstellZiel);
-      if (b.ghost.aufstellZiel !== aufstellZielKachel(2, n)) f.push('Zweiter nicht auf Platz 3: ' + b.ghost.aufstellZiel);
-      if (!a.ghost.startGesehen || a.ghost.auslauf) f.push('Startlinie/Auslauf nicht gesetzt');
+      // Hybrid-Dash 3.0 BESTELLT: "when the NPC finishes the race, let them cross the finish line and drive off the
+      // track 2 track pieces away from the finish line" - replaces the lap back to the grid (98o-hd-boxen.js).
+      if (typeof hdZielAbfahrtStarten === 'function') {
+        if (!a.ghost.finish || a.ghost.finish.phase !== 'hdWeg' || !b.ghost.finish || b.ghost.finish.phase !== 'hdWeg') f.push('faehrt nicht 2 Kacheln nach dem Ziel von der Bahn');
+        if (a.ghost.auslauf) f.push('Auslauf nicht beendet');
+      } else {
+        if (a.ghost.finish || b.ghost.finish) f.push('rollt noch nach der alten Folge aus');
+        if (a.ghost.aufstellZiel !== aufstellZielKachel(1, n)) f.push('Erster nicht auf Platz 2: ' + a.ghost.aufstellZiel);
+        if (b.ghost.aufstellZiel !== aufstellZielKachel(2, n)) f.push('Zweiter nicht auf Platz 3: ' + b.ghost.aufstellZiel);
+        if (!a.ghost.startGesehen || a.ghost.auslauf) f.push('Startlinie/Auslauf nicht gesetzt');
+      }
       // Im Ausdruck-Modus wie bisher ausrollen.
       trackMode = 'off';
       const c = { device: { id: 'nc' }, role: 'ghost', alias: 'NC', ghost: { running: true } };
@@ -121331,6 +121352,22 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     hdPaarMerken();
     hdPaarMalen();
   }
+  // v3.0 BESTELLT: "forget pairing on the host laptop in case there is a pairing clash" (two laptops both
+  // acting as host, a helper still on an old code, the wrong laptop linked). A clean slate: the remembered code
+  // and role are dropped, the pairing service is left, the current link is closed and this laptop is neither
+  // host nor helper until you choose again. Pairing again = create a new code and type it on the helper.
+  function hdPaarAllesVergessen() {
+    hdPaarVergessen();
+    try { hdRelaySchliessen(true); } catch (e) { /* not ready */ }
+    try { hdRelay.rolle = null; hdRelay.offen = false; } catch (e) { /* not ready */ }
+    try { localStorage.removeItem(HD_PAAR_STORE); } catch (e) { /* private */ }
+    const box = $('hd-relay'); if (box) delete box.dataset.zeige;
+    const ein = $('hdr-paar-eingabe'); if (ein) ein.value = '';
+    hdPaarStatus('Pairing forgotten. Choose HOST or HELPER and pair again with a new code.');
+    try { hdRelayMalen(); } catch (e) { /* not ready */ }
+    hdPaarMalen();
+    log('Two-laptop mode: pairing forgotten on this laptop.', 'info');
+  }
 
   // After a reload of a HELPER page, reconnect the cars this laptop had permission for (Chrome
   // remembers the Web Bluetooth permission; getDevices() returns them without the chooser).
@@ -121356,7 +121393,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const hc = $('hdr-paar-code');
     if (hc) hc.textContent = hdPaar.rolle === 'host' && hdPaar.code ? hdCodeZeigen(hdPaar.code) : '——';
     const vg = $('hdr-paar-vergessen');
-    if (vg) vg.hidden = !hdPaar.code;
+    if (vg) vg.hidden = !(hdPaar.code || hdRelay.rolle);
     const st = $('hdr-paar-status');
     if (st) st.textContent = hdPaar.status;
     const ein = $('hdr-paar-eingabe');
@@ -121374,7 +121411,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     an('hdr-paar-helper', () => hdPaarStarten('helper', ($('hdr-paar-eingabe') || {}).value).catch(fehler));
     const ein = $('hdr-paar-eingabe');
     if (ein) ein.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('hdr-paar-helper').click(); } });
-    an('hdr-paar-vergessen', () => { hdPaarVergessen(); hdRelaySchliessen(false); });
+    const vergessenFragen = () => {
+      if (window.confirm('Forget the pairing on this laptop?\n\nThe link closes and the saved code is deleted. To pair again, create a new code here and type it on the helper laptop.')) hdPaarAllesVergessen();
+    };
+    an('hdr-paar-vergessen', vergessenFragen);
+    an('hdr-paar-vergessen-host', vergessenFragen);
     an('hdr-helper-bekannte', () => hdHelperBekannteVerbinden());
     // Unlink also stops the automatic reconnect (the code stays remembered for "Reconnect").
     an('hdr-trennen', () => { hdPaarStoppen(); hdPaarStatus('Unlinked. Press Pair / Create code to link again.'); });
@@ -121391,7 +121432,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   })();
 
   window.HYBRIDDASH_PAAR = Object.freeze({
-    starten: hdPaarStarten, stoppen: () => hdPaarStoppen(), vergessen: hdPaarVergessen, neuerCode: hdCodeNeu,
+    starten: hdPaarStarten, stoppen: () => hdPaarStoppen(), vergessen: hdPaarVergessen, allesVergessen: hdPaarAllesVergessen, neuerCode: hdCodeNeu,
     status: () => ({ code: hdPaar.code, rolle: hdPaar.rolle, aktiv: hdPaar.aktiv, beigetreten: hdPaar.beigetreten,
                      status: hdPaar.status, topic: hdPaar.topic }),
   });
@@ -122423,18 +122464,26 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
          button in the corner) with two Race Director additions: the steward bar under the heading
          and the incident log in the right column. */
       body #race-ovscreen { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, .8fr) !important;
-        grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr) auto auto !important;
+        grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr) fit-content(34%) auto !important;
         grid-template-areas: "kopf kopf kopf" "rl rl rl" "tab dia log" "tab karte log" "sek sek sek" "fuss fuss nochmal" !important; }
       body #race-ovscreen:has(.ov-karte:empty) { grid-template-areas: "kopf kopf kopf" "rl rl rl" "tab dia log" "tab dia log" "sek sek sek" "fuss fuss nochmal" !important; }
-      body #race-ovscreen:has(.ov-podest:not([hidden])) { grid-template-rows: auto auto minmax(0, .62fr) minmax(0, 1fr) auto auto !important;
+      /* v3.0 REPORTED: "the podium is not scaled correctly". The sector table (S1-S4 per driver, one row per car) sat
+         in an 'auto' row and took all the height it wanted: with 10 cars the podium shrank to ~30 px and the
+         standings to one row. Now the sector table gets at most ~a third (fit-content, it scrolls), and the podium
+         and standings have a floor. */
+      body #race-ovscreen:has(.ov-podest:not([hidden])) { grid-template-rows: auto auto minmax(100px, .6fr) minmax(110px, 1fr) fit-content(26%) auto !important;
         grid-template-areas: "kopf kopf kopf" "rl rl rl" "podium podium karte" "tab dia log" "sek sek sek" "fuss fuss nochmal" !important; }
       body #race-ovscreen:has(.ov-podest:not([hidden])):has(.ov-karte:empty) {
         grid-template-areas: "kopf kopf kopf" "rl rl rl" "podium podium podium" "tab dia log" "sek sek sek" "fuss fuss nochmal" !important; }
       body #race-ovscreen > .ov-podest { grid-area: podium; min-height: 0; }
+      /* v3.0: the Race Director screen also takes the shift-light strip above it (no use here) - ~60 px more
+         for podium, standings and sectors. */
+      body #race-dash[data-screen="uebersicht"] > #race-shift { visibility: hidden; }
+      body #race-dash[data-screen="uebersicht"] > #race-ovscreen { grid-row-start: shift; }
       body #race-ovscreen > .ov-diagramm { grid-area: dia; min-height: 0; overflow: hidden; }
       body #race-ovscreen > .ov-diagramm svg { width: 100%; height: 100%; }
       body #race-ovscreen > .ov-karte { min-height: 0; overflow: hidden; }
-      body #race-ovscreen > .ov-sektoren { grid-area: sek; }
+      body #race-ovscreen > .ov-sektoren { grid-area: sek; min-height: 0; overflow: auto; }
       body #race-ovscreen > .ov-sektoren:empty { display: none; }
       body #race-ovscreen > .ov-nochmal { grid-area: nochmal; }
       body #race-ovscreen > .ov-tab { overflow: auto; min-height: 0; }
@@ -123014,6 +123063,20 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (v >= 0 && v <= 10) hdAuto.sekunden = v;
   } catch (e) { /* private */ }
   function hdAutoBoxAktiv(car) { try { return !!(hdAuto.stopp && (!car || hdAuto.stopp.car === car)); } catch (e) { return false; } }
+  // Has the car reached (or just passed) the box piece k, moving from position `vor` to `jetzt`? Not only
+  // "on piece k right now": the tile count can jump two pieces under radio load, and during the 1 s hold the
+  // car passes 1-2 pieces - either would otherwise send it round a whole extra lap (v3.0 BESTELLT: "if it's
+  // 1-2 track pieces away, they will go straight in the pit"). Positions are piece + phase, wrapping at n.
+  function hdBoxErreicht(vor, jetzt, k, n) {
+    if (jetzt === null || jetzt === undefined || !(n > 0)) return false;
+    if (Math.floor(jetzt) === k) return true;
+    if (vor === null || vor === undefined) return false;
+    const weg = ((jetzt - vor) % n + n) % n;              // forward distance travelled
+    if (!(weg > 0) || weg > n / 2) return false;          // standing, or a jump backwards / a whole lap
+    if (Math.floor(vor) === k) return true;               // was on the box piece, now just past it
+    const bisBox = ((k - vor) % n + n) % n;               // forward distance from `vor` to the start of piece k
+    return bisBox <= weg;
+  }
   // Self-guidance on (track bytes) while driving to the box and pulling away; off while parking and
   // standing, where the parking script steers the wheels directly (like the grid placement).
   function hdAutoBoxSpur(car) {
@@ -123036,7 +123099,13 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const p = hdBoxFuer(car);
     if (!p) { showHudToast(t('Keine Pit Box auf dieser Strecke – im Streckeneditor festlegen')); return false; }
     if (typeof ghostOrt === 'function' && ghostOrt(car) === null) { showHudToast(t('Auto noch nicht geortet – eine Runde fahren')); return false; }
-    hdAuto.stopp = { car, p, phase: 'anfahrt', at: rennZeitJetzt(), service: false };
+    // ortVor: the position the "did we reach the box piece" check starts from - where the button went down
+    // (hold detection), so a box passed during the 1 s hold still counts and the car goes straight in.
+    const ortJetzt = typeof ghostOrt === 'function' ? ghostOrt(car) : null;
+    const ortDruck = hdAuto.ortDruck;
+    hdAuto.ortDruck = null;
+    hdAuto.stopp = { car, p, phase: 'anfahrt', at: rennZeitJetzt(), service: false,
+                     ortVor: ortDruck !== null && ortDruck !== undefined ? ortDruck : ortJetzt };
     setPitState('limited');
     showHudToast(t('AUTOMATISCHER BOXENSTOPP') + ' · P' + p.nr + ' · ' + hdBoxSeiteText(p.seite));
     log('Automatic pit stop: driving to Pit Box P' + p.nr + ' (piece ' + (p.k + 1) + ', ' + (p.seite === 'l' ? 'left' : 'right') + ').', 'info');
@@ -123047,13 +123116,13 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     try { autopilotZuruecksetzen(1); } catch (e) { /* not ready */ }
     if (text) showHudToast(text);
   }
-  function hdAutoBoxAbbrechen() {
+  function hdAutoBoxAbbrechen(text) {
     if (!hdAuto.stopp) return;
     const vorParken = hdAuto.stopp.phase === 'anfahrt';
-    hdAutoBoxEnde(t('Automatischer Boxenstopp abgebrochen'));
+    hdAutoBoxEnde(text || t('Automatischer Boxenstopp abgebrochen'));
     if (vorParken && pitState === 'limited') setPitState('off');
   }
-  // Hold detection: LB / L1 (or whatever is mapped) held for 1 s starts - or, before parking, cancels.
+  // Hold detection: LB / L1 (or whatever is mapped) held for 1 s starts; it must stay held to the box (released = cancel).
   setInterval(() => {
     let an = false;
     try {
@@ -123063,14 +123132,25 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       }
     } catch (e) { /* no pad */ }
     const imCockpit = (() => { try { return document.body.classList.contains('race-fs') || document.querySelector('.tabpage.active') === $('tab-race'); } catch (e) { return false; } })();
+    hdAutoBoxTaste(an, imCockpit, performance.now());
+  }, 40);
+  // One step of the button logic (40 ms): an = button down, imCockpit = cockpit on screen.
+  function hdAutoBoxTaste(an, imCockpit, now) {
+    // v3.0 BESTELLT: "only if LB is pressed down until it reaches the pit box. If LB is released, the auto pit
+    // stop is cancelled and the car goes back to regular speed." Started by the button: on the way to the box
+    // the button must stay held; letting go cancels (limiter off). Once parking has begun it no longer matters.
+    if (!an && hdAuto.stopp && hdAuto.stopp.perTaste && hdAuto.stopp.phase === 'anfahrt') hdAutoBoxAbbrechen(t('Automatischer Boxenstopp abgebrochen – Taste losgelassen'));
     if (!an || !imCockpit) { hdAuto.gedrueckt = 0; hdAuto.ausgeloest = false; return; }
-    const now = performance.now();
-    if (!hdAuto.gedrueckt) { hdAuto.gedrueckt = now; return; }
+    if (!hdAuto.gedrueckt) {
+      hdAuto.gedrueckt = now;
+      // Where the car was when the button went down: during the 1 s hold it covers 1-2 pieces at race speed.
+      try { hdAuto.ortDruck = playerCar && typeof ghostOrt === 'function' ? ghostOrt(playerCar) : null; } catch (e) { hdAuto.ortDruck = null; }
+      return;
+    }
     if (hdAuto.ausgeloest || now - hdAuto.gedrueckt < HD_AUTOBOX_HALTEN_MS) return;
     hdAuto.ausgeloest = true;
-    if (hdAuto.stopp) { if (hdAuto.stopp.phase === 'anfahrt') hdAutoBoxAbbrechen(); }
-    else hdAutoBoxStarten();
-  }, 40);
+    if (!hdAuto.stopp && hdAutoBoxStarten()) hdAuto.stopp.perTaste = true;
+  }
   // The autopilot for the stop (called from autopilot() in 50-drive.js). null = not active.
   function hdAutoBoxPilot(car, st, motor, regler, fahrerBremse) {
     // Called every physics step - also while the app is still loading, before this file ran.
@@ -123088,7 +123168,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const limiter = () => formationPace() * (typeof autopilotKurvenFaktor === 'function' ? autopilotKurvenFaktor(car) : 1);
     if (s.phase === 'anfahrt') {
       const ort = ghostOrt(car);
-      if (ort !== null && Math.floor(ort) === s.p.k) {
+      const erreicht = ort !== null && hdBoxErreicht(s.ortVor, ort, s.p.k, (currentTrackTiles || []).length);
+      if (ort !== null) s.ortVor = ort;
+      if (erreicht) {
         s.phase = 'einparken'; s.at = now;
         s.skript = s.p.seite === 'l' ? manoeverGespiegelt(MANOEVER.scEin) : MANOEVER.scEin;
       } else {
@@ -123222,19 +123304,156 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       hdAuto.stopp.at -= 2100;
       const a5 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('after the set time (2 s): the car is yours again', a5 === null && !hdAuto.stopp, 'still ' + (hdAuto.stopp && hdAuto.stopp.phase));
-      // Cancel before parking.
-      pitState = 'off'; pitReady = false; ort = 0.2;
-      hdAutoBoxStarten(); hdAutoBoxAbbrechen();
-      ok('hold again before parking: cancelled', !hdAuto.stopp && pitState === 'off', 'pit ' + pitState);
+      // v3.0: the button must stay held until the car reaches its box; released on the way = cancelled.
+      pitState = 'off'; pitReady = false; ort = 0.2; hdAuto.gedrueckt = 0; hdAuto.ausgeloest = false;
+      hdAutoBoxTaste(true, true, 1000); hdAutoBoxTaste(true, true, 1500);
+      const zuFrueh = !hdAuto.stopp;
+      hdAutoBoxTaste(true, true, 2050);
+      ok('button: held 1 s starts (not before)', zuFrueh && hdAuto.stopp && hdAuto.stopp.perTaste && pitState === 'limited', 'stopp ' + !!hdAuto.stopp);
+      hdAutoBoxTaste(true, true, 2500); hdAutoBoxTaste(true, true, 4000);
+      const nochDa = !!hdAuto.stopp;
+      hdAutoBoxTaste(false, true, 4040);
+      ok('released on the way to the box: cancelled, limiter off (back to normal speed)', nochDa && !hdAuto.stopp && pitState === 'off', 'stopp ' + !!hdAuto.stopp + ', pit ' + pitState);
+      hdAutoBoxTaste(true, true, 5000); hdAutoBoxTaste(true, true, 6100);
+      ort = box.k + 0.1; hdAutoBoxPilot(car, st, motor, regler, 0);
+      const parkt = hdAuto.stopp && hdAuto.stopp.phase === 'einparken';
+      hdAutoBoxTaste(false, true, 6200);
+      ok('released once parking has begun: the stop carries on', parkt && hdAuto.stopp && hdAuto.stopp.phase === 'einparken', 'phase ' + (hdAuto.stopp && hdAuto.stopp.phase));
+      hdAutoBoxEnde(null);
+      // v3.0: box 1-2 pieces away - no extra lap. Reached = on the piece, or passed it since the last look.
+      const n = currentTrackTiles.length, K = box.k;
+      const w = (x) => ((x % n) + n) % n;
+      ok('reaching the box: on it, passed during a jump of 2 pieces, just past it - yes; before it or standing - no',
+         hdBoxErreicht(w(K - 0.4), K + 0.2, K, n) && hdBoxErreicht(w(K - 0.5), w(K + 1.5), K, n) && hdBoxErreicht(K + 0.3, w(K + 1.2), K, n)
+         && !hdBoxErreicht(w(K - 2), w(K - 1), K, n) && !hdBoxErreicht(w(K - 0.5), w(K - 0.5), K, n),
+         [hdBoxErreicht(w(K - 0.4), K + 0.2, K, n), hdBoxErreicht(w(K - 0.5), w(K + 1.5), K, n), hdBoxErreicht(K + 0.3, w(K + 1.2), K, n),
+          hdBoxErreicht(w(K - 2), w(K - 1), K, n), hdBoxErreicht(w(K - 0.5), w(K - 0.5), K, n)].join(','));
+      // Pressed 1 piece before the box; during the 1 s hold the car drove past it: straight in, no extra lap.
+      pitState = 'off'; hdAuto.gedrueckt = 0; hdAuto.ausgeloest = false;
+      ort = w(K - 1);
+      hdAutoBoxTaste(true, true, 9000);
+      ort = w(K + 1.3);
+      hdAutoBoxTaste(true, true, 10100);
+      hdAutoBoxPilot(car, st, motor, regler, 0);
+      ok('box passed during the 1 s hold: goes straight in (parks now, no extra lap)', hdAuto.stopp && hdAuto.stopp.phase === 'einparken',
+         'phase ' + (hdAuto.stopp && hdAuto.stopp.phase));
+      hdAutoBoxEnde(null);
+      // Pressed 2 pieces before the box, box still ahead after the hold: drives on and parks on reaching it.
+      pitState = 'off'; hdAuto.gedrueckt = 0; hdAuto.ausgeloest = false;
+      ort = w(K - 2.5); hdAutoBoxTaste(true, true, 12000);
+      ort = w(K - 1.2); hdAutoBoxTaste(true, true, 13100);
+      hdAutoBoxPilot(car, st, motor, regler, 0);
+      const nochAnfahrt = hdAuto.stopp && hdAuto.stopp.phase === 'anfahrt';
+      ort = w(K - 0.3); hdAutoBoxPilot(car, st, motor, regler, 0);
+      ort = w(K + 0.4); hdAutoBoxPilot(car, st, motor, regler, 0);
+      ok('box 2 pieces ahead: drives on, parks at it the same lap', nochAnfahrt && hdAuto.stopp && hdAuto.stopp.phase === 'einparken',
+         'phase ' + (hdAuto.stopp && hdAuto.stopp.phase));
+      hdAutoBoxEnde(null);
     } catch (e) {
       ok('automatic pit stop self-test ran', false, String(e && e.stack || e));
     } finally {
-      hdAuto.stopp = null; hdAuto.sekunden = merk.sek;
+      hdAuto.stopp = null; hdAuto.sekunden = merk.sek; hdAuto.gedrueckt = 0; hdAuto.ausgeloest = false; hdAuto.ortDruck = null;
       currentTrackTiles = merk.tiles; playerCar = merk.pc; trackMode = merk.tm; flagState = merk.fl; raceFormationLap = merk.form;
       pitReady = merk.pr; ghostOrt = merk.ort;
       if (pitState !== merk.ps) { try { setPitState(merk.ps); } catch (e) { pitState = merk.ps; } }
       garage.length = 0; merk.garage.forEach((c) => garage.push(c));
       hdBox.zuteilung = merk.zut;
+    }
+  }
+
+  // ---- AFTER THE FINISH: NPCs DRIVE OFF THE TRACK (Hybrid-Dash 3.0) ----
+  // BESTELLT: "when the NPC finishes the race, let them cross the finish line and drive off the track thats 2 track
+  // pieces away from the finish line. when they reach the 2 piece track, turn away from the inside of the track and
+  // speed up for 1.5s". Replaces the lap back to the grid. Phases (in g.finish, run by ghostFinishTick):
+  //   hdWeg   self-guided at formation pace, counting pieces from the finish line (tile counter, like the roll-out)
+  //   hdRaus  on the 2nd piece: wheels turned to the outside (no track bytes, so it is a real wheel angle) and
+  //           HD_ZIEL_RAUS_GAS for HD_ZIEL_RAUS_MS, then stop (stopGhost: stand still, parking light on).
+  const HD_ZIEL_KACHELN = 2, HD_ZIEL_RAUS_MS = 1500, HD_ZIEL_RAUS_GAS = 0.6, HD_ZIEL_RAUS_LENK = 0.8, HD_ZIEL_WEG_MAX_MS = 8000;
+  // Turn of a piece in degrees, right positive.
+  function hdKachelDreh(t) {
+    const T = TILE_TYPE;
+    switch (t && t.type) {
+      case T.CURVE_RIGHT: return 60; case T.CURVE_LEFT: return -60;
+      case T.WEIT_RIGHT: case T.KLEIN_RIGHT: return 30; case T.WEIT_LEFT: case T.KLEIN_LEFT: return -30;
+      case T.HAIRPIN: return 180; case T.HAIRPIN_LEFT: return -180;
+      default: return 0;
+    }
+  }
+  // The outside of the track at piece k: +1 right, -1 left. On a curve its own outside; on a straight the side
+  // away from the inside of the loop (a lap that turns right overall has its inside on the right).
+  function hdAussenSeite(k, tiles) {
+    tiles = tiles || currentTrackTiles || [];
+    const hier = hdKachelDreh(tiles[k]);
+    if (hier) return hier > 0 ? -1 : 1;
+    const summe = tiles.reduce((a, t) => a + hdKachelDreh(t), 0);
+    return summe > 0 ? -1 : 1;
+  }
+  function hdZielAbfahrtStarten(car) {
+    const g = car && car.ghost, tiles = currentTrackTiles || [], n = tiles.length;
+    if (!g || n < 3) return false;
+    const k = (hdBoxStart(tiles) + HD_ZIEL_KACHELN) % n;
+    g.finish = { phase: 'hdWeg', at: rennZeitJetzt(), k, seite: hdAussenSeite(k, tiles),
+                 kachelStart: car.tileCount === null || car.tileCount === undefined ? null : car.tileCount };
+    g.auslauf = false;
+    log(garageLabel(car) + ': finished - drives off the track ' + HD_ZIEL_KACHELN + ' pieces after the line ('
+        + (g.finish.seite > 0 ? 'right' : 'left') + ', outside).', 'info');
+    return true;
+  }
+  function hdZielAbfahrtTick(car) {
+    const g = car.ghost, f = g && g.finish;
+    if (!f) return;
+    const now = rennZeitJetzt(), bit = trackModeBit();
+    if (f.phase === 'hdWeg') {
+      const gefahren = f.kachelStart === null || car.tileCount === null || car.tileCount === undefined
+        ? null : ((car.tileCount - f.kachelStart) & 0xff);
+      if ((gefahren !== null && gefahren >= HD_ZIEL_KACHELN) || now - f.at >= HD_ZIEL_WEG_MAX_MS) {
+        f.phase = 'hdRaus'; f.at = now;
+      } else {
+        const la = typeof ghostLookahead === 'function' ? ghostLookahead(car) : null;
+        writeToCar(car, 0, formationPace(), bit | LIGHT_HEAD, Object.assign({ 10: AUTO_MODE.b10, 15: AUTO_MODE.b15 }, la || {}));
+        return;
+      }
+    }
+    if (f.phase === 'hdRaus') {
+      if (now - f.at >= HD_ZIEL_RAUS_MS) {
+        g.finish = null;
+        stopGhost(car);
+        log(garageLabel(car) + ': off the track, parked.', 'info');
+        return;
+      }
+      writeToCar(car, f.seite * HD_ZIEL_RAUS_LENK, HD_ZIEL_RAUS_GAS, bit | LIGHT_HEAD);
+    }
+  }
+  function hdZielSelbsttest(ok) {
+    const merk = { tiles: currentTrackTiles, rs: raceState, tm: trackMode, write: writeToCar, stop: stopGhost };
+    try {
+      currentTrackTiles = codeToTrack('SG3R4G3R4').tiles;          // a right-hand loop
+      const n = currentTrackTiles.length, s0 = hdBoxStart(currentTrackTiles);
+      const outside = hdAussenSeite((s0 + 2) % n);
+      ok('finish drive-off: outside of a right-hand loop on a straight is the left', currentTrackTiles[(s0 + 2) % n].type === TILE_TYPE.STRAIGHT ? outside === -1 : true,
+         'piece ' + ((s0 + 2) % n) + ' type ' + currentTrackTiles[(s0 + 2) % n].type + ' -> ' + outside);
+      const rechts = currentTrackTiles.findIndex((t) => t.type === TILE_TYPE.CURVE_RIGHT);
+      ok('finish drive-off: on a right curve the outside is the left', rechts < 0 || hdAussenSeite(rechts) === -1, String(hdAussenSeite(rechts)));
+      const gesendet = []; let gestoppt = 0;
+      writeToCar = (c, steer, gas, licht, spur) => { gesendet.push({ steer, gas, spur: !!spur }); };
+      stopGhost = () => { gestoppt++; };
+      trackMode = 'on'; raceState = 'finished';
+      const car = { role: 'ghost', alias: 'NPC', device: { id: 'hd-ziel' }, tileCount: 10, ghost: { running: true } };
+      ok('finish drive-off: starts after the line', hdZielAbfahrtStarten(car) && car.ghost.finish.phase === 'hdWeg', JSON.stringify(car.ghost.finish));
+      hdZielAbfahrtTick(car); car.tileCount = 11; hdZielAbfahrtTick(car);
+      const weg = gesendet.slice();
+      ok('finish drive-off: first 2 pieces self-guided at formation pace (track bytes, centred)',
+         weg.length === 2 && weg.every((x) => x.spur && x.steer === 0 && Math.abs(x.gas - formationPace()) < 1e-9) && car.ghost.finish.phase === 'hdWeg', JSON.stringify(weg));
+      car.tileCount = 12; gesendet.length = 0; hdZielAbfahrtTick(car);
+      const raus = gesendet[0];
+      ok('finish drive-off: on the 2nd piece turns to the outside and speeds up (wheel angle, no track bytes)',
+         car.ghost.finish.phase === 'hdRaus' && raus && !raus.spur && Math.sign(raus.steer) === car.ghost.finish.seite && raus.gas > formationPace(), JSON.stringify(raus));
+      car.ghost.finish.at -= HD_ZIEL_RAUS_MS + 10; hdZielAbfahrtTick(car);
+      ok('finish drive-off: after 1.5 s it stops off the track', !car.ghost.finish && gestoppt === 1, 'stopped ' + gestoppt);
+    } catch (e) {
+      ok('finish drive-off self-test ran', false, String(e && e.stack || e));
+    } finally {
+      currentTrackTiles = merk.tiles; raceState = merk.rs; trackMode = merk.tm; writeToCar = merk.write; stopGhost = merk.stop;
     }
   }
 
@@ -123296,6 +123515,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       hdBox.zuteilung = merk.zut; hdBox.wahl = merk.wahl;
     }
     hdAutoBoxSelbsttest(ok);
+    hdZielSelbsttest(ok);
     return out;
   }
 

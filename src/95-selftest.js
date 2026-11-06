@@ -22650,10 +22650,17 @@
       garage.length = 0; garage.push(ich, a, b); playerCar = ich;
       finishSeitenZaehlerZuruecksetzen(2);
       finishGhost(a); finishGhost(b);
-      if (a.ghost.finish || b.ghost.finish) f.push('rollt noch nach der alten Folge aus');
-      if (a.ghost.aufstellZiel !== aufstellZielKachel(1, n)) f.push('Erster nicht auf Platz 2: ' + a.ghost.aufstellZiel);
-      if (b.ghost.aufstellZiel !== aufstellZielKachel(2, n)) f.push('Zweiter nicht auf Platz 3: ' + b.ghost.aufstellZiel);
-      if (!a.ghost.startGesehen || a.ghost.auslauf) f.push('Startlinie/Auslauf nicht gesetzt');
+      // Hybrid-Dash 3.0 BESTELLT: "when the NPC finishes the race, let them cross the finish line and drive off the
+      // track 2 track pieces away from the finish line" - replaces the lap back to the grid (98o-hd-boxen.js).
+      if (typeof hdZielAbfahrtStarten === 'function') {
+        if (!a.ghost.finish || a.ghost.finish.phase !== 'hdWeg' || !b.ghost.finish || b.ghost.finish.phase !== 'hdWeg') f.push('faehrt nicht 2 Kacheln nach dem Ziel von der Bahn');
+        if (a.ghost.auslauf) f.push('Auslauf nicht beendet');
+      } else {
+        if (a.ghost.finish || b.ghost.finish) f.push('rollt noch nach der alten Folge aus');
+        if (a.ghost.aufstellZiel !== aufstellZielKachel(1, n)) f.push('Erster nicht auf Platz 2: ' + a.ghost.aufstellZiel);
+        if (b.ghost.aufstellZiel !== aufstellZielKachel(2, n)) f.push('Zweiter nicht auf Platz 3: ' + b.ghost.aufstellZiel);
+        if (!a.ghost.startGesehen || a.ghost.auslauf) f.push('Startlinie/Auslauf nicht gesetzt');
+      }
       // Im Ausdruck-Modus wie bisher ausrollen.
       trackMode = 'off';
       const c = { device: { id: 'nc' }, role: 'ghost', alias: 'NC', ghost: { running: true } };

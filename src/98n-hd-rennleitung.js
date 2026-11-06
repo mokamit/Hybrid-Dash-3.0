@@ -395,18 +395,26 @@
          button in the corner) with two Race Director additions: the steward bar under the heading
          and the incident log in the right column. */
       body #race-ovscreen { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, .8fr) !important;
-        grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr) auto auto !important;
+        grid-template-rows: auto auto minmax(0, 1fr) minmax(0, 1fr) fit-content(34%) auto !important;
         grid-template-areas: "kopf kopf kopf" "rl rl rl" "tab dia log" "tab karte log" "sek sek sek" "fuss fuss nochmal" !important; }
       body #race-ovscreen:has(.ov-karte:empty) { grid-template-areas: "kopf kopf kopf" "rl rl rl" "tab dia log" "tab dia log" "sek sek sek" "fuss fuss nochmal" !important; }
-      body #race-ovscreen:has(.ov-podest:not([hidden])) { grid-template-rows: auto auto minmax(0, .62fr) minmax(0, 1fr) auto auto !important;
+      /* v3.0 REPORTED: "the podium is not scaled correctly". The sector table (S1-S4 per driver, one row per car) sat
+         in an 'auto' row and took all the height it wanted: with 10 cars the podium shrank to ~30 px and the
+         standings to one row. Now the sector table gets at most ~a third (fit-content, it scrolls), and the podium
+         and standings have a floor. */
+      body #race-ovscreen:has(.ov-podest:not([hidden])) { grid-template-rows: auto auto minmax(100px, .6fr) minmax(110px, 1fr) fit-content(26%) auto !important;
         grid-template-areas: "kopf kopf kopf" "rl rl rl" "podium podium karte" "tab dia log" "sek sek sek" "fuss fuss nochmal" !important; }
       body #race-ovscreen:has(.ov-podest:not([hidden])):has(.ov-karte:empty) {
         grid-template-areas: "kopf kopf kopf" "rl rl rl" "podium podium podium" "tab dia log" "sek sek sek" "fuss fuss nochmal" !important; }
       body #race-ovscreen > .ov-podest { grid-area: podium; min-height: 0; }
+      /* v3.0: the Race Director screen also takes the shift-light strip above it (no use here) - ~60 px more
+         for podium, standings and sectors. */
+      body #race-dash[data-screen="uebersicht"] > #race-shift { visibility: hidden; }
+      body #race-dash[data-screen="uebersicht"] > #race-ovscreen { grid-row-start: shift; }
       body #race-ovscreen > .ov-diagramm { grid-area: dia; min-height: 0; overflow: hidden; }
       body #race-ovscreen > .ov-diagramm svg { width: 100%; height: 100%; }
       body #race-ovscreen > .ov-karte { min-height: 0; overflow: hidden; }
-      body #race-ovscreen > .ov-sektoren { grid-area: sek; }
+      body #race-ovscreen > .ov-sektoren { grid-area: sek; min-height: 0; overflow: auto; }
       body #race-ovscreen > .ov-sektoren:empty { display: none; }
       body #race-ovscreen > .ov-nochmal { grid-area: nochmal; }
       body #race-ovscreen > .ov-tab { overflow: auto; min-height: 0; }

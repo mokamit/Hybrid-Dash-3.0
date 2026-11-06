@@ -6158,6 +6158,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // Nur auf der Bahn mit Strecke und nur fuer fahrende NPCs; sonst wie bisher ausrollen.
     const nStr = currentTrackTiles ? currentTrackTiles.length : 0;
     // v1.1.3: nur nach einem Rennen. Der Knopf "NPCs anhalten" schickte sie sonst auf eine Runde.
+    // Hybrid-Dash 3.0: instead of the lap back to the grid, the NPC drives off the track 2 pieces after the
+    // finish line (98o-hd-boxen.js, hdZielAbfahrtStarten). The grid return below stays as the fallback.
+    if (rollt && g.running && trackMode === 'on' && nStr >= 3 && car.role === 'ghost' && raceState === 'finished'
+        && typeof hdZielAbfahrtStarten === 'function' && hdZielAbfahrtStarten(car)) return;
     if (rollt && g.running && trackMode === 'on' && nStr >= 3 && car.role === 'ghost' && raceState === 'finished') {
       const menschen = [playerCar].concat((typeof zusatzAktiv === 'function' ? zusatzAktiv() : []).map((z) => z.car))
         .filter((c) => c && c.device).length;
@@ -6221,6 +6225,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     //
     // Also wird `seit` beim Phasenwechsel mitgesetzt. Eine Uhr, die nach dem Umschalten
     // noch die alte Phase misst, ist keine Uhr fuer die neue.
+    if (f.phase === 'hdWeg' || f.phase === 'hdRaus') { hdZielAbfahrtTick(car); return; }   // Hybrid-Dash 3.0
     let seit = now - f.at;
     const bit = trackModeBit();
     // Die Seite gilt in BEIDEN Fahrphasen. Nur in der Rollphase zu lenken waere ein
