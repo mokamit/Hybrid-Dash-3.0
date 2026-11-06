@@ -400,6 +400,12 @@
   .hdr-manuell summary { cursor: pointer; color: #9aa1b0; font-size: 13px; }
   .hdr-autos-schritt { list-style: none; padding-left: 0; }
   .hdr-paar-status { color: #7cd8ff; }
+  /* v3.0: which laptop a car is connected to (garage), see hdLaptopEtikett() */
+  .hd-laptop { display: inline-block; margin-left: 8px; padding: 1px 7px; vertical-align: 2px; font: italic 900 10.5px/1.5 var(--k-font, sans-serif);
+    letter-spacing: .08em; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%); }
+  .hd-laptop-host { background: var(--b-paper, #f2f3f5); color: var(--b-asphalt, #15171c); }
+  .hd-laptop-helper { background: #3b7fe2; color: #fff; }
+  .hd-laptop-aus { opacity: .5; text-decoration: line-through; }
   .hdr-vergessen-zeile { display: flex; align-items: center; gap: 10px; margin: 10px 0 0; }
   .hdr-vergessen-zeile small { color: var(--muted, #a9b2c4); line-height: 1.35; }
   #hdr-paar-vergessen-host { flex: none; border-color: var(--b-red, #e10600); }

@@ -775,6 +775,19 @@
       prüfen('avatar: driver in the car colour, brand accents, same look every time, new look on tap',
              svg.includes('fill="#e23b3b"') && /#(d5001c|111111|ffffff|c9a227)/i.test(svg)
              && ohneId(svg) === ohneId(svg2) && ohneId(svg) !== ohneId(svg3), svg.length + ' chars');
+      // I: garage label - which laptop a car is connected to (two-laptop mode only).
+      const rolleMerk = hdRelay.rolle;
+      try {
+        const eigen = fake('hd-l-eigen', 'ghost'), fremd = fake('relay-hd-l', 'ghost');
+        hdRelay.rolle = null;
+        const allein = hdLaptopVon(eigen) === null && hdLaptopEtikett(eigen) === '';
+        hdRelay.rolle = 'host';
+        const host = hdLaptopVon(eigen) === 'host' && hdLaptopVon(fremd) === 'helper' && /HELPER/.test(hdLaptopEtikett(fremd));
+        hdRelay.rolle = 'helper';
+        const helper = hdLaptopVon(eigen) === 'helper';
+        prüfen('garage label: nothing on one laptop; on the host its own cars HOST, relayed cars HELPER; on the helper HELPER',
+               allein && host && helper, [allein, host, helper].join(','));
+      } finally { hdRelay.rolle = rolleMerk; }
     } catch (e) {
       prüfen('self-test ran', false, String(e && e.stack || e));
     } finally { zurueck(); }

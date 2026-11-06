@@ -400,6 +400,12 @@
   .hdr-manuell summary { cursor: pointer; color: #9aa1b0; font-size: 13px; }
   .hdr-autos-schritt { list-style: none; padding-left: 0; }
   .hdr-paar-status { color: #7cd8ff; }
+  /* v3.0: which laptop a car is connected to (garage), see hdLaptopEtikett() */
+  .hd-laptop { display: inline-block; margin-left: 8px; padding: 1px 7px; vertical-align: 2px; font: italic 900 10.5px/1.5 var(--k-font, sans-serif);
+    letter-spacing: .08em; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%); }
+  .hd-laptop-host { background: var(--b-paper, #f2f3f5); color: var(--b-asphalt, #15171c); }
+  .hd-laptop-helper { background: #3b7fe2; color: #fff; }
+  .hd-laptop-aus { opacity: .5; text-decoration: line-through; }
   .hdr-vergessen-zeile { display: flex; align-items: center; gap: 10px; margin: 10px 0 0; }
   .hdr-vergessen-zeile small { color: var(--muted, #a9b2c4); line-height: 1.35; }
   #hdr-paar-vergessen-host { flex: none; border-color: var(--b-red, #e10600); }
@@ -64339,7 +64345,7 @@
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
         <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
-        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}</b>
+        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
           <b>${t(rolle.name)}</b>
@@ -120563,6 +120569,19 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       prüfen('avatar: driver in the car colour, brand accents, same look every time, new look on tap',
              svg.includes('fill="#e23b3b"') && /#(d5001c|111111|ffffff|c9a227)/i.test(svg)
              && ohneId(svg) === ohneId(svg2) && ohneId(svg) !== ohneId(svg3), svg.length + ' chars');
+      // I: garage label - which laptop a car is connected to (two-laptop mode only).
+      const rolleMerk = hdRelay.rolle;
+      try {
+        const eigen = fake('hd-l-eigen', 'ghost'), fremd = fake('relay-hd-l', 'ghost');
+        hdRelay.rolle = null;
+        const allein = hdLaptopVon(eigen) === null && hdLaptopEtikett(eigen) === '';
+        hdRelay.rolle = 'host';
+        const host = hdLaptopVon(eigen) === 'host' && hdLaptopVon(fremd) === 'helper' && /HELPER/.test(hdLaptopEtikett(fremd));
+        hdRelay.rolle = 'helper';
+        const helper = hdLaptopVon(eigen) === 'helper';
+        prüfen('garage label: nothing on one laptop; on the host its own cars HOST, relayed cars HELPER; on the helper HELPER',
+               allein && host && helper, [allein, host, helper].join(','));
+      } finally { hdRelay.rolle = rolleMerk; }
     } catch (e) {
       prüfen('self-test ran', false, String(e && e.stack || e));
     } finally { zurueck(); }
@@ -121004,9 +121023,35 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
 
   // ---- UI ---------------------------------------------------------------------------------
   function hdStatus(s) { hdRelay.status = s; const el = $('hdr-status'); if (el) el.textContent = s; }
+  // v3.0 BESTELLT: "In the garage page, show next to the car who the car is connected to - the host or the helper."
+  // Only in two-laptop mode (a role is chosen or helper cars are known); a single laptop shows nothing.
+  // On the host: cars relayed by the helper -> HELPER, its own Bluetooth cars -> HOST. On the helper: its cars -> HELPER.
+  function hdLaptopVon(car) {
+    try {
+      if (!car || !car.device) return null;
+      const helperAuto = String(car.device.id || '').indexOf(HD_RELAY_ID) === 0;
+      if (!hdRelay.rolle && !helperAuto) return null;
+      if (helperAuto || hdRelay.rolle === 'helper') return 'helper';
+      return 'host';
+    } catch (e) { return null; }      // called before this file ran (start-up)
+  }
+  function hdLaptopEtikett(car) {
+    const w = hdLaptopVon(car);
+    if (!w) return '';
+    const dev = car.device;
+    const aus = w === 'helper' && hdRelay.rolle === 'host' && dev && dev.gatt && !dev.gatt.connected;
+    const titel = w === 'host' ? 'Connected by Bluetooth to the host laptop (this laptop)'
+      : hdRelay.rolle === 'host' ? 'Connected to the helper laptop, relayed over the link' + (aus ? ' – offline right now' : '')
+      : 'Connected to this laptop (the helper)';
+    return ` <span class="hd-laptop hd-laptop-${w}${aus ? ' hd-laptop-aus' : ''}" title="${titel}">${w === 'host' ? 'HOST' : 'HELPER'}</span>`;
+  }
+  let hdLaptopStand = '';
   function hdRelayMalen() {
     const box = $('hd-relay');
     if (!box) return;
+    // Garage labels (HOST / HELPER) follow the role and the helper cars' link state.
+    const stand = (hdRelay.rolle || '') + '|' + [...hdRelay.fremd.values()].map((d) => d.gatt && d.gatt.connected ? 1 : 0).join('');
+    if (stand !== hdLaptopStand) { hdLaptopStand = stand; if (typeof renderGarage === 'function') try { renderGarage(); } catch (e) { /* start-up */ } }
     box.dataset.rolle = hdRelay.rolle || '';
     const lamp = $('hdr-lampe');
     if (lamp) {
@@ -121134,6 +121179,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       gesendet: hdRelay.gesendet, empfangen: hdRelay.empfangen,
       garage: garage.map((c) => ({ id: String(c.device.id), name: garageLabel(c), role: c.role, tileCount: c.tileCount })) }),
     schliessen: () => hdRelaySchliessen(false),
+    // Tests only: set the role and mark garage car i as relayed by the helper (stand-in device), then redraw.
+    _laptopProbe: (rolle, i) => { hdRelay.rolle = rolle || null;
+      if (i >= 0 && garage[i]) garage[i].device = { id: HD_RELAY_ID + 'probe' + i, name: garage[i].device.name, gatt: { connected: true } };
+      hdRelayMalen(); renderGarage(); return garage.map((c) => hdLaptopVon(c)); },
     garageRolle: (id, role) => { const c = garage.find((x) => String(x.device.id) === id); if (c) setCarRole(c, role); },
     garageSchreiben: (id, steer, gas) => { const c = garage.find((x) => String(x.device.id) === id); if (c) return writeToCar(c, steer, gas, TRACK_BIT_ON); },
     stoppPaket: () => Array.from(buildCommandPacket(0, 0, TRACK_BIT_ON)),

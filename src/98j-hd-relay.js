@@ -415,9 +415,35 @@
 
   // ---- UI ---------------------------------------------------------------------------------
   function hdStatus(s) { hdRelay.status = s; const el = $('hdr-status'); if (el) el.textContent = s; }
+  // v3.0 BESTELLT: "In the garage page, show next to the car who the car is connected to - the host or the helper."
+  // Only in two-laptop mode (a role is chosen or helper cars are known); a single laptop shows nothing.
+  // On the host: cars relayed by the helper -> HELPER, its own Bluetooth cars -> HOST. On the helper: its cars -> HELPER.
+  function hdLaptopVon(car) {
+    try {
+      if (!car || !car.device) return null;
+      const helperAuto = String(car.device.id || '').indexOf(HD_RELAY_ID) === 0;
+      if (!hdRelay.rolle && !helperAuto) return null;
+      if (helperAuto || hdRelay.rolle === 'helper') return 'helper';
+      return 'host';
+    } catch (e) { return null; }      // called before this file ran (start-up)
+  }
+  function hdLaptopEtikett(car) {
+    const w = hdLaptopVon(car);
+    if (!w) return '';
+    const dev = car.device;
+    const aus = w === 'helper' && hdRelay.rolle === 'host' && dev && dev.gatt && !dev.gatt.connected;
+    const titel = w === 'host' ? 'Connected by Bluetooth to the host laptop (this laptop)'
+      : hdRelay.rolle === 'host' ? 'Connected to the helper laptop, relayed over the link' + (aus ? ' – offline right now' : '')
+      : 'Connected to this laptop (the helper)';
+    return ` <span class="hd-laptop hd-laptop-${w}${aus ? ' hd-laptop-aus' : ''}" title="${titel}">${w === 'host' ? 'HOST' : 'HELPER'}</span>`;
+  }
+  let hdLaptopStand = '';
   function hdRelayMalen() {
     const box = $('hd-relay');
     if (!box) return;
+    // Garage labels (HOST / HELPER) follow the role and the helper cars' link state.
+    const stand = (hdRelay.rolle || '') + '|' + [...hdRelay.fremd.values()].map((d) => d.gatt && d.gatt.connected ? 1 : 0).join('');
+    if (stand !== hdLaptopStand) { hdLaptopStand = stand; if (typeof renderGarage === 'function') try { renderGarage(); } catch (e) { /* start-up */ } }
     box.dataset.rolle = hdRelay.rolle || '';
     const lamp = $('hdr-lampe');
     if (lamp) {
@@ -545,6 +571,10 @@
       gesendet: hdRelay.gesendet, empfangen: hdRelay.empfangen,
       garage: garage.map((c) => ({ id: String(c.device.id), name: garageLabel(c), role: c.role, tileCount: c.tileCount })) }),
     schliessen: () => hdRelaySchliessen(false),
+    // Tests only: set the role and mark garage car i as relayed by the helper (stand-in device), then redraw.
+    _laptopProbe: (rolle, i) => { hdRelay.rolle = rolle || null;
+      if (i >= 0 && garage[i]) garage[i].device = { id: HD_RELAY_ID + 'probe' + i, name: garage[i].device.name, gatt: { connected: true } };
+      hdRelayMalen(); renderGarage(); return garage.map((c) => hdLaptopVon(c)); },
     garageRolle: (id, role) => { const c = garage.find((x) => String(x.device.id) === id); if (c) setCarRole(c, role); },
     garageSchreiben: (id, steer, gas) => { const c = garage.find((x) => String(x.device.id) === id); if (c) return writeToCar(c, steer, gas, TRACK_BIT_ON); },
     stoppPaket: () => Array.from(buildCommandPacket(0, 0, TRACK_BIT_ON)),
