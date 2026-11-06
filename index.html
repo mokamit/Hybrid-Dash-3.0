@@ -5933,7 +5933,7 @@
            geoeffnet ist, mit direktem Download der neuesten APK". Sichtbar nur im Browser und
            nicht auf iPhone/iPad (97b-app.js). Die Adresse zeigt auf die feste Datei OmegaSim.apk
            der neuesten Release; auf der luuke42-Kopie auf die APK im eigenen Repo. -->
-      <a class="k-apk" id="home-apk" href="https://github.com/mokamit/hybriddash/releases/latest/download/HybridDash.apk" hidden>
+      <a class="k-apk" id="home-apk" href="https://github.com/mokamit/hybrid-dash-3.0/releases/latest/download/HybridDash.apk" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
              stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
         <span>Installiere die Android App f&uuml;r Mehrspieler</span></a>
@@ -5959,7 +5959,7 @@
       <div class="k-titel-fuss">
         <span class="foot-ver">v<span id="app-version">1.3.92</span></span>
         <span data-i18n-skip>Hybrid-Dash 3.0 &middot; MIT &middot; based on <a href="https://github.com/Luuke42/omegasim" target="_blank" rel="noopener noreferrer">OmegaSim</a> by Luuke</span>
-        <a class="foot-code" href="https://github.com/mokamit/hybriddash"
+        <a class="foot-code" href="https://github.com/mokamit/hybrid-dash-3.0"
            target="_blank" rel="noopener noreferrer">Code auf GitHub</a>
         <button id="home-install" hidden>Als App installieren</button>
       </div>
@@ -6368,8 +6368,8 @@
       </div>
       <div class="gt3-marke">
         <svg viewBox="0 0 512 512" aria-hidden="true"><use href="#om" fill="#e6ecf7"/></svg>
-        <a href="https://mokamit.github.io/hybriddash/" target="_blank" rel="noopener noreferrer"
-           data-i18n-skip>mokamit.github.io/hybriddash</a>
+        <a href="https://mokamit.github.io/hybrid-dash-3.0/" target="_blank" rel="noopener noreferrer"
+           data-i18n-skip>mokamit.github.io/hybrid-dash-3.0</a>
         <span data-i18n-skip>HybridDash</span>
       </div>
       <!-- ZWEI ZUSAETZLICHE SCHIRME, im Markup und NICHT zur Malzeit erzeugt: der
@@ -6993,7 +6993,7 @@
       <div class="row" style="gap:10px; flex-wrap:wrap">
         <button type="button" class="primary" id="app-pruefen">Nach Update suchen</button>
         <button type="button" id="app-eingebaut">Mitgelieferte Fassung verwenden</button>
-        <a class="mp-datei" id="app-apk-link" href="https://github.com/mokamit/hybriddash/releases/latest"
+        <a class="mp-datei" id="app-apk-link" href="https://github.com/mokamit/hybrid-dash-3.0/releases/latest"
            target="_blank" rel="noopener noreferrer">Neueste APK auf GitHub</a>
       </div>
       <div class="opt-row"><div class="opt-label">Beim Start nach Updates suchen
@@ -94837,7 +94837,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const h = a[0].getAttribute('href');
       if (h.indexOf('https://') !== 0) schlecht.push('Kurzlink nicht https: ' + h);
       // HybridDash: the cockpit link points to this fork's own page instead of OmegaSim's short link.
-      if (h.indexOf('mokamit.github.io/hybriddash') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
+      if (h.indexOf('mokamit.github.io/hybrid-dash-3.0') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
       if ((a[0].getAttribute('rel') || '').indexOf('noopener') < 0) schlecht.push('rel ohne noopener');
       if (a[0].getAttribute('target') !== '_blank') schlecht.push('kein target=_blank');
       // Das Omega kommt per <use> aus dem Kopfzeilen-Logo. Fehlt der Pfad, bleibt ein
@@ -115394,8 +115394,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // v0.9.6, der Rueckfall wird also nicht mehr gebraucht.
     {
       const info = $('app-apk-link');
-      a.href = 'https://github.com/mokamit/hybriddash/releases/latest/download/HybridDash.apk';
-      if (info) info.href = 'https://github.com/mokamit/hybriddash/releases/latest';
+      a.href = 'https://github.com/mokamit/hybrid-dash-3.0/releases/latest/download/HybridDash.apk';
+      if (info) info.href = 'https://github.com/mokamit/hybrid-dash-3.0/releases/latest';
     }
     a.hidden = false;
   })();
