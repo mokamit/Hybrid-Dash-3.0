@@ -3117,6 +3117,10 @@
      allein der dicke Rahmen. */
   .ps-quad { stroke: #ff8ad8; } .ps-kreis { stroke: #ff6b7a; }
   .ps-slot[data-s="quad"] .ps-quad, .ps-slot[data-s="kreis"] .ps-kreis { display: block; }
+  /* HybridDash: Xbox controller - the letter of the mapped button instead of square / circle. */
+  .pit-spiel.hd-ps-xbox .ps-slot svg { display: none !important; }
+  .pit-spiel.hd-ps-xbox .ps-slot::after { content: attr(data-hd-taste); color: var(--hd-taste-farbe, #f2f3f5);
+    font: italic 900 clamp(26px, 4.6vw, 52px)/1 var(--k-font, sans-serif); }
   .ps-slot[data-zustand="jetzt"] { opacity: 1; border-color: var(--k-blau); box-shadow: 0 0 0 2px var(--k-blau); }
   .ps-slot[data-zustand="ok"] { opacity: 1; border-color: var(--good); box-shadow: 0 0 0 3px var(--good); }
   .ps-slot[data-zustand="falsch"] { opacity: 1; border-color: var(--bad); box-shadow: 0 0 0 3px var(--bad); }
@@ -16355,6 +16359,9 @@
     "Boxengasse, Katalognummer 14": "Pit lane, catalogue number 14",
     "Boxenstopp auf Knopfdruck": "Pit stop at the touch of a button",
     "Boxenstopp": "Pit stop",
+    "Limiter aktiv \u00b7 Abbruch": "Limiter on \u00b7 cancel",
+    "Service \u00b7 Abbruch": "Service \u00b7 cancel",
+    "Box: 2\u00d7 Ausdruck": "Pit: 2\u00d7 printout",
     "Boxenstopp an, erneut drücken bricht ab. Bei der Auslösung „doppelter Ausdruck“ löst die Taste nicht aus – dort zählt nur das zweimalige Überfahren.":
       "Pit stop on, press again to abort. With the trigger set to \"double print\" the key does not arm it – there only driving over the print twice counts.",
     "Boxer": "Flat",
@@ -17344,6 +17351,7 @@
     "Standard: gemacht wird, was geplant ist, und losfahren beendet den Stopp. Minigame: gewechselt wird alles, was simuliert wird – Reifen, Tank voll, Reparatur –, und bis alles fertig ist, kommst du nicht los. In der Mitte erscheinen nacheinander fünf Tasten, Quadrat oder Kreis (Tastatur: K und I); darunter stehen alle fünf in einer Reihe, die erledigten blenden aus. Jede richtig gedrückte kürzt den Stopp um 8 Prozent (grüner Haken), alle fünf kürzen ihn um 40 Prozent; eine falsche verlängert ihn um 8 Prozent (rotes Kreuz); wer nichts drückt, wartet die volle Zeit. Am Ende wartest du noch mindestens eine Sekunde, bei falschen Tasten länger. Abbrechen: Kreuz tippen.": "Standard: what is planned gets done, and driving off ends the stop. Minigame: everything that is simulated gets changed – tyres, a full tank, repairs –, and you cannot leave until everything is done. In the middle five buttons appear one after another, square or circle (keyboard: K and I); below them all five stand in a row, and the finished ones fade out. Each correct press shortens the stop by 8 percent (green tick), all five shorten it by 40 percent; a wrong one lengthens it by 8 percent (red cross); if you press nothing, you wait the full time. At the end you still wait at least one second, longer after wrong presses. Cancel: tap the cross.",
     "Minigame (experimentell)": "Minigame (experimental)",
     "Boxen-Minigame: Quadrat und Kreis!": "Pit minigame: square and circle!",
+    "Boxen-Minigame": "Pit minigame",
     "Boxen-Minigame (experimentell, ab Werk an, unter Optionen > Allgemein > Tank & Schaden): alles wird gewechselt, losfahren erst am Ende, acht Tasten □/○ in der Mitte kürzen den Stopp um 40 Prozent.": "Pit minigame (experimental, on by default, under Options > General > Fuel & damage): everything gets changed, you can only leave at the end, eight buttons □/○ in the middle cut the stop down to 40 per cent.",
     "Menü: Kopf halb so hoch, flachere Knöpfe und Unterreiter, Kachelfotos als Hintergrund gut sichtbar, kleinere Titel, Erklärungen nur noch im ⓘ. Letzte Auswahl je Seite bleibt, nach dem Rennen „Nochmal“, in der Garage blinkt das Auto beim Darüberfahren. Weniger automatische Sprünge: Rennende im Menü nur als Einblendung, grüne Ampel und Vollbild-Ende behalten den Cockpit-Schirm, Options führt zurück auf die Seite, von der man kam.": "Menu: header half as tall, flatter buttons and sub-tabs, tile photos clearly visible as backgrounds, smaller titles, explanations only behind ⓘ. The last selection per page is kept, “Again” after the race, in the garage a car flashes when you point at it. Fewer automatic jumps: race end in a menu only as a banner, green light and leaving fullscreen keep the cockpit screen, Options returns to the page you came from.",
     "Pacejka: Übersteuern spürbar – Vollgas in der Kurve bringt das Heck, der Vortrieb geht zurück, der Rutsch hält ohne Stick, bis man gegenlenkt oder vom Pedal geht, stärkere Vibration; mit dem Schalter „Übersteuern“ abschaltbar (experimentell).": "Pacejka: oversteer you can feel – full throttle in a corner brings the rear round, drive drops, the slide holds without the stick until you countersteer or come off the pedal, stronger vibration; can be switched off with the “Oversteer” switch (experimental).",
@@ -20036,6 +20044,9 @@
     "Boxengasse": "Calle de boxes",
     "Boxenstopp auf Knopfdruck": "Parada en boxes con un botón",
     "Boxenstopp": "Parada en boxes",
+    "Limiter aktiv \u00b7 Abbruch": "Limitador activo \u00b7 cancelar",
+    "Service \u00b7 Abbruch": "Servicio \u00b7 cancelar",
+    "Box: 2\u00d7 Ausdruck": "Boxes: 2\u00d7 impresi\u00f3n",
     "Boxer": "Bóxer",
     "Bremse": "Freno",
     "Bremse:": "Freno:",
@@ -20540,6 +20551,7 @@
     "Boxenstopp-Modus": "Modo de parada en boxes",
     "Minigame (experimentell)": "Minijuego (experimental)",
     "Boxen-Minigame: Quadrat und Kreis!": "Minijuego de boxes: ¡cuadrado y círculo!",
+    "Boxen-Minigame": "Minijuego de boxes",
     "Boxen-Minigame (experimentell, ab Werk an, unter Optionen > Allgemein > Tank & Schaden): alles wird gewechselt, losfahren erst am Ende, acht Tasten □/○ in der Mitte kürzen den Stopp um 40 Prozent.": "Minijuego de boxes (experimental, activado de fábrica, en Opciones > General > Combustible y daños): se cambia todo, se sale solo al final, ocho botones □/○ en el centro reducen la parada hasta el 40 por ciento.",
     "Rennen beendet – Ergebnis ansehen": "Carrera terminada – ver el resultado",
     "✕ Nochmal": "✕ Otra vez",
@@ -29183,6 +29195,9 @@
     return car && FAHRHILFE_MODI.indexOf(car.fahrhilfe) >= 0 ? car.fahrhilfe : fahrhilfeModus;
   }
   function driverAssistAktiv(car) {
+    // HybridDash: the automatic pit stop drives the player's car itself - on the way to the box and
+    // on the way out it needs the self-guidance (track bytes), or steer 0 is read as a straight wheel.
+    if (typeof hdAutoBoxSpur === 'function' && hdAutoBoxSpur(car)) return true;
     return fahrhilfeModusVon(car) !== 'aus' || !!autopilotGrund();
   }
 
@@ -46969,10 +46984,10 @@
       // eingeblendet in rot." Im Stand zaehlt der Knopf die Strafe herunter.
       const imStrafStand = pitState === 'servicing' && strafe > 0 && pitStrafeBis !== null;
       p.textContent = imStrafStand ? t('STRAFE') + ' \u00b7 ' + Math.max(0, Math.ceil(pitStrafeBis - pitStandElapsed)) + ' s'
-                    : nurDoppelt ? 'Box: 2\u00d7 Ausdruck'
-                    : pitState === 'off' ? (strafe > 0 ? 'Boxenstopp \u00b7 ' + t('STRAFE') + ' ' + strafe + ' s' : 'Boxenstopp')
-                    : pitState === 'limited' ? 'Limiter aktiv \u00b7 Abbruch'
-                    : 'Service \u00b7 Abbruch';
+                    : nurDoppelt ? t('Box: 2\u00d7 Ausdruck')
+                    : pitState === 'off' ? (strafe > 0 ? t('Boxenstopp') + ' \u00b7 ' + t('STRAFE') + ' ' + strafe + ' s' : t('Boxenstopp'))
+                    : pitState === 'limited' ? t('Limiter aktiv \u00b7 Abbruch')
+                    : t('Service \u00b7 Abbruch');
       p.classList.toggle('strafe', strafe > 0);
       p.classList.toggle('armed', pitState !== 'off');
       // Abgeblendet und nicht disabled: ein disabled-Knopf gibt keine Rueckmeldung mehr,
@@ -49089,7 +49104,8 @@
     // Die Tipp-Flaechen nur ohne Gamepad (einmal beim Start, nicht je Bild).
     const el = $('pit-spiel');
     if (el) el.classList.toggle('ps-touch', !(typeof padsSortiert === 'function' && padsSortiert().length));
-    showHudToast(t('Boxen-Minigame: Quadrat und Kreis!'));
+    const hdTasten = typeof hdPitSpielNamen === 'function' ? hdPitSpielNamen() : null;
+    showHudToast(hdTasten ? t('Boxen-Minigame') + ': ' + hdTasten.quad + ' & ' + hdTasten.kreis + '!' : t('Boxen-Minigame: Quadrat und Kreis!'));
     pitSpielMalen();
   }
   // welche: 'quad' | 'kreis'. true = die Taste gehoert dem Spiel (kein Schalten).
@@ -49190,6 +49206,7 @@
       s.dataset.s = sp.folge[k] || '';
       s.dataset.zustand = sp.ergebnis[k] || (k === sp.i && !sp.vorbei ? 'jetzt' : 'kommt');
     });
+    if (typeof hdPitSpielTasten === 'function') hdPitSpielTasten(el);   // HybridDash: Xbox letters
   }
   if ($('pit-spiel-quad')) $('pit-spiel-quad').addEventListener('click', () => pitSpielTaste('quad'));
   if ($('pit-spiel-kreis')) $('pit-spiel-kreis').addEventListener('click', () => pitSpielTaste('kreis'));
@@ -69436,14 +69453,49 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // v1.1.41 BESTELLT ("auf gleich schnell bringen"): das Safety Car faehrt das Gelb-Tempo des Feldes. Mit
     // dem Anteil 0,85 (0,342) lag es unter seinem Mindesttempo 0,37 und fuhr ueberall 0,37 - auf der Geraden
     // langsamer als das Feld (0,4025), in der Haarnadel schneller (0,35). SC_TEMPO_ANTEIL ist damit 1.
-    if (car && car.role === 'safetycar') return gelbGrenze() * SC_TEMPO_ANTEIL;
+    if (car && car.role === 'safetycar') {
+      // HybridDash 3.0 (reported: "the lead car does not catch up to the safety car"): while nobody is queued
+      // behind it yet, the safety car runs at the lowest pace that still reads the track, so the field reaches it.
+      if (scAufschliessenAn() && !scSchlangeDa(car)) return Math.min(gelbGrenze() * SC_TEMPO_ANTEIL, SC_WARTETEMPO);
+      return gelbGrenze() * SC_TEMPO_ANTEIL;
+    }
     // HybridDash race control: a local yellow runs at a caution pace above the SC pace.
     const hdRlZiel = typeof hdRlGelbZiel === 'function' ? hdRlGelbZiel(car) : null;
     if (hdRlZiel !== null) return hdRlZiel;
-    if (car && scAufschliessenAn() && safetyCarFaehrt() && !nahAmSafetyCar(car)) {
-      return Math.max(SC_AUFSCHLUSS, gelbGrenze());
+    // HybridDash 3.0: the further behind the safety car, the faster the catch-up - 50 % at queue distance
+    // (GELB_ABSTAND_VOLL, ~2 car lengths), up to 60 % from 3 pieces back (NPCs never above their race pace); closer than that the follow cap
+    // (scFolgeDeckel) takes over. Before, 45 % was barely above the safety car's 40 % and stopped 2 pieces
+    // out ("near"): simulator, 13 pieces, 6 cars - the first car was still ~9 pieces behind after 90 s.
+    if (car && scAufschliessenAn() && safetyCarFaehrt()) {
+      const d = scAbstandVor(car);
+      if (d === null) { if (!nahAmSafetyCar(car)) return Math.max(SC_AUFSCHLUSS, gelbGrenze()); }
+      else if (d > GELB_ABSTAND_VOLL) {
+        const x = Math.max(0, Math.min(1, (d - GELB_ABSTAND_VOLL) / (SC_AUFSCHLUSS_WEIT - GELB_ABSTAND_VOLL)));
+        return Math.max(SC_AUFSCHLUSS_NAH + (SC_AUFSCHLUSS_MAX - SC_AUFSCHLUSS_NAH) * x, gelbGrenze());
+      }
     }
     return gelbGrenze();
+  }
+  const SC_AUFSCHLUSS_NAH = 0.5, SC_AUFSCHLUSS_MAX = 0.6, SC_AUFSCHLUSS_WEIT = 3, SC_WARTETEMPO = GHOST_FAHR_MIN;
+  // Pieces the running safety car is AHEAD of this car (on the lap, 0..n), null without positions.
+  function scAbstandVor(car) {
+    const sc = safetyCar();
+    if (!sc || sc === car || !sc.ghost || !car || !car.ghost) return null;
+    const n = currentTrackTiles ? currentTrackTiles.length : 0;
+    const a = ghostOrt(car), b = ghostOrt(sc);
+    if (!n || a === null || b === null) return null;
+    return ((b - a) % n + n) % n;
+  }
+  // Is anyone queued right behind the safety car (within queue distance + half a piece)? Without positions: yes.
+  function scSchlangeDa(sc) {
+    if (!sc || !sc.ghost || ghostOrt(sc) === null) return true;
+    for (const o of ghostFieldRacing()) {
+      if (o === sc) continue;
+      const d = scAbstandVor(o);
+      if (d === null) continue;
+      if (d > 0 && d <= GELB_ABSTAND_VOLL + 0.5) return true;
+    }
+    return false;
   }
   // Die Kurvendrosselung der Ghosts fuer ein Fahrerauto im Autopiloten: dieselbe Regel wie
   // die Kachelregel in ghostTick (curveSlow in der 60-Grad-Kurve, doppelt in Haarnadel und
@@ -69553,7 +69605,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Fahrerauto setzt dann der Autopilot (autopilotGrund), nicht die Physik.
       // v1.0.9 BESTELLT: "~35 % Geschwindigkeit bei allen ohne Messung der Naehe zum
       // Safetycar und keine Ueberholmanoever" - mit und ohne Safety Car dieselbe Grenze.
-      limitYellow = (safetyCar() && scAufschliessenAn()) ? Math.max(SC_AUFSCHLUSS, gelbGrenze()) : gelbGrenze();
+      // HybridDash 3.0: up to the faster catch-up pace (gelbZielFuer), so the player's car can reach the safety car too.
+      limitYellow = (safetyCar() && scAufschliessenAn()) ? Math.max(SC_AUFSCHLUSS_MAX, gelbGrenze()) : gelbGrenze();
       // HybridDash race control: yellow flag and VSC run WITHOUT the safety car (98n-hd-rennleitung.js).
       if (!(typeof hdRlOhneSafetyCar === 'function' && hdRlOhneSafetyCar())) safetyCarRaus();
       applySpeedLimit();
@@ -70692,7 +70745,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const wer = spielerNrVon(c) || 1;
     // v1.0.37: nach dem Ankommen in der Aufstellung ohne Spur-Bytes (Einlenk-Takt als Radwinkel).
     if (trackMode === 'on' && driverAssistAktiv(c) && !abseitsJetztFuer(wer)
-        && !(typeof aufstellenSpielerOhneSpur === 'function' && aufstellenSpielerOhneSpur(c))) {
+        && !(typeof aufstellenSpielerOhneSpur === 'function' && aufstellenSpielerOhneSpur(c))
+        && !(typeof hdAutoBoxOhneSpur === 'function' && hdAutoBoxOhneSpur(c))) {
       // v0.9.51: AUCH OHNE VORAUSBLICK, wie bei den Ghosts (ghostTick). Ohne Vorausblick -
       // das Auto stand oder wurde gerade zurueckgestellt, die Kachel ist noch nicht verortet -
       // gingen gar keine Spur-Bytes hinaus, und der Autopilot schickte steer = 0 als
@@ -108775,8 +108829,13 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const cb = $('race-sc-aufschliessen'), cbMerk = cb ? cb.checked : true;
       try {
         if (cb) cb.checked = true;
-        if (Math.abs(gelbZielFuer(weit) - Math.max(0.45, gelbGrenze())) > 1e-9) f.push('weit weg nicht ~45 %: ' + gelbZielFuer(weit));
-        if (Math.abs(gelbZielFuer(nah) - gelbGrenze()) > 1e-9) f.push('nah dran nicht 35 %: ' + gelbZielFuer(nah));
+        // HybridDash 3.0: catch-up scales with the distance (50 % at queue distance, 60 % from 3 pieces back) -
+        // 5 pieces behind is the full 60 %. Reported: "the lead car does not catch up to the safety car".
+        if (Math.abs(gelbZielFuer(weit) - Math.max(0.6, gelbGrenze())) > 1e-9) f.push('weit weg nicht ~60 %: ' + gelbZielFuer(weit));
+        // HybridDash 3.0: 1 piece behind is still outside queue distance (~0.65 pieces): it keeps closing, a bit
+        // above the safety car's pace and below the full catch-up; the follow cap (scFolgeDeckel) does the last bit.
+        const zNah = gelbZielFuer(nah);
+        if (!(zNah >= Math.max(0.5, gelbGrenze()) - 1e-9 && zNah < 0.6)) f.push('1 Kachel dahinter schliesst nicht maessig auf: ' + zNah);
         // v1.1.41 BESTELLT: gleich schnell - das Safety Car faehrt das Gelb-Tempo des Feldes (vorher 85 %).
         if (Math.abs(gelbZielFuer(sc) - gelbGrenze()) > 1e-9) f.push('Safety Car nicht so schnell wie das Feld: ' + gelbZielFuer(sc));
         startGhost = () => {};
@@ -120502,7 +120561,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
               gesperrt: hdScTasteGesperrt, vsc: hdScVsc },
     // Race simulation hooks for the yellow-flag measurement (tests only).
     sim: { start: () => simStart(), stop: () => simStop('test'), gelb: () => setFlag('yellow'), gruen: () => gelbBeenden(),
-           folge: (an) => { hd.gelbFolge = !!an; }, kacheln: () => (currentTrackTiles || []).length, param: (o) => Object.assign(hdFolge, o || {}) },
+           folge: (an) => { hd.gelbFolge = !!an; }, kacheln: () => (currentTrackTiles || []).length, param: (o) => Object.assign(hdFolge, o || {}),
+           // Make simulated car i the safety car (role), or take the role back (i < 0).
+           sc: (i) => { const autos = garage.filter((c) => c.sim); autos.forEach((c) => { if (c.role === 'safetycar') c.role = 'ghost'; });
+                        if (i >= 0 && autos[i]) autos[i].role = 'safetycar'; return autos.map((c) => c.alias + ':' + c.role); } },
   });
   // =========================================================================
   // HybridDash 2.0: TWO-LAPTOP MODE (Bluetooth relay)
@@ -121469,6 +121531,34 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     wahl.forEach((b) => b.classList.toggle('sel', b.dataset.hdPadstil === hdUi.padStil));
     const erk = $('hd-padstil-erkannt');
     if (erk) { const e = hdPadErkannt(); erk.textContent = hdUi.padStil === 'auto' ? (e ? 'Detected: ' + (e === 'ps' ? 'PlayStation' : 'Xbox') : 'No controller detected – showing PlayStation names') : ''; }
+  }
+  // Pit minigame: the game's two buttons are the gear-down ("quad") and gear-up ("kreis") buttons. With an
+  // Xbox controller (chosen or detected) show the letters of the buttons they are mapped to, in their colours,
+  // instead of the PlayStation square and circle. null = keep the PlayStation symbols.
+  const HD_XBOX_FARBE = { A: '#35b45a', B: '#e23b3b', X: '#3b7fe2', Y: '#e8c72a' };
+  function hdPitSpielNamen() {
+    if (hdPadStil() !== 'xbox') return null;
+    try {
+      const n = (b) => (b && b.type === 'button' && HD_PAD_NAMEN.xbox[b.index]) || null;
+      return { quad: n(bindings.downshift) || 'X', kreis: n(bindings.upshift) || 'B' };
+    } catch (e) { return { quad: 'X', kreis: 'B' }; }
+  }
+  function hdPitSpielTasten(el) {
+    const namen = hdPitSpielNamen();
+    el.classList.toggle('hd-ps-xbox', !!namen);
+    const q = $('pit-spiel-quad'), k = $('pit-spiel-kreis');
+    if (!namen) {
+      if (q) { q.textContent = '\u25a1'; q.setAttribute('aria-label', 'Square'); }
+      if (k) { k.textContent = '\u25cb'; k.setAttribute('aria-label', 'Circle'); }
+      return;
+    }
+    el.querySelectorAll('.ps-slot').forEach((s) => {
+      const name = s.dataset.s ? namen[s.dataset.s] : '';
+      s.dataset.hdTaste = name || '';
+      s.style.setProperty('--hd-taste-farbe', HD_XBOX_FARBE[name] || '#f2f3f5');
+    });
+    if (q) { q.textContent = namen.quad; q.setAttribute('aria-label', namen.quad); }
+    if (k) { k.textContent = namen.kreis; k.setAttribute('aria-label', namen.kreis); }
   }
   function hdPadStilSetzen(stil) {
     hdUi.padStil = stil; hdUiSpeichern();
@@ -122924,6 +123014,14 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (v >= 0 && v <= 10) hdAuto.sekunden = v;
   } catch (e) { /* private */ }
   function hdAutoBoxAktiv(car) { try { return !!(hdAuto.stopp && (!car || hdAuto.stopp.car === car)); } catch (e) { return false; } }
+  // Self-guidance on (track bytes) while driving to the box and pulling away; off while parking and
+  // standing, where the parking script steers the wheels directly (like the grid placement).
+  function hdAutoBoxSpur(car) {
+    try { const s = hdAuto.stopp; return !!(s && (!car || s.car === car) && (s.phase === 'anfahrt' || s.phase === 'ausfahrt')); } catch (e) { return false; }
+  }
+  function hdAutoBoxOhneSpur(car) {
+    try { const s = hdAuto.stopp; return !!(s && (!car || s.car === car) && (s.phase === 'einparken' || s.phase === 'stand')); } catch (e) { return false; }
+  }
   function hdAutoBoxAmOrt() { try { return !!(hdAuto.stopp && hdAuto.stopp.phase === 'stand'); } catch (e) { return false; } }
   // Does a binding sit on the same input as the automatic pit stop? (tyre select then waits for release)
   function hdAutoBoxTeilt(b) {
@@ -123099,6 +123197,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       ok('hold 1 s: starts, pit limiter on', gestartet && hdAuto.stopp.phase === 'anfahrt' && pitState === 'limited', 'phase ' + (hdAuto.stopp && hdAuto.stopp.phase) + ', pit ' + pitState);
       const a1 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('on the way: drives itself at the pit limiter', a1 && a1.grund === 'autobox' && a1.throttle >= 0 && a1.steer === 0, JSON.stringify(a1));
+      // Reported: "it just puts the limiter on, and the car drives straight". Without the track bytes the car
+      // reads steer 0 as a straight wheel; the stop must switch the self-guidance on even with the assist off.
+      ok('on the way: self-guidance on (follows the track, not a straight wheel), even with driving assist off',
+         driverAssistAktiv(car) && hdAutoBoxSpur(car) && !hdAutoBoxOhneSpur(car), 'assist ' + driverAssistAktiv(car));
       ort = box.k + 0.1;
       hdAutoBoxPilot(car, st, motor, regler, 0);
       const sk = MANOEVER.scEin, w0 = manoeverWert(sk, 300);          // a moment with steering in it
@@ -123107,6 +123209,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const a2 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('at its Pit Box: parks with the sequence, mirrored for a left box', phaseEin === 'einparken' && a2 && w0[1] !== 0
          && Math.abs(a2.radLenk + w0[1]) < 1e-9, 'radLenk ' + (a2 && a2.radLenk) + ' vs recorded ' + w0[1]);
+      ok('parking: self-guidance off, the sequence steers the wheels directly', hdAutoBoxOhneSpur(car) && !hdAutoBoxSpur(car), 'phase ' + hdAuto.stopp.phase);
       hdAuto.stopp.at -= manoeverDauer(sk) + 50;
       const a3 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('parked: held still so the pit service can start', hdAuto.stopp.phase === 'stand' && a3 && a3.brake === 1 && hdAutoBoxAmOrt(), JSON.stringify(a3));
@@ -123114,6 +123217,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       pitReady = true;
       const a4 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('service done: pulls away along its (left) edge at the limiter', hdAuto.stopp && hdAuto.stopp.phase === 'ausfahrt' && a4 && a4.steer < 0, JSON.stringify(a4));
+      ok('pulling away: self-guidance on again', hdAutoBoxSpur(car) && driverAssistAktiv(car), 'assist ' + driverAssistAktiv(car));
       hdAuto.sekunden = 2;
       hdAuto.stopp.at -= 2100;
       const a5 = hdAutoBoxPilot(car, st, motor, regler, 0);

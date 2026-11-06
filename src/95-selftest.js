@@ -22129,8 +22129,13 @@
       const cb = $('race-sc-aufschliessen'), cbMerk = cb ? cb.checked : true;
       try {
         if (cb) cb.checked = true;
-        if (Math.abs(gelbZielFuer(weit) - Math.max(0.45, gelbGrenze())) > 1e-9) f.push('weit weg nicht ~45 %: ' + gelbZielFuer(weit));
-        if (Math.abs(gelbZielFuer(nah) - gelbGrenze()) > 1e-9) f.push('nah dran nicht 35 %: ' + gelbZielFuer(nah));
+        // HybridDash 3.0: catch-up scales with the distance (50 % at queue distance, 60 % from 3 pieces back) -
+        // 5 pieces behind is the full 60 %. Reported: "the lead car does not catch up to the safety car".
+        if (Math.abs(gelbZielFuer(weit) - Math.max(0.6, gelbGrenze())) > 1e-9) f.push('weit weg nicht ~60 %: ' + gelbZielFuer(weit));
+        // HybridDash 3.0: 1 piece behind is still outside queue distance (~0.65 pieces): it keeps closing, a bit
+        // above the safety car's pace and below the full catch-up; the follow cap (scFolgeDeckel) does the last bit.
+        const zNah = gelbZielFuer(nah);
+        if (!(zNah >= Math.max(0.5, gelbGrenze()) - 1e-9 && zNah < 0.6)) f.push('1 Kachel dahinter schliesst nicht maessig auf: ' + zNah);
         // v1.1.41 BESTELLT: gleich schnell - das Safety Car faehrt das Gelb-Tempo des Feldes (vorher 85 %).
         if (Math.abs(gelbZielFuer(sc) - gelbGrenze()) > 1e-9) f.push('Safety Car nicht so schnell wie das Feld: ' + gelbZielFuer(sc));
         startGhost = () => {};

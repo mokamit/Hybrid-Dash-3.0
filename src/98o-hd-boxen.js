@@ -380,6 +380,14 @@
     if (v >= 0 && v <= 10) hdAuto.sekunden = v;
   } catch (e) { /* private */ }
   function hdAutoBoxAktiv(car) { try { return !!(hdAuto.stopp && (!car || hdAuto.stopp.car === car)); } catch (e) { return false; } }
+  // Self-guidance on (track bytes) while driving to the box and pulling away; off while parking and
+  // standing, where the parking script steers the wheels directly (like the grid placement).
+  function hdAutoBoxSpur(car) {
+    try { const s = hdAuto.stopp; return !!(s && (!car || s.car === car) && (s.phase === 'anfahrt' || s.phase === 'ausfahrt')); } catch (e) { return false; }
+  }
+  function hdAutoBoxOhneSpur(car) {
+    try { const s = hdAuto.stopp; return !!(s && (!car || s.car === car) && (s.phase === 'einparken' || s.phase === 'stand')); } catch (e) { return false; }
+  }
   function hdAutoBoxAmOrt() { try { return !!(hdAuto.stopp && hdAuto.stopp.phase === 'stand'); } catch (e) { return false; } }
   // Does a binding sit on the same input as the automatic pit stop? (tyre select then waits for release)
   function hdAutoBoxTeilt(b) {
@@ -555,6 +563,10 @@
       ok('hold 1 s: starts, pit limiter on', gestartet && hdAuto.stopp.phase === 'anfahrt' && pitState === 'limited', 'phase ' + (hdAuto.stopp && hdAuto.stopp.phase) + ', pit ' + pitState);
       const a1 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('on the way: drives itself at the pit limiter', a1 && a1.grund === 'autobox' && a1.throttle >= 0 && a1.steer === 0, JSON.stringify(a1));
+      // Reported: "it just puts the limiter on, and the car drives straight". Without the track bytes the car
+      // reads steer 0 as a straight wheel; the stop must switch the self-guidance on even with the assist off.
+      ok('on the way: self-guidance on (follows the track, not a straight wheel), even with driving assist off',
+         driverAssistAktiv(car) && hdAutoBoxSpur(car) && !hdAutoBoxOhneSpur(car), 'assist ' + driverAssistAktiv(car));
       ort = box.k + 0.1;
       hdAutoBoxPilot(car, st, motor, regler, 0);
       const sk = MANOEVER.scEin, w0 = manoeverWert(sk, 300);          // a moment with steering in it
@@ -563,6 +575,7 @@
       const a2 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('at its Pit Box: parks with the sequence, mirrored for a left box', phaseEin === 'einparken' && a2 && w0[1] !== 0
          && Math.abs(a2.radLenk + w0[1]) < 1e-9, 'radLenk ' + (a2 && a2.radLenk) + ' vs recorded ' + w0[1]);
+      ok('parking: self-guidance off, the sequence steers the wheels directly', hdAutoBoxOhneSpur(car) && !hdAutoBoxSpur(car), 'phase ' + hdAuto.stopp.phase);
       hdAuto.stopp.at -= manoeverDauer(sk) + 50;
       const a3 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('parked: held still so the pit service can start', hdAuto.stopp.phase === 'stand' && a3 && a3.brake === 1 && hdAutoBoxAmOrt(), JSON.stringify(a3));
@@ -570,6 +583,7 @@
       pitReady = true;
       const a4 = hdAutoBoxPilot(car, st, motor, regler, 0);
       ok('service done: pulls away along its (left) edge at the limiter', hdAuto.stopp && hdAuto.stopp.phase === 'ausfahrt' && a4 && a4.steer < 0, JSON.stringify(a4));
+      ok('pulling away: self-guidance on again', hdAutoBoxSpur(car) && driverAssistAktiv(car), 'assist ' + driverAssistAktiv(car));
       hdAuto.sekunden = 2;
       hdAuto.stopp.at -= 2100;
       const a5 = hdAutoBoxPilot(car, st, motor, regler, 0);

@@ -2997,10 +2997,10 @@
       // eingeblendet in rot." Im Stand zaehlt der Knopf die Strafe herunter.
       const imStrafStand = pitState === 'servicing' && strafe > 0 && pitStrafeBis !== null;
       p.textContent = imStrafStand ? t('STRAFE') + ' \u00b7 ' + Math.max(0, Math.ceil(pitStrafeBis - pitStandElapsed)) + ' s'
-                    : nurDoppelt ? 'Box: 2\u00d7 Ausdruck'
-                    : pitState === 'off' ? (strafe > 0 ? 'Boxenstopp \u00b7 ' + t('STRAFE') + ' ' + strafe + ' s' : 'Boxenstopp')
-                    : pitState === 'limited' ? 'Limiter aktiv \u00b7 Abbruch'
-                    : 'Service \u00b7 Abbruch';
+                    : nurDoppelt ? t('Box: 2\u00d7 Ausdruck')
+                    : pitState === 'off' ? (strafe > 0 ? t('Boxenstopp') + ' \u00b7 ' + t('STRAFE') + ' ' + strafe + ' s' : t('Boxenstopp'))
+                    : pitState === 'limited' ? t('Limiter aktiv \u00b7 Abbruch')
+                    : t('Service \u00b7 Abbruch');
       p.classList.toggle('strafe', strafe > 0);
       p.classList.toggle('armed', pitState !== 'off');
       // Abgeblendet und nicht disabled: ein disabled-Knopf gibt keine Rueckmeldung mehr,
@@ -5117,7 +5117,8 @@
     // Die Tipp-Flaechen nur ohne Gamepad (einmal beim Start, nicht je Bild).
     const el = $('pit-spiel');
     if (el) el.classList.toggle('ps-touch', !(typeof padsSortiert === 'function' && padsSortiert().length));
-    showHudToast(t('Boxen-Minigame: Quadrat und Kreis!'));
+    const hdTasten = typeof hdPitSpielNamen === 'function' ? hdPitSpielNamen() : null;
+    showHudToast(hdTasten ? t('Boxen-Minigame') + ': ' + hdTasten.quad + ' & ' + hdTasten.kreis + '!' : t('Boxen-Minigame: Quadrat und Kreis!'));
     pitSpielMalen();
   }
   // welche: 'quad' | 'kreis'. true = die Taste gehoert dem Spiel (kein Schalten).
@@ -5218,6 +5219,7 @@
       s.dataset.s = sp.folge[k] || '';
       s.dataset.zustand = sp.ergebnis[k] || (k === sp.i && !sp.vorbei ? 'jetzt' : 'kommt');
     });
+    if (typeof hdPitSpielTasten === 'function') hdPitSpielTasten(el);   // HybridDash: Xbox letters
   }
   if ($('pit-spiel-quad')) $('pit-spiel-quad').addEventListener('click', () => pitSpielTaste('quad'));
   if ($('pit-spiel-kreis')) $('pit-spiel-kreis').addEventListener('click', () => pitSpielTaste('kreis'));
