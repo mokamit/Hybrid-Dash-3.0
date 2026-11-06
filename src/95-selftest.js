@@ -11504,7 +11504,8 @@
       if (kAktiverTab() !== 'fahren') f.push('Kreis in der Garage fuehrt nach ' + kAktiverTab() + ' statt nach Fahren');
       showTab('garage');
       const r1 = konsoleReiterEbene1() || [];
-      if (!r1.some((x) => x.an && x.text === t(K_NAME.fahren))) f.push('in der Garage ist oben nicht FAHREN hervorgehoben');
+      // v3.0: the Garage has its own tab on the top bar (Crimson Paddock) - that one is highlighted there.
+      if (!r1.some((x) => x.an && x.text === t(K_NAME.garage))) f.push('in der Garage ist oben nicht GARAGE hervorgehoben');
       if (konsoleReiterInnen()) f.push('die Garage hat eine zweite Leiste');
       showTab('options');
       showSubpage('opt-feel');
