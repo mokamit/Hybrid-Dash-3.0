@@ -427,22 +427,32 @@
       return 'host';
     } catch (e) { return null; }      // called before this file ran (start-up)
   }
+  // Is the car's link up right now? Bluetooth on the host, or the relayed stand-in device for a helper car.
+  function hdLaptopVerbunden(car) {
+    const dev = car && car.device;
+    return !!(dev && dev.gatt && dev.gatt.connected !== false && !(car.rx && car.rx.verbindungWeg));
+  }
+  // v3.0 BESTELLT: "Put a connected logo next to the host/helper" - a link icon: green and closed while connected,
+  // grey and broken while not.
+  const HD_LINK_AN = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  const HD_LINK_AUS = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9 15l-1.6 1.6a3 3 0 0 1-4.2-4.2L5 10.6M15 9l1.6-1.6a3 3 0 0 1 4.2 4.2L19 13.4M8 3v3M3 8h3M16 21v-3M21 16h-3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
   function hdLaptopEtikett(car) {
     const w = hdLaptopVon(car);
     if (!w) return '';
-    const dev = car.device;
-    const aus = w === 'helper' && hdRelay.rolle === 'host' && dev && dev.gatt && !dev.gatt.connected;
-    const titel = w === 'host' ? 'Connected by Bluetooth to the host laptop (this laptop)'
-      : hdRelay.rolle === 'host' ? 'Connected to the helper laptop, relayed over the link' + (aus ? ' – offline right now' : '')
-      : 'Connected to this laptop (the helper)';
-    return ` <span class="hd-laptop hd-laptop-${w}${aus ? ' hd-laptop-aus' : ''}" title="${titel}">${w === 'host' ? 'HOST' : 'HELPER'}</span>`;
+    const an = hdLaptopVerbunden(car);
+    const wo = w === 'host' ? 'the host laptop' + (hdRelay.rolle === 'host' ? ' (this laptop)' : '')
+      : hdRelay.rolle === 'host' ? 'the helper laptop (relayed over the link)' : 'this laptop (the helper)';
+    const titel = (an ? 'Connected to ' : 'Not connected – belongs to ') + wo;
+    return ` <span class="hd-laptop-wrap" title="${titel}"><span class="hd-laptop hd-laptop-${w}${an ? '' : ' hd-laptop-aus'}">${w === 'host' ? 'HOST' : 'HELPER'}</span>`
+      + `<span class="hd-link ${an ? 'hd-link-an' : 'hd-link-aus'}" role="img" aria-label="${an ? 'connected' : 'not connected'}">${an ? HD_LINK_AN : HD_LINK_AUS}</span></span>`;
   }
   let hdLaptopStand = '';
   function hdRelayMalen() {
     const box = $('hd-relay');
     if (!box) return;
     // Garage labels (HOST / HELPER) follow the role and the helper cars' link state.
-    const stand = (hdRelay.rolle || '') + '|' + [...hdRelay.fremd.values()].map((d) => d.gatt && d.gatt.connected ? 1 : 0).join('');
+    const stand = (hdRelay.rolle || '') + '|' + [...hdRelay.fremd.values()].map((d) => d.gatt && d.gatt.connected ? 1 : 0).join('')
+      + '|' + garage.map((c) => (hdLaptopVerbunden(c) ? 1 : 0)).join('');
     if (stand !== hdLaptopStand) { hdLaptopStand = stand; if (typeof renderGarage === 'function') try { renderGarage(); } catch (e) { /* start-up */ } }
     box.dataset.rolle = hdRelay.rolle || '';
     const lamp = $('hdr-lampe');
@@ -573,6 +583,7 @@
     schliessen: () => hdRelaySchliessen(false),
     // Tests only: set the role and mark garage car i as relayed by the helper (stand-in device), then redraw.
     _laptopProbe: (rolle, i) => { hdRelay.rolle = rolle || null;
+      garage.forEach((c, k) => { if (c.probe && !c.device.gatt) c.device.gatt = { connected: k !== 3 }; });
       if (i >= 0 && garage[i]) garage[i].device = { id: HD_RELAY_ID + 'probe' + i, name: garage[i].device.name, gatt: { connected: true } };
       hdRelayMalen(); renderGarage(); return garage.map((c) => hdLaptopVon(c)); },
     garageRolle: (id, role) => { const c = garage.find((x) => String(x.device.id) === id); if (c) setCarRole(c, role); },

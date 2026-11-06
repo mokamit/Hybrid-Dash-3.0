@@ -787,6 +787,11 @@
         const helper = hdLaptopVon(eigen) === 'helper';
         prüfen('garage label: nothing on one laptop; on the host its own cars HOST, relayed cars HELPER; on the helper HELPER',
                allein && host && helper, [allein, host, helper].join(','));
+        eigen.device.gatt = { connected: true }; fremd.device.gatt = { connected: false };
+        hdRelay.rolle = 'host';
+        prüfen('garage label: link icon - connected (green) or not connected (broken, grey)',
+               /hd-link-an/.test(hdLaptopEtikett(eigen)) && /hd-link-aus/.test(hdLaptopEtikett(fremd)) && /Not connected/.test(hdLaptopEtikett(fremd)),
+               hdLaptopEtikett(fremd).replace(/<svg[\s\S]*?<\/svg>/, '[svg]'));
       } finally { hdRelay.rolle = rolleMerk; }
     } catch (e) {
       prüfen('self-test ran', false, String(e && e.stack || e));
