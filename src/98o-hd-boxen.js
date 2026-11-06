@@ -575,6 +575,79 @@
     box.innerHTML = '<div class="hd-gi-titel">' + t('Rennen') + '</div><div class="hd-gi-raster">' + zeilen.join('') + '</div>';
   }
 
+  // ---- STARTING GRID AS A TV BOARD (Hybrid-Dash 3.0) ----
+  // BESTELLT: "change the cards to something like this" (a TV "Starting Grid" graphic): a title bar, one band per
+  // grid row with a "ROW n" tab and the two positions, the car on the left of the track in the left card and the
+  // car on the right in the right card (mirrored: big car number on the outer edge, portrait, first name over the
+  // surname), and a footer strip. The rows that raceGridZeilen() built stay the same elements - their arrows, Pit
+  // Box picker, click-to-blink and drag handlers keep working; only their content is regrouped.
+  function hdNameTeile(name) {
+    const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (w.length < 2) return ['', w[0] || ''];
+    return [w.slice(0, -1).join(' '), w[w.length - 1]];
+  }
+  function hdStartgridBoard(host, cars) {
+    if (!host || !cars || !cars.length) return;
+    const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    host.classList.add('hd-sg');
+    // title bar
+    let titel = '', unter = [];
+    try {
+      const m = RACE_MODES[raceMode];
+      titel = t(m.label);
+      if (raceLimit > 0) unter.push(raceLimit + ' ' + t(m.unit));
+      unter.push(raceFlying ? t('Fliegend') : t('Stehend'));
+      unter.push(cars.length + ' ' + t('Autos'));
+    } catch (e) { /* settings not ready */ }
+    const kopf = document.createElement('div');
+    kopf.className = 'hd-sg-kopf'; kopf.setAttribute('data-i18n-skip', '');
+    kopf.style.gridRow = '1';
+    kopf.innerHTML = '<b>' + esc(t('Startaufstellung')) + '</b><span>' + esc(titel) + '</span>';
+    host.insertBefore(kopf, host.firstChild);
+    // rows: car i stands in grid row floor(i/2); even index on the right of the track, odd on the left
+    const reihen = Math.ceil(cars.length / 2);
+    host.querySelectorAll('.grid-row:not(.grid-sc)').forEach((row, i) => {
+      const car = cars[i];
+      if (!car) return;
+      const r = Math.floor(i / 2), rechts = i % 2 === 0;
+      row.style.gridRow = String(r + 2);
+      row.classList.add('hd-sg-karte', rechts ? 'hd-sg-r' : 'hd-sg-l');
+      const f = carColor(car);
+      row.style.setProperty('--hd-sg-farbe', f.hex);
+      const name = car.alias || car.tag || garageLabel(car);
+      const [vor, nach] = hdNameTeile(name);
+      const nr = typeof hdNummer === 'function' ? hdNummer(car) : (car.tagChar || i + 1);
+      const avatar = typeof hdAvatarSvg === 'function'
+        ? (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(car, 64) : hdAvatarSvg(name, f.hex, 0, 64, carModellWert(car.modellId))) : '';
+      const ctrl = document.createElement('span');
+      ctrl.className = 'hd-sg-ctrl';
+      ['.grid-box', '.grid-move'].forEach((sel) => { const el = row.querySelector(sel); if (el) ctrl.appendChild(el); });
+      const inhalt = document.createElement('span');
+      inhalt.className = 'hd-sg-inhalt'; inhalt.setAttribute('data-i18n-skip', '');
+      inhalt.innerHTML = `<span class="hd-sg-nr">${esc(nr)}</span><span class="hd-sg-bild">${avatar}</span>`
+        + `<span class="hd-sg-name"><small>${esc(vor)}</small><b>${esc(nach)}</b></span>`;
+      inhalt.appendChild(ctrl);
+      row.appendChild(inhalt);
+    });
+    for (let r = 0; r < reihen; r++) {
+      const tab = document.createElement('div');
+      tab.className = 'hd-sg-reihe'; tab.setAttribute('data-i18n-skip', '');
+      tab.style.gridRow = String(r + 2);
+      const links = 2 * r + 2 <= cars.length ? 2 * r + 2 : '';
+      tab.innerHTML = `<i>${links}</i><b>${esc(t('Reihe {r}').replace('{r}', r + 1))}</b><i>${2 * r + 1}</i>`;
+      host.appendChild(tab);
+    }
+    const sc = host.querySelector('.grid-row.grid-sc');
+    if (sc) sc.style.gridRow = String(reihen + 2);
+    const fuss = document.createElement('div');
+    fuss.className = 'hd-sg-fuss'; fuss.setAttribute('data-i18n-skip', '');
+    fuss.style.gridRow = String(reihen + (sc ? 3 : 2));
+    let strecke = t('frei');
+    try { if (($('setting-ontrack') || {}).checked && currentTrackTiles && currentTrackTiles.length > 1) strecke = currentTrackTiles.length + ' ' + t('Teile') + (typeof trackLaengeText === 'function' ? ' · ' + trackLaengeText(currentTrackTiles) : ''); } catch (e) { /* no track */ }
+    fuss.textContent = (t('Strecke') + ': ' + strecke + (unter.length ? ' · ' + unter.join(' · ') : '')).toUpperCase();
+    host.appendChild(fuss);
+  }
+
   // Self-test of the automatic pit stop: a stand-in player car walked through the four phases.
   function hdAutoBoxSelbsttest(ok) {
     const merk = { tiles: currentTrackTiles, pc: playerCar, tm: trackMode, fl: flagState, ps: pitState, pr: pitReady,
