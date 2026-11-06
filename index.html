@@ -5806,6 +5806,29 @@
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
 
+  /* ---- Hybrid-Dash 3.0: title screen merged into the main menu (hdOhneTitel) ---- */
+  .hd-banner { flex: none; display: flex; align-items: center; gap: 14px 22px; flex-wrap: wrap; justify-content: space-between;
+    max-width: 1264px; width: 100%; margin: 8px auto 6px; padding: 8px 14px; box-sizing: border-box;
+    background: linear-gradient(90deg, rgba(14,16,20,.92), rgba(14,16,20,.72)); border-bottom: 3px solid var(--b-red, #e10600); }
+  .hd-banner-logo { display: flex; align-items: baseline; font: italic 900 clamp(22px, 2.6vw, 36px)/1 var(--b-font, sans-serif); color: #fff; letter-spacing: .01em; }
+  .hd-banner-logo .hd-bl-strich { color: var(--b-red, #e10600); }
+  .hd-banner-logo .hd-bl-plakette { margin-left: .4em; padding: .1em .5em; align-self: center; font-size: .48em; background: var(--b-red, #e10600); color: #fff;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); }
+  .hd-banner-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .hd-banner-knoepfe > * { margin: 0 !important; }
+  .hd-banner-knoepfe .k-tutorial-knopf { font-family: var(--b-font, sans-serif) !important; padding: 6px 14px !important; font-size: 13px !important; }
+  .hd-banner-knoepfe .k-apk { padding: 6px 12px; font-size: 12px; }
+  .hd-banner-knoepfe #home-install { padding: 6px 12px; font-size: 12px; }
+  .hd-banner .app-update { flex-basis: 100%; margin: 4px 0 0; }
+  .hd-fuss { flex: none; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; align-items: center;
+    max-width: 1264px; width: 100%; margin: 6px auto 6px; padding: 5px 12px; box-sizing: border-box; font-size: 11px; color: var(--muted, #a8adb8);
+    background: rgba(14,16,20,.85); border-top: 2px solid var(--b-red, #e10600); }
+  .hd-fuss a { color: #fff; }
+  .hd-lang { margin-left: 6px; min-width: 38px; height: 30px; padding: 0 8px; border: 1px solid rgba(255,255,255,.35); background: #0e1014; color: #fff;
+    font: italic 900 13px var(--b-font, sans-serif); letter-spacing: .06em; cursor: pointer; }
+  .hd-lang:hover { border-color: var(--b-red, #e10600); }
+  header#k-kopf { grid-template-columns: auto minmax(0, 1fr) auto auto; }
+
   /* ---- Hybrid-Dash 3.0: the starting grid as a TV board (hdStartgridBoard) ---- */
   #race-gridscreen #grid-liste.hd-sg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-auto-rows: auto;
     gap: 14px 8px; padding: 0 0 4px; align-content: start; overflow: auto; }
@@ -31409,7 +31432,10 @@
     if (K_EBENE1.includes(neu)) kStapel = [];
     // v1.3.5: zurueck auf dem Titel ist wieder "Starten" gewaehlt (96-home.js).
     // try: waehrend des Ladens liegen HOME_START & Co. (96-home.js) noch in der Todeszone.
-    if (neu === 'home') { try { homeFokusSetzen(HOME_START); } catch (e) { /* noch nicht geladen */ } }
+    // Hybrid-Dash 3.0 BESTELLT: "I don't want to have this page, I want to integrate it onto the main menu."
+    // The title screen is gone: whatever leads there (start-up, the logo, Back from the main menu) lands on
+    // the main menu, which now carries the banner (Wiki, Tutorial, Controls, install) and the footer.
+    if (neu === 'home') { setTimeout(() => { if (kAktiverTab() === 'home') konsoleTitelWeiter(); }, 0); return; }
     else if (!kZurueckLaeuft && alt && alt !== neu && alt !== 'home') {
       kStapel.push({ tab: alt, sub: altSub || '' });
       if (kStapel.length > 40) kStapel.shift();
@@ -122088,6 +122114,44 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     padStil: (s) => { if (s) { hdUi.padStil = s; hdUiSpeichern(); if (typeof renderBindTable === 'function') renderBindTable(); hdPadBildAnwenden(); } return hdPadStil(); },
     label: (b) => bindingDescription(b),
   });
+
+  // ---- Hybrid-Dash 3.0: no title screen - its parts live on the main menu ----------------
+  // BESTELLT: "On the main menu have the Hybrid-Dash 3.0 at the top as a banner, with the Wiki, Tutorial and Install
+  // option there. For the language setting, make it a button somewhere accessible to toggle. [The version / credits
+  // line] can be a footer banner." The elements are MOVED (ids and handlers stay): Wiki, Tutorial, Controls, the
+  // Android download, "Install as an app" and the update box into the banner, the credits line into the footer.
+  // The language button sits in the header, so it is there on every screen.
+  (function hdOhneTitel() {
+    const fahren = $('tab-fahren');
+    if (!fahren) return;
+    const banner = document.createElement('div');
+    banner.className = 'hd-banner'; banner.id = 'hd-banner';
+    banner.innerHTML = '<div class="hd-banner-logo" aria-label="HYBRID-DASH 3.0" data-i18n-skip><span class="hd-bl-text">HYBRID</span>'
+      + '<span class="hd-bl-strich">-</span><span class="hd-bl-text">DASH</span><span class="hd-bl-plakette">3.0</span></div>'
+      + '<div class="hd-banner-knoepfe"></div>';
+    const knoepfe = banner.querySelector('.hd-banner-knoepfe');
+    ['k-wiki', 'k-tutorial-start', 'k-steuerung-start', 'home-apk', 'home-install'].forEach((id) => { const el = $(id); if (el) knoepfe.appendChild(el); });
+    const upd = $('app-update'); if (upd) banner.appendChild(upd);
+    const erstes = fahren.querySelector('.k-fahren') || fahren.firstElementChild;
+    fahren.insertBefore(banner, erstes);
+    const fussAlt = document.querySelector('#tab-home .k-titel-fuss');
+    if (fussAlt) { const fuss = document.createElement('div'); fuss.className = 'hd-fuss'; fuss.id = 'hd-fuss'; while (fussAlt.firstChild) fuss.appendChild(fussAlt.firstChild); fahren.appendChild(fuss); }
+    // language button in the header
+    const kopf = $('k-kopf');
+    if (kopf && !$('hd-lang')) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.id = 'hd-lang'; b.className = 'hd-lang hd-top-knopf'; b.setAttribute('data-i18n-skip', '');
+      b.setAttribute('aria-label', 'Language / Sprache / Idioma');
+      const malen = () => { b.textContent = String(lang || 'en').toUpperCase(); b.title = { de: 'Sprache: Deutsch', es: 'Idioma: español' }[lang] || 'Language: English'; };
+      b.addEventListener('click', (e) => { e.stopPropagation(); wechsleSprache(); malen(); });
+      malen();
+      if (typeof i18nOnLangChange === 'function') i18nOnLangChange(malen);
+      kopf.appendChild(b);
+    }
+    // the app opens on the main menu
+    setTimeout(() => { try { if (kAktiverTab() === 'home') konsoleTitelWeiter(); } catch (e) { /* not ready */ } }, 0);
+  })();
+
   // =========================================================================
   // HybridDash 2.1: the "HybridDash" cockpit look (tile dashboard)
   // =========================================================================
