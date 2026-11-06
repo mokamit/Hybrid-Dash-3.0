@@ -11495,7 +11495,8 @@
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'x', bubbles: true }));
       if (kAktiverTab() !== 'fahren') f.push('Taste auf dem Titel fuehrt nach ' + kAktiverTab() + ' statt nach Fahren');
       konsoleReiterSchritt(1);
-      if (kAktiverTab() !== 'challenges') f.push('R1 im Fahren-Schirm fuehrt nach ' + kAktiverTab());
+      // v3.0: the tab after Race Control is Garage (then Challenges).
+      if (kAktiverTab() !== 'garage') f.push('R1 im Fahren-Schirm fuehrt nach ' + kAktiverTab());
       if (!konsoleZurueck() || kAktiverTab() !== 'fahren') f.push('Kreis auf der Ebene 1 fuehrt nicht nach Fahren (' + kAktiverTab() + ')');
       showTab('fahren');
       $('fa-garage').click();

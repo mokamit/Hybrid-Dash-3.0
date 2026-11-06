@@ -33,7 +33,7 @@
   // BESTELLT (v0.9.20): "Tausche die Tabs WLAN MEHRSPIELER und CHALLENGES (zuerst CHALLENGES)".
   // v1.3.5 BESTELLT: "WLAN-Mehrspieler nicht als eigenen Tab, sondern als Button in der
   // FAHREN -> Garage-Kachel" - mp ist jetzt eine tiefe Seite unter Fahren (#fa-mp).
-  const K_EBENE1 = ['fahren', 'challenges', 'garage', 'hdmp', 'options', 'misc'];   // v3.0: Garage on the top bar (Crimson Paddock mock-up)
+  const K_EBENE1 = ['fahren', 'garage', 'challenges', 'hdmp', 'options', 'misc'];   // v3.0: Garage on the top bar (Crimson Paddock mock-up)
   const K_NAME = {
     home: 'Titel', fahren: 'Rennleitung', garage: 'Garage', race: 'Cockpit',
     options: 'Optionen', control: 'Renneinstellungen', track: 'Strecke', mp: 'WLAN Mehrspieler', hdmp: 'Mehrspieler',
