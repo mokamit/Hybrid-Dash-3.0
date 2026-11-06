@@ -135,6 +135,34 @@
     const erk = $('hd-padstil-erkannt');
     if (erk) { const e = hdPadErkannt(); erk.textContent = hdUi.padStil === 'auto' ? (e ? 'Detected: ' + (e === 'ps' ? 'PlayStation' : 'Xbox') : 'No controller detected – showing PlayStation names') : ''; }
   }
+  // Pit minigame: the game's two buttons are the gear-down ("quad") and gear-up ("kreis") buttons. With an
+  // Xbox controller (chosen or detected) show the letters of the buttons they are mapped to, in their colours,
+  // instead of the PlayStation square and circle. null = keep the PlayStation symbols.
+  const HD_XBOX_FARBE = { A: '#35b45a', B: '#e23b3b', X: '#3b7fe2', Y: '#e8c72a' };
+  function hdPitSpielNamen() {
+    if (hdPadStil() !== 'xbox') return null;
+    try {
+      const n = (b) => (b && b.type === 'button' && HD_PAD_NAMEN.xbox[b.index]) || null;
+      return { quad: n(bindings.downshift) || 'X', kreis: n(bindings.upshift) || 'B' };
+    } catch (e) { return { quad: 'X', kreis: 'B' }; }
+  }
+  function hdPitSpielTasten(el) {
+    const namen = hdPitSpielNamen();
+    el.classList.toggle('hd-ps-xbox', !!namen);
+    const q = $('pit-spiel-quad'), k = $('pit-spiel-kreis');
+    if (!namen) {
+      if (q) { q.textContent = '\u25a1'; q.setAttribute('aria-label', 'Square'); }
+      if (k) { k.textContent = '\u25cb'; k.setAttribute('aria-label', 'Circle'); }
+      return;
+    }
+    el.querySelectorAll('.ps-slot').forEach((s) => {
+      const name = s.dataset.s ? namen[s.dataset.s] : '';
+      s.dataset.hdTaste = name || '';
+      s.style.setProperty('--hd-taste-farbe', HD_XBOX_FARBE[name] || '#f2f3f5');
+    });
+    if (q) { q.textContent = namen.quad; q.setAttribute('aria-label', namen.quad); }
+    if (k) { k.textContent = namen.kreis; k.setAttribute('aria-label', namen.kreis); }
+  }
   function hdPadStilSetzen(stil) {
     hdUi.padStil = stil; hdUiSpeichern();
     if (typeof renderBindTable === 'function') renderBindTable();

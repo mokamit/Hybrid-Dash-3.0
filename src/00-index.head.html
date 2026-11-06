@@ -3117,6 +3117,10 @@
      allein der dicke Rahmen. */
   .ps-quad { stroke: #ff8ad8; } .ps-kreis { stroke: #ff6b7a; }
   .ps-slot[data-s="quad"] .ps-quad, .ps-slot[data-s="kreis"] .ps-kreis { display: block; }
+  /* HybridDash: Xbox controller - the letter of the mapped button instead of square / circle. */
+  .pit-spiel.hd-ps-xbox .ps-slot svg { display: none !important; }
+  .pit-spiel.hd-ps-xbox .ps-slot::after { content: attr(data-hd-taste); color: var(--hd-taste-farbe, #f2f3f5);
+    font: italic 900 clamp(26px, 4.6vw, 52px)/1 var(--k-font, sans-serif); }
   .ps-slot[data-zustand="jetzt"] { opacity: 1; border-color: var(--k-blau); box-shadow: 0 0 0 2px var(--k-blau); }
   .ps-slot[data-zustand="ok"] { opacity: 1; border-color: var(--good); box-shadow: 0 0 0 3px var(--good); }
   .ps-slot[data-zustand="falsch"] { opacity: 1; border-color: var(--bad); box-shadow: 0 0 0 3px var(--bad); }

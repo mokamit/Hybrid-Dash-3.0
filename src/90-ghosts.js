@@ -7331,14 +7331,49 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // v1.1.41 BESTELLT ("auf gleich schnell bringen"): das Safety Car faehrt das Gelb-Tempo des Feldes. Mit
     // dem Anteil 0,85 (0,342) lag es unter seinem Mindesttempo 0,37 und fuhr ueberall 0,37 - auf der Geraden
     // langsamer als das Feld (0,4025), in der Haarnadel schneller (0,35). SC_TEMPO_ANTEIL ist damit 1.
-    if (car && car.role === 'safetycar') return gelbGrenze() * SC_TEMPO_ANTEIL;
+    if (car && car.role === 'safetycar') {
+      // HybridDash 3.0 (reported: "the lead car does not catch up to the safety car"): while nobody is queued
+      // behind it yet, the safety car runs at the lowest pace that still reads the track, so the field reaches it.
+      if (scAufschliessenAn() && !scSchlangeDa(car)) return Math.min(gelbGrenze() * SC_TEMPO_ANTEIL, SC_WARTETEMPO);
+      return gelbGrenze() * SC_TEMPO_ANTEIL;
+    }
     // HybridDash race control: a local yellow runs at a caution pace above the SC pace.
     const hdRlZiel = typeof hdRlGelbZiel === 'function' ? hdRlGelbZiel(car) : null;
     if (hdRlZiel !== null) return hdRlZiel;
-    if (car && scAufschliessenAn() && safetyCarFaehrt() && !nahAmSafetyCar(car)) {
-      return Math.max(SC_AUFSCHLUSS, gelbGrenze());
+    // HybridDash 3.0: the further behind the safety car, the faster the catch-up - 50 % at queue distance
+    // (GELB_ABSTAND_VOLL, ~2 car lengths), up to 60 % from 3 pieces back (NPCs never above their race pace); closer than that the follow cap
+    // (scFolgeDeckel) takes over. Before, 45 % was barely above the safety car's 40 % and stopped 2 pieces
+    // out ("near"): simulator, 13 pieces, 6 cars - the first car was still ~9 pieces behind after 90 s.
+    if (car && scAufschliessenAn() && safetyCarFaehrt()) {
+      const d = scAbstandVor(car);
+      if (d === null) { if (!nahAmSafetyCar(car)) return Math.max(SC_AUFSCHLUSS, gelbGrenze()); }
+      else if (d > GELB_ABSTAND_VOLL) {
+        const x = Math.max(0, Math.min(1, (d - GELB_ABSTAND_VOLL) / (SC_AUFSCHLUSS_WEIT - GELB_ABSTAND_VOLL)));
+        return Math.max(SC_AUFSCHLUSS_NAH + (SC_AUFSCHLUSS_MAX - SC_AUFSCHLUSS_NAH) * x, gelbGrenze());
+      }
     }
     return gelbGrenze();
+  }
+  const SC_AUFSCHLUSS_NAH = 0.5, SC_AUFSCHLUSS_MAX = 0.6, SC_AUFSCHLUSS_WEIT = 3, SC_WARTETEMPO = GHOST_FAHR_MIN;
+  // Pieces the running safety car is AHEAD of this car (on the lap, 0..n), null without positions.
+  function scAbstandVor(car) {
+    const sc = safetyCar();
+    if (!sc || sc === car || !sc.ghost || !car || !car.ghost) return null;
+    const n = currentTrackTiles ? currentTrackTiles.length : 0;
+    const a = ghostOrt(car), b = ghostOrt(sc);
+    if (!n || a === null || b === null) return null;
+    return ((b - a) % n + n) % n;
+  }
+  // Is anyone queued right behind the safety car (within queue distance + half a piece)? Without positions: yes.
+  function scSchlangeDa(sc) {
+    if (!sc || !sc.ghost || ghostOrt(sc) === null) return true;
+    for (const o of ghostFieldRacing()) {
+      if (o === sc) continue;
+      const d = scAbstandVor(o);
+      if (d === null) continue;
+      if (d > 0 && d <= GELB_ABSTAND_VOLL + 0.5) return true;
+    }
+    return false;
   }
   // Die Kurvendrosselung der Ghosts fuer ein Fahrerauto im Autopiloten: dieselbe Regel wie
   // die Kachelregel in ghostTick (curveSlow in der 60-Grad-Kurve, doppelt in Haarnadel und
@@ -7448,7 +7483,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Fahrerauto setzt dann der Autopilot (autopilotGrund), nicht die Physik.
       // v1.0.9 BESTELLT: "~35 % Geschwindigkeit bei allen ohne Messung der Naehe zum
       // Safetycar und keine Ueberholmanoever" - mit und ohne Safety Car dieselbe Grenze.
-      limitYellow = (safetyCar() && scAufschliessenAn()) ? Math.max(SC_AUFSCHLUSS, gelbGrenze()) : gelbGrenze();
+      // HybridDash 3.0: up to the faster catch-up pace (gelbZielFuer), so the player's car can reach the safety car too.
+      limitYellow = (safetyCar() && scAufschliessenAn()) ? Math.max(SC_AUFSCHLUSS_MAX, gelbGrenze()) : gelbGrenze();
       // HybridDash race control: yellow flag and VSC run WITHOUT the safety car (98n-hd-rennleitung.js).
       if (!(typeof hdRlOhneSafetyCar === 'function' && hdRlOhneSafetyCar())) safetyCarRaus();
       applySpeedLimit();
@@ -8587,7 +8623,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const wer = spielerNrVon(c) || 1;
     // v1.0.37: nach dem Ankommen in der Aufstellung ohne Spur-Bytes (Einlenk-Takt als Radwinkel).
     if (trackMode === 'on' && driverAssistAktiv(c) && !abseitsJetztFuer(wer)
-        && !(typeof aufstellenSpielerOhneSpur === 'function' && aufstellenSpielerOhneSpur(c))) {
+        && !(typeof aufstellenSpielerOhneSpur === 'function' && aufstellenSpielerOhneSpur(c))
+        && !(typeof hdAutoBoxOhneSpur === 'function' && hdAutoBoxOhneSpur(c))) {
       // v0.9.51: AUCH OHNE VORAUSBLICK, wie bei den Ghosts (ghostTick). Ohne Vorausblick -
       // das Auto stand oder wurde gerade zurueckgestellt, die Kachel ist noch nicht verortet -
       // gingen gar keine Spur-Bytes hinaus, und der Autopilot schickte steer = 0 als

@@ -2926,6 +2926,9 @@
     return car && FAHRHILFE_MODI.indexOf(car.fahrhilfe) >= 0 ? car.fahrhilfe : fahrhilfeModus;
   }
   function driverAssistAktiv(car) {
+    // HybridDash: the automatic pit stop drives the player's car itself - on the way to the box and
+    // on the way out it needs the self-guidance (track bytes), or steer 0 is read as a straight wheel.
+    if (typeof hdAutoBoxSpur === 'function' && hdAutoBoxSpur(car)) return true;
     return fahrhilfeModusVon(car) !== 'aus' || !!autopilotGrund();
   }
 
