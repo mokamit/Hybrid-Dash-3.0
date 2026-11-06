@@ -1499,6 +1499,9 @@
     const schirmB = breiteFuerTest || (gedreht ? window.innerHeight : window.innerWidth);
     const schirmH = hoeheFuerTest || (gedreht ? window.innerWidth : window.innerHeight);
     if (!(schirmB > 0) || !(schirmH > 0)) return null;
+    // Hybrid-Dash 3.0: on a screen at least 560 px tall the cockpit stretches to fill it (CSS .hd-cp-voll);
+    // smaller (a phone in landscape) keeps the compact layout.
+    el.classList.toggle('hd-cp-voll', schirmH >= 560);
     // EINE Einpassung, nicht zwei: der Weg in der Seite arbeitet mit zoom, dieser mit
     // Groesse und Skalierung. Beide zugleich waeren zwei Faktoren auf einer Zahl.
     el.style.zoom = '';
