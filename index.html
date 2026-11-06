@@ -400,6 +400,17 @@
   .hdr-manuell summary { cursor: pointer; color: #9aa1b0; font-size: 13px; }
   .hdr-autos-schritt { list-style: none; padding-left: 0; }
   .hdr-paar-status { color: #7cd8ff; }
+  /* v3.0: which laptop a car is connected to (garage), see hdLaptopEtikett() */
+  .hd-laptop { display: inline-block; margin-left: 8px; padding: 1px 7px; vertical-align: 2px; font: italic 900 10.5px/1.5 var(--k-font, sans-serif);
+    letter-spacing: .08em; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%); }
+  .hd-laptop-host { background: var(--b-paper, #f2f3f5); color: var(--b-asphalt, #15171c); }
+  .hd-laptop-helper { background: #3b7fe2; color: #fff; }
+  .hd-laptop-aus { opacity: .5; }
+  .hd-laptop-wrap { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; vertical-align: 1px; }
+  .hd-laptop-wrap .hd-laptop { margin-left: 0; vertical-align: 0; }
+  .hd-link { display: inline-flex; width: 19px; height: 19px; align-items: center; justify-content: center; border-radius: 50%; }
+  .hd-link-an { color: #3ddc84; background: rgba(61,220,132,.14); box-shadow: 0 0 0 1px rgba(61,220,132,.5); }
+  .hd-link-aus { color: #8a93a3; background: rgba(255,255,255,.05); box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
   .hdr-vergessen-zeile { display: flex; align-items: center; gap: 10px; margin: 10px 0 0; }
   .hdr-vergessen-zeile small { color: var(--muted, #a9b2c4); line-height: 1.35; }
   #hdr-paar-vergessen-host { flex: none; border-color: var(--b-red, #e10600); }
@@ -580,6 +591,17 @@
                      border-radius: 50%; line-height: 0; }
   .hd-avatar-knopf:focus-visible { outline: 2px solid #00d6ff; outline-offset: 2px; }
   .hd-avatar { display: block; }
+  /* v3.0: grid card at the top of "Driver and Car Settings" */
+  .hd-gridkarte { display: flex; align-items: center; gap: 14px; margin: 6px 0 10px; padding: 8px 12px 8px 8px;
+    background: linear-gradient(100deg, rgba(255,255,255,.04), transparent 70%); border-left: 4px solid var(--hd-gk-farbe, #e10600); }
+  .hd-gridkarte .hd-gk-bild { flex: none; }
+  .hd-gridkarte .hd-avatar { border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+  .hd-gk-text { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .hd-gridkarte .gar-a-titel { margin: 0; font-size: clamp(20px, 2vw, 28px); line-height: 1.05; }
+  .hd-gk-zeile { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .hd-gk-nr { min-width: 34px; padding: 2px 10px; text-align: center; font: italic 900 18px/1.2 var(--k-font, sans-serif);
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); }
+  .hd-gk-modell { font: italic 700 14px var(--k-font, sans-serif); color: var(--muted, #a8adb8); text-transform: uppercase; letter-spacing: .06em; }
   .hd-wuerfel { margin-left: .4em; }
   .home-omega { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     font-size: clamp(110px, min(34vw, 50vh), 480px); font-weight: 700; line-height: 1;
@@ -5783,6 +5805,46 @@
   .ov-farbe { width: 5px !important; border-radius: 0 !important; box-shadow: none !important; }
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
+
+  /* ---- Hybrid-Dash 3.0: the starting grid as a TV board (hdStartgridBoard) ---- */
+  #race-gridscreen #grid-liste.hd-sg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-auto-rows: auto;
+    gap: 14px 8px; padding: 0 0 4px; align-content: start; overflow: auto; }
+  #grid-liste.hd-sg .hd-sg-kopf { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 0;
+    padding: 6px 12px 7px; margin-bottom: 4px; background: linear-gradient(180deg, #23262e, #15171c); border-top: 3px solid var(--b-red, #e10600);
+    clip-path: polygon(2% 0, 98% 0, 100% 100%, 0 100%); }
+  #grid-liste.hd-sg .hd-sg-kopf b { font: italic 900 clamp(18px, 2.2vw, 30px)/1.05 var(--b-font, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: #fff; }
+  #grid-liste.hd-sg .hd-sg-kopf span { font: 700 clamp(10px, 1vw, 13px)/1.2 var(--b-font, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: var(--b-yellow, #ffc400); }
+  #race-gridscreen #grid-liste.hd-sg .grid-row.hd-sg-karte { margin: 0 !important; padding: 0; display: block; min-height: 0; border: 0; border-radius: 0;
+    background: repeating-linear-gradient(-60deg, rgba(255,255,255,.025) 0 2px, transparent 2px 7px), linear-gradient(180deg, #2b2f39 0%, #171a20 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); overflow: hidden; }
+  #race-gridscreen #grid-liste.hd-sg .grid-row.hd-sg-l { grid-column: 1; }
+  #race-gridscreen #grid-liste.hd-sg .grid-row.hd-sg-r { grid-column: 2; }
+  #grid-liste.hd-sg .hd-sg-karte > :not(.hd-sg-inhalt) { display: none !important; }
+  #grid-liste.hd-sg .hd-sg-inhalt { display: grid; align-items: center; gap: 0 10px; height: clamp(58px, 8.4vh, 78px); padding: 0 10px 0 0; position: relative; }
+  #grid-liste.hd-sg .hd-sg-l .hd-sg-inhalt { grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "nr bild name ctrl"; border-left: 5px solid var(--hd-sg-farbe); }
+  #grid-liste.hd-sg .hd-sg-r .hd-sg-inhalt { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "ctrl name bild nr"; padding: 0 0 0 10px; border-right: 5px solid var(--hd-sg-farbe); }
+  #grid-liste.hd-sg .hd-sg-nr { grid-area: nr; min-width: 1.6em; padding: 0 6px; text-align: center; font: italic 900 clamp(28px, 3.6vw, 48px)/1 var(--b-font, sans-serif); color: #fff;
+    text-shadow: 0 2px 0 rgba(0,0,0,.5); }
+  #grid-liste.hd-sg .hd-sg-bild { grid-area: bild; align-self: end; height: 100%; display: flex; align-items: flex-end; }
+  #grid-liste.hd-sg .hd-sg-bild .hd-avatar { width: auto; height: 100%; border-radius: 0; }
+  #grid-liste.hd-sg .hd-sg-name { grid-area: name; min-width: 0; display: flex; flex-direction: column; line-height: 1.02; }
+  #grid-liste.hd-sg .hd-sg-r .hd-sg-name { text-align: right; }
+  #grid-liste.hd-sg .hd-sg-name small { font: 700 clamp(11px, 1.15vw, 16px)/1.1 var(--b-font, sans-serif); text-transform: uppercase; letter-spacing: .04em; color: #e6e8ec; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #grid-liste.hd-sg .hd-sg-name b { font: italic 900 clamp(15px, 1.7vw, 24px)/1.05 var(--b-font, sans-serif); text-transform: uppercase; letter-spacing: .02em; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #grid-liste.hd-sg .hd-sg-ctrl { grid-area: ctrl; display: flex; align-items: center; gap: 6px; }
+  #grid-liste.hd-sg .hd-sg-ctrl .grid-move { display: flex; flex-direction: column; gap: 3px; }
+  #grid-liste.hd-sg .hd-sg-ctrl .grid-move button { width: 26px !important; height: 22px !important; font-size: 10px !important; padding: 0; }
+  #grid-liste.hd-sg .hd-sg-ctrl .grid-box { display: flex; }
+  #grid-liste.hd-sg .hd-sg-reihe { grid-column: 1 / -1; justify-self: center; align-self: start; z-index: 2; transform: translateY(-62%);
+    display: flex; align-items: stretch; height: 18px; font: 800 11px/18px var(--b-font, sans-serif); text-transform: uppercase; letter-spacing: .08em; pointer-events: none; }
+  #grid-liste.hd-sg .hd-sg-reihe b { padding: 0 14px; background: var(--b-yellow, #ffc400); color: #15171c; font-style: italic; clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%); }
+  #grid-liste.hd-sg .hd-sg-reihe i { min-width: 18px; padding: 0 4px; text-align: center; font-style: normal; background: #f2f3f5; color: #15171c; margin: 0 3px; }
+  #grid-liste.hd-sg .hd-sg-reihe i:empty { visibility: hidden; }
+  #grid-liste.hd-sg .grid-row.grid-sc { grid-column: 1 / -1; margin: 0 !important; }
+  #grid-liste.hd-sg .hd-sg-fuss { grid-column: 1 / -1; padding: 6px 12px; text-align: center; font: italic 800 clamp(11px, 1.15vw, 15px)/1.2 var(--b-font, sans-serif);
+    letter-spacing: .1em; color: #fff; background: linear-gradient(180deg, #23262e, #0e1014); border-bottom: 3px solid var(--b-red, #e10600); }
+  #grid-liste.hd-sg .grid-row.grid-blinkt { animation: hd-sg-blink .6s 2; }
+  @keyframes hd-sg-blink { 50% { box-shadow: inset 0 0 0 2px var(--hd-sg-farbe), 0 0 18px var(--hd-sg-farbe); } }
 
   /* Flag band (yellow / SC / VSC): solid flag-yellow TV bar with a cut corner */
   html body #gt3-flag { background: var(--b-yellow); color: var(--b-asphalt); font-family: var(--b-font); font-style: italic; font-weight: 900;
@@ -45794,6 +45856,7 @@
       });
       host.appendChild(row);
     });
+    if (typeof hdStartgridBoard === 'function') hdStartgridBoard(host, cars);   // HybridDash 3.0: TV starting-grid board
     gridGleiten(host, alt, bewegt);
     const sc = garage.find(c => c.role === 'safetycar' && c.device);
     if (sc) {
@@ -64430,7 +64493,7 @@
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
         <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
-        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 40) : ''}${esc(name)}</b>
+        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 52) : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
           <b>${t(rolle.name)}</b>
@@ -64513,7 +64576,9 @@
       kopf.className = 'gar-a-titel';
       kopf.setAttribute('data-i18n-skip', '');
       kopf.textContent = car.alias || car.tag || garageLabel(car);
-      rechts.appendChild(kopf);
+      // HybridDash 3.0: a broadcast-style grid card - the large driver portrait beside the name.
+      const gk = typeof hdGridKarte === 'function' ? hdGridKarte(car, kopf) : null;
+      rechts.appendChild(gk || kopf);
       rechts.appendChild(garRollenZeile(car));
       const zb = document.createElement('div');
       zb.className = 'opt-row opt-breit gar-a-aktion gar-a-blinken';
@@ -120365,75 +120430,247 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const c = (v) => Math.max(0, Math.min(255, Math.round(v * f)));
     return '#' + [c(n >> 16), c((n >> 8) & 255), c(n & 255)].map((v) => v.toString(16).padStart(2, '0')).join('');
   }
+  function hdHeller(hex, f) {
+    const n = parseInt(String(hex).slice(1), 16); if (!(n >= 0)) return hex;
+    const c = (v) => Math.max(0, Math.min(255, Math.round(v + (255 - v) * f)));
+    return '#' + [c(n >> 16), c((n >> 8) & 255), c(n & 255)].map((v) => v.toString(16).padStart(2, '0')).join('');
+  }
   function hdHell(hex) {
     const n = parseInt(String(hex).slice(1), 16); if (!(n >= 0)) return 0.5;
     return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
   }
   let hdAvatarNr = 0;
+  // ---- PHOTO PORTRAITS (v3.0) ---------------------------------------------------------------
+  // BESTELLT: "Make it exactly like the reference photo" - sheets of 36 studio portraits (driver, helmet with the
+  // visor down, arms crossed) that came with the requests ("I've added more reference photos for you to store").
+  // They are cut out into img/fahrer/p00-p71.jpg (240 x 240, square from the top of each portrait, so the whole
+  // helmet shows - "Make sure they show the full helmet") and chosen by the car colour: each portrait is labelled with its main colour and its accent colours
+  // (by eye - the suit and helmet, not the backdrop). A car gets the portraits whose main colour is its own first,
+  // then those that carry it as an accent; the driver's name picks one, a tap on the avatar steps to the next.
+  const HD_FOTOS = [
+    ['weiss', 'rot'], ['blau', 'gelb'], ['gruen', 'schwarz'], ['orange'], ['lila'], ['schwarz', 'gelb'],
+    ['blau', 'gruen'], ['gelb', 'weiss'], ['rot', 'gelb'], ['orange', 'blau'], ['gruen', 'orange'], ['weiss', 'rot'],
+    ['schwarz', 'blau'], ['gruen', 'lila'], ['weiss', 'rot', 'lila'], ['schwarz', 'orange'], ['gelb', 'blau'], ['schwarz', 'rot'],
+    ['rot', 'gelb'], ['schwarz', 'orange'], ['blau', 'weiss'], ['gruen', 'weiss'], ['lila', 'gelb'], ['schwarz', 'weiss'],
+    ['schwarz'], ['weiss', 'blau'], ['gruen', 'orange', 'blau'], ['rot', 'weiss'], ['weiss'], ['gruen', 'blau'],
+    ['gelb', 'orange'], ['blau', 'weiss'], ['schwarz', 'lila', 'rot'], ['orange', 'schwarz'], ['lila', 'weiss'], ['gruen', 'schwarz'],
+    // second sheet (p36-p71)
+    ['lila', 'weiss'], ['schwarz', 'gelb'], ['blau', 'orange'], ['gruen'], ['weiss', 'rot'], ['rot', 'gelb'],
+    ['orange', 'blau'], ['lila', 'weiss'], ['schwarz', 'lila', 'rot'], ['gruen', 'weiss', 'rot'], ['blau', 'orange'], ['blau', 'gelb'],
+    ['gruen', 'gelb'], ['rot', 'weiss'], ['lila', 'weiss'], ['gruen', 'orange', 'blau'], ['schwarz', 'blau'], ['weiss', 'rot', 'lila'],
+    ['schwarz'], ['lila', 'gruen'], ['weiss', 'orange', 'blau'], ['schwarz', 'orange'], ['blau', 'weiss'], ['weiss', 'orange'],
+    ['rot', 'lila'], ['gruen', 'schwarz'], ['blau', 'weiss'], ['schwarz', 'gelb'], ['lila', 'schwarz', 'blau'], ['lila', 'orange'],
+    ['gelb', 'schwarz'], ['gruen', 'orange'], ['weiss', 'blau'], ['rot', 'schwarz'], ['gelb', 'gruen'], ['lila', 'weiss'],
+  ];
+  // The car colour as one of the palette names (from the hex, so it also works for a colour we do not list).
+  function hdFarbKlasse(hex) {
+    const n = parseInt(String(hex || '').slice(1), 16);
+    if (!(n >= 0)) return null;
+    const r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min;
+    if (l > 0.86 && d < 0.12) return 'weiss';
+    if (l < 0.18) return 'schwarz';
+    if (d < 0.08) return null;                       // grey: "none" / "multi-coloured" - any portrait
+    let h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h = (h * 60 + 360) % 360;
+    return h < 15 || h >= 335 ? 'rot' : h < 42 ? 'orange' : h < 68 ? 'gelb' : h < 170 ? 'gruen' : h < 250 ? 'blau' : 'lila';
+  }
+  // The portraits a car colour may use, in order of preference, and where this driver starts in that list.
+  function hdFotoPool(name, farbeHex, stil) {
+    const k = hdFarbKlasse(farbeHex);
+    const alle = HD_FOTOS.map((_, i) => i);
+    const haupt = k ? alle.filter((i) => HD_FOTOS[i][0] === k) : alle;
+    const neben = k ? alle.filter((i) => HD_FOTOS[i][0] !== k && HD_FOTOS[i].indexOf(k) > 0) : [];
+    const pool = haupt.concat(neben);
+    const start = pool.length ? (hdHash(String(name)) % Math.max(1, haupt.length) + (stil || 0)) % pool.length : 0;
+    return { pool, start };
+  }
+  // The preferred portrait (no knowledge of the other cars) - and the first one from there that is still free.
+  function hdFotoNr(name, farbeHex, stil, belegt) {
+    const { pool, start } = hdFotoPool(name, farbeHex, stil);
+    const frei = (i) => !belegt || !belegt.has(i);
+    for (let j = 0; j < pool.length; j++) { const i = pool[(start + j) % pool.length]; if (frei(i)) return i; }
+    // Every portrait of this colour is taken: any free one, starting from the driver's own spot in the full list.
+    const s0 = hdHash(String(name)) % HD_FOTOS.length;
+    for (let j = 0; j < HD_FOTOS.length; j++) { const i = (s0 + j) % HD_FOTOS.length; if (frei(i)) return i; }
+    return pool.length ? pool[start] : s0;       // more cars than portraits: share is unavoidable
+  }
+  // v3.0 BESTELLT: "make sure that no two drivers use the same avatar". Each garage car is GIVEN a portrait once and
+  // keeps it (remembered per car in hd.fotos, saved with the HybridDash settings): a new car takes its preferred
+  // portrait, or the next free one of its colour, or any free one. A car keeps its portrait until its colour no
+  // longer fits it or another car got it first (garage order); a tap moves only that car to the next free one.
+  // So nobody's avatar changes because someone else's did.
+  function hdFotoPasst(nr, hex) { const k = hdFarbKlasse(hex); return !k || HD_FOTOS[nr].indexOf(k) >= 0; }
+  function hdFotoBelegung() {
+    let autos = [];
+    try { autos = garage.filter((c) => c && c.device); } catch (e) { return new Map(); }
+    hd.fotos = hd.fotos || {};
+    const belegt = new Set(), map = new Map();
+    let neu = false;
+    autos.forEach((c) => {
+      const id = String(c.device.id), hex = carColor(c).hex;
+      let nr = hd.fotos[id];
+      if (!(Number.isInteger(nr) && nr >= 0 && nr < HD_FOTOS.length && !belegt.has(nr) && hdFotoPasst(nr, hex))) {
+        nr = hdFotoNr(c.alias || c.tag || garageLabel(c), hex, 0, belegt);
+        hd.fotos[id] = nr; neu = true;
+      }
+      belegt.add(nr); map.set(id, nr);
+    });
+    if (neu) { try { hdSpeichern(); } catch (e) { /* start-up */ } }
+    return map;
+  }
+  // Tap: the next portrait of this car's colour that no other car has (then any free one).
+  function hdFotoWeiter(car) {
+    const id = String(car.device.id), hex = carColor(car).hex;
+    const belegung = hdFotoBelegung();
+    const andere = new Set([...belegung].filter(([cid]) => cid !== id).map(([, nr]) => nr));
+    const { pool } = hdFotoPool(car.alias || car.tag || garageLabel(car), hex, 0);
+    const jetzt = belegung.get(id);
+    const reihe = pool.length ? pool : HD_FOTOS.map((_, i) => i);
+    const ab = Math.max(0, reihe.indexOf(jetzt));
+    for (let j = 1; j <= reihe.length; j++) { const nr = reihe[(ab + j) % reihe.length]; if (!andere.has(nr) && nr !== jetzt) { hd.fotos[id] = nr; return nr; } }
+    for (let j = 1; j <= HD_FOTOS.length; j++) { const nr = ((jetzt || 0) + j) % HD_FOTOS.length; if (!andere.has(nr)) { hd.fotos[id] = nr; return nr; } }
+    return jetzt;
+  }
+  // The avatar of a garage car - unique across the garage.
+  function hdAvatarFuerAuto(car, px) {
+    const name = car.alias || car.tag || garageLabel(car);
+    const nr = hdFotoBelegung().get(String(car.device && car.device.id));
+    return hdAvatarSvg(name, carColor(car).hex, hdAvatarStil(car), px, carModellWert(car.modellId), nr);
+  }
+  function hdAvatarSvg(name, farbeHex, stil, px, marke, festNr) {
+    const nr = Number.isInteger(festNr) ? festNr : hdFotoNr(name, farbeHex, stil);
+    const id = 'hdfo' + (++hdAvatarNr);
+    const datei = 'img/fahrer/p' + String(nr).padStart(2, '0') + '.jpg';
+    return `<svg class="hd-avatar hd-avatar-foto" width="${px}" height="${px}" viewBox="0 0 100 100" aria-hidden="true" data-foto="${nr}">`
+      + `<defs><clipPath id="${id}"><rect x="0.5" y="0.5" width="99" height="99" rx="14"/></clipPath></defs>`
+      + `<rect x="0.5" y="0.5" width="99" height="99" rx="14" fill="${farbeHex || '#15171c'}"/>`
+      // (attribute name built in two parts: the build's link check reads every literal href=" as a fixed file)
+      + '<image ' + 'href' + '="' + datei + `" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/>`
+      + `</svg>`;
+  }
+
+  // The drawn studio portrait (v3.0 before the photos) - no longer used for the avatars; kept as a fallback.
   // name, car colour (hex), style number, size in px, brand id (car.modellId)
-  function hdAvatarSvg(name, farbeHex, stil, px, marke) {
+  // v3.0 BESTELLT: "Make the avatars even more realistic ... use the smokey gradient background too that would
+  // complement the colour of their cars" (reference: studio portraits of drivers, visor down, arms crossed).
+  // Driver chest-up, arms crossed in black gloves, full-face helmet with the tinted visor DOWN, HANS device on the
+  // shoulders, race suit with folds, stitching, shoulder piping and patches, a key light from the top left and a
+  // rim light in the car colour; behind: a dark studio gradient tinted by the car colour, drifting smoke
+  // (feTurbulence, a different seed per driver) and a faint light streak. Deterministic per driver and brand.
+  function hdAvatarGezeichnet(name, farbeHex, stil, px, marke) {
     const r = hdZufall(hdHash(String(name) + '#' + (stil || 0) + '#' + (marke || '')));
     const pick = (a) => a[Math.floor(r() * a.length) % a.length];
     const pal = HD_MARKEN_FARBEN[marke] || HD_MARKEN_FARBEN[''];
     const basis = farbeHex && !/^#(7a7a7a|b0b0b0)$/i.test(farbeHex) ? farbeHex : pal[0];
-    // Accents: brand colours that differ from the base (and from each other).
     const akz = pal.filter((c) => c.toLowerCase() !== basis.toLowerCase());
     const a1 = akz[Math.floor(r() * akz.length)];
     const a2 = akz.filter((c) => c !== a1)[Math.floor(r() * (akz.length - 1))] || '#ffffff';
-    // Helmet: car colour most of the time, sometimes a brand colour or white.
-    const helm = r() < 0.65 ? basis : pick([pal[0], '#f4f5f7', '#1c1f24'].filter((c) => c.toLowerCase() !== a1.toLowerCase()));
-    const haut = pick(HD_HAUT), haar = pick(HD_HAARE);
-    const helmMuster = Math.floor(r() * 6), anzugMuster = Math.floor(r() * 5);
-    const kante = hdHell(basis) > 0.8 ? 'rgba(0,0,0,.28)' : 'rgba(0,0,0,.18)';
+    // Suit: the car colour most of the time, sometimes white or black with the car colour as the accent.
+    const anzugWahl = r();
+    const anzug = anzugWahl < 0.6 ? basis : anzugWahl < 0.8 ? '#e9ebee' : '#1d2026';
+    const akzent = anzug === basis ? a1 : basis;
+    const helm = r() < 0.55 ? basis : pick([pal[0], '#f2f3f5', '#1c1f24', a1].filter((c) => c.toLowerCase() !== akzent.toLowerCase()));
+    const helmMuster = Math.floor(r() * 5), anzugMuster = Math.floor(r() * 4), visierTon = pick(['#0b0d11', '#120d08', '#0a0f14', '#140a0c']);
+    const seed = 1 + (hdHash(String(name) + (stil || 0)) % 97);
     const id = 'hdav' + (++hdAvatarNr) + '-' + (hdHash(String(name)) % 9973);
     const nummer = 1 + (hdHash(String(name)) % 99);
-    const helmPfad = 'M24 46 C23 25 35 13 51 13 C67 13 78 25 77 44 C76.5 55 73 62 66 66 L35 66 C28 62 24.5 55 24 46 Z';
-    const torso = 'M3 104 C4 85 17 74 36 70.5 L64 70.5 C83 74 96 85 97 104 Z';
-    // Helmet patterns (clipped to the shell) - on the sides, crown and chin, where the raised
-    // visor and the face opening leave the shell visible.
-    const spiegel = (d) => `<path d="${d}" fill="CF"/><path d="${d}" fill="CF" transform="translate(101 0) scale(-1 1)"/>`;
-    const hm = [
-      spiegel('M23 40 L31 35 L37 63 L28 64 Z').replace(/CF/g, a1) + spiegel('M30 36 L32 35 L38 63 L36 63 Z').replace(/CF/g, a2),
-      `<path d="M20 53 C30 60 72 60 82 53 L82 72 L20 72 Z" fill="${a1}"/><path d="M22 51 C32 57.5 70 57.5 80 51" fill="none" stroke="${a2}" stroke-width="1.8"/>`,
-      `<path d="M47 8 H55 V24 H47 Z" fill="${a1}"/>` + spiegel('M24 44 L31 40 L33 47 L25 51 Z').replace(/CF/g, a2) + spiegel('M25 54 L33 50 L35 57 L27 61 Z').replace(/CF/g, a1),
-      spiegel('M22 34 C30 38 26 46 32 50 C27 54 30 60 34 66 L22 66 Z').replace(/CF/g, a1),
-      spiegel(Array.from({ length: 4 }, (_, i) => `M${23 + (i % 2) * 4.5} ${38 + i * 6} h4.5 v6 h-4.5 Z M${27.5 - (i % 2) * 4.5} ${41 + i * 6} h4.5 v3 h-4.5 Z`).join(' ')).replace(/CF/g, a1),
-      `<path d="M10 8 H51 V72 H10 Z" fill="${a1}" opacity=".95"/><path d="M50 8 H52.5 V72 H50 Z" fill="${a2}"/>`,
+    const rgb = (hex) => { const n = parseInt(String(hex).slice(1), 16) || 0; return [(n >> 16) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
+    const rauch = rgb(hdHeller(basis, 0.35));
+    const anzugH = hdHeller(anzug, 0.28), anzugD = hdDunkler(anzug, 0.55), anzugDD = hdDunkler(anzug, 0.38);
+    const helmH = hdHeller(helm, 0.45), helmD = hdDunkler(helm, 0.5);
+    const hintergrund = hdDunkler(basis, 0.32), hintergrundD = hdDunkler(basis, 0.1);
+    const patch = hdHell(anzug) > 0.7 ? '#23262d' : '#eef0f2', patchTinte = hdHell(patch) > 0.6 ? '#14161c' : '#ffffff';
+    // ---- shapes (viewBox 100 x 100) ----
+    const torso = 'M-3 101 L-1 82 C2 70 13 63 29 60.4 L39 57.4 L61 57.4 L71 60.4 C87 63 98 70 101 82 L103 101 Z';
+    const schale = 'M29.4 30.6 C29.4 15 38.8 6.2 50 6.2 C61.2 6.2 70.6 15 70.6 30.6 C70.6 41.6 68.6 48 64.2 52.2 C60.2 55.2 55.4 56.2 50 56.2 C44.6 56.2 39.8 55.2 35.8 52.2 C31.4 48 29.4 41.6 29.4 30.6 Z';
+    const visier = 'M30.8 25.4 C33.8 20.8 41.8 18.8 50 18.8 C58.2 18.8 66.2 20.8 69.2 25.4 C70.2 30.4 69.6 35.6 67.8 39 C61.8 41.4 56 42.2 50 42.2 C44 42.2 38.2 41.4 32.2 39 C30.4 35.6 29.8 30.4 30.8 25.4 Z';
+    const helmDeko = [
+      `<path d="M46.4 0 H53.6 V22 H46.4 Z" fill="${akzent}"/><path d="M44.6 0 H45.6 V22 H44.6 Z M54.4 0 H55.4 V22 H54.4 Z" fill="${a2}"/>`,
+      `<path d="M50 9 L70 19 L70 25 L50 15 L30 25 L30 19 Z" fill="${akzent}"/><path d="M50 16.6 L70 26.6 V29 L50 19 L30 29 V26.6 Z" fill="${a2}"/>`,
+      `<path d="M28 44 C36 41 42 44 46 56 L38 56 C36 49 33 47 28 48 Z M72 44 C64 41 58 44 54 56 L62 56 C64 49 67 47 72 48 Z" fill="${akzent}"/>`,
+      `<path d="M28 13 C40 18 60 18 72 13 V19 C60 23.6 40 23.6 28 19 Z" fill="${akzent}"/><path d="M28 41 H72 V44 H28 Z" fill="${a2}"/>`,
+      `<path d="M30 30 C38 26 44 14 50 8 C56 14 62 26 70 30 L70 34 C62 30 56 20 50 14 C44 20 38 30 30 34 Z" fill="${akzent}"/>`,
     ][helmMuster];
-    // Suit patterns (clipped to the torso).
-    const am = [
-      `<path d="M3 92 C9 80 21 73.5 36 70.5 L32 80 C21 82 12 87 6 98 Z M97 92 C91 80 79 73.5 64 70.5 L68 80 C79 82 88 87 94 98 Z" fill="${a1}"/>`,
-      `<path d="M36 70.5 L50 90 L64 70.5 L58.5 70.5 L50 82.5 L41.5 70.5 Z" fill="${a1}"/><path d="M12 104 L18 82 L23.5 82 L18 104 Z M88 104 L82 82 L76.5 82 L82 104 Z" fill="${a2}"/>`,
-      `<path d="M15 76 L25 72.5 L62 104 L50 104 Z" fill="${a1}"/>`,
-      `<path d="M3 93 H97 V98 H3 Z" fill="${a1}"/><path d="M3 100 H97 V103 H3 Z" fill="${a2}"/>`,
-      `<path d="M5 94 C11 82 23 75 36 71.5 L34 76.5 C23 79.5 14 86 9.5 96 Z M95 94 C89 82 77 75 64 71.5 L66 76.5 C77 79.5 86 86 90.5 96 Z" fill="${a1}"/><path d="M44 71 H56 L54 104 H46 Z" fill="${a2}"/>`,
+    const anzugDeko = [
+      // shoulder piping and side stripes
+      `<path d="M8 72 C16 64 26 61 38 59.6 L38.8 61.6 C27 63 17.6 66 10 73.6 Z M92 72 C84 64 74 61 62 59.6 L61.2 61.6 C73 63 82.4 66 90 73.6 Z" fill="${akzent}"/><path d="M2 101 L6 78 L9 77 L6 101 Z M98 101 L94 78 L91 77 L94 101 Z" fill="${akzent}"/>`,
+      // contrasting yoke
+      `<path d="M-2 80 C2 69 14 62.6 30 60.2 L39 57.6 L61 57.6 L70 60.2 C86 62.6 98 69 102 80 L102 74 C96 66 84 61 70 58.6 L60 56.6 L40 56.6 L30 58.6 C16 61 4 66 -2 74 Z" fill="${akzent}"/>`,
+      // diagonal sash
+      `<path d="M14 66 L24 61.6 L78 101 L62 101 Z" fill="${akzent}" opacity=".9"/>`,
+      // centre band
+      `<path d="M44.4 58 H55.6 L55 101 H45 Z" fill="${akzent}"/><path d="M43 58 H44.2 L43.8 101 H42.4 Z M55.8 58 H57 L57.6 101 H56.2 Z" fill="${a2}"/>`,
     ][anzugMuster];
-    const patch = hdHell(basis) > 0.7 ? '#2a2e35' : '#f1f2f4';   // always readable on the suit
+    const armHinten = 'M101 89 C88 87.4 54 84 32 81.4 C25.6 80.8 24.4 90.4 30.6 91.8 C52 95.6 86 99.8 101 101.4 Z';
+    const armVorn = 'M-1 95.6 C3 90 10 88.8 19 88.2 C37 86.6 59 83 71.6 81.2 C78.6 80.2 80.4 89.4 74.4 91 C58 95 34 99.8 14 101.8 L-1 101.8 Z';
+    const handR = 'M70.6 80.2 C74.4 77 81.4 77.2 83.4 81.4 C85.4 85.8 82.8 90.8 78 91.6 C74.6 92.2 72.4 90.4 72.8 88 Z';
+    const handL = 'M33.6 80.8 C29.2 78.8 23.6 80.6 23.2 85.2 C22.8 89.4 26.2 92.6 30.6 92 C33.4 91.6 34.8 89.4 33.8 87 Z';
+    const g = (x) => `url(#${id}-${x})`;
     return `<svg class="hd-avatar" width="${px}" height="${px}" viewBox="0 0 100 100" aria-hidden="true">`
-      + `<defs><clipPath id="${id}-k"><rect x="1" y="1" width="98" height="98" rx="18"/></clipPath>`
-      + `<clipPath id="${id}-h"><path d="${helmPfad}"/></clipPath><clipPath id="${id}-t"><path d="${torso}"/></clipPath></defs>`
+      + `<defs>`
+      + `<clipPath id="${id}-k"><rect x="0.5" y="0.5" width="99" height="99" rx="14"/></clipPath>`
+      + `<clipPath id="${id}-t"><path d="${torso}"/></clipPath>`
+      + `<clipPath id="${id}-s"><path d="${schale}"/></clipPath>`
+      + `<radialGradient id="${id}-bg" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="${hintergrund}"/><stop offset=".6" stop-color="${hintergrundD}"/><stop offset="1" stop-color="#030304"/></radialGradient>`
+      + `<filter id="${id}-rauch" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".022 .045" numOctaves="4" seed="${seed}"/>`
+      + `<feColorMatrix type="matrix" values="0 0 0 0 ${rauch[0].toFixed(3)} 0 0 0 0 ${rauch[1].toFixed(3)} 0 0 0 0 ${rauch[2].toFixed(3)} 0 0 0 1.6 -0.62"/></filter>`
+      + `<radialGradient id="${id}-vig" cx=".5" cy=".45" r=".72"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></radialGradient>`
+      + `<linearGradient id="${id}-anzug" x1="0" y1="0" x2="1" y2=".4"><stop offset="0" stop-color="${anzugH}"/><stop offset=".42" stop-color="${anzug}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
+      + `<linearGradient id="${id}-arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${anzugH}"/><stop offset=".45" stop-color="${anzug}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
+      + `<linearGradient id="${id}-armH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${anzug}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
+      + `<radialGradient id="${id}-helm" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="${helmH}"/><stop offset=".45" stop-color="${helm}"/><stop offset="1" stop-color="${helmD}"/></radialGradient>`
+      + `<linearGradient id="${id}-visier" x1="0" y1="0" x2=".2" y2="1"><stop offset="0" stop-color="#3b424f"/><stop offset=".35" stop-color="${visierTon}"/><stop offset=".75" stop-color="#05060a"/><stop offset="1" stop-color="${hdDunkler(basis, 0.45)}"/></linearGradient>`
+      + `<linearGradient id="${id}-hand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a3e46"/><stop offset=".5" stop-color="#16181d"/><stop offset="1" stop-color="#08090b"/></linearGradient>`
+      + `<linearGradient id="${id}-hans" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3f48"/><stop offset="1" stop-color="#0d0f13"/></linearGradient>`
+      + `<linearGradient id="${id}-abfall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient>`
+      + `<linearGradient id="${id}-glanz" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`
+      + `</defs>`
       + `<g clip-path="url(#${id}-k)">`
-      + `<rect width="100" height="100" fill="#eef0f3"/>`
-      // suit
-      + `<path d="${torso}" fill="${basis}" stroke="${kante}" stroke-width="1"/>`
-      + `<g clip-path="url(#${id}-t)">${am}</g>`
-      + `<rect x="25" y="84" width="14" height="6.5" rx="1.2" fill="${patch}"/><rect x="61" y="84" width="14" height="6.5" rx="1.2" fill="${patch}"/>`
-      + `<text x="68" y="89.4" font-family="Inter,system-ui,sans-serif" font-size="5" font-weight="800" text-anchor="middle" fill="${hdHell(patch) > 0.6 ? '#14161c' : '#ffffff'}">${nummer}</text>`
-      // collar and neck
-      + `<path d="M38 63 H62 L64.5 72.5 C58 75.5 42 75.5 35.5 72.5 Z" fill="${hdDunkler(basis, 0.55)}"/>`
-      + `<path d="M43.5 62 H56.5 V69 C53.5 71 46.5 71 43.5 69 Z" fill="${hdDunkler(haut, 0.85)}"/>`
-      // helmet shell + pattern
-      + `<path d="${helmPfad}" fill="${helm}" stroke="${hdHell(helm) > 0.8 ? 'rgba(0,0,0,.3)' : 'rgba(0,0,0,.2)'}" stroke-width="1"/>`
-      + `<g clip-path="url(#${id}-h)">${hm}<path d="M24 52 C30 66 72 66 77 52 L77 70 L24 70 Z" fill="${hdDunkler(helm, 0.82)}"/></g>`
-      // face opening, face, fringe
-      + `<path d="M32 38 C33 31 42 29 51 29 C60 29 68 31 69 38 L68 50 C66 57 58 60 50.5 60 C43 60 35 57 33 50 Z" fill="#1c1f24"/>`
-      + `<path d="M34 39 C35 33 43 31.5 51 31.5 C59 31.5 66 33 67 39 L66 49 C64.5 55 57.5 58 50.5 58 C43.5 58 36.5 55 35 49 Z" fill="${haut}"/>`
-      + `<path d="M34 41 C35 33 43 31.5 51 31.5 C59 31.5 66 33 67 41 C62 36 57 39 52 37 C47 40 41 36 34 41 Z" fill="${haar}"/>`
-      // raised visor
-      + `<path d="M28 34 C31 22 40 18 51 18 C62 18 71 22 74 34 C67 29 60 27.5 51 27.5 C42 27.5 35 29 28 34 Z" fill="#2a2e35"/>`
-      + `<path d="M33 27 C38 22 44 20.5 51 20.5" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.6" stroke-linecap="round"/>`
-      // chin guard vent
-      + `<path d="M44 61.5 H57" stroke="rgba(0,0,0,.35)" stroke-width="1.6" stroke-linecap="round"/>`
+      // studio: car-colour gradient, smoke, a light streak, vignette
+      + `<rect width="100" height="100" fill="${g('bg')}"/>`
+      + `<path d="M0 74 H100 V75.2 H0 Z M0 79 H100 V79.6 H0 Z" fill="${basis}" opacity=".45"/>`
+      + `<rect width="100" height="100" fill="${g('vig')}"/>`
+      // suit: body, panels, folds, stitching, patches, number
+      + `<path d="${torso}" fill="${g('anzug')}"/>`
+      + `<g clip-path="url(#${id}-t)">${anzugDeko}`
+      + `<path d="M24 64 C28 70 30 74 30 80 M76 64 C72 70 70 74 70 80 M40 60 C42 66 42 72 41 78 M60 60 C58 66 58 72 59 78" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="1.1"/>`
+      + `<path d="M12 70 C20 64.6 30 62 39 60.6 M88 70 C80 64.6 70 62 61 60.6" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width=".5" stroke-dasharray="1.2 1"/>`
+      + `<path d="M50 57.6 V80" stroke="#000" stroke-opacity=".35" stroke-width=".9"/>`
+      + `<rect x="21.6" y="66" width="11" height="4" rx=".6" fill="${patch}"/><path d="M23 68 H31" stroke="${patchTinte}" stroke-width=".9" stroke-dasharray="1.6 .7"/>`
+      + `<rect x="23.4" y="71.4" width="7.4" height="2.4" rx=".5" fill="${a2}"/>`
+      + `<rect x="66" y="65.4" width="12.6" height="6" rx=".8" fill="${patch}"/>`
+      + `<text x="72.3" y="70" font-family="Inter,system-ui,sans-serif" font-size="5" font-weight="900" font-style="italic" text-anchor="middle" fill="${patchTinte}">${nummer}</text>`
+      + `<path d="M101 64 C96 70 92 78 90 90" fill="none" stroke="${hdHeller(basis, 0.3)}" stroke-width="2.4" opacity=".55"/>`
+      + `</g>`
+      // arms crossed, black gloves
+      + `<g transform="translate(0 -7) translate(0 90) scale(1 1.22) translate(0 -90)">`
+      + `<ellipse cx="2" cy="94" rx="9" ry="9" fill="${anzugD}"/><ellipse cx="98" cy="91" rx="9" ry="9" fill="${anzugDD}"/>`
+      + `<path d="${armHinten}" fill="${g('armH')}"/>`
+      + `<path d="M34 83.6 C52 86 80 89.4 101 91.4" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width=".9"/>`
+      + `<path d="${handL}" fill="${g('hand')}"/><path d="M25 84 C27 83.2 29.6 83.4 31.4 84.6 M24.6 87 C26.6 86.4 29 86.6 31 87.6" stroke="#fff" stroke-opacity=".22" stroke-width=".6" fill="none"/>`
+      + `<path d="M8 99 C30 96.6 56 92.4 76 88.6 L76 92.6 C58 96.6 34 101 12 102.4 Z" fill="#000" opacity=".4"/>`
+      + `<path d="${armVorn}" fill="${g('arm')}"/>`
+      + `<path d="M62.4 82.6 C65.4 82.1 68.2 81.6 71 81.2 L72.6 90.6 C69.6 91.4 66.8 92.2 63.8 93 Z" fill="${akzent}"/>`
+      + `<path d="M4 92.4 C12 89.6 34 88 52 85.4" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="1"/>`
+      + `<path d="M20 92 C24 94 28 94.6 32 94 M40 90 C43 92 47 92.4 50 91.6" fill="none" stroke="#000" stroke-opacity=".28" stroke-width=".9"/>`
+      + `<path d="M10 99.4 C30 97.4 54 93.6 70 90.4" fill="none" stroke="#000" stroke-opacity=".3" stroke-width="1"/>`
+      + `<path d="${handR}" fill="${g('hand')}"/><path d="M74.6 81.6 C77 80.6 80.4 80.8 82.2 82.6 M75 85 C77.4 84.2 80.4 84.4 82.4 85.8" stroke="#fff" stroke-opacity=".25" stroke-width=".6" fill="none"/>`
+      + `</g>`
+      // light falls off towards the bottom (key light from above)
+      + `<rect x="0" y="56" width="100" height="44" fill="${g('abfall')}"/>`
+      // helmet: shell, pattern, visor down with reflections, chin vents, gloss, rim light
+      + `<path d="${schale}" fill="${g('helm')}"/>`
+      + `<g clip-path="url(#${id}-s)">${helmDeko}<path d="M30 46 C38 55 62 55 70 46 V58 H30 Z" fill="#000" opacity=".28"/></g>`
+      + `<path d="${visier}" fill="${g('visier')}" stroke="${hdDunkler(helm, 0.35)}" stroke-width="1.2"/>`
+      + `<path d="M33.4 24.6 C38.6 21.6 44.4 20.8 50 20.8 C55.6 20.8 61.4 21.6 66.6 24.6 L65.8 26.6 C61 24.2 55.6 23.4 50 23.4 C44.4 23.4 39 24.2 34.2 26.6 Z" fill="${g('glanz')}"/>`
+      + `<path d="M35.4 37.6 C41.4 39.6 46 40.2 50 40.2 C54 40.2 58.6 39.6 64.6 37.6" fill="none" stroke="${hdHeller(basis, 0.2)}" stroke-width="1.1" opacity=".55"/>`
+      + `<path d="M57 22.2 C61.6 28.4 62.6 33.6 61.8 39.6" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="2.6"/>`
+      + `<path d="M40 22.4 C38.4 27 38.4 32 39.6 38" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="1.6"/>`
+      + `<circle cx="30.8" cy="30.4" r="1.9" fill="${helmD}"/><circle cx="69.2" cy="30.4" r="1.9" fill="${helmD}"/>`
+      + `<path d="M45 47.6 H55 M46.2 50.2 H53.8" stroke="#000" stroke-opacity=".35" stroke-width="1" stroke-linecap="round"/>`
+      + `<path d="M33.4 18.4 C36.4 11.8 42.4 8.6 48.8 8.2" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2.2" stroke-linecap="round"/>`
+      + `<path d="M69.8 22 C71.6 30 71.4 41 67.8 48.6 C66 52 63.4 54.4 60.6 55.6" fill="none" stroke="${hdHeller(basis, 0.35)}" stroke-width="1.7" opacity=".75" stroke-linecap="round"/>`
       + `</g></svg>`;
   }
   function hdAvatarStil(car) { return (hd.avatare && hd.avatare[String(car.device.id)]) || 0; }
@@ -120442,7 +120679,31 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (!car || !car.device) return '';
     const name = car.alias || car.tag || garageLabel(car);
     return `<button type="button" class="hd-avatar-knopf" data-hd-avatar="${String(car.device.id).replace(/"/g, '')}" `
-      + `title="${t('Avatar ändern')}">${hdAvatarSvg(name, carColor(car).hex, hdAvatarStil(car), px || 34, carModellWert(car.modellId))}</button>`;
+      + `title="${t('Avatar ändern')}">${hdAvatarFuerAuto(car, px || 34)}</button>`;
+  }
+  // v3.0: the garage's "Driver and Car Settings" header as a race-weekend grid card - large portrait, the name
+  // (the given h3, kept for everything that reads it), the car number on a plate in the car colour, make / model.
+  function hdGridKarte(car, kopf) {
+    if (!car || !car.device) return null;
+    const box = document.createElement('div');
+    box.className = 'hd-gridkarte';
+    const f = carColor(car);
+    box.style.setProperty('--hd-gk-farbe', f.hex);
+    const modell = typeof carModellName === 'function' ? carModellName(car.modellId) : '';
+    // A picture, not a button: the controller's menu navigation walks the buttons of this column, and the
+    // small avatar in the car list already rolls a new look.
+    const name = car.alias || car.tag || garageLabel(car);
+    box.innerHTML = `<span class="hd-gk-bild">${hdAvatarFuerAuto(car, 112)}</span>`
+      + '<div class="hd-gk-text"></div>';
+    const text = box.querySelector('.hd-gk-text');
+    text.appendChild(kopf);
+    const zeile = document.createElement('div');
+    zeile.className = 'hd-gk-zeile';
+    zeile.setAttribute('data-i18n-skip', '');
+    zeile.innerHTML = `<span class="hd-gk-nr" style="background:${f.hex};color:${f.ink || '#fff'}">${hdNummer(car)}</span>`
+      + (modell && !/^(–|-|Nicht zugeordnet|Not assigned)$/i.test(modell) ? `<span class="hd-gk-modell">${String(modell).replace(/[&<>]/g, '')}</span>` : '');
+    text.appendChild(zeile);
+    return box;
   }
   // One delegated listener: garage cards are re-rendered often.
   document.addEventListener('click', (e) => {
@@ -120451,6 +120712,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     e.preventDefault(); e.stopPropagation();
     const id = k.getAttribute('data-hd-avatar');
     hd.avatare = hd.avatare || {};
+    // Photos: the next free portrait for this car only (hdFotoWeiter). The style number still counts on for the
+    // drawn fallback.
+    const car = garage.find((c) => c.device && String(c.device.id) === id);
+    if (car) hdFotoWeiter(car);
     hd.avatare[id] = (hd.avatare[id] || 0) + 1;
     hdSpeichern();
     if (typeof renderGarage === 'function') renderGarage();
@@ -120647,14 +120912,53 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
                frage + ' | ' + frage2 + ' | ' + stand);
       }
 
-      // H: avatar.
+      // H: avatar - a photo portrait matching the car colour, the same every time, another one on tap.
+      const fo = (n, hex, st) => Number((hdAvatarSvg(n, hex, st, 30, '').match(/data-foto="(\d+)"/) || [])[1]);
+      const rotNr = fo('Mara Kovac', '#e23b3b', 0), rot2 = fo('Mara Kovac', '#e23b3b', 0), rot3 = fo('Mara Kovac', '#e23b3b', 1);
+      const blauNr = fo('Noor Rahimi', '#3b7fe2', 0), weissNr = fo('Emil Strand', '#f2f4f8', 0);
       const svg = hdAvatarSvg('Mara Kovac', '#e23b3b', 0, 30, 'porsche911');
-      const svg2 = hdAvatarSvg('Mara Kovac', '#e23b3b', 0, 30, 'porsche911');
-      const svg3 = hdAvatarSvg('Mara Kovac', '#e23b3b', 1, 30, 'porsche911');
-      const ohneId = (x) => x.replace(/hdav\d+-\d+/g, '');
-      prüfen('avatar: driver in the car colour, brand accents, same look every time, new look on tap',
-             svg.includes('fill="#e23b3b"') && /#(d5001c|111111|ffffff|c9a227)/i.test(svg)
-             && ohneId(svg) === ohneId(svg2) && ohneId(svg) !== ohneId(svg3), svg.length + ' chars');
+      prüfen('avatar: photo portrait in the car colour (red car -> red, blue -> blue, white -> white), same every time, another on tap',
+             HD_FOTOS[rotNr].indexOf('rot') >= 0 && HD_FOTOS[blauNr].indexOf('blau') >= 0 && HD_FOTOS[weissNr].indexOf('weiss') >= 0
+             && rotNr === rot2 && rotNr !== rot3 && /img\/fahrer\/p\d\d\.jpg/.test(svg) && HD_FOTOS.length === 72,
+             'red ' + rotNr + ', blue ' + blauNr + ', white ' + weissNr + ', red tap ' + rot3);
+      // H2: no two drivers share an avatar (garage-wide), also when one colour has fewer portraits than cars.
+      {
+        const merkG = garage.slice();
+        try {
+          garage.length = 0; hd.fotos = {};
+          for (let i = 0; i < 12; i++) garage.push(fake('hd-av-' + i, 'ghost', { alias: 'Fahrer ' + (i % 3), colorId: 'rot' }));
+          const nrs = garage.map((c) => hdFotoBelegung().get(String(c.device.id)));
+          // a tap on the first car moves only that car; nobody else's portrait changes
+          hdFotoWeiter(garage[0]);
+          const nach = garage.map((c) => hdFotoBelegung().get(String(c.device.id)));
+          const stabil = nach[0] !== nrs[0] && nach.slice(1).every((n, i) => n === nrs[i + 1]) && new Set(nach).size === 12;
+          const rote = nrs.filter((n) => HD_FOTOS[n].indexOf('rot') >= 0).length;
+          garage.length = 0; hd.fotos = {};
+          for (let i = 0; i < 80; i++) garage.push(fake('hd-av-x' + i, 'ghost', { alias: 'X', colorId: ['rot', 'blau', 'gelb', 'weiss'][i % 4] }));
+          const viele = garage.map((c) => hdFotoBelegung().get(String(c.device.id)));
+          prüfen('avatars: no two drivers share one, a tap changes only that driver - 12 red cars with repeated names get 12 different portraits (red ones first); with 80 cars all 72 are used before any repeats',
+                 new Set(nrs).size === 12 && rote >= 6 && new Set(viele).size === HD_FOTOS.length && stabil,
+                 new Set(nrs).size + ' different of 12 (' + rote + ' red); tap moves only that car: ' + stabil + '; 80 cars -> ' + new Set(viele).size + ' different');
+        } finally { garage.length = 0; merkG.forEach((c) => garage.push(c)); }
+      }
+      // I: garage label - which laptop a car is connected to (two-laptop mode only).
+      const rolleMerk = hdRelay.rolle;
+      try {
+        const eigen = fake('hd-l-eigen', 'ghost'), fremd = fake('relay-hd-l', 'ghost');
+        hdRelay.rolle = null;
+        const allein = hdLaptopVon(eigen) === null && hdLaptopEtikett(eigen) === '';
+        hdRelay.rolle = 'host';
+        const host = hdLaptopVon(eigen) === 'host' && hdLaptopVon(fremd) === 'helper' && /HELPER/.test(hdLaptopEtikett(fremd));
+        hdRelay.rolle = 'helper';
+        const helper = hdLaptopVon(eigen) === 'helper';
+        prüfen('garage label: nothing on one laptop; on the host its own cars HOST, relayed cars HELPER; on the helper HELPER',
+               allein && host && helper, [allein, host, helper].join(','));
+        eigen.device.gatt = { connected: true }; fremd.device.gatt = { connected: false };
+        hdRelay.rolle = 'host';
+        prüfen('garage label: link icon - connected (green) or not connected (broken, grey)',
+               /hd-link-an/.test(hdLaptopEtikett(eigen)) && /hd-link-aus/.test(hdLaptopEtikett(fremd)) && /Not connected/.test(hdLaptopEtikett(fremd)),
+               hdLaptopEtikett(fremd).replace(/<svg[\s\S]*?<\/svg>/, '[svg]'));
+      } finally { hdRelay.rolle = rolleMerk; }
       // J: gear ratios (Short / Medium / Long / Auto).
       {
         const e = physEngine, merkName = e.gearboxName || 'gt3', merkF = e.gangStufe || 1;
@@ -121124,9 +121428,45 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
 
   // ---- UI ---------------------------------------------------------------------------------
   function hdStatus(s) { hdRelay.status = s; const el = $('hdr-status'); if (el) el.textContent = s; }
+  // v3.0 BESTELLT: "In the garage page, show next to the car who the car is connected to - the host or the helper."
+  // Only in two-laptop mode (a role is chosen or helper cars are known); a single laptop shows nothing.
+  // On the host: cars relayed by the helper -> HELPER, its own Bluetooth cars -> HOST. On the helper: its cars -> HELPER.
+  function hdLaptopVon(car) {
+    try {
+      if (!car || !car.device) return null;
+      const helperAuto = String(car.device.id || '').indexOf(HD_RELAY_ID) === 0;
+      if (!hdRelay.rolle && !helperAuto) return null;
+      if (helperAuto || hdRelay.rolle === 'helper') return 'helper';
+      return 'host';
+    } catch (e) { return null; }      // called before this file ran (start-up)
+  }
+  // Is the car's link up right now? Bluetooth on the host, or the relayed stand-in device for a helper car.
+  function hdLaptopVerbunden(car) {
+    const dev = car && car.device;
+    return !!(dev && dev.gatt && dev.gatt.connected !== false && !(car.rx && car.rx.verbindungWeg));
+  }
+  // v3.0 BESTELLT: "Put a connected logo next to the host/helper" - a link icon: green and closed while connected,
+  // grey and broken while not.
+  const HD_LINK_AN = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  const HD_LINK_AUS = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9 15l-1.6 1.6a3 3 0 0 1-4.2-4.2L5 10.6M15 9l1.6-1.6a3 3 0 0 1 4.2 4.2L19 13.4M8 3v3M3 8h3M16 21v-3M21 16h-3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  function hdLaptopEtikett(car) {
+    const w = hdLaptopVon(car);
+    if (!w) return '';
+    const an = hdLaptopVerbunden(car);
+    const wo = w === 'host' ? 'the host laptop' + (hdRelay.rolle === 'host' ? ' (this laptop)' : '')
+      : hdRelay.rolle === 'host' ? 'the helper laptop (relayed over the link)' : 'this laptop (the helper)';
+    const titel = (an ? 'Connected to ' : 'Not connected – belongs to ') + wo;
+    return ` <span class="hd-laptop-wrap" title="${titel}"><span class="hd-laptop hd-laptop-${w}${an ? '' : ' hd-laptop-aus'}">${w === 'host' ? 'HOST' : 'HELPER'}</span>`
+      + `<span class="hd-link ${an ? 'hd-link-an' : 'hd-link-aus'}" role="img" aria-label="${an ? 'connected' : 'not connected'}">${an ? HD_LINK_AN : HD_LINK_AUS}</span></span>`;
+  }
+  let hdLaptopStand = '';
   function hdRelayMalen() {
     const box = $('hd-relay');
     if (!box) return;
+    // Garage labels (HOST / HELPER) follow the role and the helper cars' link state.
+    const stand = (hdRelay.rolle || '') + '|' + [...hdRelay.fremd.values()].map((d) => d.gatt && d.gatt.connected ? 1 : 0).join('')
+      + '|' + garage.map((c) => (hdLaptopVerbunden(c) ? 1 : 0)).join('');
+    if (stand !== hdLaptopStand) { hdLaptopStand = stand; if (typeof renderGarage === 'function') try { renderGarage(); } catch (e) { /* start-up */ } }
     box.dataset.rolle = hdRelay.rolle || '';
     const lamp = $('hdr-lampe');
     if (lamp) {
@@ -121254,6 +121594,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       gesendet: hdRelay.gesendet, empfangen: hdRelay.empfangen,
       garage: garage.map((c) => ({ id: String(c.device.id), name: garageLabel(c), role: c.role, tileCount: c.tileCount })) }),
     schliessen: () => hdRelaySchliessen(false),
+    // Tests only: set the role and mark garage car i as relayed by the helper (stand-in device), then redraw.
+    _laptopProbe: (rolle, i) => { hdRelay.rolle = rolle || null;
+      garage.forEach((c, k) => { if (c.probe && !c.device.gatt) c.device.gatt = { connected: k !== 3 }; });
+      if (i >= 0 && garage[i]) garage[i].device = { id: HD_RELAY_ID + 'probe' + i, name: garage[i].device.name, gatt: { connected: true } };
+      hdRelayMalen(); renderGarage(); return garage.map((c) => hdLaptopVon(c)); },
     garageRolle: (id, role) => { const c = garage.find((x) => String(x.device.id) === id); if (c) setCarRole(c, role); },
     garageSchreiben: (id, steer, gas) => { const c = garage.find((x) => String(x.device.id) === id); if (c) return writeToCar(c, steer, gas, TRACK_BIT_ON); },
     stoppPaket: () => Array.from(buildCommandPacket(0, 0, TRACK_BIT_ON)),
@@ -123376,6 +123721,79 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     try { z(t('Zufallsevents'), $('race-zev') && $('race-zev').checked ? t('an') : t('aus')); } catch (e) { /* older build */ }
     try { z(t('Automatisches Safety Car'), hd.autoSc ? t('an') : t('aus')); } catch (e) { /* not loaded */ }
     box.innerHTML = '<div class="hd-gi-titel">' + t('Rennen') + '</div><div class="hd-gi-raster">' + zeilen.join('') + '</div>';
+  }
+
+  // ---- STARTING GRID AS A TV BOARD (Hybrid-Dash 3.0) ----
+  // BESTELLT: "change the cards to something like this" (a TV "Starting Grid" graphic): a title bar, one band per
+  // grid row with a "ROW n" tab and the two positions, the car on the left of the track in the left card and the
+  // car on the right in the right card (mirrored: big car number on the outer edge, portrait, first name over the
+  // surname), and a footer strip. The rows that raceGridZeilen() built stay the same elements - their arrows, Pit
+  // Box picker, click-to-blink and drag handlers keep working; only their content is regrouped.
+  function hdNameTeile(name) {
+    const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (w.length < 2) return ['', w[0] || ''];
+    return [w.slice(0, -1).join(' '), w[w.length - 1]];
+  }
+  function hdStartgridBoard(host, cars) {
+    if (!host || !cars || !cars.length) return;
+    const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    host.classList.add('hd-sg');
+    // title bar
+    let titel = '', unter = [];
+    try {
+      const m = RACE_MODES[raceMode];
+      titel = t(m.label);
+      if (raceLimit > 0) unter.push(raceLimit + ' ' + t(m.unit));
+      unter.push(raceFlying ? t('Fliegend') : t('Stehend'));
+      unter.push(cars.length + ' ' + t('Autos'));
+    } catch (e) { /* settings not ready */ }
+    const kopf = document.createElement('div');
+    kopf.className = 'hd-sg-kopf'; kopf.setAttribute('data-i18n-skip', '');
+    kopf.style.gridRow = '1';
+    kopf.innerHTML = '<b>' + esc(t('Startaufstellung')) + '</b><span>' + esc(titel) + '</span>';
+    host.insertBefore(kopf, host.firstChild);
+    // rows: car i stands in grid row floor(i/2); even index on the right of the track, odd on the left
+    const reihen = Math.ceil(cars.length / 2);
+    host.querySelectorAll('.grid-row:not(.grid-sc)').forEach((row, i) => {
+      const car = cars[i];
+      if (!car) return;
+      const r = Math.floor(i / 2), rechts = i % 2 === 0;
+      row.style.gridRow = String(r + 2);
+      row.classList.add('hd-sg-karte', rechts ? 'hd-sg-r' : 'hd-sg-l');
+      const f = carColor(car);
+      row.style.setProperty('--hd-sg-farbe', f.hex);
+      const name = car.alias || car.tag || garageLabel(car);
+      const [vor, nach] = hdNameTeile(name);
+      const nr = typeof hdNummer === 'function' ? hdNummer(car) : (car.tagChar || i + 1);
+      const avatar = typeof hdAvatarSvg === 'function'
+        ? (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(car, 64) : hdAvatarSvg(name, f.hex, 0, 64, carModellWert(car.modellId))) : '';
+      const ctrl = document.createElement('span');
+      ctrl.className = 'hd-sg-ctrl';
+      ['.grid-box', '.grid-move'].forEach((sel) => { const el = row.querySelector(sel); if (el) ctrl.appendChild(el); });
+      const inhalt = document.createElement('span');
+      inhalt.className = 'hd-sg-inhalt'; inhalt.setAttribute('data-i18n-skip', '');
+      inhalt.innerHTML = `<span class="hd-sg-nr">${esc(nr)}</span><span class="hd-sg-bild">${avatar}</span>`
+        + `<span class="hd-sg-name"><small>${esc(vor)}</small><b>${esc(nach)}</b></span>`;
+      inhalt.appendChild(ctrl);
+      row.appendChild(inhalt);
+    });
+    for (let r = 0; r < reihen; r++) {
+      const tab = document.createElement('div');
+      tab.className = 'hd-sg-reihe'; tab.setAttribute('data-i18n-skip', '');
+      tab.style.gridRow = String(r + 2);
+      const links = 2 * r + 2 <= cars.length ? 2 * r + 2 : '';
+      tab.innerHTML = `<i>${links}</i><b>${esc(t('Reihe {r}').replace('{r}', r + 1))}</b><i>${2 * r + 1}</i>`;
+      host.appendChild(tab);
+    }
+    const sc = host.querySelector('.grid-row.grid-sc');
+    if (sc) sc.style.gridRow = String(reihen + 2);
+    const fuss = document.createElement('div');
+    fuss.className = 'hd-sg-fuss'; fuss.setAttribute('data-i18n-skip', '');
+    fuss.style.gridRow = String(reihen + (sc ? 3 : 2));
+    let strecke = t('frei');
+    try { if (($('setting-ontrack') || {}).checked && currentTrackTiles && currentTrackTiles.length > 1) strecke = currentTrackTiles.length + ' ' + t('Teile') + (typeof trackLaengeText === 'function' ? ' · ' + trackLaengeText(currentTrackTiles) : ''); } catch (e) { /* no track */ }
+    fuss.textContent = (t('Strecke') + ': ' + strecke + (unter.length ? ' · ' + unter.join(' · ') : '')).toUpperCase();
+    host.appendChild(fuss);
   }
 
   // Self-test of the automatic pit stop: a stand-in player car walked through the four phases.

@@ -1707,6 +1707,7 @@
       });
       host.appendChild(row);
     });
+    if (typeof hdStartgridBoard === 'function') hdStartgridBoard(host, cars);   // HybridDash 3.0: TV starting-grid board
     gridGleiten(host, alt, bewegt);
     const sc = garage.find(c => c.role === 'safetycar' && c.device);
     if (sc) {
