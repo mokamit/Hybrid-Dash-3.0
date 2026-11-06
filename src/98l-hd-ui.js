@@ -185,3 +185,41 @@
     padStil: (s) => { if (s) { hdUi.padStil = s; hdUiSpeichern(); if (typeof renderBindTable === 'function') renderBindTable(); hdPadBildAnwenden(); } return hdPadStil(); },
     label: (b) => bindingDescription(b),
   });
+
+  // ---- Hybrid-Dash 3.0: no title screen - its parts live on the main menu ----------------
+  // BESTELLT: "On the main menu have the Hybrid-Dash 3.0 at the top as a banner, with the Wiki, Tutorial and Install
+  // option there. For the language setting, make it a button somewhere accessible to toggle. [The version / credits
+  // line] can be a footer banner." The elements are MOVED (ids and handlers stay): Wiki, Tutorial, Controls, the
+  // Android download, "Install as an app" and the update box into the banner, the credits line into the footer.
+  // The language button sits in the header, so it is there on every screen.
+  (function hdOhneTitel() {
+    const fahren = $('tab-fahren');
+    if (!fahren) return;
+    const banner = document.createElement('div');
+    banner.className = 'hd-banner'; banner.id = 'hd-banner';
+    banner.innerHTML = '<div class="hd-banner-logo" aria-label="HYBRID-DASH 3.0" data-i18n-skip><span class="hd-bl-text">HYBRID</span>'
+      + '<span class="hd-bl-strich">-</span><span class="hd-bl-text">DASH</span><span class="hd-bl-plakette">3.0</span></div>'
+      + '<div class="hd-banner-knoepfe"></div>';
+    const knoepfe = banner.querySelector('.hd-banner-knoepfe');
+    ['k-wiki', 'k-tutorial-start', 'k-steuerung-start', 'home-apk', 'home-install'].forEach((id) => { const el = $(id); if (el) knoepfe.appendChild(el); });
+    const upd = $('app-update'); if (upd) banner.appendChild(upd);
+    const erstes = fahren.querySelector('.k-fahren') || fahren.firstElementChild;
+    fahren.insertBefore(banner, erstes);
+    const fussAlt = document.querySelector('#tab-home .k-titel-fuss');
+    if (fussAlt) { const fuss = document.createElement('div'); fuss.className = 'hd-fuss'; fuss.id = 'hd-fuss'; while (fussAlt.firstChild) fuss.appendChild(fussAlt.firstChild); fahren.appendChild(fuss); }
+    // language button in the header
+    const kopf = $('k-kopf');
+    if (kopf && !$('hd-lang')) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.id = 'hd-lang'; b.className = 'hd-lang hd-top-knopf'; b.setAttribute('data-i18n-skip', '');
+      b.setAttribute('aria-label', 'Language / Sprache / Idioma');
+      const malen = () => { b.textContent = String(lang || 'en').toUpperCase(); b.title = { de: 'Sprache: Deutsch', es: 'Idioma: español' }[lang] || 'Language: English'; };
+      b.addEventListener('click', (e) => { e.stopPropagation(); wechsleSprache(); malen(); });
+      malen();
+      if (typeof i18nOnLangChange === 'function') i18nOnLangChange(malen);
+      kopf.appendChild(b);
+    }
+    // the app opens on the main menu
+    setTimeout(() => { try { if (kAktiverTab() === 'home') konsoleTitelWeiter(); } catch (e) { /* not ready */ } }, 0);
+  })();
+

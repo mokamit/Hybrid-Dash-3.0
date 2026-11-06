@@ -5,7 +5,7 @@
 An open source controller for Carrera Hybrid Bluetooth cars, with physics from scientific
 formulae and engine sound from an enginesim implementation, plus a Race Director with flags and
 stewards, NPCs, safety car, Pit Boxes, championships and multiplayer. The interface is in English by default; German and
-Spanish are one tap away on the title screen.
+Spanish are one tap away with the language button (top right).
 
 Hybrid-Dash 3.0 is a standalone project built on **[OmegaSim](https://github.com/Luuke42/omegasim) by Luuke**
 (MIT License), continuing from HybridDash 2.x. Everything OmegaSim does still works; Hybrid-Dash adds its own
@@ -20,7 +20,7 @@ Race-weekend TV graphics across the whole app:
 - **Slanted tab bars** with the active tab in white and a solid red rule underneath, in the menu and in the cockpit.
 - **Each car's colour as a stripe** in the standings, positions in italics, timing in tabular figures.
 - **Flag band** as a solid yellow TV bar with a cut corner.
-- New title lock-up: **HYBRID-DASH** with a red **3.0** plate.
+- No separate title screen: the app opens on the main menu, with a **HYBRID-DASH 3.0** banner on top (Wiki, Tutorial, Controls, app install), a footer strip (version, credits, source) and a language button in the header.
 
 ## What Hybrid-Dash adds
 
@@ -66,7 +66,7 @@ before). On top of that:
 |---|---|---|
 | **PS / Xbox presets** | Options → Controller | Button names and pictures for PlayStation or Xbox pads. |
 | **Mappable buttons** | Options → Controller | *Confirmation Button* (default A / Cross) and *Automatic pit stop* (default LB / L1, hold 1 s). |
-| **English by default** | Title screen | The whole interface is translated, German and Spanish one tap away. |
+| **English by default** | Language button (header) | The whole interface is translated, German and Spanish one tap away. |
 
 ### Two laptops
 | Feature | Where | What it does |

@@ -85,7 +85,10 @@
     if (K_EBENE1.includes(neu)) kStapel = [];
     // v1.3.5: zurueck auf dem Titel ist wieder "Starten" gewaehlt (96-home.js).
     // try: waehrend des Ladens liegen HOME_START & Co. (96-home.js) noch in der Todeszone.
-    if (neu === 'home') { try { homeFokusSetzen(HOME_START); } catch (e) { /* noch nicht geladen */ } }
+    // Hybrid-Dash 3.0 BESTELLT: "I don't want to have this page, I want to integrate it onto the main menu."
+    // The title screen is gone: whatever leads there (start-up, the logo, Back from the main menu) lands on
+    // the main menu, which now carries the banner (Wiki, Tutorial, Controls, install) and the footer.
+    if (neu === 'home') { setTimeout(() => { if (kAktiverTab() === 'home') konsoleTitelWeiter(); }, 0); return; }
     else if (!kZurueckLaeuft && alt && alt !== neu && alt !== 'home') {
       kStapel.push({ tab: alt, sub: altSub || '' });
       if (kStapel.length > 40) kStapel.shift();
