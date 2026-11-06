@@ -6189,6 +6189,9 @@
   body.k-menue > #hd-banner .hd-banner-logo { font: italic 700 clamp(22px, 2vw, 28px)/1 var(--c-head); letter-spacing: .02em; }
   body.k-menue > #hd-banner .hd-banner-logo img { height: 36px; }
   body.k-menue header#k-kopf { background: transparent; }
+  /* The car count, link, mute and language buttons sit in the logo row (position: fixed) but belong to the header: the header
+     must stack above the banner (z-index 61), or the transparent banner swallows every click on them. */
+  body.k-menue header#k-kopf { z-index: 62; }
   body.k-menue header#k-kopf::after { display: none; }
   body.k-menue:not(.k-kacheln) > #hd-banner .hd-banner-knoepfe { display: none; }
   @media (min-width: 900px) {
