@@ -496,6 +496,12 @@
   }
   let hdAvatarNr = 0;
   // name, car colour (hex), style number, size in px, brand id (car.modellId)
+  // v3.0 BESTELLT: "Make the avatars even more realistic ... use the smokey gradient background too that would
+  // complement the colour of their cars" (reference: studio portraits of drivers, visor down, arms crossed).
+  // Driver chest-up, arms crossed in black gloves, full-face helmet with the tinted visor DOWN, HANS device on the
+  // shoulders, race suit with folds, stitching, shoulder piping and patches, a key light from the top left and a
+  // rim light in the car colour; behind: a dark studio gradient tinted by the car colour, drifting smoke
+  // (feTurbulence, a different seed per driver) and a faint light streak. Deterministic per driver and brand.
   function hdAvatarSvg(name, farbeHex, stil, px, marke) {
     const r = hdZufall(hdHash(String(name) + '#' + (stil || 0) + '#' + (marke || '')));
     const pick = (a) => a[Math.floor(r() * a.length) % a.length];
@@ -504,133 +510,118 @@
     const akz = pal.filter((c) => c.toLowerCase() !== basis.toLowerCase());
     const a1 = akz[Math.floor(r() * akz.length)];
     const a2 = akz.filter((c) => c !== a1)[Math.floor(r() * (akz.length - 1))] || '#ffffff';
-    const haut = pick(HD_HAUT), haar = pick(HD_HAARE);
-    const helm = r() < 0.65 ? basis : pick([pal[0], '#f4f5f7', '#1c1f24'].filter((c) => c.toLowerCase() !== a1.toLowerCase()));
-    const helmMuster = Math.floor(r() * 5);
-    const frisur = Math.floor(r() * 6), anzugMuster = Math.floor(r() * 5), bart = r() < 0.3, augen = pick(['#3b2a1e', '#2a1d14', '#4a6a82', '#3f5a3a', '#5b3b24']);
+    // Suit: the car colour most of the time, sometimes white or black with the car colour as the accent.
+    const anzugWahl = r();
+    const anzug = anzugWahl < 0.6 ? basis : anzugWahl < 0.8 ? '#e9ebee' : '#1d2026';
+    const akzent = anzug === basis ? a1 : basis;
+    const helm = r() < 0.55 ? basis : pick([pal[0], '#f2f3f5', '#1c1f24', a1].filter((c) => c.toLowerCase() !== akzent.toLowerCase()));
+    const helmMuster = Math.floor(r() * 5), anzugMuster = Math.floor(r() * 4), visierTon = pick(['#0b0d11', '#120d08', '#0a0f14', '#140a0c']);
+    const seed = 1 + (hdHash(String(name) + (stil || 0)) % 97);
     const id = 'hdav' + (++hdAvatarNr) + '-' + (hdHash(String(name)) % 9973);
     const nummer = 1 + (hdHash(String(name)) % 99);
-    const hautD = hdDunkler(haut, 0.78), hautDD = hdDunkler(haut, 0.62), hautH = hdHeller(haut, 0.12);
-    const haarD = hdDunkler(haar, 0.7), haarH = hdHeller(haar, 0.18);
-    const anzugH = hdHeller(basis, 0.22), anzugD = hdDunkler(basis, 0.58), anzugDD = hdDunkler(basis, 0.42);
-    const patch = hdHell(basis) > 0.7 ? '#2a2e35' : '#f1f2f4';
+    const rgb = (hex) => { const n = parseInt(String(hex).slice(1), 16) || 0; return [(n >> 16) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
+    const rauch = rgb(hdHeller(basis, 0.35));
+    const anzugH = hdHeller(anzug, 0.28), anzugD = hdDunkler(anzug, 0.55), anzugDD = hdDunkler(anzug, 0.38);
+    const helmH = hdHeller(helm, 0.45), helmD = hdDunkler(helm, 0.5);
+    const hintergrund = hdDunkler(basis, 0.32), hintergrundD = hdDunkler(basis, 0.1);
+    const patch = hdHell(anzug) > 0.7 ? '#23262d' : '#eef0f2', patchTinte = hdHell(patch) > 0.6 ? '#14161c' : '#ffffff';
     // ---- shapes (viewBox 100 x 100) ----
-    const torso = 'M-3 101 L-1 84 C2 72 13 66 28 63 L40 60.6 L60 60.6 L72 63 C87 66 98 72 101 84 L103 101 Z';
-    const gesicht = 'M33.5 33 C33.5 20.5 41 14 50 14 C59 14 66.5 20.5 66.5 33 C66.5 43.5 63.5 51.5 58 55.5 C55.5 57.4 52.8 58.4 50 58.4 C47.2 58.4 44.5 57.4 42 55.5 C36.5 51.5 33.5 43.5 33.5 33 Z';
-    const haare = [
-      // short crop with a little texture
-      'M32.6 34 C31.6 19 39.5 11 50 11 C60.5 11 68.4 19 67.4 34 C66.5 28 64 24.5 59.5 23 C55 25.6 45.5 26.2 40.6 23.2 C36.6 25 34 28.6 32.6 34 Z',
-      // side part, swept
-      'M32.2 36 C29.6 18.5 40.5 9.4 52 10.2 C62.6 10.8 69.6 18.5 68.2 33 C64.5 23.5 57.5 19.8 48 21.2 C42.5 22.2 37.5 25.6 34.8 31 Z',
-      // buzz cut
-      'M33.4 31.5 C33.4 20.2 41 13.4 50 13.4 C59 13.4 66.6 20.2 66.6 31.5 C62.8 25.4 56.8 22.6 50 22.6 C43.2 22.6 37.2 25.4 33.4 31.5 Z',
-      // curly top
-      'M32.4 34 C31 22 37 12.5 44 11.8 C46 9 51 8.6 53.4 10.6 C57 9 62.5 11.4 64 15 C68 17.5 69 25 67.6 34 C66 28 63 24.6 59 23.6 C54 26.2 45.4 26.4 41 23.6 C36.8 25.4 34 28.8 32.4 34 Z',
-      // longer quiff
-      'M31.4 38 C29.2 20 38.6 8.4 51 8.4 C63.4 8.4 71.2 19 68.8 38 L67 31 C65.6 24.6 61 20.8 54 21.6 C46 19.6 38.8 23.4 34.8 30.4 Z',
-      // fade with a parting line
-      'M33 33 C32.4 19.6 40.4 11.6 50.4 11.8 C60.4 12 67.6 19.6 67 33 C65.8 27 62.4 23.4 57.6 22.2 L44 22.4 C39 23.6 35 27.4 33 33 Z',
-    ];
-    // helmet shell and eye port (head coordinates, before the head group's scale)
-    const helmSchale = 'M25.4 40 C24.6 19.6 35.6 6.4 50 6.4 C64.4 6.4 75.4 19.6 74.6 40 C74.4 52 71 60.4 65.6 64.6 L34.4 64.6 C29 60.4 25.6 52 25.4 40 Z';
-    const helmAuge = 'M35.6 30.6 C36 26.6 40.4 25.2 50 25.2 C59.6 25.2 64 26.6 64.4 30.6 L63.8 41 C63 44.2 59.6 45.6 50 45.6 C40.4 45.6 37 44.2 36.2 41 Z';
+    const torso = 'M-3 101 L-1 82 C2 70 13 63 29 60.4 L39 57.4 L61 57.4 L71 60.4 C87 63 98 70 101 82 L103 101 Z';
+    const schale = 'M29.4 30.6 C29.4 15 38.8 6.2 50 6.2 C61.2 6.2 70.6 15 70.6 30.6 C70.6 41.6 68.6 48 64.2 52.2 C60.2 55.2 55.4 56.2 50 56.2 C44.6 56.2 39.8 55.2 35.8 52.2 C31.4 48 29.4 41.6 29.4 30.6 Z';
+    const visier = 'M30.8 25.4 C33.8 20.8 41.8 18.8 50 18.8 C58.2 18.8 66.2 20.8 69.2 25.4 C70.2 30.4 69.6 35.6 67.8 39 C61.8 41.4 56 42.2 50 42.2 C44 42.2 38.2 41.4 32.2 39 C30.4 35.6 29.8 30.4 30.8 25.4 Z';
     const helmDeko = [
-      `<path d="M46 0 H54 V26 H46 Z" fill="${a1}"/><path d="M44 0 H45.4 V26 H44 Z M54.6 0 H56 V26 H54.6 Z" fill="${a2}"/>`,
-      `<path d="M20 44 C34 50 40 58 44 70 L34 70 C30 60 26 54 20 50 Z M80 44 C66 50 60 58 56 70 L66 70 C70 60 74 54 80 50 Z" fill="${a1}"/>`,
-      `<path d="M20 34 C30 30 38 31 44 36 L36 40 C31 37 26 37 20 39 Z M80 34 C70 30 62 31 56 36 L64 40 C69 37 74 37 80 39 Z" fill="${a1}"/><path d="M20 41 C27 39 32 40 36 42.6 L34.6 44 C30 42 26 42 20 43.4 Z M80 41 C73 39 68 40 64 42.6 L65.4 44 C70 42 74 42 80 43.4 Z" fill="${a2}"/>`,
-      `<path d="M20 52 H80 V58 H20 Z" fill="${a1}"/><path d="M20 59.4 H80 V61.4 H20 Z" fill="${a2}"/>`,
-      `<path d="M50 4 L80 20 V34 L50 18 L20 34 V20 Z" fill="${a1}"/>`,
+      `<path d="M46.4 0 H53.6 V22 H46.4 Z" fill="${akzent}"/><path d="M44.6 0 H45.6 V22 H44.6 Z M54.4 0 H55.4 V22 H54.4 Z" fill="${a2}"/>`,
+      `<path d="M50 9 L70 19 L70 25 L50 15 L30 25 L30 19 Z" fill="${akzent}"/><path d="M50 16.6 L70 26.6 V29 L50 19 L30 29 V26.6 Z" fill="${a2}"/>`,
+      `<path d="M28 44 C36 41 42 44 46 56 L38 56 C36 49 33 47 28 48 Z M72 44 C64 41 58 44 54 56 L62 56 C64 49 67 47 72 48 Z" fill="${akzent}"/>`,
+      `<path d="M28 13 C40 18 60 18 72 13 V19 C60 23.6 40 23.6 28 19 Z" fill="${akzent}"/><path d="M28 41 H72 V44 H28 Z" fill="${a2}"/>`,
+      `<path d="M30 30 C38 26 44 14 50 8 C56 14 62 26 70 30 L70 34 C62 30 56 20 50 14 C44 20 38 30 30 34 Z" fill="${akzent}"/>`,
     ][helmMuster];
-    // suit panels (clipped to the torso): shoulder yoke, side panels, chest band, diagonal sash, centre stripe
-    const am = [
-      `<path d="M1 84 C8 74 20 69.5 34 67 L36 73 C22 75 12 79 4 90 Z M99 84 C92 74 80 69.5 66 67 L64 73 C78 75 88 79 96 90 Z" fill="${a1}"/>`,
-      `<path d="M2 101 L7 80 L13 77 L10 101 Z M98 101 L93 80 L87 77 L90 101 Z" fill="${a1}"/><path d="M13 101 L15 79 L17 78 L16 101 Z M87 101 L85 79 L83 78 L84 101 Z" fill="${a2}"/>`,
-      `<path d="M0 78 H100 V83 H0 Z" fill="${a1}"/><path d="M0 84.5 H100 V86.5 H0 Z" fill="${a2}"/>`,
-      `<path d="M18 70 L27 67.5 L70 101 L56 101 Z" fill="${a1}"/><path d="M27 67.5 L30.5 66.8 L74 101 L70 101 Z" fill="${a2}"/>`,
-      `<path d="M44 66 H56 L55 101 H45 Z" fill="${a1}"/><path d="M42.5 66 H44 L43.6 101 H42 Z M56 66 H57.5 L58 101 H56.4 Z" fill="${a2}"/>`,
+    const anzugDeko = [
+      // shoulder piping and side stripes
+      `<path d="M8 72 C16 64 26 61 38 59.6 L38.8 61.6 C27 63 17.6 66 10 73.6 Z M92 72 C84 64 74 61 62 59.6 L61.2 61.6 C73 63 82.4 66 90 73.6 Z" fill="${akzent}"/><path d="M2 101 L6 78 L9 77 L6 101 Z M98 101 L94 78 L91 77 L94 101 Z" fill="${akzent}"/>`,
+      // contrasting yoke
+      `<path d="M-2 80 C2 69 14 62.6 30 60.2 L39 57.6 L61 57.6 L70 60.2 C86 62.6 98 69 102 80 L102 74 C96 66 84 61 70 58.6 L60 56.6 L40 56.6 L30 58.6 C16 61 4 66 -2 74 Z" fill="${akzent}"/>`,
+      // diagonal sash
+      `<path d="M14 66 L24 61.6 L78 101 L62 101 Z" fill="${akzent}" opacity=".9"/>`,
+      // centre band
+      `<path d="M44.4 58 H55.6 L55 101 H45 Z" fill="${akzent}"/><path d="M43 58 H44.2 L43.8 101 H42.4 Z M55.8 58 H57 L57.6 101 H56.2 Z" fill="${a2}"/>`,
     ][anzugMuster];
-    // arms crossed: the far forearm (right arm) under, the near one (left arm) over it, a hand on each bicep
     const armHinten = 'M101 89 C88 87.4 54 84 32 81.4 C25.6 80.8 24.4 90.4 30.6 91.8 C52 95.6 86 99.8 101 101.4 Z';
     const armVorn = 'M-1 95.6 C3 90 10 88.8 19 88.2 C37 86.6 59 83 71.6 81.2 C78.6 80.2 80.4 89.4 74.4 91 C58 95 34 99.8 14 101.8 L-1 101.8 Z';
-    const handR = 'M72.4 80.8 C75.8 78.2 81.4 78.4 83 81.8 C84.6 85.4 82.4 89.6 78.4 90.4 C75.6 91 73.8 89.4 74.2 87.4 Z';
-    const handL = 'M32.2 81.4 C28.4 79.8 23.8 81.2 23.4 85 C23 88.6 26 91.4 29.6 91 C32 90.6 33.2 88.6 32.4 86.6 Z';
+    const handR = 'M70.6 80.2 C74.4 77 81.4 77.2 83.4 81.4 C85.4 85.8 82.8 90.8 78 91.6 C74.6 92.2 72.4 90.4 72.8 88 Z';
+    const handL = 'M33.6 80.8 C29.2 78.8 23.6 80.6 23.2 85.2 C22.8 89.4 26.2 92.6 30.6 92 C33.4 91.6 34.8 89.4 33.8 87 Z';
+    const g = (x) => `url(#${id}-${x})`;
     return `<svg class="hd-avatar" width="${px}" height="${px}" viewBox="0 0 100 100" aria-hidden="true">`
       + `<defs>`
       + `<clipPath id="${id}-k"><rect x="0.5" y="0.5" width="99" height="99" rx="14"/></clipPath>`
       + `<clipPath id="${id}-t"><path d="${torso}"/></clipPath>`
-      + `<linearGradient id="${id}-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2e37"/><stop offset="1" stop-color="#0b0d11"/></linearGradient>`
-      + `<radialGradient id="${id}-glow" cx=".5" cy=".95" r=".6"><stop offset="0" stop-color="${basis}" stop-opacity=".55"/><stop offset="1" stop-color="${basis}" stop-opacity="0"/></radialGradient>`
-      + `<linearGradient id="${id}-anzug" x1="0" y1="0" x2="1" y2=".35"><stop offset="0" stop-color="${anzugH}"/><stop offset=".45" stop-color="${basis}"/><stop offset="1" stop-color="${anzugD}"/></linearGradient>`
-      + `<radialGradient id="${id}-haut" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="${hautH}"/><stop offset=".55" stop-color="${haut}"/><stop offset="1" stop-color="${hautD}"/></radialGradient>`
-      + `<linearGradient id="${id}-haar" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="${haarH}"/><stop offset="1" stop-color="${haarD}"/></linearGradient>`
-      + `<linearGradient id="${id}-arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${anzugH}"/><stop offset=".5" stop-color="${basis}"/><stop offset="1" stop-color="${anzugD}"/></linearGradient>`
-      + `<linearGradient id="${id}-armH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${basis}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
-      + `<linearGradient id="${id}-helm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${hdHeller(helm, 0.3)}"/><stop offset=".5" stop-color="${helm}"/><stop offset="1" stop-color="${hdDunkler(helm, 0.6)}"/></linearGradient>`
-      + `<linearGradient id="${id}-visier" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a4250"/><stop offset="1" stop-color="#0f1217"/></linearGradient>`
-      + `<clipPath id="${id}-hc"><path d="${helmSchale} ${helmAuge}" clip-rule="evenodd"/></clipPath>`
-      + `<linearGradient id="${id}-rand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".85" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".35"/></linearGradient>`
+      + `<clipPath id="${id}-s"><path d="${schale}"/></clipPath>`
+      + `<radialGradient id="${id}-bg" cx=".5" cy=".42" r=".75"><stop offset="0" stop-color="${hintergrund}"/><stop offset=".6" stop-color="${hintergrundD}"/><stop offset="1" stop-color="#030304"/></radialGradient>`
+      + `<filter id="${id}-rauch" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".022 .045" numOctaves="4" seed="${seed}"/>`
+      + `<feColorMatrix type="matrix" values="0 0 0 0 ${rauch[0].toFixed(3)} 0 0 0 0 ${rauch[1].toFixed(3)} 0 0 0 0 ${rauch[2].toFixed(3)} 0 0 0 1.6 -0.62"/></filter>`
+      + `<radialGradient id="${id}-vig" cx=".5" cy=".45" r=".72"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></radialGradient>`
+      + `<linearGradient id="${id}-anzug" x1="0" y1="0" x2="1" y2=".4"><stop offset="0" stop-color="${anzugH}"/><stop offset=".42" stop-color="${anzug}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
+      + `<linearGradient id="${id}-arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${anzugH}"/><stop offset=".45" stop-color="${anzug}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
+      + `<linearGradient id="${id}-armH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${anzug}"/><stop offset="1" stop-color="${anzugDD}"/></linearGradient>`
+      + `<radialGradient id="${id}-helm" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="${helmH}"/><stop offset=".45" stop-color="${helm}"/><stop offset="1" stop-color="${helmD}"/></radialGradient>`
+      + `<linearGradient id="${id}-visier" x1="0" y1="0" x2=".2" y2="1"><stop offset="0" stop-color="#3b424f"/><stop offset=".35" stop-color="${visierTon}"/><stop offset=".75" stop-color="#05060a"/><stop offset="1" stop-color="${hdDunkler(basis, 0.45)}"/></linearGradient>`
+      + `<linearGradient id="${id}-hand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a3e46"/><stop offset=".5" stop-color="#16181d"/><stop offset="1" stop-color="#08090b"/></linearGradient>`
+      + `<linearGradient id="${id}-hans" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3f48"/><stop offset="1" stop-color="#0d0f13"/></linearGradient>`
+      + `<linearGradient id="${id}-abfall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></linearGradient>`
+      + `<linearGradient id="${id}-glanz" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`
       + `</defs>`
       + `<g clip-path="url(#${id}-k)">`
-      // background: dark studio, car-colour glow and two slanted broadcast stripes
-      + `<rect width="100" height="100" fill="url(#${id}-bg)"/>`
-      + `<path d="M64 -2 L80 -2 L44 102 L28 102 Z" fill="${basis}" opacity=".85"/>`
-      + `<path d="M83 -2 L88 -2 L52 102 L47 102 Z" fill="${a1}" opacity=".7"/>`
-      + `<rect width="100" height="100" fill="url(#${id}-glow)"/>`
-      // neck and its shadow
-      + `<path d="M43.4 44 L56.6 44 L57.8 61 C54 64 46 64 42.2 61 Z" fill="${hautD}"/>`
-      + `<path d="M43 48.4 C46.4 53 53.6 53 57 48.4 L57.4 56 C53.6 59 46.4 59 42.6 56 Z" fill="${hautDD}" opacity=".7"/>`
-      // suit, panels, shading, rim light
-      + `<path d="${torso}" fill="url(#${id}-anzug)"/>`
-      + `<g clip-path="url(#${id}-t)">${am}<path d="M0 0 H100 V101 H0 Z" fill="url(#${id}-rand)"/>`
-      + `<rect x="24" y="66.6" width="10" height="4.2" rx="0.8" fill="${patch}"/><rect x="24" y="71.4" width="6.4" height="2.4" rx="0.6" fill="${a2}"/>`
-      + `<rect x="65" y="66.2" width="12" height="5.8" rx="0.9" fill="${patch}"/>`
-      + `<text x="71" y="70.8" font-family="Inter,system-ui,sans-serif" font-size="5" font-weight="900" font-style="italic" text-anchor="middle" fill="${hdHell(patch) > 0.6 ? '#14161c' : '#ffffff'}">${nummer}</text></g>`
-      // high fireproof collar with a zip
-      + `<path d="M39.4 55.6 H60.6 L61.8 64.6 C56.8 67.6 43.2 67.6 38.2 64.6 Z" fill="${anzugDD}"/>`
-      + `<path d="M39.2 62.8 C43.8 65.2 56.2 65.2 60.8 62.8" fill="none" stroke="${a1}" stroke-width="1.2"/>`
-      + `<path d="M50 66 V80" stroke="rgba(0,0,0,.35)" stroke-width="1"/>`
-      // arms crossed
+      // studio: car-colour gradient, smoke, a light streak, vignette
+      + `<rect width="100" height="100" fill="${g('bg')}"/>`
+      + `<rect width="100" height="100" filter="${g('rauch')}" opacity=".6"/>`
+      + `<path d="M0 74 H100 V75.2 H0 Z M0 79 H100 V79.6 H0 Z" fill="${basis}" opacity=".45"/>`
+      + `<rect width="100" height="100" fill="${g('vig')}"/>`
+      // HANS device rising behind the helmet
+      + `<path d="M31.6 61 C31.4 54 35 49.4 40 48 L43 56.4 C40.2 57.2 38.6 59 37.8 61.8 Z M68.4 61 C68.6 54 65 49.4 60 48 L57 56.4 C59.8 57.2 61.4 59 62.2 61.8 Z" fill="${g('hans')}"/>`
+      // suit: body, panels, folds, stitching, patches, number
+      + `<path d="${torso}" fill="${g('anzug')}"/>`
+      + `<g clip-path="url(#${id}-t)">${anzugDeko}`
+      + `<path d="M24 64 C28 70 30 74 30 80 M76 64 C72 70 70 74 70 80 M40 60 C42 66 42 72 41 78 M60 60 C58 66 58 72 59 78" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="1.1"/>`
+      + `<path d="M12 70 C20 64.6 30 62 39 60.6 M88 70 C80 64.6 70 62 61 60.6" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width=".5" stroke-dasharray="1.2 1"/>`
+      + `<path d="M50 57.6 V80" stroke="#000" stroke-opacity=".35" stroke-width=".9"/>`
+      + `<rect x="21.6" y="66" width="11" height="4" rx=".6" fill="${patch}"/><path d="M23 68 H31" stroke="${patchTinte}" stroke-width=".9" stroke-dasharray="1.6 .7"/>`
+      + `<rect x="23.4" y="71.4" width="7.4" height="2.4" rx=".5" fill="${a2}"/>`
+      + `<rect x="66" y="65.4" width="12.6" height="6" rx=".8" fill="${patch}"/>`
+      + `<text x="72.3" y="70" font-family="Inter,system-ui,sans-serif" font-size="5" font-weight="900" font-style="italic" text-anchor="middle" fill="${patchTinte}">${nummer}</text>`
+      + `<path d="M101 64 C96 70 92 78 90 90" fill="none" stroke="${hdHeller(basis, 0.3)}" stroke-width="2.4" opacity=".55"/>`
+      + `</g>`
+      // HANS pads over the shoulders and the tether
+      + `<path d="M28 63.6 C30 59.6 34 57.4 39 56.6 L41.4 61 C37 61.6 33.6 63.4 31.4 66.4 Z M72 63.6 C70 59.6 66 57.4 61 56.6 L58.6 61 C63 61.6 66.4 63.4 68.6 66.4 Z" fill="${g('hans')}"/>`
+      + `<path d="M36.6 58.6 C38 57.6 39.6 57 41 56.8 M63.4 58.6 C62 57.6 60.4 57 59 56.8" stroke="#fff" stroke-opacity=".25" stroke-width=".7" fill="none"/>`
+      // arms crossed, black gloves
       + `<g transform="translate(0 -7) translate(0 90) scale(1 1.22) translate(0 -90)">`
       + `<ellipse cx="2" cy="94" rx="9" ry="9" fill="${anzugD}"/><ellipse cx="98" cy="91" rx="9" ry="9" fill="${anzugDD}"/>`
-      + `<path d="${armHinten}" fill="url(#${id}-armH)"/>`
-      + `<path d="M34 83.6 C52 86 80 89.4 101 91.4" fill="none" stroke="rgba(255,255,255,.18)" stroke-width=".9"/>`
-      + `<path d="${handL}" fill="url(#${id}-haut)"/><path d="M22 86.6 C23.4 86.2 24.8 86.4 26 87" stroke="${hautDD}" stroke-width=".6" fill="none" opacity=".7"/>`
-      + `<path d="M8 99 C30 96.6 56 92.4 76 88.6 L76 92.6 C58 96.6 34 101 12 102.4 Z" fill="rgba(0,0,0,.35)"/>`
-      + `<path d="${armVorn}" fill="url(#${id}-arm)"/>`
-      + `<path d="M62.4 82.6 C65.4 82.1 68.2 81.6 71 81.2 L72.6 90.6 C69.6 91.4 66.8 92.2 63.8 93 Z" fill="${a1}"/>`
-      + `<path d="M4 92.4 C12 89.6 34 88 52 85.4" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="1"/>`
-      + `<path d="M10 99.4 C30 97.4 54 93.6 70 90.4" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="1"/>`
-      + `<path d="${handR}" fill="url(#${id}-haut)"/><path d="M76.6 82.6 C78.4 82.2 80 82.8 81 84" stroke="${hautDD}" stroke-width=".6" fill="none" opacity=".7"/>`
+      + `<path d="${armHinten}" fill="${g('armH')}"/>`
+      + `<path d="M34 83.6 C52 86 80 89.4 101 91.4" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width=".9"/>`
+      + `<path d="${handL}" fill="${g('hand')}"/><path d="M25 84 C27 83.2 29.6 83.4 31.4 84.6 M24.6 87 C26.6 86.4 29 86.6 31 87.6" stroke="#fff" stroke-opacity=".22" stroke-width=".6" fill="none"/>`
+      + `<path d="M8 99 C30 96.6 56 92.4 76 88.6 L76 92.6 C58 96.6 34 101 12 102.4 Z" fill="#000" opacity=".4"/>`
+      + `<path d="${armVorn}" fill="${g('arm')}"/>`
+      + `<path d="M62.4 82.6 C65.4 82.1 68.2 81.6 71 81.2 L72.6 90.6 C69.6 91.4 66.8 92.2 63.8 93 Z" fill="${akzent}"/>`
+      + `<path d="M4 92.4 C12 89.6 34 88 52 85.4" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="1"/>`
+      + `<path d="M20 92 C24 94 28 94.6 32 94 M40 90 C43 92 47 92.4 50 91.6" fill="none" stroke="#000" stroke-opacity=".28" stroke-width=".9"/>`
+      + `<path d="M10 99.4 C30 97.4 54 93.6 70 90.4" fill="none" stroke="#000" stroke-opacity=".3" stroke-width="1"/>`
+      + `<path d="${handR}" fill="${g('hand')}"/><path d="M74.6 81.6 C77 80.6 80.4 80.8 82.2 82.6 M75 85 C77.4 84.2 80.4 84.4 82.4 85.8" stroke="#fff" stroke-opacity=".25" stroke-width=".6" fill="none"/>`
       + `</g>`
-      // head: ears, face, features, hair
-      + `<g transform="translate(8 0.6) scale(.84)">`
-      + `<ellipse cx="33.6" cy="37.5" rx="3.1" ry="5" fill="${hautD}"/><ellipse cx="66.4" cy="37.5" rx="3.1" ry="5" fill="${hautD}"/>`
-      + `<path d="${gesicht}" fill="url(#${id}-haut)"/>`
-      + `<path d="M62.5 30 C64.6 38 63.6 47 58 54 C61.8 50 64.6 43 66 34 Z" fill="${hautDD}" opacity=".35"/>`
-      + (bart ? `<path d="M37.6 45 C39.6 53 45 57.8 50 57.8 C55 57.8 60.4 53 62.4 45 C60 51.6 56 54 50 54 C44 54 40 51.6 37.6 45 Z" fill="${haar}" opacity=".55"/>` : '')
-      // brows, eyes, nose, mouth
-      + `<path d="M39.6 31.6 C41.6 30.2 44.8 30 47 31" stroke="${haarD}" stroke-width="1.5" fill="none" stroke-linecap="round"/>`
-      + `<path d="M53 31 C55.2 30 58.4 30.2 60.4 31.6" stroke="${haarD}" stroke-width="1.5" fill="none" stroke-linecap="round"/>`
-      + `<ellipse cx="43.4" cy="36" rx="2.7" ry="1.45" fill="#f4f1ec"/><ellipse cx="56.6" cy="36" rx="2.7" ry="1.45" fill="#f4f1ec"/>`
-      + `<circle cx="43.6" cy="36" r="1.15" fill="${augen}"/><circle cx="56.4" cy="36" r="1.15" fill="${augen}"/>`
-      + `<circle cx="43.9" cy="35.6" r=".35" fill="#fff"/><circle cx="56.7" cy="35.6" r=".35" fill="#fff"/>`
-      + `<path d="M40.6 35 C42 34 45 34 46.2 35.2 M53.8 35.2 C55 34 58 34 59.4 35" stroke="${hautDD}" stroke-width=".7" fill="none"/>`
-      + `<path d="M50.6 37.4 C51 41.4 52.4 43.6 52 45.2 C51.2 46 49.6 46.2 48.4 45.6" stroke="${hautDD}" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".8"/>`
-      + `<path d="M45.4 49.6 C48 50.8 52 50.8 54.6 49.6" stroke="${hdDunkler(haut, 0.5)}" stroke-width="1.1" fill="none" stroke-linecap="round"/>`
-      + `<path d="M46.8 51.6 C48.6 52.4 51.4 52.4 53.2 51.6" stroke="${hautH}" stroke-width=".8" fill="none" stroke-linecap="round" opacity=".7"/>`
-      // helmet (v3.0 BESTELLT: "Put helmets on the new avatars"): full-face shell in the helmet colour with a
-      // brand-colour pattern, the eye port cut out (evenodd) so eyes and nose show, the visor raised on top,
-      // visor pivots, a chin bar with vents, a gloss highlight and the car-colour rim light.
-      + `<path d="${helmSchale} ${helmAuge}" fill="url(#${id}-helm)" fill-rule="evenodd"/>`
-      + `<g clip-path="url(#${id}-hc)">${helmDeko}</g>`
-      + `<path d="${helmAuge}" fill="none" stroke="${hdDunkler(helm, 0.45)}" stroke-width="1.4"/>`
-      + `<path d="M31 24.6 C33.6 16 41 12.6 50 12.6 C59 12.6 66.4 16 69 24.6 C63.4 22 57.4 21 50 21 C42.6 21 36.6 22 31 24.6 Z" fill="url(#${id}-visier)"/>`
-      + `<path d="M35 19.6 C39.6 16.2 44.6 15.2 50 15.2" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.1" stroke-linecap="round"/>`
-      + `<circle cx="31.4" cy="30.6" r="2.2" fill="${hdDunkler(helm, 0.5)}"/><circle cx="68.6" cy="30.6" r="2.2" fill="${hdDunkler(helm, 0.5)}"/>`
-      + `<path d="M44 52.6 H56 M45.2 55.6 H54.8" stroke="rgba(0,0,0,.45)" stroke-width="1.5" stroke-linecap="round"/>`
-      + `<path d="M31.6 30 C31 20 38 10.6 48 9.6" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2.2" stroke-linecap="round"/>`
-      + `<path d="M71.6 26 C74.2 34 74 46 69.6 55 C67.6 59 65 61.6 62.6 63" fill="none" stroke="${basis}" stroke-width="1.8" opacity=".6" stroke-linecap="round"/>`
-      + `</g></g></svg>`;
+      // light falls off towards the bottom (key light from above)
+      + `<rect x="0" y="56" width="100" height="44" fill="${g('abfall')}"/>`
+      // helmet: shell, pattern, visor down with reflections, chin vents, gloss, rim light
+      + `<path d="${schale}" fill="${g('helm')}"/>`
+      + `<g clip-path="url(#${id}-s)">${helmDeko}<path d="M30 46 C38 55 62 55 70 46 V58 H30 Z" fill="#000" opacity=".28"/></g>`
+      + `<path d="${visier}" fill="${g('visier')}" stroke="${hdDunkler(helm, 0.35)}" stroke-width="1.2"/>`
+      + `<path d="M33.4 24.6 C38.6 21.6 44.4 20.8 50 20.8 C55.6 20.8 61.4 21.6 66.6 24.6 L65.8 26.6 C61 24.2 55.6 23.4 50 23.4 C44.4 23.4 39 24.2 34.2 26.6 Z" fill="${g('glanz')}"/>`
+      + `<path d="M35.4 37.6 C41.4 39.6 46 40.2 50 40.2 C54 40.2 58.6 39.6 64.6 37.6" fill="none" stroke="${hdHeller(basis, 0.2)}" stroke-width="1.1" opacity=".55"/>`
+      + `<path d="M57 22.2 C61.6 28.4 62.6 33.6 61.8 39.6" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="2.6"/>`
+      + `<path d="M40 22.4 C38.4 27 38.4 32 39.6 38" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="1.6"/>`
+      + `<circle cx="30.8" cy="30.4" r="1.9" fill="${helmD}"/><circle cx="69.2" cy="30.4" r="1.9" fill="${helmD}"/>`
+      + `<path d="M45 47.6 H55 M46.2 50.2 H53.8" stroke="#000" stroke-opacity=".35" stroke-width="1" stroke-linecap="round"/>`
+      + `<path d="M33.4 18.4 C36.4 11.8 42.4 8.6 48.8 8.2" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2.2" stroke-linecap="round"/>`
+      + `<path d="M69.8 22 C71.6 30 71.4 41 67.8 48.6 C66 52 63.4 54.4 60.6 55.6" fill="none" stroke="${hdHeller(basis, 0.35)}" stroke-width="1.7" opacity=".75" stroke-linecap="round"/>`
+      + `</g></svg>`;
   }
   function hdAvatarStil(car) { return (hd.avatare && hd.avatare[String(car.device.id)]) || 0; }
   // Hook used by the garage card (90-ghosts.js).
