@@ -2116,7 +2116,7 @@
     // eine gemessene Groesse und keine gerechnete. Ohne Auto oder ohne Meldung: ein Strich,
     // und keine erfundene Zahl.
     const roh = car && car.battery !== undefined && car.battery !== null ? car.battery : null;
-    schreibeWert($(pre + '-batt'), roh === null ? '\u2013' : batteryPercent(roh) + ' %');
+    schreibeWert($(pre + '-batt'), roh === null ? '\u2013' : batteryPercent(roh, car) + ' %');
   }
 
   function p2ScreenRender() {

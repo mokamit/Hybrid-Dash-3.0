@@ -5803,6 +5803,39 @@
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
 
+  /* ---- Hybrid-Dash 3.0: paired-cars picker, avatar picker, car tools (98p-hd-gepaart.js, 98i) ---- */
+  .hd-gepaart { position: fixed; inset: 0; z-index: 400; display: grid; place-items: center; padding: 20px; background: rgba(4,4,8,.72); }
+  .hd-gepaart[hidden] { display: none; }
+  .hdg-karte { width: min(760px, 100%); max-height: 86vh; overflow: auto; background: #121318; border: 1px solid rgba(255,255,255,.14);
+    border-top: 3px solid var(--b-red, #e10600); box-shadow: 0 20px 60px rgba(0,0,0,.6); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .hdg-kopf { display: flex; align-items: center; justify-content: space-between; }
+  .hdg-kopf b { font: italic 900 24px var(--b-font, sans-serif); letter-spacing: .04em; text-transform: uppercase; }
+  .hdg-zu { width: 36px; height: 36px; padding: 0; font-size: 16px; }
+  .hdg-liste { display: flex; flex-direction: column; gap: 8px; }
+  .hdg-zeile { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 8px 10px;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-left: 5px solid var(--hdg-farbe, #777); }
+  .hdg-bild .hd-avatar { display: block; width: 56px; height: 56px; }
+  .hdg-text { display: flex; flex-direction: column; min-width: 0; }
+  .hdg-text b { font: italic 900 19px var(--b-font, sans-serif); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hdg-text span { font-size: 14px; color: #d9dce2; }
+  .hdg-text small { font-size: 11px; color: var(--muted, #8a93a3); font-family: monospace; }
+  .hdg-st { font: 800 11px var(--b-font, sans-serif); letter-spacing: .08em; text-transform: uppercase; padding: 2px 8px; border: 1px solid rgba(255,255,255,.3); color: #d9dce2; }
+  .hdg-st.an { background: #3ddc84; border-color: #3ddc84; color: #04140a; }
+  .hdg-st.aus { color: #8a93a3; }
+  .hdg-knoepfe { display: flex; gap: 6px; }
+  .hdg-knoepfe button, .hdg-fuss button { padding: 6px 12px; font-size: 13px; }
+  .hdg-fuss { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hdg-hinweis { margin: 0; font-size: 12.5px; color: var(--muted, #a8adb8); }
+  @media (max-width: 560px) { .hdg-zeile { grid-template-columns: 48px minmax(0, 1fr); } .hdg-st, .hdg-knoepfe { grid-column: 2; } }
+  .hdav-karte { width: min(900px, 100%); }
+  .hdav-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+  .hdav-raster button { padding: 0; aspect-ratio: 1; border: 2px solid transparent; background: #000; overflow: hidden; border-radius: 10px; }
+  .hdav-raster button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .hdav-raster button:hover:not(:disabled) { border-color: #fff; }
+  .hdav-raster button.an { border-color: var(--b-red, #e10600); box-shadow: 0 0 0 2px var(--b-red, #e10600); }
+  .hdav-raster button:disabled { opacity: .28; cursor: not-allowed; }
+  .hd-werkzeug { display: contents; }
+
   /* ---- Hybrid-Dash 3.0: app logo in the header, banner at the very top of the main menu ---- */
   header#k-kopf .hdr-logo .hd-logo-bild { display: block; height: 26px; width: auto; }
   @media (max-height: 480px) { header#k-kopf .hdr-logo .hd-logo-bild { height: 18px; } }
@@ -6121,6 +6154,8 @@
           <button type="button" class="k-knopf" id="fa-editor">Editor</button>
           <button type="button" class="k-knopf" id="fa-laden">Laden</button>
           <button type="button" class="k-knopf" id="fa-raum">Raum</button>
+          <button type="button" class="k-knopf hd-fa-stat" id="fa-hd-stats" title="Statistik dieser Strecke">Statistik</button>
+          <button type="button" class="k-knopf hd-fa-stat" id="fa-hd-tele" title="Telemetrie dieser Strecke">Telemetrie</button>
           <button type="button" class="k-knopf" id="fa-reinig-stre" hidden>Reinigungsfahrzeug starten</button>
           <button type="button" class="k-knopf" id="fa-druck" hidden>Druckvorlagen</button>
           <button type="button" class="k-knopf" id="fa-foto" hidden title="Optimal: quer, z. B. 4:3 oder 16:9">Foto</button>
@@ -13578,7 +13613,7 @@
         <span class="opt-val" id="funk-rundlauf" data-i18n-skip>&ndash;</span></div>
       <div class="opt-row"><div class="opt-label">Bekannte Autos beim Start verbinden
           <small>Nur in der Android-App: Beim Start verbindet sie nacheinander alle Autos, die schon einmal verbunden waren (mit gemerkter Rolle oder gemerktem Namen) und gerade erreichbar sind. Ein Auto, das mit einem anderen Ger&auml;t verbunden, aus oder au&szlig;er Reichweite ist, wird ausgelassen. Im Browser verlangt Bluetooth f&uuml;r jedes Auto einen Klick.</small></div>
-        <label class="tgl"><input type="checkbox" id="setting-autoverbinden" checked><span></span></label></div>
+        <label class="tgl"><input type="checkbox" id="setting-autoverbinden"><span></span></label></div>
       <!-- v1.3.15 (WIP): Funkprioritaet je Rolle zu Beginn der Startampel (funkPrioritaetVorStart, 90-ghosts.js). -->
       <div class="opt-row"><div class="opt-label">Funkpriorit&auml;t beim Start<span class="wip-tag">WIP</span><small>Nur in der Android-App: Zu Beginn der Startampel, solange alle Autos stehen, bekommen die gesteuerten Autos (Spieler 1&ndash;3) das schnellste Verbindungsintervall und NPCs, Safety Car und Reinigungswagen ein ausgewogenes. So nehmen die NPCs dem Funk nicht die kurzen Zeitfenster weg, und die gesteuerten Autos reagieren schneller. Die Autos werden nacheinander umgestellt, im Abstand von 0,15 s.</small></div>
         <label class="tgl"><input type="checkbox" id="setting-funk-prio" checked><span></span></label></div>
@@ -15585,6 +15620,32 @@
   // stehen - das ist die Absicht, nicht ein Mangel: ein fehlender Eintrag faellt auf,
   // ein leerer Text nicht.
   const I18N_EN = {
+    "Alle wieder verbinden": "Reconnect all",
+    "Gepaarte Autos": "Paired cars",
+    "Unbenanntes Auto": "Unnamed car",
+    "Modell und Farbe noch nicht eingestellt": "Model and colour not set yet",
+    "gepaart": "paired",
+    "neu koppeln": "pair again",
+    "Erst trennen": "Disconnect first",
+    "Vergessen": "Forget",
+    "Noch keine Autos gepaart.": "No cars paired yet.",
+    "Neues Auto koppeln": "Pair a new car",
+    "Alle verbinden": "Connect all",
+    "Gepaarte Autos verbinden direkt, ohne das Auswahlfenster des Browsers. Ein neues Auto muss der Browser einmal selbst anbieten – danach steht es hier mit Modell und Farbe.": "Paired cars connect directly, without the browser's pop-up. A new car has to be picked once in the browser's own pop-up – after that it is listed here with its model and colour.",
+    "Suche …": "Searching …",
+    "Auto nicht gefunden – ist es an und in Reichweite?": "Car not found – is it switched on and in range?",
+    "Verbinden fehlgeschlagen": "Connection failed",
+    "Kopplung vergessen?": "Forget this pairing?",
+    "Zum Verbinden muss das Auto danach wieder im Auswahlfenster des Browsers gewählt werden.": "To connect it again, it has to be picked in the browser's pop-up again.",
+    "Avatar wählen": "Choose avatar",
+    "Hat schon ein anderer Fahrer": "Another driver has this one",
+    "Zufälliger Avatar": "Random avatar",
+    "Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.": "Press with a full battery: what the car reports now counts as 100 % from now on.",
+    "Akku voll – kalibrieren": "Battery full – calibrate",
+    "Das Auto hat noch keinen Akkustand gemeldet.": "The car has not reported its battery yet.",
+    "Akku kalibriert": "Battery calibrated",
+    "Statistik dieser Strecke": "Statistics of this track",
+    "Telemetrie dieser Strecke": "Telemetry of this track",
     "AUTOMATISCHER BOXENSTOPP": "AUTOMATIC PIT STOP",
     "Auto noch nicht geortet – eine Runde fahren": "Car not located yet – drive one lap",
     "Automatischer Boxenstopp abgebrochen": "Automatic pit stop cancelled",
@@ -17627,7 +17688,6 @@
     "Host beenden": "Stop host",
     "keine WLAN-Adresse": "no Wi-Fi address",
     "Info-Screen im Browser:": "Info screen in the browser:",
-    "Suche …": "Searching …",
     "Kein Host gefunden. Gleiches WLAN? Manche Router trennen Geräte voneinander.": "No host found. Same Wi-Fi? Some routers isolate devices from each other.",
     "Restzeit": "Time left",
     "offen": "open",
@@ -19614,6 +19674,31 @@
   // nachzieht. Bewusst KEINE Ansagen (Rundenzeit, Tank, Schaden): dafuer gibt es noch keine
   // spanischen Aufnahmen, und die Sprachausgabe nutzt die englische als Platzhalter.
   const I18N_ES = {
+    "Alle wieder verbinden": "Reconectar todos",
+    "Gepaarte Autos": "Coches emparejados",
+    "Unbenanntes Auto": "Coche sin nombre",
+    "Modell und Farbe noch nicht eingestellt": "Modelo y color sin definir",
+    "gepaart": "emparejado",
+    "neu koppeln": "emparejar de nuevo",
+    "Erst trennen": "Desconecta primero",
+    "Vergessen": "Olvidar",
+    "Noch keine Autos gepaart.": "Aún no hay coches emparejados.",
+    "Neues Auto koppeln": "Emparejar coche nuevo",
+    "Alle verbinden": "Conectar todos",
+    "Gepaarte Autos verbinden direkt, ohne das Auswahlfenster des Browsers. Ein neues Auto muss der Browser einmal selbst anbieten – danach steht es hier mit Modell und Farbe.": "Los coches emparejados se conectan directamente, sin la ventana del navegador. Un coche nuevo se elige una vez en la ventana del navegador; después aparece aquí con su modelo y color.",
+    "Auto nicht gefunden – ist es an und in Reichweite?": "Coche no encontrado: ¿está encendido y al alcance?",
+    "Verbinden fehlgeschlagen": "Fallo de conexión",
+    "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
+    "Zum Verbinden muss das Auto danach wieder im Auswahlfenster des Browsers gewählt werden.": "Para volver a conectarlo hay que elegirlo otra vez en la ventana del navegador.",
+    "Avatar wählen": "Elegir avatar",
+    "Hat schon ein anderer Fahrer": "Ya lo tiene otro piloto",
+    "Zufälliger Avatar": "Avatar aleatorio",
+    "Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.": "Pulsa con la batería llena: lo que el coche informa ahora cuenta como 100 %.",
+    "Akku voll – kalibrieren": "Batería llena: calibrar",
+    "Das Auto hat noch keinen Akkustand gemeldet.": "El coche aún no ha informado de su batería.",
+    "Akku kalibriert": "Batería calibrada",
+    "Statistik dieser Strecke": "Estadísticas de este circuito",
+    "Telemetrie dieser Strecke": "Telemetría de este circuito",
     "AUTOMATISCHER BOXENSTOPP": "PARADA AUTOMÁTICA",
     "Auto noch nicht geortet – eine Runde fahren": "Coche aún sin localizar – da una vuelta",
     "Automatischer Boxenstopp abgebrochen": "Parada automática cancelada",
@@ -28532,7 +28617,7 @@
     // eine gemessene Groesse und keine gerechnete. Ohne Auto oder ohne Meldung: ein Strich,
     // und keine erfundene Zahl.
     const roh = car && car.battery !== undefined && car.battery !== null ? car.battery : null;
-    schreibeWert($(pre + '-batt'), roh === null ? '\u2013' : batteryPercent(roh) + ' %');
+    schreibeWert($(pre + '-batt'), roh === null ? '\u2013' : batteryPercent(roh, car) + ' %');
   }
 
   function p2ScreenRender() {
@@ -32502,6 +32587,9 @@
     kn('fa-editor', () => konsoleZeige('track', 'edit'));
     kn('fa-laden', () => konsoleZeige('track', 'laden'));
     kn('fa-raum', () => konsoleZeige('track', 'raum'));
+    // Hybrid-Dash 3.0 BESTELLT: "On the track card add a quick button to view the statistics and telemetry of that track."
+    kn('fa-hd-stats', () => { showTab('options'); showSubpage('opt-stats'); });
+    kn('fa-hd-tele', () => { if (typeof teleSeiteOeffnen === 'function') teleSeiteOeffnen(); });
     kn('fa-druck', () => konsoleZeige('track', 'print'));
     kn('fa-profil', () => meisterOeffnen());
     // v1.0.45 BESTELLT: "Reinigungsfahrzeug starten" im Autos- und Strecken-Menue.
@@ -44266,9 +44354,33 @@
   }
   const dashAkkuHalter = {};
 
-  function batteryPercent(raw) {
+  // Hybrid-Dash 3.0 REPORTED: "The cars are fully charged but they keep showing 65 %. The cars use the stock
+  // battery." A full stock battery reports ~149, the scale's top was 155 (65 % = raw 149). Now "full" is kept PER CAR
+  // (device id, localStorage hybriddash.akku.v1): it starts at 149 (stock battery), rises by itself whenever that car
+  // reports more (the smoothed value, i.e. the max of 5 s), and the garage has "Battery is full - calibrate", which
+  // sets it to what the car reports right now.
+  const AKKU_VOLL_STOCK = 149, AKKU_KALIB_STORE = 'hybriddash.akku.v1';
+  let akkuVollJe = {};
+  try { akkuVollJe = JSON.parse(localStorage.getItem(AKKU_KALIB_STORE) || '{}') || {}; } catch (e) { akkuVollJe = {}; }
+  function akkuVollFuer(car) {
+    const id = car && car.device ? String(car.device.id) : '';
+    const v = id ? akkuVollJe[id] : null;
+    return v > AKKU_LEER + 4 && v <= 200 ? v : AKKU_VOLL_STOCK;
+  }
+  function akkuVollMerken(car, roh) {
+    if (!car || !car.device || !(roh > AKKU_LEER + 4) || roh > 200) return;
+    akkuVollJe[String(car.device.id)] = roh;
+    try { localStorage.setItem(AKKU_KALIB_STORE, JSON.stringify(akkuVollJe)); } catch (e) { /* private */ }
+  }
+  // Learn upwards: a car that reports more than its "full" has a fuller battery than assumed.
+  function akkuLernen(car) {
+    if (car && car.battery > akkuVollFuer(car)) akkuVollMerken(car, car.battery);
+  }
+  function batteryPercent(raw, car) {
+    if (car === undefined) { try { car = playerCar; } catch (e) { car = null; } }
+    const voll = akkuVollFuer(car);
     return Math.max(0, Math.min(100,
-      Math.round((raw - AKKU_LEER) / (AKKU_VOLL - AKKU_LEER) * 100)));
+      Math.round((raw - AKKU_LEER) / (voll - AKKU_LEER) * 100)));
   }
 
   // Hier stand renderLapList(), und es tat nichts: es schrieb in #dash-lap-list und
@@ -48559,7 +48671,7 @@
                && c.battery !== undefined && c.battery !== null)
                .map((c) => ({ car: c,
                               label: typeof garageLabel === 'function' ? garageLabel(c) : '',
-                              value: batteryPercent(c.battery) / 100 })) };
+                              value: batteryPercent(c.battery, c) / 100 })) };
   }
   setInterval(() => {
     if (typeof ansagenPruefen !== 'function') return;
@@ -64120,7 +64232,7 @@
   // dazu der kleinste je gemeldete Rohwert - mit ihm laesst sich AKKU_LEER nachmessen.
   function garAkkuText(car) {
     if (car.battery === null || car.battery === undefined || typeof batteryPercent !== 'function') return '';
-    const p = batteryPercent(car.battery);
+    const p = batteryPercent(car.battery, car);
     return ' &middot; <span class="gar-akku' + (p < 25 ? ' knapp' : '') + '">' + t('Akku') + ' ' + p + '&nbsp;%'
       + (car.akkuMinRoh !== undefined ? ' (min ' + car.akkuMinRoh + ')' : '') + '</span>';
   }
@@ -64579,31 +64691,48 @@
     plusKnopf.type = 'button';
     plusKnopf.className = 'gar-karte-neu primary';
     plusKnopf.textContent = '+ ' + t('Auto verbinden');
-    plusKnopf.onclick = () => { const c = $('gar-connect'); if (c) c.click(); };
+    // Hybrid-Dash 3.0: cars paired before are offered in the app's own picker (model, colour, number) and connect
+    // without the browser's chooser; only when there are none does it go straight to the browser's.
+    plusKnopf.onclick = async () => {
+      const bekannt = typeof hdGepaartListe === 'function' ? (await hdGepaartListe()).filter((x) => x.dev && !x.verbunden) : [];
+      if (bekannt.length && typeof hdGepaartOeffnen === 'function') hdGepaartOeffnen();
+      else { const c = $('gar-connect'); if (c) c.click(); }
+    };
     plus.appendChild(plusKnopf);
     leiste.appendChild(plus);
     // HybridDash: reconnect every car this browser was allowed to use before, in one click.
+    // Hybrid-Dash 3.0 BESTELLT: "don't auto connect the cars, just have a dedicated button to reconnect all previously
+    // paired cars, maybe next to the disconnect all button" - always shown there (greyed out with none to connect),
+    // with "Paired cars" (the list with reconnect / forget) beside it.
     const bek = document.createElement('div');
     bek.className = 'opt-row opt-breit gar-a-aktion';
     const bekKnopf = document.createElement('button');
     bekKnopf.type = 'button';
     bekKnopf.id = 'gar-bekannte';
     bekKnopf.className = 'gar-karte-neu gar-bekannte';
-    bekKnopf.hidden = true;
+    bekKnopf.textContent = '⟳ ' + t('Alle wieder verbinden');
     bekKnopf.onclick = () => garageBekannteVerbinden(bekKnopf);
     bek.appendChild(bekKnopf);
-    leiste.appendChild(bek);
     garageBekannteKandidaten().then((l) => {
       if (garBekannteLaeuft) return;
-      bekKnopf.hidden = !l.length;
-      bek.hidden = !l.length;
-      bekKnopf.textContent = '⟳ ' + t('Bekannte Autos verbinden') + ' (' + l.length + ')';
+      bekKnopf.disabled = !l.length;
+      bekKnopf.textContent = '⟳ ' + t('Alle wieder verbinden') + ' (' + l.length + ')';
     });
-    bek.hidden = true;
-    ['gar-stop-ghosts', 'gar-go', 'gar-disconnect-all', 'gar-to-cockpit'].forEach((id) => {
+    const gep = document.createElement('div');
+    gep.className = 'opt-row opt-breit gar-a-aktion';
+    const gepKnopf = document.createElement('button');
+    gepKnopf.type = 'button'; gepKnopf.id = 'gar-gepaart'; gepKnopf.className = 'gar-karte-neu';
+    gepKnopf.textContent = t('Gepaarte Autos');
+    gepKnopf.onclick = () => { if (typeof hdGepaartOeffnen === 'function') hdGepaartOeffnen(); };
+    gep.appendChild(gepKnopf);
+    ['gar-stop-ghosts', 'gar-go', 'gar-disconnect-all'].forEach((id) => {
       const z = garAktionsZeile(id);
       if (z) leiste.appendChild(z);
     });
+    leiste.appendChild(bek);
+    leiste.appendChild(gep);
+    { const z = garAktionsZeile('gar-to-cockpit'); if (z) leiste.appendChild(z); }
+    if (typeof hdGepaartMerken === 'function') hdGepaartMerken();
     // v1.1.3: virtuelle Fahrt (60d-virtuell.js) - ein Auto ohne Bluetooth auf der Editor-Strecke.
     // BESTELLT: ganz unten, unter "Zum Cockpit".
     const virt = document.createElement('div');
@@ -64644,6 +64773,8 @@
       bb.onclick = () => blinkCar(car);
       zb.appendChild(bb);
       rechts.appendChild(zb);
+      // Hybrid-Dash 3.0: avatar (pick / random) and battery calibration for this car.
+      if (typeof hdAutoWerkzeugZeile === 'function') rechts.appendChild(hdAutoWerkzeugZeile(car));
       // Name
       const zn = document.createElement('div');
       zn.className = 'opt-row gk-zeile gar-a-name';
@@ -65247,7 +65378,7 @@
     if (rennPauseAktiv()) {
       car.tileCode = b[12]; car.tileCount = b[11];
       car.lastCodeAt = rennZeitJetzt();
-      car.battery = akkuGlaetten(car, b[10], rennZeitJetzt());
+      car.battery = akkuGlaetten(car, b[10], rennZeitJetzt()); if (typeof akkuLernen === 'function') akkuLernen(car);
       if (car.race) zielSperreFlanke(car.race, b);
       if (car === playerCar) handleDashboardBytes(b);
       return;
@@ -65334,7 +65465,7 @@
     car.yaw = b[3] > 127 ? b[3] - 256 : b[3];
     // v0.9.87: geglaettet (Maximum der letzten 5 s) - unter Gas sackt die Spannung ab, und
     // der Rohwert sprang dann um bis zu zehn Prozent.
-    car.battery = akkuGlaetten(car, b[10], rennZeitJetzt());
+    car.battery = akkuGlaetten(car, b[10], rennZeitJetzt()); if (typeof akkuLernen === 'function') akkuLernen(car);
   }
 
   function stopGhost(car) {
@@ -120736,6 +120867,75 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     return `<button type="button" class="hd-avatar-knopf" data-hd-avatar="${String(car.device.id).replace(/"/g, '')}" `
       + `title="${t('Avatar ändern')}">${hdAvatarFuerAuto(car, px || 34)}</button>`;
   }
+  // ---- v3.0: avatar picker / random, battery calibration (garage, the selected car) ----
+  // BESTELLT: "Have the ability to randomise or change the driver avatar." A tap on the avatar still steps to the next
+  // free portrait of the car's colour; "Choose avatar" opens all 72 (the car's colour first, portraits other drivers
+  // have are greyed out), "Random" picks a free one at random. No two drivers share one either way.
+  function hdAvatarSetzen(car, nr) {
+    hd.fotos = hd.fotos || {};
+    hd.fotos[String(car.device.id)] = nr;
+    hdSpeichern();
+    if (typeof renderGarage === 'function') renderGarage();
+  }
+  function hdAvatarBelegtVonAnderen(car) {
+    const id = String(car.device.id);
+    return new Set([...hdFotoBelegung()].filter(([cid]) => cid !== id).map(([, nr]) => nr));
+  }
+  function hdAvatarZufall(car) {
+    const andere = hdAvatarBelegtVonAnderen(car);
+    const k = hdFarbKlasse(carColor(car).hex);
+    const jetzt = hdFotoBelegung().get(String(car.device.id));
+    let pool = HD_FOTOS.map((_, i) => i).filter((i) => !andere.has(i) && i !== jetzt && (!k || HD_FOTOS[i].indexOf(k) >= 0));
+    if (!pool.length) pool = HD_FOTOS.map((_, i) => i).filter((i) => !andere.has(i) && i !== jetzt);
+    if (pool.length) hdAvatarSetzen(car, pool[Math.floor(Math.random() * pool.length)]);
+  }
+  let hdAvatarWahlBox = null;
+  function hdAvatarWahl(car) {
+    if (!hdAvatarWahlBox) {
+      hdAvatarWahlBox = document.createElement('div');
+      hdAvatarWahlBox.className = 'hd-gepaart hd-avwahl'; hdAvatarWahlBox.setAttribute('role', 'dialog'); hdAvatarWahlBox.setAttribute('aria-modal', 'true');
+      hdAvatarWahlBox.setAttribute('data-i18n-skip', '');
+      document.body.appendChild(hdAvatarWahlBox);
+      hdAvatarWahlBox.addEventListener('click', (e) => {
+        if (e.target === hdAvatarWahlBox || e.target.closest('[data-hdav="zu"]')) { hdAvatarWahlBox.hidden = true; return; }
+        const b = e.target.closest('[data-hdav-nr]');
+        if (b && !b.disabled && hdAvatarWahlBox._car) { hdAvatarWahlBox.hidden = true; hdAvatarSetzen(hdAvatarWahlBox._car, Number(b.dataset.hdavNr)); }
+      });
+    }
+    hdAvatarWahlBox._car = car;
+    const andere = hdAvatarBelegtVonAnderen(car);
+    const jetzt = hdFotoBelegung().get(String(car.device.id));
+    const k = hdFarbKlasse(carColor(car).hex);
+    const reihe = HD_FOTOS.map((_, i) => i).sort((a, b) => ((k && HD_FOTOS[b].indexOf(k) >= 0) - (k && HD_FOTOS[a].indexOf(k) >= 0)) || a - b);
+    hdAvatarWahlBox.innerHTML = '<div class="hdg-karte hdav-karte"><div class="hdg-kopf"><b>' + t('Avatar wählen') + '</b>'
+      + '<button type="button" class="hdg-zu" data-hdav="zu" aria-label="' + t('Schließen') + '">&#10005;</button></div>'
+      + '<div class="hdav-raster">' + reihe.map((nr) => '<button type="button" data-hdav-nr="' + nr + '"' + (andere.has(nr) ? ' disabled title="' + t('Hat schon ein anderer Fahrer') + '"' : '')
+        + (nr === jetzt ? ' class="an"' : '') + '><img ' + 'src' + '="' + 'img/fahrer/p' + String(nr).padStart(2, '0') + '.jpg' + '" alt="" loading="lazy" width="96" height="96"></button>').join('') + '</div></div>';
+    hdAvatarWahlBox.hidden = false;
+  }
+  function hdAutoWerkzeugZeile(car) {
+    // One button per row (like the Blink row): the controller's menu navigation walks the rows up / down.
+    const z = document.createElement('div');
+    z.className = 'hd-werkzeug';
+    const reihe = (w, html, title) => {
+      const r = document.createElement('div');
+      r.className = 'opt-row opt-breit gar-a-aktion';
+      r.innerHTML = '<button type="button" data-w="' + w + '"' + (title ? ' title="' + title + '"' : '') + '>' + html + '</button>';
+      z.appendChild(r);
+      return r.firstChild;
+    };
+    reihe('wahl', t('Avatar wählen')).onclick = () => hdAvatarWahl(car);
+    reihe('zufall', '&#x1F3B2; ' + t('Zufälliger Avatar')).onclick = () => hdAvatarZufall(car);
+    const ak = reihe('akku', t('Akku voll – kalibrieren'), t('Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.'));
+    if (!(car.battery > 0)) { ak.disabled = true; ak.title = t('Das Auto hat noch keinen Akkustand gemeldet.'); }
+    ak.onclick = () => {
+      if (!(car.battery > 0) || typeof akkuVollMerken !== 'function') return;
+      akkuVollMerken(car, car.battery);
+      showHudToast(t('Akku kalibriert') + ': ' + garageLabel(car) + ' = 100 %');
+      if (typeof renderGarage === 'function') renderGarage();
+    };
+    return z;
+  }
   // v3.0: the garage's "Driver and Car Settings" header as a race-weekend grid card - large portrait, the name
   // (the given h3, kept for everything that reads it), the car number on a plate in the car colour, make / model.
   function hdGridKarte(car, kopf) {
@@ -124167,6 +124367,139 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       blink: !!c.ghost.pitBlink, ziel: +(c.ghost.lastTarget || 0).toFixed(2), frei: hdBoxStreckeFrei(c) })),
     fuer: (id) => { const c = garage.find((x) => x.device && String(x.device.id) === String(id)); const p = c && hdBoxFuer(c); return p ? { nr: p.nr, k: p.k, seite: p.seite } : null; },
   });
+  // =====================================================================================
+  // Hybrid-Dash 3.0: PREVIOUSLY PAIRED CARS - a themed car picker, reconnect, forget
+  // =====================================================================================
+  //
+  // BESTELLT: "In the Garage menu, have somewhere to see previously paired cars, where you can forget pairing and
+  // reconnect easily. When you press connect, is it possible to make an app themed pop up instead [of the browser's],
+  // where instead of the Bluetooth name it shows the car model and colour?"
+  //
+  // What the browser allows: a car this site was ALREADY allowed to use (navigator.bluetooth.getDevices(), and the
+  // APK's bridge) can be connected without the browser's chooser - so those are listed here with what the app knows
+  // about them: number, driver, make / model, colour. A car that was NEVER paired can only be offered by the
+  // browser's own chooser (Web Bluetooth does not let a page scan by itself); "Pair a new car" opens it. Forget:
+  // BluetoothDevice.forget() takes the site's permission back (Chrome 101+), and the car leaves the list.
+  //
+  // What the app knows about a car is kept per device id in hybriddash.gepaart.v1 - written whenever a car is in the
+  // garage, so the list can show it while the car is off.
+  const HD_GEPAART_STORE = 'hybriddash.gepaart.v1';
+  function hdGepaartLesen() {
+    try { return JSON.parse(localStorage.getItem(HD_GEPAART_STORE) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function hdGepaartSchreiben(o) {
+    try { localStorage.setItem(HD_GEPAART_STORE, JSON.stringify(o)); } catch (e) { /* private */ }
+  }
+  // Called from renderGarage (cheap: only writes when something changed).
+  function hdGepaartMerken() {
+    let alle;
+    try { alle = garage.filter((c) => c && c.device && !c.sim && !c.probe && String(c.device.id).indexOf('relay-') !== 0); } catch (e) { return; }
+    if (!alle.length) return;
+    const o = hdGepaartLesen();
+    let neu = false;
+    for (const c of alle) {
+      const id = String(c.device.id);
+      const e = { bt: c.device.name || '', alias: c.alias || '', colorId: c.colorId || '', modellId: carModellWert(c.modellId) || '',
+                  nummer: typeof hdNummer === 'function' ? hdNummer(c) : '', zuletzt: (o[id] && o[id].zuletzt) || Date.now() };
+      const alt = o[id];
+      if (!alt || alt.bt !== e.bt || alt.alias !== e.alias || alt.colorId !== e.colorId || alt.modellId !== e.modellId || String(alt.nummer) !== String(e.nummer)) {
+        e.zuletzt = Date.now(); o[id] = e; neu = true;
+      }
+    }
+    if (neu) hdGepaartSchreiben(o);
+  }
+  // Every car the app can connect without the browser's chooser (permission kept), with what it knows about it.
+  async function hdGepaartListe() {
+    const o = hdGepaartLesen();
+    let geraete = [];
+    try { if (navigator.bluetooth && typeof navigator.bluetooth.getDevices === 'function') geraete = await navigator.bluetooth.getDevices(); } catch (e) { geraete = []; }
+    geraete = geraete.filter((d) => /^HYBRID/i.test(d.name || ''));
+    const liste = geraete.map((d) => ({ id: String(d.id), dev: d, info: o[String(d.id)] || { bt: d.name || '' } }));
+    // Cars the app remembers but the browser no longer lists (permission gone, other browser): shown as "pair again".
+    Object.keys(o).forEach((id) => { if (!liste.some((x) => x.id === id)) liste.push({ id, dev: null, info: o[id] }); });
+    liste.forEach((x) => { x.verbunden = garage.some((c) => c.device && String(c.device.id) === x.id); });
+    liste.sort((a, b) => (b.verbunden - a.verbunden) || ((b.info.zuletzt || 0) - (a.info.zuletzt || 0)));
+    return liste;
+  }
+  function hdGepaartEsc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
+  function hdGepaartZeile(x) {
+    const i = x.info || {};
+    const farbe = (typeof CAR_COLORS !== 'undefined' && CAR_COLORS.find((f) => f.id === i.colorId)) || null;
+    const hex = farbe ? farbe.hex : '#7a7a7a';
+    const modell = i.modellId && typeof carModellName === 'function' ? carModellName(i.modellId) : '';
+    const name = i.alias || '';
+    const nr = i.nummer ? '#' + i.nummer : '';
+    const titel = [nr, name].filter(Boolean).join(' ') || t('Unbenanntes Auto');
+    const unter = [modell, farbe ? t(farbe.name) : ''].filter(Boolean).join(' · ') || t('Modell und Farbe noch nicht eingestellt');
+    const avatar = typeof hdAvatarSvg === 'function' ? hdAvatarSvg(name || i.bt || x.id, hex, 0, 56, i.modellId || '') : '';
+    const status = x.verbunden ? '<span class="hdg-st an">' + t('verbunden') + '</span>'
+      : x.dev ? '<span class="hdg-st">' + t('gepaart') + '</span>' : '<span class="hdg-st aus">' + t('neu koppeln') + '</span>';
+    return `<div class="hdg-zeile" data-id="${hdGepaartEsc(x.id)}" style="--hdg-farbe:${hex}">`
+      + `<span class="hdg-bild">${avatar}</span>`
+      + `<span class="hdg-text"><b>${hdGepaartEsc(titel)}</b><span>${hdGepaartEsc(unter)}</span><small>${hdGepaartEsc(i.bt || '')}</small></span>`
+      + status
+      + `<span class="hdg-knoepfe">`
+      + (!x.verbunden && x.dev ? `<button type="button" class="primary" data-hdg="verbinden">${t('Verbinden')}</button>` : '')
+      + `<button type="button" data-hdg="vergessen"${x.verbunden ? ' disabled title="' + hdGepaartEsc(t('Erst trennen')) + '"' : ''}>${t('Vergessen')}</button>`
+      + `</span></div>`;
+  }
+  let hdGepaartBox = null;
+  async function hdGepaartOeffnen() {
+    if (!hdGepaartBox) {
+      hdGepaartBox = document.createElement('div');
+      hdGepaartBox.id = 'hd-gepaart'; hdGepaartBox.className = 'hd-gepaart'; hdGepaartBox.setAttribute('role', 'dialog');
+      hdGepaartBox.setAttribute('aria-modal', 'true'); hdGepaartBox.setAttribute('data-i18n-skip', '');
+      document.body.appendChild(hdGepaartBox);
+      hdGepaartBox.addEventListener('click', hdGepaartKlick);
+    }
+    hdGepaartBox.hidden = false;
+    hdGepaartBox.innerHTML = '<div class="hdg-karte"><div class="hdg-kopf"><b>' + t('Gepaarte Autos') + '</b>'
+      + '<button type="button" class="hdg-zu" data-hdg="zu" aria-label="' + t('Schließen') + '">&#10005;</button></div>'
+      + '<p class="hdg-hinweis">' + t('Lädt …') + '</p></div>';
+    const liste = await hdGepaartListe();
+    const karte = hdGepaartBox.querySelector('.hdg-karte');
+    const verbindbar = liste.filter((x) => x.dev && !x.verbunden).length;
+    karte.innerHTML = '<div class="hdg-kopf"><b>' + t('Gepaarte Autos') + '</b>'
+      + '<button type="button" class="hdg-zu" data-hdg="zu" aria-label="' + t('Schließen') + '">&#10005;</button></div>'
+      + (liste.length ? '<div class="hdg-liste">' + liste.map(hdGepaartZeile).join('') + '</div>'
+        : '<p class="hdg-hinweis">' + t('Noch keine Autos gepaart.') + '</p>')
+      + '<div class="hdg-fuss">'
+      + '<button type="button" data-hdg="neu">+ ' + t('Neues Auto koppeln') + '</button>'
+      + (verbindbar ? '<button type="button" class="primary" data-hdg="alle">&#10227; ' + t('Alle verbinden') + ' (' + verbindbar + ')</button>' : '')
+      + '</div>'
+      + '<p class="hdg-hinweis">' + t('Gepaarte Autos verbinden direkt, ohne das Auswahlfenster des Browsers. Ein neues Auto muss der Browser einmal selbst anbieten – danach steht es hier mit Modell und Farbe.') + '</p>';
+    hdGepaartBox._liste = liste;
+  }
+  function hdGepaartZu() { if (hdGepaartBox) hdGepaartBox.hidden = true; }
+  async function hdGepaartKlick(e) {
+    if (e.target === hdGepaartBox) { hdGepaartZu(); return; }
+    const b = e.target.closest('[data-hdg]');
+    if (!b) return;
+    const was = b.dataset.hdg;
+    if (was === 'zu') { hdGepaartZu(); return; }
+    if (was === 'neu') { hdGepaartZu(); garageConnect(); return; }
+    if (was === 'alle') { hdGepaartZu(); garageBekannteVerbinden($('gar-bekannte')); return; }
+    const zeile = b.closest('.hdg-zeile');
+    const x = zeile && (hdGepaartBox._liste || []).find((y) => y.id === zeile.dataset.id);
+    if (!x) return;
+    if (was === 'verbinden' && x.dev) {
+      b.disabled = true; b.textContent = t('Suche …');
+      const gesehen = await garageGesehen(x.dev, 8000);
+      if (!gesehen) { showHudToast(t('Auto nicht gefunden – ist es an und in Reichweite?')); hdGepaartOeffnen(); return; }
+      try { await garageGeraetAufnehmen(x.dev); } catch (err) { showHudToast(t('Verbinden fehlgeschlagen')); }
+      hdGepaartOeffnen();
+    } else if (was === 'vergessen') {
+      const name = (x.info && (x.info.alias || x.info.bt)) || x.id;
+      if (!window.confirm(t('Kopplung vergessen?') + '\n\n' + name + '\n\n' + t('Zum Verbinden muss das Auto danach wieder im Auswahlfenster des Browsers gewählt werden.'))) return;
+      try { if (x.dev && typeof x.dev.forget === 'function') await x.dev.forget(); } catch (err) { /* already gone */ }
+      const o = hdGepaartLesen(); delete o[x.id]; hdGepaartSchreiben(o);
+      log('Pairing forgotten: ' + name + ' (' + x.id + ').', 'info');
+      hdGepaartOeffnen();
+      if (typeof renderGarage === 'function') renderGarage();
+    }
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && hdGepaartBox && !hdGepaartBox.hidden) { e.preventDefault(); hdGepaartZu(); } }, true);
+  window.HYBRIDDASH_GEPAART = Object.freeze({ oeffnen: hdGepaartOeffnen, zu: hdGepaartZu, liste: hdGepaartListe, merken: hdGepaartMerken });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------
   //

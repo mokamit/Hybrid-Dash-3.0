@@ -62,9 +62,33 @@
   }
   const dashAkkuHalter = {};
 
-  function batteryPercent(raw) {
+  // Hybrid-Dash 3.0 REPORTED: "The cars are fully charged but they keep showing 65 %. The cars use the stock
+  // battery." A full stock battery reports ~149, the scale's top was 155 (65 % = raw 149). Now "full" is kept PER CAR
+  // (device id, localStorage hybriddash.akku.v1): it starts at 149 (stock battery), rises by itself whenever that car
+  // reports more (the smoothed value, i.e. the max of 5 s), and the garage has "Battery is full - calibrate", which
+  // sets it to what the car reports right now.
+  const AKKU_VOLL_STOCK = 149, AKKU_KALIB_STORE = 'hybriddash.akku.v1';
+  let akkuVollJe = {};
+  try { akkuVollJe = JSON.parse(localStorage.getItem(AKKU_KALIB_STORE) || '{}') || {}; } catch (e) { akkuVollJe = {}; }
+  function akkuVollFuer(car) {
+    const id = car && car.device ? String(car.device.id) : '';
+    const v = id ? akkuVollJe[id] : null;
+    return v > AKKU_LEER + 4 && v <= 200 ? v : AKKU_VOLL_STOCK;
+  }
+  function akkuVollMerken(car, roh) {
+    if (!car || !car.device || !(roh > AKKU_LEER + 4) || roh > 200) return;
+    akkuVollJe[String(car.device.id)] = roh;
+    try { localStorage.setItem(AKKU_KALIB_STORE, JSON.stringify(akkuVollJe)); } catch (e) { /* private */ }
+  }
+  // Learn upwards: a car that reports more than its "full" has a fuller battery than assumed.
+  function akkuLernen(car) {
+    if (car && car.battery > akkuVollFuer(car)) akkuVollMerken(car, car.battery);
+  }
+  function batteryPercent(raw, car) {
+    if (car === undefined) { try { car = playerCar; } catch (e) { car = null; } }
+    const voll = akkuVollFuer(car);
     return Math.max(0, Math.min(100,
-      Math.round((raw - AKKU_LEER) / (AKKU_VOLL - AKKU_LEER) * 100)));
+      Math.round((raw - AKKU_LEER) / (voll - AKKU_LEER) * 100)));
   }
 
   // Hier stand renderLapList(), und es tat nichts: es schrieb in #dash-lap-list und
@@ -4355,7 +4379,7 @@
                && c.battery !== undefined && c.battery !== null)
                .map((c) => ({ car: c,
                               label: typeof garageLabel === 'function' ? garageLabel(c) : '',
-                              value: batteryPercent(c.battery) / 100 })) };
+                              value: batteryPercent(c.battery, c) / 100 })) };
   }
   setInterval(() => {
     if (typeof ansagenPruefen !== 'function') return;

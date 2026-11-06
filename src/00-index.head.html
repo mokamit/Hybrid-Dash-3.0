@@ -5803,6 +5803,39 @@
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
 
+  /* ---- Hybrid-Dash 3.0: paired-cars picker, avatar picker, car tools (98p-hd-gepaart.js, 98i) ---- */
+  .hd-gepaart { position: fixed; inset: 0; z-index: 400; display: grid; place-items: center; padding: 20px; background: rgba(4,4,8,.72); }
+  .hd-gepaart[hidden] { display: none; }
+  .hdg-karte { width: min(760px, 100%); max-height: 86vh; overflow: auto; background: #121318; border: 1px solid rgba(255,255,255,.14);
+    border-top: 3px solid var(--b-red, #e10600); box-shadow: 0 20px 60px rgba(0,0,0,.6); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .hdg-kopf { display: flex; align-items: center; justify-content: space-between; }
+  .hdg-kopf b { font: italic 900 24px var(--b-font, sans-serif); letter-spacing: .04em; text-transform: uppercase; }
+  .hdg-zu { width: 36px; height: 36px; padding: 0; font-size: 16px; }
+  .hdg-liste { display: flex; flex-direction: column; gap: 8px; }
+  .hdg-zeile { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 8px 10px;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-left: 5px solid var(--hdg-farbe, #777); }
+  .hdg-bild .hd-avatar { display: block; width: 56px; height: 56px; }
+  .hdg-text { display: flex; flex-direction: column; min-width: 0; }
+  .hdg-text b { font: italic 900 19px var(--b-font, sans-serif); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hdg-text span { font-size: 14px; color: #d9dce2; }
+  .hdg-text small { font-size: 11px; color: var(--muted, #8a93a3); font-family: monospace; }
+  .hdg-st { font: 800 11px var(--b-font, sans-serif); letter-spacing: .08em; text-transform: uppercase; padding: 2px 8px; border: 1px solid rgba(255,255,255,.3); color: #d9dce2; }
+  .hdg-st.an { background: #3ddc84; border-color: #3ddc84; color: #04140a; }
+  .hdg-st.aus { color: #8a93a3; }
+  .hdg-knoepfe { display: flex; gap: 6px; }
+  .hdg-knoepfe button, .hdg-fuss button { padding: 6px 12px; font-size: 13px; }
+  .hdg-fuss { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hdg-hinweis { margin: 0; font-size: 12.5px; color: var(--muted, #a8adb8); }
+  @media (max-width: 560px) { .hdg-zeile { grid-template-columns: 48px minmax(0, 1fr); } .hdg-st, .hdg-knoepfe { grid-column: 2; } }
+  .hdav-karte { width: min(900px, 100%); }
+  .hdav-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+  .hdav-raster button { padding: 0; aspect-ratio: 1; border: 2px solid transparent; background: #000; overflow: hidden; border-radius: 10px; }
+  .hdav-raster button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .hdav-raster button:hover:not(:disabled) { border-color: #fff; }
+  .hdav-raster button.an { border-color: var(--b-red, #e10600); box-shadow: 0 0 0 2px var(--b-red, #e10600); }
+  .hdav-raster button:disabled { opacity: .28; cursor: not-allowed; }
+  .hd-werkzeug { display: contents; }
+
   /* ---- Hybrid-Dash 3.0: app logo in the header, banner at the very top of the main menu ---- */
   header#k-kopf .hdr-logo .hd-logo-bild { display: block; height: 26px; width: auto; }
   @media (max-height: 480px) { header#k-kopf .hdr-logo .hd-logo-bild { height: 18px; } }
@@ -6121,6 +6154,8 @@
           <button type="button" class="k-knopf" id="fa-editor">Editor</button>
           <button type="button" class="k-knopf" id="fa-laden">Laden</button>
           <button type="button" class="k-knopf" id="fa-raum">Raum</button>
+          <button type="button" class="k-knopf hd-fa-stat" id="fa-hd-stats" title="Statistik dieser Strecke">Statistik</button>
+          <button type="button" class="k-knopf hd-fa-stat" id="fa-hd-tele" title="Telemetrie dieser Strecke">Telemetrie</button>
           <button type="button" class="k-knopf" id="fa-reinig-stre" hidden>Reinigungsfahrzeug starten</button>
           <button type="button" class="k-knopf" id="fa-druck" hidden>Druckvorlagen</button>
           <button type="button" class="k-knopf" id="fa-foto" hidden title="Optimal: quer, z. B. 4:3 oder 16:9">Foto</button>
@@ -13578,7 +13613,7 @@
         <span class="opt-val" id="funk-rundlauf" data-i18n-skip>&ndash;</span></div>
       <div class="opt-row"><div class="opt-label">Bekannte Autos beim Start verbinden
           <small>Nur in der Android-App: Beim Start verbindet sie nacheinander alle Autos, die schon einmal verbunden waren (mit gemerkter Rolle oder gemerktem Namen) und gerade erreichbar sind. Ein Auto, das mit einem anderen Ger&auml;t verbunden, aus oder au&szlig;er Reichweite ist, wird ausgelassen. Im Browser verlangt Bluetooth f&uuml;r jedes Auto einen Klick.</small></div>
-        <label class="tgl"><input type="checkbox" id="setting-autoverbinden" checked><span></span></label></div>
+        <label class="tgl"><input type="checkbox" id="setting-autoverbinden"><span></span></label></div>
       <!-- v1.3.15 (WIP): Funkprioritaet je Rolle zu Beginn der Startampel (funkPrioritaetVorStart, 90-ghosts.js). -->
       <div class="opt-row"><div class="opt-label">Funkpriorit&auml;t beim Start<span class="wip-tag">WIP</span><small>Nur in der Android-App: Zu Beginn der Startampel, solange alle Autos stehen, bekommen die gesteuerten Autos (Spieler 1&ndash;3) das schnellste Verbindungsintervall und NPCs, Safety Car und Reinigungswagen ein ausgewogenes. So nehmen die NPCs dem Funk nicht die kurzen Zeitfenster weg, und die gesteuerten Autos reagieren schneller. Die Autos werden nacheinander umgestellt, im Abstand von 0,15 s.</small></div>
         <label class="tgl"><input type="checkbox" id="setting-funk-prio" checked><span></span></label></div>
