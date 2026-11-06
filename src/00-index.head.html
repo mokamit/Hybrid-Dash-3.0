@@ -5806,6 +5806,22 @@
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
 
+  /* ---- Hybrid-Dash 3.0: the full-screen cockpit uses the whole window ----
+     REPORTED: "In the cockpit window, the UI is not fully utilized. There is a lot of empty space at the top and
+     bottom." The grid rows had their content height and the grid was centred (align-content: center), so on a
+     tall window a band stayed empty above and below. Now the rows stretch: the main row (lap / gear / times)
+     and the tile strip share the free height 1.6 : 1, the grid starts right under the cockpit tabs, and the
+     status line and footer sit at the bottom edge. The Pit Wall and Race Director screens span the same rows,
+     so they grow with them. */
+  /* Only on a screen at least 560 px tall (class set by cockpitVollbildPassung): a phone in landscape keeps the compact layout. */
+  body.race-fs #race-dash.gt3.hd-cp-voll { align-content: stretch;
+    grid-template-rows: auto auto minmax(0, 1.6fr) minmax(0, 1fr) auto auto auto auto;
+    padding-top: 58px; }
+  body.race-fs #race-dash.gt3.hd-cp-voll > .gt3-left, body.race-fs #race-dash.gt3.hd-cp-voll > .gt3-gear, body.race-fs #race-dash.gt3.hd-cp-voll > .gt3-right,
+  body.race-fs #race-dash.gt3.hd-cp-voll > .gt3-strip { min-height: 0; align-self: stretch; }
+  body.race-fs #race-dash.gt3.hd-cp-voll > .gt3-left { grid-auto-rows: minmax(0, 1fr); align-content: stretch; }
+  body.race-fs #race-dash.gt3.hd-cp-voll > .gt3-strip > * { min-height: 0; }
+
   /* ---- Hybrid-Dash 3.0: title screen merged into the main menu (hdOhneTitel) ---- */
   .hd-banner { flex: none; display: flex; align-items: center; gap: 14px 22px; flex-wrap: wrap; justify-content: space-between;
     max-width: 1264px; width: 100%; margin: 8px auto 6px; padding: 8px 14px; box-sizing: border-box;
