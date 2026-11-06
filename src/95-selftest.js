@@ -8191,7 +8191,7 @@
       const h = a[0].getAttribute('href');
       if (h.indexOf('https://') !== 0) schlecht.push('Kurzlink nicht https: ' + h);
       // HybridDash: the cockpit link points to this fork's own page instead of OmegaSim's short link.
-      if (h.indexOf('mokamit.github.io/hybrid-dash-3.0') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
+      if (h.indexOf('mokamit.github.io/Hybrid-Dash-3.0') < 0) schlecht.push('Kurzlink zeigt woanders: ' + h);
       if ((a[0].getAttribute('rel') || '').indexOf('noopener') < 0) schlecht.push('rel ohne noopener');
       if (a[0].getAttribute('target') !== '_blank') schlecht.push('kein target=_blank');
       // Das Omega kommt per <use> aus dem Kopfzeilen-Logo. Fehlt der Pfad, bleibt ein
