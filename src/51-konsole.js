@@ -1126,6 +1126,9 @@
     kn('fa-editor', () => konsoleZeige('track', 'edit'));
     kn('fa-laden', () => konsoleZeige('track', 'laden'));
     kn('fa-raum', () => konsoleZeige('track', 'raum'));
+    // Hybrid-Dash 3.0 BESTELLT: "On the track card add a quick button to view the statistics and telemetry of that track."
+    kn('fa-hd-stats', () => { showTab('options'); showSubpage('opt-stats'); });
+    kn('fa-hd-tele', () => { if (typeof teleSeiteOeffnen === 'function') teleSeiteOeffnen(); });
     kn('fa-druck', () => konsoleZeige('track', 'print'));
     kn('fa-profil', () => meisterOeffnen());
     // v1.0.45 BESTELLT: "Reinigungsfahrzeug starten" im Autos- und Strecken-Menue.

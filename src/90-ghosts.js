@@ -1780,7 +1780,7 @@
   // dazu der kleinste je gemeldete Rohwert - mit ihm laesst sich AKKU_LEER nachmessen.
   function garAkkuText(car) {
     if (car.battery === null || car.battery === undefined || typeof batteryPercent !== 'function') return '';
-    const p = batteryPercent(car.battery);
+    const p = batteryPercent(car.battery, car);
     return ' &middot; <span class="gar-akku' + (p < 25 ? ' knapp' : '') + '">' + t('Akku') + ' ' + p + '&nbsp;%'
       + (car.akkuMinRoh !== undefined ? ' (min ' + car.akkuMinRoh + ')' : '') + '</span>';
   }
@@ -2239,31 +2239,48 @@
     plusKnopf.type = 'button';
     plusKnopf.className = 'gar-karte-neu primary';
     plusKnopf.textContent = '+ ' + t('Auto verbinden');
-    plusKnopf.onclick = () => { const c = $('gar-connect'); if (c) c.click(); };
+    // Hybrid-Dash 3.0: cars paired before are offered in the app's own picker (model, colour, number) and connect
+    // without the browser's chooser; only when there are none does it go straight to the browser's.
+    plusKnopf.onclick = async () => {
+      const bekannt = typeof hdGepaartListe === 'function' ? (await hdGepaartListe()).filter((x) => x.dev && !x.verbunden) : [];
+      if (bekannt.length && typeof hdGepaartOeffnen === 'function') hdGepaartOeffnen();
+      else { const c = $('gar-connect'); if (c) c.click(); }
+    };
     plus.appendChild(plusKnopf);
     leiste.appendChild(plus);
     // HybridDash: reconnect every car this browser was allowed to use before, in one click.
+    // Hybrid-Dash 3.0 BESTELLT: "don't auto connect the cars, just have a dedicated button to reconnect all previously
+    // paired cars, maybe next to the disconnect all button" - always shown there (greyed out with none to connect),
+    // with "Paired cars" (the list with reconnect / forget) beside it.
     const bek = document.createElement('div');
     bek.className = 'opt-row opt-breit gar-a-aktion';
     const bekKnopf = document.createElement('button');
     bekKnopf.type = 'button';
     bekKnopf.id = 'gar-bekannte';
     bekKnopf.className = 'gar-karte-neu gar-bekannte';
-    bekKnopf.hidden = true;
+    bekKnopf.textContent = '⟳ ' + t('Alle wieder verbinden');
     bekKnopf.onclick = () => garageBekannteVerbinden(bekKnopf);
     bek.appendChild(bekKnopf);
-    leiste.appendChild(bek);
     garageBekannteKandidaten().then((l) => {
       if (garBekannteLaeuft) return;
-      bekKnopf.hidden = !l.length;
-      bek.hidden = !l.length;
-      bekKnopf.textContent = '⟳ ' + t('Bekannte Autos verbinden') + ' (' + l.length + ')';
+      bekKnopf.disabled = !l.length;
+      bekKnopf.textContent = '⟳ ' + t('Alle wieder verbinden') + ' (' + l.length + ')';
     });
-    bek.hidden = true;
-    ['gar-stop-ghosts', 'gar-go', 'gar-disconnect-all', 'gar-to-cockpit'].forEach((id) => {
+    const gep = document.createElement('div');
+    gep.className = 'opt-row opt-breit gar-a-aktion';
+    const gepKnopf = document.createElement('button');
+    gepKnopf.type = 'button'; gepKnopf.id = 'gar-gepaart'; gepKnopf.className = 'gar-karte-neu';
+    gepKnopf.textContent = t('Gepaarte Autos');
+    gepKnopf.onclick = () => { if (typeof hdGepaartOeffnen === 'function') hdGepaartOeffnen(); };
+    gep.appendChild(gepKnopf);
+    ['gar-stop-ghosts', 'gar-go', 'gar-disconnect-all'].forEach((id) => {
       const z = garAktionsZeile(id);
       if (z) leiste.appendChild(z);
     });
+    leiste.appendChild(bek);
+    leiste.appendChild(gep);
+    { const z = garAktionsZeile('gar-to-cockpit'); if (z) leiste.appendChild(z); }
+    if (typeof hdGepaartMerken === 'function') hdGepaartMerken();
     // v1.1.3: virtuelle Fahrt (60d-virtuell.js) - ein Auto ohne Bluetooth auf der Editor-Strecke.
     // BESTELLT: ganz unten, unter "Zum Cockpit".
     const virt = document.createElement('div');
@@ -2304,6 +2321,8 @@
       bb.onclick = () => blinkCar(car);
       zb.appendChild(bb);
       rechts.appendChild(zb);
+      // Hybrid-Dash 3.0: avatar (pick / random) and battery calibration for this car.
+      if (typeof hdAutoWerkzeugZeile === 'function') rechts.appendChild(hdAutoWerkzeugZeile(car));
       // Name
       const zn = document.createElement('div');
       zn.className = 'opt-row gk-zeile gar-a-name';
@@ -2907,7 +2926,7 @@
     if (rennPauseAktiv()) {
       car.tileCode = b[12]; car.tileCount = b[11];
       car.lastCodeAt = rennZeitJetzt();
-      car.battery = akkuGlaetten(car, b[10], rennZeitJetzt());
+      car.battery = akkuGlaetten(car, b[10], rennZeitJetzt()); if (typeof akkuLernen === 'function') akkuLernen(car);
       if (car.race) zielSperreFlanke(car.race, b);
       if (car === playerCar) handleDashboardBytes(b);
       return;
@@ -2994,7 +3013,7 @@
     car.yaw = b[3] > 127 ? b[3] - 256 : b[3];
     // v0.9.87: geglaettet (Maximum der letzten 5 s) - unter Gas sackt die Spannung ab, und
     // der Rohwert sprang dann um bis zu zehn Prozent.
-    car.battery = akkuGlaetten(car, b[10], rennZeitJetzt());
+    car.battery = akkuGlaetten(car, b[10], rennZeitJetzt()); if (typeof akkuLernen === 'function') akkuLernen(car);
   }
 
   function stopGhost(car) {

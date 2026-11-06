@@ -736,6 +736,75 @@
     return `<button type="button" class="hd-avatar-knopf" data-hd-avatar="${String(car.device.id).replace(/"/g, '')}" `
       + `title="${t('Avatar ändern')}">${hdAvatarFuerAuto(car, px || 34)}</button>`;
   }
+  // ---- v3.0: avatar picker / random, battery calibration (garage, the selected car) ----
+  // BESTELLT: "Have the ability to randomise or change the driver avatar." A tap on the avatar still steps to the next
+  // free portrait of the car's colour; "Choose avatar" opens all 72 (the car's colour first, portraits other drivers
+  // have are greyed out), "Random" picks a free one at random. No two drivers share one either way.
+  function hdAvatarSetzen(car, nr) {
+    hd.fotos = hd.fotos || {};
+    hd.fotos[String(car.device.id)] = nr;
+    hdSpeichern();
+    if (typeof renderGarage === 'function') renderGarage();
+  }
+  function hdAvatarBelegtVonAnderen(car) {
+    const id = String(car.device.id);
+    return new Set([...hdFotoBelegung()].filter(([cid]) => cid !== id).map(([, nr]) => nr));
+  }
+  function hdAvatarZufall(car) {
+    const andere = hdAvatarBelegtVonAnderen(car);
+    const k = hdFarbKlasse(carColor(car).hex);
+    const jetzt = hdFotoBelegung().get(String(car.device.id));
+    let pool = HD_FOTOS.map((_, i) => i).filter((i) => !andere.has(i) && i !== jetzt && (!k || HD_FOTOS[i].indexOf(k) >= 0));
+    if (!pool.length) pool = HD_FOTOS.map((_, i) => i).filter((i) => !andere.has(i) && i !== jetzt);
+    if (pool.length) hdAvatarSetzen(car, pool[Math.floor(Math.random() * pool.length)]);
+  }
+  let hdAvatarWahlBox = null;
+  function hdAvatarWahl(car) {
+    if (!hdAvatarWahlBox) {
+      hdAvatarWahlBox = document.createElement('div');
+      hdAvatarWahlBox.className = 'hd-gepaart hd-avwahl'; hdAvatarWahlBox.setAttribute('role', 'dialog'); hdAvatarWahlBox.setAttribute('aria-modal', 'true');
+      hdAvatarWahlBox.setAttribute('data-i18n-skip', '');
+      document.body.appendChild(hdAvatarWahlBox);
+      hdAvatarWahlBox.addEventListener('click', (e) => {
+        if (e.target === hdAvatarWahlBox || e.target.closest('[data-hdav="zu"]')) { hdAvatarWahlBox.hidden = true; return; }
+        const b = e.target.closest('[data-hdav-nr]');
+        if (b && !b.disabled && hdAvatarWahlBox._car) { hdAvatarWahlBox.hidden = true; hdAvatarSetzen(hdAvatarWahlBox._car, Number(b.dataset.hdavNr)); }
+      });
+    }
+    hdAvatarWahlBox._car = car;
+    const andere = hdAvatarBelegtVonAnderen(car);
+    const jetzt = hdFotoBelegung().get(String(car.device.id));
+    const k = hdFarbKlasse(carColor(car).hex);
+    const reihe = HD_FOTOS.map((_, i) => i).sort((a, b) => ((k && HD_FOTOS[b].indexOf(k) >= 0) - (k && HD_FOTOS[a].indexOf(k) >= 0)) || a - b);
+    hdAvatarWahlBox.innerHTML = '<div class="hdg-karte hdav-karte"><div class="hdg-kopf"><b>' + t('Avatar wählen') + '</b>'
+      + '<button type="button" class="hdg-zu" data-hdav="zu" aria-label="' + t('Schließen') + '">&#10005;</button></div>'
+      + '<div class="hdav-raster">' + reihe.map((nr) => '<button type="button" data-hdav-nr="' + nr + '"' + (andere.has(nr) ? ' disabled title="' + t('Hat schon ein anderer Fahrer') + '"' : '')
+        + (nr === jetzt ? ' class="an"' : '') + '><img ' + 'src' + '="' + 'img/fahrer/p' + String(nr).padStart(2, '0') + '.jpg' + '" alt="" loading="lazy" width="96" height="96"></button>').join('') + '</div></div>';
+    hdAvatarWahlBox.hidden = false;
+  }
+  function hdAutoWerkzeugZeile(car) {
+    // One button per row (like the Blink row): the controller's menu navigation walks the rows up / down.
+    const z = document.createElement('div');
+    z.className = 'hd-werkzeug';
+    const reihe = (w, html, title) => {
+      const r = document.createElement('div');
+      r.className = 'opt-row opt-breit gar-a-aktion';
+      r.innerHTML = '<button type="button" data-w="' + w + '"' + (title ? ' title="' + title + '"' : '') + '>' + html + '</button>';
+      z.appendChild(r);
+      return r.firstChild;
+    };
+    reihe('wahl', t('Avatar wählen')).onclick = () => hdAvatarWahl(car);
+    reihe('zufall', '&#x1F3B2; ' + t('Zufälliger Avatar')).onclick = () => hdAvatarZufall(car);
+    const ak = reihe('akku', t('Akku voll – kalibrieren'), t('Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.'));
+    if (!(car.battery > 0)) { ak.disabled = true; ak.title = t('Das Auto hat noch keinen Akkustand gemeldet.'); }
+    ak.onclick = () => {
+      if (!(car.battery > 0) || typeof akkuVollMerken !== 'function') return;
+      akkuVollMerken(car, car.battery);
+      showHudToast(t('Akku kalibriert') + ': ' + garageLabel(car) + ' = 100 %');
+      if (typeof renderGarage === 'function') renderGarage();
+    };
+    return z;
+  }
   // v3.0: the garage's "Driver and Car Settings" header as a race-weekend grid card - large portrait, the name
   // (the given h3, kept for everything that reads it), the car number on a plate in the car colour, make / model.
   function hdGridKarte(car, kopf) {
