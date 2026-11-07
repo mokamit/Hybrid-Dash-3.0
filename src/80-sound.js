@@ -2411,7 +2411,8 @@
     xs.ton.frequency.value = 20000;
     xs.cut = audioCtx.createGain();
     xs.cut.gain.value = 1;
-    xs.ton.connect(xs.cut).connect(audioCtx.destination);
+    // v3.0: through the presence / exciter stage (98u-hd-klang.js) instead of straight to the speakers.
+    xs.ton.connect(xs.cut).connect(typeof hdKlangKette === 'function' ? hdKlangKette(audioCtx) : audioCtx.destination);
     // Die getaktete Verstaerkung des Begrenzers. Ein Rechteck bei 28 Hz ist die
     // Zuendunterbrechung - der wiedererkennbarste Motorklang ueberhaupt, und er kostet einen
     // Oszillator. Die Tiefe steht auf 0, solange der Begrenzer nicht anliegt.
@@ -2689,7 +2690,9 @@
 
     // 1. Lastabhaengige Helligkeit. Ein Motor im Schub ist dunkler als einer am Gas, und
     //    zwar nicht nur leiser: die hohen Teiltoene kommen aus der Verbrennung.
-    const tonHz = 2200 + 9000 * Math.max(0, Math.min(1, load));
+    // v3.0 GEMELDET: "the engine sounds sound muffled". The floor was 2.2 kHz, i.e. off full throttle the engine sat
+    // behind a 2.2 kHz lowpass - a car heard through a wall. Coasting stays a little darker, no longer muffled.
+    const tonHz = 7000 + 13000 * Math.max(0, Math.min(1, load));
 
     // 2. Begrenzer-Stottern: die Zuendunterbrechung, 28 Hz, siehe xBus().
     //

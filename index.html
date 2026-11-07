@@ -5167,6 +5167,16 @@
   @media (prefers-reduced-motion: reduce) {
     #ampel-overlay { transition: none; }
   }
+  /* v3.0 GEMELDET: "the starting lights are not inside the light box". The box was min(50vw, 50vh) wide but the
+     lamps were sized from the width alone (6.5vw), so on a wide, short window they spilled out. Now everything is
+     a share of the box's own size (--ab): 5 lamps of 15 % + 4 gaps of 3.5 % + 4 % padding each side = 97 %. */
+  #ampel-overlay { --ab: min(50vw, 50vh); width: var(--ab); box-sizing: border-box;
+    padding: calc(var(--ab) * .04) calc(var(--ab) * .04) calc(var(--ab) * .05); }
+  #ampel-overlay .ampel-beam { gap: calc(var(--ab) * .035); }
+  #ampel-overlay .ampel-col { gap: calc(var(--ab) * .03); }
+  #ampel-overlay .ampel-lamp { width: calc(var(--ab) * .15); height: calc(var(--ab) * .15); }
+  #ampel-overlay .ampel-lamp.red { box-shadow: inset 0 0 0 1px #ff6b74, 0 0 calc(var(--ab) * .07) calc(var(--ab) * .012) rgba(255,45,58,.62); }
+  #ampel-overlay .ampel-mast { height: calc(var(--ab) * .03); margin-top: calc(var(--ab) * .035); }
   /* ======================= COCKPIT-ANSICHT "ACC" (v1.3.51, Vorgabe seit v1.3.58) =========
      BESTELLT: "ein alternativer Haupt-Cockpit-Screen fuer das nicht-virtuelle Fahren, mit
      allen Elementen des aktuellen ausser Regenradar, im Stil von ACC [Assetto Corsa
@@ -16106,6 +16116,7 @@
     "Kopplung vergessen?": "Forget this pairing?",
     "Auswählen": "Select",
     "Zurückgehen": "Back",
+    "Klarerer Motorklang": "Clearer engine sound",
     "Zufällig": "Random",
     "Akku 100 %": "Battery 100 %",
     "Ansagen überspringen": "Skip announcements",
@@ -20227,6 +20238,7 @@
     "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
     "Auswählen": "Elegir",
     "Zurückgehen": "Atrás",
+    "Klarerer Motorklang": "Motor más nítido",
     "Zufällig": "Aleatorio",
     "Akku 100 %": "Batería 100 %",
     "Ansagen überspringen": "Saltar anuncios",
@@ -60690,7 +60702,8 @@
     xs.ton.frequency.value = 20000;
     xs.cut = audioCtx.createGain();
     xs.cut.gain.value = 1;
-    xs.ton.connect(xs.cut).connect(audioCtx.destination);
+    // v3.0: through the presence / exciter stage (98u-hd-klang.js) instead of straight to the speakers.
+    xs.ton.connect(xs.cut).connect(typeof hdKlangKette === 'function' ? hdKlangKette(audioCtx) : audioCtx.destination);
     // Die getaktete Verstaerkung des Begrenzers. Ein Rechteck bei 28 Hz ist die
     // Zuendunterbrechung - der wiedererkennbarste Motorklang ueberhaupt, und er kostet einen
     // Oszillator. Die Tiefe steht auf 0, solange der Begrenzer nicht anliegt.
@@ -60968,7 +60981,9 @@
 
     // 1. Lastabhaengige Helligkeit. Ein Motor im Schub ist dunkler als einer am Gas, und
     //    zwar nicht nur leiser: die hohen Teiltoene kommen aus der Verbrennung.
-    const tonHz = 2200 + 9000 * Math.max(0, Math.min(1, load));
+    // v3.0 GEMELDET: "the engine sounds sound muffled". The floor was 2.2 kHz, i.e. off full throttle the engine sat
+    // behind a 2.2 kHz lowpass - a car heard through a wall. Coasting stays a little darker, no longer muffled.
+    const tonHz = 7000 + 13000 * Math.max(0, Math.min(1, load));
 
     // 2. Begrenzer-Stottern: die Zuendunterbrechung, 28 Hz, siehe xBus().
     //
@@ -126308,6 +126323,76 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     hdSkipVorher = gedrueckt;
   }, 100);
   window.HYBRIDDASH_INTRO = Object.freeze({ skip: hdIntroSkip });
+  // =====================================================================================
+  // Hybrid-Dash 3.0: ENGINE SOUND - presence and exciter stage
+  // =====================================================================================
+  //
+  // GEMELDET: "Can you check the engine sounds too? They don't sound right, they sound muffled."
+  // Measured: most engine loops are rendered at 22 kHz / Vorbis q2 and carry almost nothing above 1-3 kHz (the
+  // synthetic engines in tools/engine_synth.py roll their partials off fast; the recordings were band-limited when
+  // encoded). The ear hears that as "through a wall". A filter cannot bring back what is not there, so this stage
+  // does what a studio exciter does with a dull recording:
+  //   dry ───────────────────────────────────────────────┐
+  //   └─ highpass 150 Hz ─ soft saturation (tanh) ─ highpass 1 kHz ─ 0.4 ─────┴─ peaking +3 dB @ 1.8 kHz
+  //                                                                             ─ high shelf ─ limiter ─ out
+  // The saturation turns the 1-3 kHz content into its own upper harmonics (3-9 kHz), the highpass after it keeps
+  // only those, and they are mixed back under the dry signal: brightness and "rasp" without hiss. Every engine sound
+  // (recorded and synthetic, both player cars) passes the extras bus (xBus in 80-sound.js), which ends here.
+  // Off in Options > Sound ("Clearer engine sound") for the original sound.
+  const HD_KLANG_STORE = 'hybriddash.klang.v1';
+  let hdKlangAn = (() => { try { return localStorage.getItem(HD_KLANG_STORE) !== 'aus'; } catch (e) { return true; } })();
+  let hdKlangKnoten = null;
+  function hdKlangKurve(drive) {
+    const n = 2048, c = new Float32Array(n), nt = Math.tanh(drive);
+    for (let i = 0; i < n; i++) { const x = (i / (n - 1)) * 2 - 1; c[i] = Math.tanh(x * drive) / nt; }
+    return c;
+  }
+  // Builds the stage in ctx (any AudioContext, also an OfflineAudioContext for the self-test) and returns its input.
+  const HD_KLANG = { hp1: 150, drive: 7, hp2: 1000, anteil: 0.4, praesenzHz: 1800, praesenzDb: 3, luftHz: 4000, luftDb: 3 };
+  function hdKlangKette(ctx, ziel, p) {
+    const P = Object.assign({}, HD_KLANG, p || {});
+    const aus = ziel || ctx.destination;
+    const ein = ctx.createGain();
+    const praesenz = ctx.createBiquadFilter(); praesenz.type = 'peaking'; praesenz.frequency.value = P.praesenzHz; praesenz.Q.value = 0.8;
+    const luft = ctx.createBiquadFilter(); luft.type = 'highshelf'; luft.frequency.value = P.luftHz;
+    const hp1 = ctx.createBiquadFilter(); hp1.type = 'highpass'; hp1.frequency.value = P.hp1; hp1.Q.value = 0.7;
+    const form = ctx.createWaveShaper(); form.curve = hdKlangKurve(P.drive); form.oversample = '2x';
+    const hp2 = ctx.createBiquadFilter(); hp2.type = 'highpass'; hp2.frequency.value = P.hp2; hp2.Q.value = 0.7;
+    const anteil = ctx.createGain();
+    ein.connect(praesenz);
+    ein.connect(hp1).connect(form).connect(hp2).connect(anteil).connect(praesenz);
+    // Safety limiter: the added harmonics may push peaks over full scale; this holds them at about -1 dBFS.
+    const grenze = ctx.createDynamicsCompressor();
+    grenze.threshold.value = -2; grenze.knee.value = 1; grenze.ratio.value = 20; grenze.attack.value = 0.002; grenze.release.value = 0.08;
+    praesenz.connect(luft).connect(grenze).connect(aus);
+    const k = { ein, praesenz, luft, anteil, P };
+    hdKlangSetzen(k, hdKlangAn);
+    if (ctx === (typeof audioCtx !== 'undefined' ? audioCtx : null)) hdKlangKnoten = k;
+    return ein;
+  }
+  function hdKlangSetzen(k, an) {
+    if (!k) return;
+    k.praesenz.gain.value = an ? k.P.praesenzDb : 0;
+    k.luft.gain.value = an ? k.P.luftDb : 0;
+    k.anteil.gain.value = an ? k.P.anteil : 0;
+  }
+  // The switch in Options > Sound, next to the engine-sound settings.
+  (function hdKlangSchalter() {
+    const nach = document.getElementById('setting-engine-extras');
+    const zeile = nach && nach.closest('.opt-row');
+    if (!zeile || document.getElementById('hd-klang-an')) return;
+    const r = document.createElement('div');
+    r.className = 'opt-row hd-row';
+    r.innerHTML = '<span class="opt-label">Klarerer Motorklang</span>'
+      + '<label class="tgl"><input type="checkbox" id="hd-klang-an"' + (hdKlangAn ? ' checked' : '') + '><span></span></label>';
+    zeile.parentNode.insertBefore(r, zeile.nextSibling);
+    r.querySelector('input').addEventListener('change', (e) => {
+      hdKlangAn = e.target.checked;
+      try { localStorage.setItem(HD_KLANG_STORE, hdKlangAn ? 'an' : 'aus'); } catch (err) { /* private */ }
+      hdKlangSetzen(hdKlangKnoten, hdKlangAn);
+    });
+  })();
+  window.HYBRIDDASH_KLANG = Object.freeze({ kette: hdKlangKette, an: () => hdKlangAn });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------
   //
