@@ -6218,6 +6218,8 @@
   .hdhm-mini svg { width: 100% !important; height: 100% !important; display: block; }
   .hdhm-plus { width: 52px; height: 52px; display: grid; place-items: center; font-size: 26px; color: #fff; background: transparent; border: 2px dashed rgba(255,255,255,.4); border-radius: 0; cursor: pointer; }
   .hdhm-plus:hover { border-color: var(--c-red); color: var(--c-red); }
+  .hdhm-reihe.viele { gap: 6px; }
+  .hdhm-reihe.viele .hdhm-mini, .hdhm-reihe.viele .hdhm-plus { width: 44px; height: 44px; }
   html body #tab-fahren .k-fahren.hdhm #fa-auto > .k-knopfreihe { position: static; padding: 8px 18px 0; }
   /* header on the main menu: logo row, then the tabs with « LB ... RB »; status and language top right */
   body.k-menue > #hd-banner { background: transparent; border: 0; padding-top: 18px; padding-bottom: 4px; }
@@ -45806,8 +45808,11 @@
     // nicht fallen, weil ein Ghost zuerst ueber die Linie kommt - sonst waere die
     // angefangene Runde des Fahrers abgeschnitten. Mit zwei Fahrern gilt dasselbe zweimal,
     // und ohne diese Zeile waere die abgeschnittene Runde die von Auto 2.
+    // v3.0 GEMELDET: "the final lap feature doesn't seem to be working in practice mode". A driver car that is not
+    // driving (standing for HD_ZIEL_STEHT_MS, e.g. the host watching NPCs in practice) no longer holds the flag.
     const fahrer = (c) => !(typeof hdDnfAuto === 'function' && hdDnfAuto(c)) && (c.role === 'player'
-                          || (zweiSpieler && /^player[2-9]$/.test(c.role)));
+                          || (zweiSpieler && /^player[2-9]$/.test(c.role)))
+                          && !(typeof hdFahrerSteht === 'function' && hdFahrerSteht(c));
     if (warFinishing && !garage.some(fahrer)) finishRace();
   }
 
@@ -123667,6 +123672,48 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     hdRlLog('Chequered flag – final lap', 'ziel');
     hdRlSag('Final lap. The chequered flag is out.');
   }
+  // ---- The chequered flag when the drivers are not driving -------------------------------------
+  // A session in 'finishing' ends when every car still racing has crossed the line: the NPCs in carLapCrossed, the
+  // drivers in playerLapCrossed. A driver car that stands still never crosses - in practice the host often watches
+  // the NPCs while Player 1 stays in the pit, and before the first movement the practice clock has not even started.
+  // So: a driver car that has not moved for HD_ZIEL_STEHT_MS does not hold the flag (hdFahrerSteht, used in
+  // carLapCrossed), and if nothing at all is driving any more after the flag, the session ends (hdZielWache).
+  const HD_ZIEL_STEHT_MS = 8000;
+  const hdFahrerBewegt = new Map();   // device id -> rennZeitJetzt() of the last movement
+  function hdFahrerTempo(c) {
+    try {
+      if (c === playerCar) return Math.abs(physEngine.state.speedKmh);
+      const z = typeof zusatzPlatzVonRolle === 'function' ? zusatzPlatzVonRolle(c.role) : null;
+      return z && z.motor ? Math.abs(z.motor.state.speedKmh) : 0;
+    } catch (e) { return 0; }
+  }
+  function hdFahrerSteht(c) {
+    if (!c || !c.device) return false;
+    const t = hdFahrerBewegt.get(String(c.device.id));
+    return t === undefined || rennZeitJetzt() - t >= HD_ZIEL_STEHT_MS;
+  }
+  function hdZielWache() {
+    let state; try { state = raceState; } catch (e) { return; }
+    const jetzt = rennZeitJetzt();
+    const schwelle = 3 / REAL_SCALE;
+    const fahrer = garage.filter((c) => c && c.device && (c.role === 'player' || /^player[2-9]$/.test(c.role || '')));
+    if (state !== 'racing' && state !== 'finishing') { hdFahrerBewegt.clear(); return; }
+    for (const c of fahrer) {
+      const id = String(c.device.id);
+      if (hdFahrerTempo(c) > schwelle) hdFahrerBewegt.set(id, jetzt);
+      else if (!hdFahrerBewegt.has(id) && state === 'racing') hdFahrerBewegt.set(id, jetzt);   // grace from the start
+    }
+    if (state !== 'finishing') return;
+    const npcFahren = garage.some((c) => c && c.role === 'ghost' && c.ghost && c.ghost.running && !(c.ghost.finish)
+      && !(typeof hdDnfAuto === 'function' && hdDnfAuto(c)));
+    const fahrerFahren = fahrer.some((c) => !hdFahrerSteht(c) && !(typeof hdDnfAuto === 'function' && hdDnfAuto(c)));
+    if (!npcFahren && !fahrerFahren) {
+      log('Final lap: no car is driving any more - session ends.', 'info');
+      finishRace();
+    }
+  }
+  setInterval(hdZielWache, 250);
+
   function hdRlWetter(modus) {
     if (typeof wxModusSetzen !== 'function') return;
     wxModusSetzen(modus);
@@ -124094,6 +124141,13 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Chequered flag.
       hdRlZiel();
       ok('chequered flag: final lap for everyone', raceState === 'finishing', 'state ' + raceState);
+      // Practice: a driver car standing still does not hold the flag.
+      const fahrerAuto = { role: 'player', device: { id: 'rl-fahrer' } };
+      hdFahrerBewegt.set('rl-fahrer', rennZeitJetzt());
+      const frisch = hdFahrerSteht(fahrerAuto);
+      hdFahrerBewegt.set('rl-fahrer', rennZeitJetzt() - HD_ZIEL_STEHT_MS - 1);
+      ok('final lap: a driver who just moved holds the flag, one standing 8 s does not', !frisch && hdFahrerSteht(fahrerAuto), 'fresh ' + frisch);
+      hdFahrerBewegt.delete('rl-fahrer');
     } catch (e) {
       ok('self-test ran', false, String(e && e.stack || e));
     } finally {
@@ -126229,7 +126283,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     try { autos = garage.filter((c) => c && c.device && c.role !== 'safetycar' && c.role !== 'reinig'); } catch (e) { autos = []; }
     let ich = null;
     try { ich = playerCar && autos.includes(playerCar) ? playerCar : (autos[0] || null); } catch (e) { ich = autos[0] || null; }
-    const andere = autos.filter((c) => c !== ich).slice(0, 3);
+    // every other car (GEMELDET: "I have 6 cars connected, but it only shows 4 avatars"); smaller when many
+    const andere = autos.filter((c) => c !== ich);
     const schl = [lang, ich ? [ich.device.id, ich.alias, ich.colorId, ich.modellId, ich.role, typeof hdNummer === 'function' ? hdNummer(ich) : ''].join(':') : '-',
       andere.map((c) => c.device.id + ':' + c.colorId + ':' + c.alias).join(',')].join('|');
     if (schl === hdHmSchluessel && box.firstChild) return;
@@ -126248,7 +126303,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       html += '<span class="hdhm-portrait hdhm-leer"><svg viewBox="0 0 100 100" width="120" height="120" aria-hidden="true"><path d="M50 14c-20 0-34 14-34 34v14c0 6 4 10 10 10h48c6 0 10-4 10-10V48c0-20-14-34-34-34z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M22 48h56v10H22z" fill="currentColor" opacity=".5"/><path d="M28 86h44" stroke="currentColor" stroke-width="4"/></svg></span>'
         + '<span class="hdhm-rolle">' + esc(t('Kein Auto verbunden')) + '</span>';
     }
-    html += '<span class="hdhm-reihe">' + andere.map((c) => '<span class="hdhm-mini" title="' + esc(c.alias || garageLabel(c)) + '" style="--f:' + esc(carColor(c).hex) + '">' + portrait(c, 52) + '</span>').join('')
+    html += '<span class="hdhm-reihe' + (andere.length > 4 ? ' viele' : '') + '">' + andere.map((c) => '<span class="hdhm-mini" title="' + esc(c.alias || garageLabel(c)) + '" style="--f:' + esc(carColor(c).hex) + '">' + portrait(c, 52) + '</span>').join('')
       + '<button type="button" class="hdhm-plus" data-hdhm="plus" title="' + esc(t('Auto verbinden')) + '" aria-label="' + esc(t('Auto verbinden')) + '">+</button></span>';
     box.innerHTML = html;
   }

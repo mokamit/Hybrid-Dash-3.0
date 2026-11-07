@@ -149,6 +149,48 @@
     hdRlLog('Chequered flag – final lap', 'ziel');
     hdRlSag('Final lap. The chequered flag is out.');
   }
+  // ---- The chequered flag when the drivers are not driving -------------------------------------
+  // A session in 'finishing' ends when every car still racing has crossed the line: the NPCs in carLapCrossed, the
+  // drivers in playerLapCrossed. A driver car that stands still never crosses - in practice the host often watches
+  // the NPCs while Player 1 stays in the pit, and before the first movement the practice clock has not even started.
+  // So: a driver car that has not moved for HD_ZIEL_STEHT_MS does not hold the flag (hdFahrerSteht, used in
+  // carLapCrossed), and if nothing at all is driving any more after the flag, the session ends (hdZielWache).
+  const HD_ZIEL_STEHT_MS = 8000;
+  const hdFahrerBewegt = new Map();   // device id -> rennZeitJetzt() of the last movement
+  function hdFahrerTempo(c) {
+    try {
+      if (c === playerCar) return Math.abs(physEngine.state.speedKmh);
+      const z = typeof zusatzPlatzVonRolle === 'function' ? zusatzPlatzVonRolle(c.role) : null;
+      return z && z.motor ? Math.abs(z.motor.state.speedKmh) : 0;
+    } catch (e) { return 0; }
+  }
+  function hdFahrerSteht(c) {
+    if (!c || !c.device) return false;
+    const t = hdFahrerBewegt.get(String(c.device.id));
+    return t === undefined || rennZeitJetzt() - t >= HD_ZIEL_STEHT_MS;
+  }
+  function hdZielWache() {
+    let state; try { state = raceState; } catch (e) { return; }
+    const jetzt = rennZeitJetzt();
+    const schwelle = 3 / REAL_SCALE;
+    const fahrer = garage.filter((c) => c && c.device && (c.role === 'player' || /^player[2-9]$/.test(c.role || '')));
+    if (state !== 'racing' && state !== 'finishing') { hdFahrerBewegt.clear(); return; }
+    for (const c of fahrer) {
+      const id = String(c.device.id);
+      if (hdFahrerTempo(c) > schwelle) hdFahrerBewegt.set(id, jetzt);
+      else if (!hdFahrerBewegt.has(id) && state === 'racing') hdFahrerBewegt.set(id, jetzt);   // grace from the start
+    }
+    if (state !== 'finishing') return;
+    const npcFahren = garage.some((c) => c && c.role === 'ghost' && c.ghost && c.ghost.running && !(c.ghost.finish)
+      && !(typeof hdDnfAuto === 'function' && hdDnfAuto(c)));
+    const fahrerFahren = fahrer.some((c) => !hdFahrerSteht(c) && !(typeof hdDnfAuto === 'function' && hdDnfAuto(c)));
+    if (!npcFahren && !fahrerFahren) {
+      log('Final lap: no car is driving any more - session ends.', 'info');
+      finishRace();
+    }
+  }
+  setInterval(hdZielWache, 250);
+
   function hdRlWetter(modus) {
     if (typeof wxModusSetzen !== 'function') return;
     wxModusSetzen(modus);
@@ -576,6 +618,13 @@
       // Chequered flag.
       hdRlZiel();
       ok('chequered flag: final lap for everyone', raceState === 'finishing', 'state ' + raceState);
+      // Practice: a driver car standing still does not hold the flag.
+      const fahrerAuto = { role: 'player', device: { id: 'rl-fahrer' } };
+      hdFahrerBewegt.set('rl-fahrer', rennZeitJetzt());
+      const frisch = hdFahrerSteht(fahrerAuto);
+      hdFahrerBewegt.set('rl-fahrer', rennZeitJetzt() - HD_ZIEL_STEHT_MS - 1);
+      ok('final lap: a driver who just moved holds the flag, one standing 8 s does not', !frisch && hdFahrerSteht(fahrerAuto), 'fresh ' + frisch);
+      hdFahrerBewegt.delete('rl-fahrer');
     } catch (e) {
       ok('self-test ran', false, String(e && e.stack || e));
     } finally {
