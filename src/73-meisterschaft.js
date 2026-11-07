@@ -914,10 +914,13 @@
   function msDetailKlick(ev) {
     const b = ev.target.closest('[data-akt]');
     if (b) { msStandFokus = msStandKnoepfe().findIndex((k) => k[0] === b.getAttribute('data-akt')); msStandAktion(b.getAttribute('data-akt')); return; }
-    const el = ev.target.closest('[data-d]');
+    // v3.0 GEMELDET: "These arrows don't work properly." The arrows (.ms-pf) carry data-d too (-1 / 1, the direction),
+    // so closest('[data-d]') found the ARROW instead of its row: ▶ always jumped to row 1 (Format), ◀ set the row to
+    // -1 and left the event editor. The row is the nearest data-d that is not an arrow.
+    const pf = ev.target.closest('.ms-pf');
+    const el = (pf ? pf.parentElement : ev.target).closest('[data-d]:not(.ms-pf)');
     if (!el || el.classList.contains('aus') || msAnsicht !== 'plan') return;
     msDetail = +el.getAttribute('data-d');
-    const pf = ev.target.closest('.ms-pf');
     if (pf) { msLinks(+pf.getAttribute('data-d')); return; }
     if (el.tagName === 'BUTTON') { msBestaetigen(); return; }
     msZeichnen();
