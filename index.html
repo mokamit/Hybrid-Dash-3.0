@@ -6085,7 +6085,9 @@
   /* Settings: each row a framed box, group headings as section titles */
   .opt-head { font-size: clamp(18px, 1.8vw, 28px); font-weight: 600; letter-spacing: .04em; border-left: 4px solid var(--c-red) !important;
     background: transparent !important; padding-top: 12px; }
-  .opt-row { border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03) !important; margin-bottom: 6px; box-shadow: none !important; }
+  .opt-row { border: 1px solid rgba(255,255,255,.12); margin-bottom: 6px; box-shadow: none !important; }
+  /* not on a garage card with the car's own photo: that card's background IS the photo (renderGarage sets it inline) */
+  .opt-row:not(.gk-mit-foto) { background: rgba(255,255,255,.03) !important; }
   .opt-row:hover { border-color: rgba(255,255,255,.3); }
   .opt-row.menu-nav-sel { border-color: var(--c-red); box-shadow: 0 0 0 1px var(--c-red), 0 0 14px rgba(225,6,50,.35) !important; }
   .opt-label { font-weight: 600; }
@@ -6227,6 +6229,9 @@
   /* The car count, link, mute and language buttons sit in the logo row (position: fixed) but belong to the header: the header
      must stack above the banner (z-index 61), or the transparent banner swallows every click on them. */
   body.k-menue header#k-kopf { z-index: 62; }
+  /* ...and the page itself above both: its pop-ups (two-laptop panel, questions, lightbox) live inside main and must
+     cover the whole screen, logo row and tabs included. main has no background, so the header stays visible. */
+  body main { z-index: 63; }
   /* Start-up (until the scripts have opened the main menu): the old title screen never shows - the main menu does,
      from the first frame. hd-start is removed by hdOhneTitel (98l-hd-ui.js). */
   body.hd-start #tab-home { display: none !important; }
