@@ -20,7 +20,35 @@
     ['Fahren', 'driver-assist'], ['Fahren', 'setting-gearbox'], ['Fahren', 'hd-gangstufe'], ['Fahren', 'setting-autoshift'],
     ['Lenkung & Bremse', 'phys-steerresp'], ['Lenkung & Bremse', 'setting-steer-calib'], ['Lenkung & Bremse', 'setting-brakebias'], ['Lenkung & Bremse', 'setting-brakepower'],
     ['Auto', 'setting-topspeed-kmh'], ['Auto', 'setting-grip'], ['Auto', 'setting-tyre-pressure'], ['Auto', 'setting-tyre-blankets'],
+    // v3.0 BESTELLT: "In the pre-race set up screen, have settings to adjust NPC settings too. Like their difficulty, top
+    // speed..." - the main ones from Options > NPCs (all of them stay there).
+    ['NPCs', 'ghost-speed'], ['NPCs', 'ghost-max-gerade'], ['NPCs', 'ghost-hardness'], ['NPCs', 'ghost-curve'], ['NPCs', 'ghost-streuung'],
+    ['NPCs', 'ghost-w-fehler'], ['NPCs', 'ghost-w-defend'], ['NPCs', 'ghost-pit'],
   ];
+  // Difficulty per NPC car = its pace level (GHOST_TEMPO_STUFEN, the same as "NPC pace" in the garage card).
+  function hdSetupNpcs() { try { return garage.filter((c) => c && c.device && c.role === 'ghost'); } catch (e) { return []; } }
+  function hdSetupStufe(c) { return (c.ghostStufe === undefined || c.ghostStufe === null) ? 1 : c.ghostStufe; }
+  function hdSetupStufeSetzen(cars, k) {
+    cars.forEach((c) => { c.ghostStufe = k; if (typeof carRolleMerken === 'function') carRolleMerken(c); });
+    if (typeof renderGarage === 'function') renderGarage();
+  }
+  function hdSetupStufenChips(aktiv, attr) {
+    return '<span class="hds-chips">' + GHOST_TEMPO_STUFEN.map((st, k) => '<button type="button" ' + attr + ' data-k="' + k + '"' + (k === aktiv ? ' class="an"' : '') + '>'
+      + hdSetupEsc(st.max ? 'MAX' : t(st.label)) + '</button>').join('') + '</span>';
+  }
+  function hdSetupNpcHtml() {
+    const npcs = hdSetupNpcs();
+    if (!npcs.length) return '<p class="hds-leer">' + hdSetupEsc(t('Keine NPCs in der Garage – gib einem Auto die Rolle NPC.')) + '</p>';
+    const alle = npcs.every((c) => hdSetupStufe(c) === hdSetupStufe(npcs[0])) ? hdSetupStufe(npcs[0]) : -1;
+    let h = '<div class="hds-z"><span class="hds-l">' + hdSetupEsc(t('Schwierigkeit für alle')) + '</span>' + hdSetupStufenChips(alle, 'data-hds-alle="1"') + '</div>';
+    h += '<div class="hds-npcs">' + npcs.map((c) => {
+      const f = carColor(c);
+      return '<div class="hds-npc" style="--f:' + hdSetupEsc(f.hex) + '"><span class="hds-npc-bild">' + (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(c, 36) : '') + '</span>'
+        + '<span class="hds-npc-name">' + hdSetupEsc(c.alias || c.tag || garageLabel(c)) + '</span>'
+        + hdSetupStufenChips(hdSetupStufe(c), 'data-hds-npc="' + hdSetupEsc(String(c.device.id)) + '"') + '</div>';
+    }).join('') + '</div>';
+    return h;
+  }
   // hdSetupFreigabe: when the screen was passed (Start pressed). The start then goes on - grid board first
   // (raceGridAnzeigen), then the lights (startRaceCountdown); both hooks let it through for HD_SETUP_FREI_MS, and the
   // race start uses it up, so the next session asks again.
@@ -134,6 +162,7 @@
       + gruppe('Fahren', preset + (gruppen['Fahren'] || []).join(''))
       + gruppe('Lenkung & Bremse', (gruppen['Lenkung & Bremse'] || []).join(''))
       + gruppe('Auto', (gruppen['Auto'] || []).join(''))
+      + '<section class="hds-gruppe hds-npc-gruppe"><h3>' + hdSetupEsc(t('NPCs')) + '</h3>' + hdSetupNpcHtml() + '<div class="hds-npc-regler">' + (gruppen['NPCs'] || []).join('') + '</div></section>'
       + '</div>'
       + '<div class="hds-fuss"><label class="hds-immer"><input type="checkbox" data-hds-immer="1"' + (hdSetupAn() ? ' checked' : '') + '> '
       + hdSetupEsc(t('Vor jeder Sitzung zeigen')) + '</label>'
@@ -169,6 +198,10 @@
     if (r) { tyres = r.dataset.hdsReifen; mischungWunsch = null; if (typeof applySurface === 'function') applySurface(); hdSetupMalen(); return; }
     const k = e.target.closest('[data-hds-tank]');
     if (k) { if (typeof pitVorwahl === 'object' && pitVorwahl) pitVorwahl.refuel = Number(k.dataset.hdsTank); hdSetupMalen(); return; }
+    const ga = e.target.closest('[data-hds-alle]');
+    if (ga) { hdSetupStufeSetzen(hdSetupNpcs(), +ga.dataset.k); hdSetupMalen(); return; }
+    const gn = e.target.closest('[data-hds-npc]');
+    if (gn) { hdSetupStufeSetzen(hdSetupNpcs().filter((c) => String(c.device.id) === gn.dataset.hdsNpc), +gn.dataset.k); hdSetupMalen(); return; }
     const a = e.target.closest('[data-hds-akt]');
     if (a) { if (a.dataset.hdsAkt === 'start') hdSetupStart(); else hdSetupZu(); }
   }

@@ -5878,6 +5878,16 @@
   .hds-chips button { font: 600 14px/1 var(--c-head, sans-serif); text-transform: uppercase; padding: 7px 10px; border-radius: 0; border: 2px solid var(--m, rgba(255,255,255,.3)); background: transparent; color: #fff; cursor: pointer; }
   .hds-chips button.an { background: var(--m, var(--c-red, #e10632)); color: #111; }
   .hds-chips button[data-hds-tank].an { background: var(--c-red, #e10632); color: #fff; border-color: var(--c-red, #e10632); }
+  .hds-npc-gruppe { grid-column: span 2; }
+  @media (max-width: 760px) { .hds-npc-gruppe { grid-column: auto; } }
+  .hds-npcs { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; padding-right: 4px; }
+  .hds-npc { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 4px 6px; border-left: 4px solid var(--f, #888); background: rgba(255,255,255,.03); }
+  .hds-npc-bild { width: 36px; height: 36px; overflow: hidden; } .hds-npc-bild svg { width: 100% !important; height: 100% !important; }
+  .hds-npc-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hds-npc .hds-chips button { padding: 5px 8px; font-size: 12px; }
+  .hds-npc-regler { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 18px; margin-top: 6px; }
+  .hds-chips button[data-hds-alle].an, .hds-chips button[data-hds-npc].an { background: var(--c-red, #e10632); color: #fff; border-color: var(--c-red, #e10632); }
+  .hds-leer { color: #b9b2b5; font-size: 13px; margin: 0; }
   .hds-fuss { display: flex; align-items: center; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
   .hds-immer { margin-right: auto; color: #b9b2b5; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
   .hds-fuss button { font: 700 18px/1 var(--c-head, sans-serif); letter-spacing: .04em; text-transform: uppercase; padding: 12px 22px; border-radius: 0; cursor: pointer; }

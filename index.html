@@ -5878,6 +5878,16 @@
   .hds-chips button { font: 600 14px/1 var(--c-head, sans-serif); text-transform: uppercase; padding: 7px 10px; border-radius: 0; border: 2px solid var(--m, rgba(255,255,255,.3)); background: transparent; color: #fff; cursor: pointer; }
   .hds-chips button.an { background: var(--m, var(--c-red, #e10632)); color: #111; }
   .hds-chips button[data-hds-tank].an { background: var(--c-red, #e10632); color: #fff; border-color: var(--c-red, #e10632); }
+  .hds-npc-gruppe { grid-column: span 2; }
+  @media (max-width: 760px) { .hds-npc-gruppe { grid-column: auto; } }
+  .hds-npcs { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; padding-right: 4px; }
+  .hds-npc { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 4px 6px; border-left: 4px solid var(--f, #888); background: rgba(255,255,255,.03); }
+  .hds-npc-bild { width: 36px; height: 36px; overflow: hidden; } .hds-npc-bild svg { width: 100% !important; height: 100% !important; }
+  .hds-npc-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hds-npc .hds-chips button { padding: 5px 8px; font-size: 12px; }
+  .hds-npc-regler { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 18px; margin-top: 6px; }
+  .hds-chips button[data-hds-alle].an, .hds-chips button[data-hds-npc].an { background: var(--c-red, #e10632); color: #fff; border-color: var(--c-red, #e10632); }
+  .hds-leer { color: #b9b2b5; font-size: 13px; margin: 0; }
   .hds-fuss { display: flex; align-items: center; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
   .hds-immer { margin-right: auto; color: #b9b2b5; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
   .hds-fuss button { font: 700 18px/1 var(--c-head, sans-serif); letter-spacing: .04em; text-transform: uppercase; padding: 12px 22px; border-radius: 0; cursor: pointer; }
@@ -16191,6 +16201,8 @@
     "Kopplung vergessen?": "Forget this pairing?",
     "Auswählen": "Select",
     "Zurückgehen": "Back",
+    "Schwierigkeit für alle": "Difficulty for all",
+    "Keine NPCs in der Garage – gib einem Auto die Rolle NPC.": "No NPCs in the garage – give a car the NPC role.",
     "Ohne Auswahlfenster verbinden": "Connect without the pop-up",
     "Chrome merkt sich die Freigabe der Autos nur mit dieser Einstellung. Adresse kopieren, in die Adresszeile einfügen, auf „Enabled“ stellen und Chrome neu starten. Danach steht bei jedem Auto „Verbinden“ – ganz ohne Fenster, auch „Alle verbinden“.": "Chrome only remembers the cars’ permission with this setting. Copy the address, paste it into the address bar, set it to “Enabled” and restart Chrome. After that every car shows “Connect” – no pop-up at all, “Connect all” too.",
     "Adresse kopieren": "Copy address",
@@ -20350,6 +20362,8 @@
     "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
     "Auswählen": "Elegir",
     "Zurückgehen": "Atrás",
+    "Schwierigkeit für alle": "Dificultad para todos",
+    "Keine NPCs in der Garage – gib einem Auto die Rolle NPC.": "No hay NPCs en el garaje: asigna a un coche el rol NPC.",
     "Ohne Auswahlfenster verbinden": "Conectar sin la ventana",
     "Chrome merkt sich die Freigabe der Autos nur mit dieser Einstellung. Adresse kopieren, in die Adresszeile einfügen, auf „Enabled“ stellen und Chrome neu starten. Danach steht bei jedem Auto „Verbinden“ – ganz ohne Fenster, auch „Alle verbinden“.": "Chrome solo recuerda el permiso de los coches con este ajuste. Copia la dirección, pégala en la barra de direcciones, ponla en “Enabled” y reinicia Chrome. Después cada coche muestra “Conectar”, sin ventana, también “Conectar todos”.",
     "Adresse kopieren": "Copiar dirección",
@@ -126935,7 +126949,35 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     ['Fahren', 'driver-assist'], ['Fahren', 'setting-gearbox'], ['Fahren', 'hd-gangstufe'], ['Fahren', 'setting-autoshift'],
     ['Lenkung & Bremse', 'phys-steerresp'], ['Lenkung & Bremse', 'setting-steer-calib'], ['Lenkung & Bremse', 'setting-brakebias'], ['Lenkung & Bremse', 'setting-brakepower'],
     ['Auto', 'setting-topspeed-kmh'], ['Auto', 'setting-grip'], ['Auto', 'setting-tyre-pressure'], ['Auto', 'setting-tyre-blankets'],
+    // v3.0 BESTELLT: "In the pre-race set up screen, have settings to adjust NPC settings too. Like their difficulty, top
+    // speed..." - the main ones from Options > NPCs (all of them stay there).
+    ['NPCs', 'ghost-speed'], ['NPCs', 'ghost-max-gerade'], ['NPCs', 'ghost-hardness'], ['NPCs', 'ghost-curve'], ['NPCs', 'ghost-streuung'],
+    ['NPCs', 'ghost-w-fehler'], ['NPCs', 'ghost-w-defend'], ['NPCs', 'ghost-pit'],
   ];
+  // Difficulty per NPC car = its pace level (GHOST_TEMPO_STUFEN, the same as "NPC pace" in the garage card).
+  function hdSetupNpcs() { try { return garage.filter((c) => c && c.device && c.role === 'ghost'); } catch (e) { return []; } }
+  function hdSetupStufe(c) { return (c.ghostStufe === undefined || c.ghostStufe === null) ? 1 : c.ghostStufe; }
+  function hdSetupStufeSetzen(cars, k) {
+    cars.forEach((c) => { c.ghostStufe = k; if (typeof carRolleMerken === 'function') carRolleMerken(c); });
+    if (typeof renderGarage === 'function') renderGarage();
+  }
+  function hdSetupStufenChips(aktiv, attr) {
+    return '<span class="hds-chips">' + GHOST_TEMPO_STUFEN.map((st, k) => '<button type="button" ' + attr + ' data-k="' + k + '"' + (k === aktiv ? ' class="an"' : '') + '>'
+      + hdSetupEsc(st.max ? 'MAX' : t(st.label)) + '</button>').join('') + '</span>';
+  }
+  function hdSetupNpcHtml() {
+    const npcs = hdSetupNpcs();
+    if (!npcs.length) return '<p class="hds-leer">' + hdSetupEsc(t('Keine NPCs in der Garage – gib einem Auto die Rolle NPC.')) + '</p>';
+    const alle = npcs.every((c) => hdSetupStufe(c) === hdSetupStufe(npcs[0])) ? hdSetupStufe(npcs[0]) : -1;
+    let h = '<div class="hds-z"><span class="hds-l">' + hdSetupEsc(t('Schwierigkeit für alle')) + '</span>' + hdSetupStufenChips(alle, 'data-hds-alle="1"') + '</div>';
+    h += '<div class="hds-npcs">' + npcs.map((c) => {
+      const f = carColor(c);
+      return '<div class="hds-npc" style="--f:' + hdSetupEsc(f.hex) + '"><span class="hds-npc-bild">' + (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(c, 36) : '') + '</span>'
+        + '<span class="hds-npc-name">' + hdSetupEsc(c.alias || c.tag || garageLabel(c)) + '</span>'
+        + hdSetupStufenChips(hdSetupStufe(c), 'data-hds-npc="' + hdSetupEsc(String(c.device.id)) + '"') + '</div>';
+    }).join('') + '</div>';
+    return h;
+  }
   // hdSetupFreigabe: when the screen was passed (Start pressed). The start then goes on - grid board first
   // (raceGridAnzeigen), then the lights (startRaceCountdown); both hooks let it through for HD_SETUP_FREI_MS, and the
   // race start uses it up, so the next session asks again.
@@ -127049,6 +127091,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       + gruppe('Fahren', preset + (gruppen['Fahren'] || []).join(''))
       + gruppe('Lenkung & Bremse', (gruppen['Lenkung & Bremse'] || []).join(''))
       + gruppe('Auto', (gruppen['Auto'] || []).join(''))
+      + '<section class="hds-gruppe hds-npc-gruppe"><h3>' + hdSetupEsc(t('NPCs')) + '</h3>' + hdSetupNpcHtml() + '<div class="hds-npc-regler">' + (gruppen['NPCs'] || []).join('') + '</div></section>'
       + '</div>'
       + '<div class="hds-fuss"><label class="hds-immer"><input type="checkbox" data-hds-immer="1"' + (hdSetupAn() ? ' checked' : '') + '> '
       + hdSetupEsc(t('Vor jeder Sitzung zeigen')) + '</label>'
@@ -127084,6 +127127,10 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (r) { tyres = r.dataset.hdsReifen; mischungWunsch = null; if (typeof applySurface === 'function') applySurface(); hdSetupMalen(); return; }
     const k = e.target.closest('[data-hds-tank]');
     if (k) { if (typeof pitVorwahl === 'object' && pitVorwahl) pitVorwahl.refuel = Number(k.dataset.hdsTank); hdSetupMalen(); return; }
+    const ga = e.target.closest('[data-hds-alle]');
+    if (ga) { hdSetupStufeSetzen(hdSetupNpcs(), +ga.dataset.k); hdSetupMalen(); return; }
+    const gn = e.target.closest('[data-hds-npc]');
+    if (gn) { hdSetupStufeSetzen(hdSetupNpcs().filter((c) => String(c.device.id) === gn.dataset.hdsNpc), +gn.dataset.k); hdSetupMalen(); return; }
     const a = e.target.closest('[data-hds-akt]');
     if (a) { if (a.dataset.hdsAkt === 'start') hdSetupStart(); else hdSetupZu(); }
   }
