@@ -305,6 +305,7 @@
     const ev = meister.plan.events[lauf.laeuft.idx];
     if (!ev) return '';
     return t('Meisterschaft') + ' · ' + t('Event') + ' ' + (lauf.laeuft.idx + 1) + '/' + meister.plan.events.length
+      + (meister.plan.events[lauf.laeuft.idx] && meister.plan.events[lauf.laeuft.idx].name ? ' · ' + meister.plan.events[lauf.laeuft.idx].name : '')
       + (meisterIstRennen(ev) ? ' · ' + t('Startaufstellung') + ': ' + meisterAufstText(lauf.laeuft.idx) : '');
   }
 
@@ -375,7 +376,8 @@
     lauf.laeuft = { idx: lauf.idx, modus: f.modus, seit: Date.now() };
     meisterSpeichern();
     meisterSchliessen();
-    msMeldung(t('Meisterschaft') + ' · ' + t('Event') + ' ' + (lauf.idx + 1) + '/' + meister.plan.events.length);
+    msMeldung(t('Meisterschaft') + ' · ' + t('Event') + ' ' + (lauf.idx + 1) + '/' + meister.plan.events.length
+      + (meister.plan.events[lauf.idx] && meister.plan.events[lauf.idx].name ? ' · ' + meister.plan.events[lauf.idx].name : ''));
     if (meisterMpAndere().length && typeof mpRennenFuerAlle === 'function') {
       showTab('race');
       mpRennenFuerAlle();
@@ -569,6 +571,21 @@
     return '<span class="ms-wert ' + (klasse || '') + '"><span class="ms-pf" data-d="-1">◀</span><span class="ms-w">' + msEsc(text)
       + '</span><span class="ms-pf" data-d="1">▶</span></span>';
   }
+  // v3.0 BESTELLT: "In the championship creation, can you add the ability to name the event?" Optional; without a
+  // name the event is "Event N" as before.
+  function meisterEventName(i) {
+    const e = meister.plan.events[i];
+    const n = e && typeof e.name === 'string' ? e.name.trim() : '';
+    return n || (t('Event') + ' ' + (i + 1));
+  }
+  function msNameFragen(i) {
+    const e = meister.plan.events[i];
+    if (!e) return;
+    const neu = window.prompt(t('Name des Events (leer = Event') + ' ' + (i + 1) + ')', e.name || '');
+    if (neu === null) return;
+    e.name = String(neu).trim().slice(0, 40);
+    meisterSpeichern();
+  }
   function msLaeuftNoch() { return !!(meister.lauf && !meister.lauf.fertig); }
   function msZeilen() {
     const z = msLaeuftNoch() ? [{ art: 'weiter' }] : [];
@@ -614,7 +631,7 @@
         const e = evs[r.i], f = meisterFormat(e);
         h += '<div class="ms-ev' + sel + '" data-k="' + k + '"><i style="background:' + MEISTER_FARBEN[r.i % MEISTER_FARBEN.length] + '"></i>'
           + '<span class="ms-nr">' + (r.i + 1) + '</span><span class="ms-bild">' + msStreckeBild(e.strecke) + '</span>'
-          + '<span class="ms-name"><b>' + msEsc(meisterStreckeName(e.strecke)) + '</b><span>' + msEsc(msUnterzeile(e)) + '</span></span>'
+          + '<span class="ms-name"><b>' + msEsc(e.name && e.name.trim() ? e.name.trim() + ' · ' + meisterStreckeName(e.strecke) : meisterStreckeName(e.strecke)) + '</b><span>' + msEsc(msUnterzeile(e)) + '</span></span>'
           + msWert(t(f.name), 'f-' + f.id) + '</div>';
       } else if (r.art === 'neu') {
         h += '<button type="button" class="ms-knopf ms-neu' + sel + '" data-k="' + k + '">' + msEsc(t('+ Event hinzufügen')) + '</button>'
@@ -646,6 +663,7 @@
   function msDetailZeilen(i) {
     const e = meister.plan.events[i], r = meisterIstRennen(e), f = meisterFormat(e);
     return [
+      { l: 'Name', w: (e.name && e.name.trim()) || t('Event') + ' ' + (i + 1), feld: 'name' },
       { l: 'Strecke', w: meisterStreckeName(e.strecke), feld: 'strecke' },
       { l: 'Format', w: t(f.name), feld: 'format' },
       { l: 'Umfang', w: e.umfang + ' ' + t(f.einheit), feld: 'umfang' },
@@ -691,12 +709,12 @@
       if (meister.lauf && !meister.lauf.fertig && meister.lauf.idx > 0) h += '<p class="ms-info ms-rot">' + msEsc(t('Eine laufende Meisterschaft wird dabei beendet.')) + '</p>';
     } else {
       const i = Math.min(msEvent, meister.plan.events.length - 1), e = meister.plan.events[i];
-      h += '<h3>' + msEsc(t('Event')) + ' ' + (i + 1) + '<small>' + msEsc(t(meisterIstRennen(e) ? 'mit Punkten' : 'ohne Punkte')) + '</small></h3>';
+      h += '<h3>' + msEsc(meisterEventName(i)) + '<small>' + msEsc(t(meisterIstRennen(e) ? 'mit Punkten' : 'ohne Punkte')) + '</small></h3>';
       const dz = msDetailZeilen(i);
       dz.forEach((r, k) => {
         const sel = k === msDetail ? ' sel' : '';
         if (r.knopf) {
-          if (k === 7) h += '<div class="ms-fuss">';
+          if (k === 0 || !dz[k - 1].knopf) h += '<div class="ms-fuss">';
           const inhalt = r.zeichen ? r.zeichen
             : r.tonne ? MS_TONNE + (r.arm ? ' ' + msEsc(t('Wirklich?')) : '')
             : msEsc(t(r.l));
@@ -753,7 +771,7 @@
     let d = '';
     if (!lauf.fertig) {
       const ev = evs[lauf.idx];
-      d += '<span class="ms-info">' + msEsc(t('Nächstes Event')) + ' · ' + (lauf.idx + 1) + ' / ' + evs.length + '</span>'
+      d += '<span class="ms-info">' + msEsc(t('Nächstes Event')) + ' · ' + (lauf.idx + 1) + ' / ' + evs.length + (ev.name ? ' · ' + msEsc(ev.name) : '') + '</span>'
         + '<span class="ms-titel">' + msEsc(meisterStreckeName(ev.strecke)) + ' · ' + msEsc(t(meisterFormat(ev).name)) + ' ' + ev.umfang + ' ' + msEsc(t(meisterFormat(ev).einheit)) + '</span>'
         + '<span class="ms-info">' + msEsc(msUnterzeile(ev)) + '</span>';
       if (meisterIstRennen(ev)) {
@@ -776,6 +794,7 @@
   // ---- BEDIENUNG -----------------------------------------------------------------------------
   function msRund(v, n) { return ((v % n) + n) % n; }
   function msAendern(i, feld, d) {
+    if (feld === 'name') { msNameFragen(i); return; }
     const e = meister.plan.events[i];
     const f = meisterFormat(e);
     if (feld === 'umfang') {
@@ -839,7 +858,7 @@
     }
     const z = msZeilen()[msZeile];
     if (z.art === 'weiter') { msAnsicht = 'stand'; msStandFokus = 0; }
-    else if (z.art === 'ev') { msEvent = z.i; msDetail = 0; }
+    else if (z.art === 'ev') { msEvent = z.i; msDetail = 1; }   // v3.0: row 0 is the name; start on Track as before
     else if (z.art === 'neu') msNeu();
     else if (z.art === 'los') { msStarten(); return; }
     else if (z.art === 'gl') { msLinks(1); return; }
@@ -852,7 +871,7 @@
   function msNeu() {
     if (meister.plan.events.length >= MEISTER_MAX_EVENTS) { msMeldung(t('Höchstens 10 Events')); return; }
     meister.plan.events.push(meisterEventNeu());
-    msEvent = meister.plan.events.length - 1; msZeile = msEvent; msDetail = 0;
+    msEvent = meister.plan.events.length - 1; msZeile = msEvent; msDetail = 1;
     meisterSpeichern();
   }
   var MS_TONNE = '<svg class="ms-tonne" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
@@ -923,6 +942,7 @@
     msDetail = +el.getAttribute('data-d');
     if (pf) { msLinks(+pf.getAttribute('data-d')); return; }
     if (el.tagName === 'BUTTON') { msBestaetigen(); return; }
+    if (msDetail === 0) { msNameFragen(msEvent); msZeichnen(); return; }   // v3.0: the name row
     msZeichnen();
   }
   // Steuerkreuz und Tasten (aus pollGamepad, vor allen anderen Menues). true = verbraucht.
