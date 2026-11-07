@@ -782,20 +782,25 @@
         + (nr === jetzt ? ' class="an"' : '') + '><img ' + 'src' + '="' + 'img/fahrer/p' + String(nr).padStart(2, '0') + '.jpg' + '" alt="" loading="lazy" width="96" height="96"></button>').join('') + '</div></div>';
     hdAvatarWahlBox.hidden = false;
   }
-  function hdAutoWerkzeugZeile(car) {
-    // One button per row (like the Blink row): the controller's menu navigation walks the rows up / down.
-    const z = document.createElement('div');
-    z.className = 'hd-werkzeug';
-    const reihe = (w, html, title) => {
-      const r = document.createElement('div');
-      r.className = 'opt-row opt-breit gar-a-aktion';
-      r.innerHTML = '<button type="button" data-w="' + w + '"' + (title ? ' title="' + title + '"' : '') + '>' + html + '</button>';
-      z.appendChild(r);
-      return r.firstChild;
+  // v3.0 BESTELLT: "Consolidate these buttons into one row, and make it more organised and compact." Blink, avatar
+  // (choose / random) and battery calibration share the Blink row as one compact strip; the controller's menu
+  // navigation walks a multi-button row left / right (menuNavRows in 50b-menu-nav.js splits it).
+  function hdAutoWerkzeugZeile(car, zeile) {
+    const z = zeile || document.createElement('div');
+    z.classList.add('hd-werkzeug-reihe');
+    const knopf = (w, icon, text, title) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.dataset.w = w;
+      if (title) b.title = title;
+      b.innerHTML = '<span class="hdw-i" aria-hidden="true">' + icon + '</span><span>' + text + '</span>';
+      z.appendChild(b);
+      return b;
     };
-    reihe('wahl', t('Avatar wählen')).onclick = () => hdAvatarWahl(car);
-    reihe('zufall', '&#x1F3B2; ' + t('Zufälliger Avatar')).onclick = () => hdAvatarZufall(car);
-    const ak = reihe('akku', t('Akku voll – kalibrieren'), t('Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.'));
+    const blink = z.querySelector('[data-act="blinken"]');
+    if (blink && !blink.querySelector('.hdw-i')) blink.innerHTML = '<span class="hdw-i" aria-hidden="true">&#x1F4A1;</span><span>' + t('Blinken') + '</span>';
+    knopf('wahl', '&#x1F464;', t('Avatar wählen')).onclick = () => hdAvatarWahl(car);
+    knopf('zufall', '&#x1F3B2;', t('Zufällig'), t('Zufälliger Avatar')).onclick = () => hdAvatarZufall(car);
+    const ak = knopf('akku', '&#x1F50B;', t('Akku 100 %'), t('Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.'));
     if (!(car.battery > 0)) { ak.disabled = true; ak.title = t('Das Auto hat noch keinen Akkustand gemeldet.'); }
     ak.onclick = () => {
       if (!(car.battery > 0) || typeof akkuVollMerken !== 'function') return;

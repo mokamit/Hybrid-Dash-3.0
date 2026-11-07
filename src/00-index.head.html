@@ -5835,6 +5835,20 @@
   .hdav-raster button.an { border-color: var(--b-red, #e10600); box-shadow: 0 0 0 2px var(--b-red, #e10600); }
   .hdav-raster button:disabled { opacity: .28; cursor: not-allowed; }
   .hd-werkzeug { display: contents; }
+  /* Skip the race intro (98t-hd-intro-skip.js) */
+  .hd-intro-skip { position: fixed; z-index: 9500; left: 50%; bottom: 72px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px; font: 700 20px/1 var(--c-head, sans-serif); letter-spacing: .05em; text-transform: uppercase; color: #fff; cursor: pointer;
+    background: var(--c-red, #e10632); border: 2px solid #fff; box-shadow: 0 6px 24px rgba(0,0,0,.5), 0 0 18px rgba(225,6,50,.55); }
+  .hd-intro-skip[hidden] { display: none; }
+  .hd-intro-skip:hover { background: #ff1f4b; }
+  .hd-intro-skip kbd { font: 600 12px/1 var(--b-font, sans-serif); padding: 3px 6px; border: 1px solid rgba(255,255,255,.6); border-radius: 4px; text-transform: none; }
+  /* Blink, avatar, random, battery: one compact strip of equal buttons */
+  html body .hd-werkzeug-reihe { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 6px !important; padding: 8px !important; }
+  html body .hd-werkzeug-reihe > button { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; margin: 0 !important; width: auto !important;
+    padding: 8px 6px !important; font: 600 14px/1.1 var(--c-head, sans-serif) !important; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; }
+  html body .hd-werkzeug-reihe > button > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+  html body .hd-werkzeug-reihe .hdw-i { font-size: 15px; line-height: 1; }
+  @media (max-width: 700px) { html body .hd-werkzeug-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
 
   /* ---- Hybrid-Dash 3.0: app logo in the header, banner at the very top of the main menu ---- */
   header#k-kopf .hdr-logo .hd-logo-bild { display: block; height: 26px; width: auto; }

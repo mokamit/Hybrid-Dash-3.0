@@ -21355,6 +21355,35 @@
     return { ok: !f.length, mass: f.length ? f.join(' | ') : 'Folge, Manifest DE/EN, Auslassen, Challenges, Fruehstart stimmen' };
   });
 
+  // v3.0 BESTELLT: "when session is starting, have an option to skip the announcements".
+  stAdd('Rennintro v3.0: Ansagen ueberspringen (Knopf, Enter), Start geht weiter', async () => {
+    const f = [];
+    const merk = { aktiv: rennintroAktiv, fertig: rennintroFertig };
+    try {
+      for (const weg of ['knopf', 'enter']) {
+        // So wartet startRaceCountdown auf das Intro: rennintroFertig loest das Warten auf.
+        let erledigt = null;
+        rennintroAktiv = true;
+        rennintroFertig = (ok) => { erledigt = ok; rennintroAktiv = false; };
+        hdIntroSkipMalen();
+        const k = $('hd-intro-skip');
+        if (!k || k.hidden) { f.push(weg + ': Knopf nicht sichtbar'); continue; }
+        if (!/Ansagen|announcements|anuncios/i.test(k.textContent)) f.push(weg + ': Beschriftung "' + k.textContent.trim() + '"');
+        if (weg === 'knopf') k.click();
+        else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        if (erledigt !== false) f.push(weg + ': Start wartet weiter (' + erledigt + ')');
+        if (rennintroAktiv) f.push(weg + ': Intro laeuft noch');
+        if (!k.hidden) f.push(weg + ': Knopf bleibt stehen');
+      }
+      // ohne Intro: kein Knopf, Enter tut nichts
+      rennintroAktiv = false; rennintroFertig = null; hdIntroSkipMalen();
+      if ($('hd-intro-skip') && !$('hd-intro-skip').hidden) f.push('Knopf ohne Intro sichtbar');
+    } finally {
+      rennintroAktiv = merk.aktiv; rennintroFertig = merk.fertig; hdIntroSkipMalen();
+    }
+    return { ok: !f.length, mass: f.length ? f.join(' | ') : 'Knopf und Enter beenden das Intro, der Start geht zur Ampel weiter' };
+  });
+
   stAdd('Spiegeln: jede Challenge-Strecke schliesst gespiegelt wie im Original', () => {
     const r = OMEGA_TEST.spiegelSchluss();
     const kaputt = r.filter((x) => x.orig !== x.gesp).map((x) => x.id);
@@ -26277,7 +26306,8 @@
     const name = (r) => (r ? (r.el.textContent || r.el.className || '').replace(/\s+/g, ' ').trim().slice(0, 24) : 'nichts');
     const druecke = (dir) => {
       if (dir === 'up' || dir === 'down') menuNavMove(dir);
-      else { menuNavSeitwaerts(dir, true); menuNavAdjustGehalten(dir, false); }
+      // press and release, as a real button does: the app ignores a HELD direction after one step
+      else { menuNavSeitwaerts(dir, true); menuNavSeitwaerts(dir, false); menuNavAdjustGehalten(dir, false); }
       return cur();
     };
     const setze = (pruef) => {

@@ -2323,7 +2323,7 @@
       zb.appendChild(bb);
       rechts.appendChild(zb);
       // Hybrid-Dash 3.0: avatar (pick / random) and battery calibration for this car.
-      if (typeof hdAutoWerkzeugZeile === 'function') rechts.appendChild(hdAutoWerkzeugZeile(car));
+      if (typeof hdAutoWerkzeugZeile === 'function') hdAutoWerkzeugZeile(car, zb);   // HD: avatar + battery join the Blink row
       // Name
       const zn = document.createElement('div');
       zn.className = 'opt-row gk-zeile gar-a-name';
