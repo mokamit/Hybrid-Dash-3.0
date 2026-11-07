@@ -64,15 +64,64 @@
     const unter = [modell, farbe ? t(farbe.name) : ''].filter(Boolean).join(' · ') || t('Modell und Farbe noch nicht eingestellt');
     const avatar = typeof hdAvatarSvg === 'function' ? hdAvatarSvg(name || i.bt || x.id, hex, 0, 56, i.modellId || '') : '';
     const status = x.verbunden ? '<span class="hdg-st an">' + t('verbunden') + '</span>'
-      : x.dev ? '<span class="hdg-st">' + t('gepaart') + '</span>' : '<span class="hdg-st aus">' + t('neu koppeln') + '</span>';
+      : x.dev ? '<span class="hdg-st">' + t('gepaart') + '</span>' : '';
     return `<div class="hdg-zeile" data-id="${hdGepaartEsc(x.id)}" style="--hdg-farbe:${hex}">`
       + `<span class="hdg-bild">${avatar}</span>`
       + `<span class="hdg-text"><b>${hdGepaartEsc(titel)}</b><span>${hdGepaartEsc(unter)}</span><small>${hdGepaartEsc(i.bt || '')}</small></span>`
       + status
       + `<span class="hdg-knoepfe">`
       + (!x.verbunden && x.dev ? `<button type="button" class="primary" data-hdg="verbinden">${t('Verbinden')}</button>` : '')
+      // v3.0 GEMELDET: "The pair again button doesn't seem to be working" - it was only a label. Now a button: the
+      // browser's pop-up, filtered to exactly this car (its Bluetooth name), so it is one click.
+      + (!x.verbunden && !x.dev ? `<button type="button" class="primary" data-hdg="koppeln" title="${hdGepaartEsc(t('Öffnet das Auswahlfenster des Browsers mit nur diesem Auto'))}">${t('Neu koppeln')}</button>` : '')
       + `<button type="button" data-hdg="vergessen"${x.verbunden ? ' disabled title="' + hdGepaartEsc(t('Erst trennen')) + '"' : ''}>${t('Vergessen')}</button>`
       + `</span></div>`;
+  }
+  // ---- pair a remembered car again --------------------------------------------------------------------------------
+  // A car the app remembers but the browser no longer lists (permission gone: Chrome keeps it across visits only with
+  // its new permissions backend; another browser; site data cleared). Web Bluetooth lets a page reach such a car only
+  // through the browser's own pop-up - so the pop-up opens filtered to exactly this car's name: one entry, one click.
+  // Picking it again can give the car a NEW device id. Everything the app keeps per id (name, colour, model and number;
+  // role; photo; driver avatar; battery calibration; this list) then moves to the new id before the car is set up,
+  // so it comes back as it was.
+  function hdGepaartUmziehen(alt, neu) {
+    if (!alt || !neu || alt === neu) return;
+    const umzug = (schl) => {
+      try {
+        const o = JSON.parse(localStorage.getItem(schl) || '{}') || {};
+        if (o[alt] !== undefined && o[neu] === undefined) { o[neu] = o[alt]; delete o[alt]; localStorage.setItem(schl, JSON.stringify(o)); }
+      } catch (e) { /* private / full */ }
+    };
+    ['chc.cars.v1', 'chc.rollen.v1', 'hybriddash.akku.v1', HD_GEPAART_STORE].forEach(umzug);
+    try {
+      const f = localStorage.getItem('omegasim-autofoto:' + alt);
+      if (f && !localStorage.getItem('omegasim-autofoto:' + neu)) { localStorage.setItem('omegasim-autofoto:' + neu, f); localStorage.removeItem('omegasim-autofoto:' + alt); }
+    } catch (e) { /* full */ }
+    try {   // the in-memory copies (hd: avatars, akkuVollJe: battery) - same scope
+      for (const k of ['fotos', 'avatare']) if (hd[k] && hd[k][alt] !== undefined && hd[k][neu] === undefined) { hd[k][neu] = hd[k][alt]; delete hd[k][alt]; }
+      hdSpeichern();
+      if (akkuVollJe[alt] !== undefined && akkuVollJe[neu] === undefined) { akkuVollJe[neu] = akkuVollJe[alt]; delete akkuVollJe[alt]; }
+    } catch (e) { /* not ready */ }
+    log('Pairing again: settings moved from ' + alt + ' to the new id ' + neu + '.', 'info');
+  }
+  async function hdGepaartNeuKoppeln(x, knopf) {
+    if (!navigator.bluetooth || typeof navigator.bluetooth.requestDevice !== 'function') { showHudToast(t('Dieser Browser kann kein Web Bluetooth.')); return; }
+    const name = x.info && x.info.bt;
+    if (knopf) { knopf.disabled = true; knopf.textContent = t('Suche …'); }
+    try {
+      const dev = await navigator.bluetooth.requestDevice({
+        filters: name ? [{ name }] : [{ namePrefix: 'HYBRID' }],
+        optionalServices: [NUS_SERVICE],
+      });
+      hdGepaartUmziehen(x.id, String(dev.id));
+      await garageGeraetAufnehmen(dev);
+      showHudToast(t('Verbunden') + ': ' + ((x.info && x.info.alias) || name || ''));
+    } catch (err) {
+      if (err && err.name === 'NotFoundError') log('Pairing again: nothing picked.', 'info');
+      else { log('Pairing again failed: ' + (err && err.message), 'err'); showHudToast(t('Verbinden fehlgeschlagen')); }
+    }
+    hdGepaartOeffnen();
+    if (typeof renderGarage === 'function') renderGarage();
   }
   let hdGepaartBox = null;
   async function hdGepaartOeffnen() {
@@ -119,6 +168,8 @@
       if (!gesehen) { showHudToast(t('Auto nicht gefunden – ist es an und in Reichweite?')); hdGepaartOeffnen(); return; }
       try { await garageGeraetAufnehmen(x.dev); } catch (err) { showHudToast(t('Verbinden fehlgeschlagen')); }
       hdGepaartOeffnen();
+    } else if (was === 'koppeln') {
+      await hdGepaartNeuKoppeln(x, b);
     } else if (was === 'vergessen') {
       const name = (x.info && (x.info.alias || x.info.bt)) || x.id;
       if (!window.confirm(t('Kopplung vergessen?') + '\n\n' + name + '\n\n' + t('Zum Verbinden muss das Auto danach wieder im Auswahlfenster des Browsers gewählt werden.'))) return;
