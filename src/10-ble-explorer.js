@@ -3959,7 +3959,7 @@
     "kein Rennen":
       "no race",
     "Start":
-      "start",
+      "Start",
     "letzte Runde":
       "final lap",
     "läuft":
