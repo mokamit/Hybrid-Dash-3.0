@@ -5852,6 +5852,10 @@
   .hdav-raster button.an { border-color: var(--b-red, #e10600); box-shadow: 0 0 0 2px var(--b-red, #e10600); }
   .hdav-raster button:disabled { opacity: .28; cursor: not-allowed; }
   .hd-werkzeug { display: contents; }
+  .hdg-flagge { margin-top: 10px; padding: 12px 14px; border: 1px dashed rgba(255,255,255,.25); display: grid; gap: 6px; font-size: 13px; color: #d9d4d6; }
+  .hdg-flagge b { color: #fff; font-size: 14px; }
+  .hdg-flagge code { font-size: 12px; color: #7cc4ff; word-break: break-all; }
+  .hdg-flagge button { justify-self: start; padding: 6px 12px; border-radius: 0; cursor: pointer; }
   /* Pre-race setup (98w-hd-setup.js) */
   .hd-setup { position: fixed; inset: 0; z-index: 9150; display: grid; place-items: center; background: rgba(5,4,8,.8); padding: 16px; }
   .hd-setup[hidden] { display: none; }
@@ -16187,6 +16191,10 @@
     "Kopplung vergessen?": "Forget this pairing?",
     "Auswählen": "Select",
     "Zurückgehen": "Back",
+    "Ohne Auswahlfenster verbinden": "Connect without the pop-up",
+    "Chrome merkt sich die Freigabe der Autos nur mit dieser Einstellung. Adresse kopieren, in die Adresszeile einfügen, auf „Enabled“ stellen und Chrome neu starten. Danach steht bei jedem Auto „Verbinden“ – ganz ohne Fenster, auch „Alle verbinden“.": "Chrome only remembers the cars’ permission with this setting. Copy the address, paste it into the address bar, set it to “Enabled” and restart Chrome. After that every car shows “Connect” – no pop-up at all, “Connect all” too.",
+    "Adresse kopieren": "Copy address",
+    "Adresse kopiert": "Address copied",
     "Neu koppeln": "Pair again",
     "Öffnet das Auswahlfenster des Browsers mit nur diesem Auto": "Opens the browser’s pop-up with only this car",
     "Dieser Browser kann kein Web Bluetooth.": "This browser cannot do Web Bluetooth.",
@@ -20342,6 +20350,10 @@
     "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
     "Auswählen": "Elegir",
     "Zurückgehen": "Atrás",
+    "Ohne Auswahlfenster verbinden": "Conectar sin la ventana",
+    "Chrome merkt sich die Freigabe der Autos nur mit dieser Einstellung. Adresse kopieren, in die Adresszeile einfügen, auf „Enabled“ stellen und Chrome neu starten. Danach steht bei jedem Auto „Verbinden“ – ganz ohne Fenster, auch „Alle verbinden“.": "Chrome solo recuerda el permiso de los coches con este ajuste. Copia la dirección, pégala en la barra de direcciones, ponla en “Enabled” y reinicia Chrome. Después cada coche muestra “Conectar”, sin ventana, también “Conectar todos”.",
+    "Adresse kopieren": "Copiar dirección",
+    "Adresse kopiert": "Dirección copiada",
     "Neu koppeln": "Emparejar de nuevo",
     "Öffnet das Auswahlfenster des Browsers mit nur diesem Auto": "Abre la ventana del navegador solo con este coche",
     "Dieser Browser kann kein Web Bluetooth.": "Este navegador no admite Web Bluetooth.",
@@ -125332,7 +125344,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const i = x.info || {};
     const farbe = (typeof CAR_COLORS !== 'undefined' && CAR_COLORS.find((f) => f.id === i.colorId)) || null;
     const hex = farbe ? farbe.hex : '#7a7a7a';
-    const modell = i.modellId && typeof carModellName === 'function' ? carModellName(i.modellId) : '';
+    const modell = i.modellId && typeof carModellWert === 'function' && carModellWert(i.modellId) && typeof carModellName === 'function' ? t(carModellName(i.modellId)) : '';
     const name = i.alias || '';
     const nr = i.nummer ? '#' + i.nummer : '';
     const titel = [nr, name].filter(Boolean).join(' ') || t('Unbenanntes Auto');
@@ -125383,6 +125395,21 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (!navigator.bluetooth || typeof navigator.bluetooth.requestDevice !== 'function') { showHudToast(t('Dieser Browser kann kein Web Bluetooth.')); return; }
     const name = x.info && x.info.bt;
     if (knopf) { knopf.disabled = true; knopf.textContent = t('Suche …'); }
+    // v3.0 BESTELLT: "When I click pair again, can you have it pair automatically?" In the Android app it can: the
+    // bridge reaches a remembered car by its address, no pop-up at all (bekanntesGeraet, 05-app-bruecke.js). In a
+    // browser it cannot - Chrome always shows its own pop-up for a car the site has no permission for, and no page can
+    // click it; there the pop-up holds just this one car (and the hint below the list shows how Chrome keeps the
+    // permission, after which the car shows "Connect" and needs no pop-up).
+    if (navigator.bluetooth && typeof navigator.bluetooth.bekanntesGeraet === 'function' && x.id && !/^relay-/.test(x.id)) {
+      try {
+        const dev = await navigator.bluetooth.bekanntesGeraet(x.id, name || '');
+        await garageGeraetAufnehmen(dev);
+        showHudToast(t('Verbunden') + ': ' + ((x.info && x.info.alias) || name || ''));
+        hdGepaartOeffnen();
+        if (typeof renderGarage === 'function') renderGarage();
+        return;
+      } catch (err) { log('Pairing again directly failed (' + (err && err.message) + '), opening the picker.', 'info'); }
+    }
     try {
       const dev = await navigator.bluetooth.requestDevice({
         filters: name ? [{ name }] : [{ namePrefix: 'HYBRID' }],
@@ -125423,6 +125450,16 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       + (verbindbar ? '<button type="button" class="primary" data-hdg="alle">&#10227; ' + t('Alle verbinden') + ' (' + verbindbar + ')</button>' : '')
       + '</div>'
       + '<p class="hdg-hinweis">' + t('Gepaarte Autos verbinden direkt, ohne das Auswahlfenster des Browsers. Ein neues Auto muss der Browser einmal selbst anbieten – danach steht es hier mit Modell und Farbe.') + '</p>';
+    // Browser without kept permissions: every remembered car needs the pop-up. Say how Chrome keeps them (a page cannot
+    // open chrome:// itself, so the address is copied).
+    const ohneRecht = liste.some((x) => !x.dev && !x.verbunden);
+    const app = !!(window.OMEGA_APP && window.OMEGA_APP.nativ);
+    if (ohneRecht && !app) {
+      karte.insertAdjacentHTML('beforeend', '<div class="hdg-flagge"><b>' + t('Ohne Auswahlfenster verbinden') + '</b><span>'
+        + t('Chrome merkt sich die Freigabe der Autos nur mit dieser Einstellung. Adresse kopieren, in die Adresszeile einfügen, auf „Enabled“ stellen und Chrome neu starten. Danach steht bei jedem Auto „Verbinden“ – ganz ohne Fenster, auch „Alle verbinden“.')
+        + '</span><code>chrome://flags/#enable-web-bluetooth-new-permissions-backend</code>'
+        + '<button type="button" data-hdg="flagge">' + t('Adresse kopieren') + '</button></div>');
+    }
     hdGepaartBox._liste = liste;
   }
   function hdGepaartZu() { if (hdGepaartBox) hdGepaartBox.hidden = true; }
@@ -125432,6 +125469,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (!b) return;
     const was = b.dataset.hdg;
     if (was === 'zu') { hdGepaartZu(); return; }
+    if (was === 'flagge') {
+      const adr = 'chrome://flags/#enable-web-bluetooth-new-permissions-backend';
+      try { await navigator.clipboard.writeText(adr); showHudToast(t('Adresse kopiert')); } catch (err) { window.prompt(t('Adresse kopieren'), adr); }
+      return;
+    }
     if (was === 'neu') { hdGepaartZu(); garageConnect(); return; }
     if (was === 'alle') { hdGepaartZu(); garageBekannteVerbinden($('gar-bekannte')); return; }
     const zeile = b.closest('.hdg-zeile');
