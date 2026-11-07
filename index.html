@@ -5835,6 +5835,20 @@
   .hdav-raster button.an { border-color: var(--b-red, #e10600); box-shadow: 0 0 0 2px var(--b-red, #e10600); }
   .hdav-raster button:disabled { opacity: .28; cursor: not-allowed; }
   .hd-werkzeug { display: contents; }
+  /* Skip the race intro (98t-hd-intro-skip.js) */
+  .hd-intro-skip { position: fixed; z-index: 9500; left: 50%; bottom: 72px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 22px; font: 700 20px/1 var(--c-head, sans-serif); letter-spacing: .05em; text-transform: uppercase; color: #fff; cursor: pointer;
+    background: var(--c-red, #e10632); border: 2px solid #fff; box-shadow: 0 6px 24px rgba(0,0,0,.5), 0 0 18px rgba(225,6,50,.55); }
+  .hd-intro-skip[hidden] { display: none; }
+  .hd-intro-skip:hover { background: #ff1f4b; }
+  .hd-intro-skip kbd { font: 600 12px/1 var(--b-font, sans-serif); padding: 3px 6px; border: 1px solid rgba(255,255,255,.6); border-radius: 4px; text-transform: none; }
+  /* Blink, avatar, random, battery: one compact strip of equal buttons */
+  html body .hd-werkzeug-reihe { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 6px !important; padding: 8px !important; }
+  html body .hd-werkzeug-reihe > button { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; margin: 0 !important; width: auto !important;
+    padding: 8px 6px !important; font: 600 14px/1.1 var(--c-head, sans-serif) !important; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; }
+  html body .hd-werkzeug-reihe > button > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+  html body .hd-werkzeug-reihe .hdw-i { font-size: 15px; line-height: 1; }
+  @media (max-width: 700px) { html body .hd-werkzeug-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
 
   /* ---- Hybrid-Dash 3.0: app logo in the header, banner at the very top of the main menu ---- */
   header#k-kopf .hdr-logo .hd-logo-bild { display: block; height: 26px; width: auto; }
@@ -16092,6 +16106,9 @@
     "Kopplung vergessen?": "Forget this pairing?",
     "Auswählen": "Select",
     "Zurückgehen": "Back",
+    "Zufällig": "Random",
+    "Akku 100 %": "Battery 100 %",
+    "Ansagen überspringen": "Skip announcements",
     "Nächste": "Next",
     "Vorherige": "Previous",
     "Alle Plätze für Mitspieler sind belegt (höchstens zwei).": "All player places are taken (two at most).",
@@ -16161,7 +16178,6 @@
     "Hat schon ein anderer Fahrer": "Another driver has this one",
     "Zufälliger Avatar": "Random avatar",
     "Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.": "Press with a full battery: what the car reports now counts as 100 % from now on.",
-    "Akku voll – kalibrieren": "Battery full – calibrate",
     "Das Auto hat noch keinen Akkustand gemeldet.": "The car has not reported its battery yet.",
     "Akku kalibriert": "Battery calibrated",
     "Statistik dieser Strecke": "Statistics of this track",
@@ -20211,6 +20227,9 @@
     "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
     "Auswählen": "Elegir",
     "Zurückgehen": "Atrás",
+    "Zufällig": "Aleatorio",
+    "Akku 100 %": "Batería 100 %",
+    "Ansagen überspringen": "Saltar anuncios",
     "Nächste": "Siguiente",
     "Vorherige": "Anterior",
     "Alle Plätze für Mitspieler sind belegt (höchstens zwei).": "Todas las plazas están ocupadas (dos como máximo).",
@@ -20288,7 +20307,6 @@
     "Hat schon ein anderer Fahrer": "Ya lo tiene otro piloto",
     "Zufälliger Avatar": "Avatar aleatorio",
     "Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.": "Pulsa con la batería llena: lo que el coche informa ahora cuenta como 100 %.",
-    "Akku voll – kalibrieren": "Batería llena: calibrar",
     "Das Auto hat noch keinen Akkustand gemeldet.": "El coche aún no ha informado de su batería.",
     "Akku kalibriert": "Batería calibrada",
     "Statistik dieser Strecke": "Estadísticas de este circuito",
@@ -65384,7 +65402,7 @@
       zb.appendChild(bb);
       rechts.appendChild(zb);
       // Hybrid-Dash 3.0: avatar (pick / random) and battery calibration for this car.
-      if (typeof hdAutoWerkzeugZeile === 'function') rechts.appendChild(hdAutoWerkzeugZeile(car));
+      if (typeof hdAutoWerkzeugZeile === 'function') hdAutoWerkzeugZeile(car, zb);   // HD: avatar + battery join the Blink row
       // Name
       const zn = document.createElement('div');
       zn.className = 'opt-row gk-zeile gar-a-name';
@@ -109024,6 +109042,35 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     return { ok: !f.length, mass: f.length ? f.join(' | ') : 'Folge, Manifest DE/EN, Auslassen, Challenges, Fruehstart stimmen' };
   });
 
+  // v3.0 BESTELLT: "when session is starting, have an option to skip the announcements".
+  stAdd('Rennintro v3.0: Ansagen ueberspringen (Knopf, Enter), Start geht weiter', async () => {
+    const f = [];
+    const merk = { aktiv: rennintroAktiv, fertig: rennintroFertig };
+    try {
+      for (const weg of ['knopf', 'enter']) {
+        // So wartet startRaceCountdown auf das Intro: rennintroFertig loest das Warten auf.
+        let erledigt = null;
+        rennintroAktiv = true;
+        rennintroFertig = (ok) => { erledigt = ok; rennintroAktiv = false; };
+        hdIntroSkipMalen();
+        const k = $('hd-intro-skip');
+        if (!k || k.hidden) { f.push(weg + ': Knopf nicht sichtbar'); continue; }
+        if (!/Ansagen|announcements|anuncios/i.test(k.textContent)) f.push(weg + ': Beschriftung "' + k.textContent.trim() + '"');
+        if (weg === 'knopf') k.click();
+        else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        if (erledigt !== false) f.push(weg + ': Start wartet weiter (' + erledigt + ')');
+        if (rennintroAktiv) f.push(weg + ': Intro laeuft noch');
+        if (!k.hidden) f.push(weg + ': Knopf bleibt stehen');
+      }
+      // ohne Intro: kein Knopf, Enter tut nichts
+      rennintroAktiv = false; rennintroFertig = null; hdIntroSkipMalen();
+      if ($('hd-intro-skip') && !$('hd-intro-skip').hidden) f.push('Knopf ohne Intro sichtbar');
+    } finally {
+      rennintroAktiv = merk.aktiv; rennintroFertig = merk.fertig; hdIntroSkipMalen();
+    }
+    return { ok: !f.length, mass: f.length ? f.join(' | ') : 'Knopf und Enter beenden das Intro, der Start geht zur Ampel weiter' };
+  });
+
   stAdd('Spiegeln: jede Challenge-Strecke schliesst gespiegelt wie im Original', () => {
     const r = OMEGA_TEST.spiegelSchluss();
     const kaputt = r.filter((x) => x.orig !== x.gesp).map((x) => x.id);
@@ -113946,7 +113993,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const name = (r) => (r ? (r.el.textContent || r.el.className || '').replace(/\s+/g, ' ').trim().slice(0, 24) : 'nichts');
     const druecke = (dir) => {
       if (dir === 'up' || dir === 'down') menuNavMove(dir);
-      else { menuNavSeitwaerts(dir, true); menuNavAdjustGehalten(dir, false); }
+      // press and release, as a real button does: the app ignores a HELD direction after one step
+      else { menuNavSeitwaerts(dir, true); menuNavSeitwaerts(dir, false); menuNavAdjustGehalten(dir, false); }
       return cur();
     };
     const setze = (pruef) => {
@@ -121528,20 +121576,25 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
         + (nr === jetzt ? ' class="an"' : '') + '><img ' + 'src' + '="' + 'img/fahrer/p' + String(nr).padStart(2, '0') + '.jpg' + '" alt="" loading="lazy" width="96" height="96"></button>').join('') + '</div></div>';
     hdAvatarWahlBox.hidden = false;
   }
-  function hdAutoWerkzeugZeile(car) {
-    // One button per row (like the Blink row): the controller's menu navigation walks the rows up / down.
-    const z = document.createElement('div');
-    z.className = 'hd-werkzeug';
-    const reihe = (w, html, title) => {
-      const r = document.createElement('div');
-      r.className = 'opt-row opt-breit gar-a-aktion';
-      r.innerHTML = '<button type="button" data-w="' + w + '"' + (title ? ' title="' + title + '"' : '') + '>' + html + '</button>';
-      z.appendChild(r);
-      return r.firstChild;
+  // v3.0 BESTELLT: "Consolidate these buttons into one row, and make it more organised and compact." Blink, avatar
+  // (choose / random) and battery calibration share the Blink row as one compact strip; the controller's menu
+  // navigation walks a multi-button row left / right (menuNavRows in 50b-menu-nav.js splits it).
+  function hdAutoWerkzeugZeile(car, zeile) {
+    const z = zeile || document.createElement('div');
+    z.classList.add('hd-werkzeug-reihe');
+    const knopf = (w, icon, text, title) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.dataset.w = w;
+      if (title) b.title = title;
+      b.innerHTML = '<span class="hdw-i" aria-hidden="true">' + icon + '</span><span>' + text + '</span>';
+      z.appendChild(b);
+      return b;
     };
-    reihe('wahl', t('Avatar wählen')).onclick = () => hdAvatarWahl(car);
-    reihe('zufall', '&#x1F3B2; ' + t('Zufälliger Avatar')).onclick = () => hdAvatarZufall(car);
-    const ak = reihe('akku', t('Akku voll – kalibrieren'), t('Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.'));
+    const blink = z.querySelector('[data-act="blinken"]');
+    if (blink && !blink.querySelector('.hdw-i')) blink.innerHTML = '<span class="hdw-i" aria-hidden="true">&#x1F4A1;</span><span>' + t('Blinken') + '</span>';
+    knopf('wahl', '&#x1F464;', t('Avatar wählen')).onclick = () => hdAvatarWahl(car);
+    knopf('zufall', '&#x1F3B2;', t('Zufällig'), t('Zufälliger Avatar')).onclick = () => hdAvatarZufall(car);
+    const ak = knopf('akku', '&#x1F50B;', t('Akku 100 %'), t('Bei vollem Akku drücken: das, was das Auto jetzt meldet, gilt ab jetzt als 100 %.'));
     if (!(car.battery > 0)) { ak.disabled = true; ak.title = t('Das Auto hat noch keinen Akkustand gemeldet.'); }
     ak.onclick = () => {
       if (!(car.battery > 0) || typeof akkuVollMerken !== 'function') return;
@@ -126204,6 +126257,57 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   setInterval(() => { try { if (kAktiverTab() === 'fahren') hdHmFahrer(); } catch (e) { /* not ready */ } }, 1000);
   if (typeof i18nOnLangChange === 'function') i18nOnLangChange(() => { hdHmSchluessel = ''; hdHmFahrer(); });
   window.HYBRIDDASH_HAUPTMENUE = Object.freeze({ malen: () => { hdHmSchluessel = ''; hdHauptmenue(); } });
+  // =====================================================================================
+  // Hybrid-Dash 3.0: SKIP THE START-OF-SESSION ANNOUNCEMENTS
+  // =====================================================================================
+  //
+  // BESTELLT: "When session is starting, have an option to skip the announcements." While the race intro is
+  // playing (welcome, mode, distance, weather, the starting grid car by car - 80d-rennintro.js), a button sits above
+  // the cockpit: "Skip announcements". It, Enter, or the controller's confirmation button (bindings.confirm, else A /
+  // Cross) end the intro at once; the start then goes on to the lights exactly as when the intro finishes by itself
+  // (rennintroAbbrechen resolves the waiting start with false, and the start continues).
+  let hdSkipKnopf = null, hdSkipVorher = false;
+  function hdIntroSkip() {
+    if (typeof rennintroAktiv === 'undefined' || !rennintroAktiv) return;
+    log('Race intro skipped.', 'info');
+    try { rennintroAbbrechen(); } catch (e) { /* already over */ }
+    hdIntroSkipMalen();
+  }
+  function hdIntroSkipMalen() {
+    let an = false;
+    try { an = !!rennintroAktiv; } catch (e) { an = false; }
+    if (!hdSkipKnopf && !an) return;
+    if (!hdSkipKnopf) {
+      hdSkipKnopf = document.createElement('button');
+      hdSkipKnopf.type = 'button'; hdSkipKnopf.id = 'hd-intro-skip'; hdSkipKnopf.className = 'hd-intro-skip';
+      hdSkipKnopf.setAttribute('data-i18n-skip', '');
+      hdSkipKnopf.addEventListener('click', (e) => { e.stopPropagation(); hdIntroSkip(); });
+      document.body.appendChild(hdSkipKnopf);
+    }
+    hdSkipKnopf.hidden = !an;
+    if (an) hdSkipKnopf.innerHTML = '<span aria-hidden="true">&#x23ED;</span> ' + t('Ansagen überspringen') + ' <kbd>Enter</kbd>';
+  }
+  // Enter skips while the intro plays (not while typing).
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || !hdSkipKnopf || hdSkipKnopf.hidden) return;
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    e.preventDefault(); e.stopPropagation(); hdIntroSkip();
+  }, true);
+  // Watch the intro and the controller's confirmation button (edge: pressed now, not before).
+  setInterval(() => {
+    hdIntroSkipMalen();
+    if (!hdSkipKnopf || hdSkipKnopf.hidden) { hdSkipVorher = false; return; }
+    let gedrueckt = false;
+    try {
+      const b = (typeof bindings !== 'undefined' && bindings.confirm && bindings.confirm.type !== 'none') ? bindings.confirm : { type: 'button', index: 0 };
+      for (const pad of (navigator.getGamepads ? navigator.getGamepads() : [])) {
+        if (pad && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) { gedrueckt = true; break; }
+      }
+    } catch (e) { gedrueckt = false; }
+    if (gedrueckt && !hdSkipVorher) hdIntroSkip();
+    hdSkipVorher = gedrueckt;
+  }, 100);
+  window.HYBRIDDASH_INTRO = Object.freeze({ skip: hdIntroSkip });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------
   //
