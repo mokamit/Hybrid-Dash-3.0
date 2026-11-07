@@ -875,8 +875,11 @@
     // nicht fallen, weil ein Ghost zuerst ueber die Linie kommt - sonst waere die
     // angefangene Runde des Fahrers abgeschnitten. Mit zwei Fahrern gilt dasselbe zweimal,
     // und ohne diese Zeile waere die abgeschnittene Runde die von Auto 2.
+    // v3.0 GEMELDET: "the final lap feature doesn't seem to be working in practice mode". A driver car that is not
+    // driving (standing for HD_ZIEL_STEHT_MS, e.g. the host watching NPCs in practice) no longer holds the flag.
     const fahrer = (c) => !(typeof hdDnfAuto === 'function' && hdDnfAuto(c)) && (c.role === 'player'
-                          || (zweiSpieler && /^player[2-9]$/.test(c.role)));
+                          || (zweiSpieler && /^player[2-9]$/.test(c.role)))
+                          && !(typeof hdFahrerSteht === 'function' && hdFahrerSteht(c));
     if (warFinishing && !garage.some(fahrer)) finishRace();
   }
 
