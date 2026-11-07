@@ -5167,6 +5167,13 @@
   @media (prefers-reduced-motion: reduce) {
     #ampel-overlay { transition: none; }
   }
+  /* v3.0 GEMELDET: "move the off track warning to somewhere that doesn't obstruct the information behind it". Not in
+     the middle of the cockpit any more: a slim strip at the very bottom (over the address line, the one place that
+     carries nothing during a race), and the whole cockpit gets a pulsing orange edge so it is still seen at a glance. */
+  html body #race-dash #gt3-offtrack { position: fixed; left: 50%; bottom: 4px; top: auto; transform: translateX(-50%); margin: 0; z-index: 260;
+    grid-row: auto; grid-column: auto; font-size: clamp(11px, 1.1vw, 15px); letter-spacing: .14em; padding: 4px 18px; box-shadow: 0 4px 16px rgba(0,0,0,.6); }
+  html body #race-dash:has(#gt3-offtrack[data-an="1"])::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 259;
+    box-shadow: inset 0 0 0 3px #ffb26b, inset 0 0 40px rgba(255,140,40,.35); animation: abseits-puls 1.1s ease-in-out infinite; }
   /* v3.0 GEMELDET: "the starting lights are not inside the light box". The box was min(50vw, 50vh) wide but the
      lamps were sized from the width alone (6.5vw), so on a wide, short window they spilled out. Now everything is
      a share of the box's own size (--ab): 5 lamps of 15 % + 4 gaps of 3.5 % + 4 % padding each side = 97 %. */
@@ -5845,6 +5852,63 @@
   .hdav-raster button.an { border-color: var(--b-red, #e10600); box-shadow: 0 0 0 2px var(--b-red, #e10600); }
   .hdav-raster button:disabled { opacity: .28; cursor: not-allowed; }
   .hd-werkzeug { display: contents; }
+  /* Pre-race setup (98w-hd-setup.js) */
+  .hd-setup { position: fixed; inset: 0; z-index: 9150; display: grid; place-items: center; background: rgba(5,4,8,.8); padding: 16px; }
+  .hd-setup[hidden] { display: none; }
+  .hds-karte { width: min(1100px, 100%); max-height: 100%; overflow: auto; background: #120d12; border: 1px solid rgba(255,255,255,.16); border-top: 4px solid var(--c-red, #e10632);
+    box-shadow: 0 20px 60px rgba(0,0,0,.7); padding: 20px 24px; color: #f4f2f3; font-family: var(--b-font, sans-serif); }
+  .hds-kopf { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .hds-bild { width: 72px; height: 72px; flex: none; overflow: hidden; } .hds-bild svg { width: 100% !important; height: 100% !important; }
+  .hds-kopf small { display: block; font: 700 12px/1 var(--b-font); letter-spacing: .16em; color: #ff8a99; text-transform: uppercase; margin-bottom: 6px; }
+  .hds-kopf b { display: block; font: 700 clamp(26px, 3vw, 40px)/1 var(--c-head, sans-serif); text-transform: uppercase; }
+  .hds-kopf span { color: #b9b2b5; font-size: 14px; }
+  .hds-gitter { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .hds-gruppe { padding: 12px 14px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 8px; }
+  .hds-gruppe h3 { margin: 0 0 2px; font: 600 20px/1 var(--c-head, sans-serif); text-transform: uppercase; letter-spacing: .03em; }
+  .hds-z { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 10px; font-size: 14px; }
+  .hds-l { font-weight: 600; }
+  .hds-z select { max-width: 190px; font: 600 15px/1.2 var(--c-head, sans-serif); padding: 6px 8px; background: rgba(10,8,12,.8); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 0; }
+  .hds-regler input[type=range] { grid-column: 1 / -1; width: 100%; }
+  .hds-w { font-variant-numeric: tabular-nums; color: #22d3ee; font-weight: 700; }
+  .hds-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+  .hds-chips button { font: 600 14px/1 var(--c-head, sans-serif); text-transform: uppercase; padding: 7px 10px; border-radius: 0; border: 2px solid var(--m, rgba(255,255,255,.3)); background: transparent; color: #fff; cursor: pointer; }
+  .hds-chips button.an { background: var(--m, var(--c-red, #e10632)); color: #111; }
+  .hds-chips button[data-hds-tank].an { background: var(--c-red, #e10632); color: #fff; border-color: var(--c-red, #e10632); }
+  .hds-fuss { display: flex; align-items: center; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .hds-immer { margin-right: auto; color: #b9b2b5; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
+  .hds-fuss button { font: 700 18px/1 var(--c-head, sans-serif); letter-spacing: .04em; text-transform: uppercase; padding: 12px 22px; border-radius: 0; cursor: pointer; }
+  /* Race summary (98v-hd-bericht.js) */
+  .hd-bericht { position: fixed; inset: 0; z-index: 9200; display: grid; place-items: center; background: rgba(5,4,8,.78); padding: 16px; }
+  .hd-bericht[hidden] { display: none; }
+  .hdb-karte { width: min(980px, 100%); max-height: 100%; overflow: auto; background: #120d12; border: 1px solid rgba(255,255,255,.16); border-top: 4px solid var(--c-red, #e10632);
+    box-shadow: 0 20px 60px rgba(0,0,0,.7); padding: 20px 24px; color: #f4f2f3; font-family: var(--b-font, sans-serif); }
+  .hdb-kopf { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+  .hdb-kopf small { display: block; font: 700 12px/1 var(--b-font); letter-spacing: .16em; color: #ff8a99; text-transform: uppercase; margin-bottom: 6px; }
+  .hdb-kopf b { display: block; font: 700 clamp(28px, 3.4vw, 44px)/1 var(--c-head, sans-serif); text-transform: uppercase; }
+  .hdb-kopf span { color: #b9b2b5; font-size: 13px; }
+  .hdb-ab { display: inline-block; font: 700 13px/1 var(--b-font); background: #6b4a00; color: #ffd166; padding: 4px 8px; vertical-align: middle; text-transform: uppercase; }
+  .hdb-zu { all: unset; cursor: pointer; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.3); font-size: 18px; }
+  .hdb-fakten { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .hdb-fakten > div { padding: 10px 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); }
+  .hdb-fakten small { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #b9b2b5; margin-bottom: 4px; }
+  .hdb-fakten b { font: 600 18px/1.15 var(--c-head, sans-serif); overflow-wrap: anywhere; }
+  .hdb-tab { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .hdb-tab th { text-align: left; font: 700 11px/1 var(--b-font); letter-spacing: .14em; text-transform: uppercase; color: #b9b2b5; padding: 8px; border-bottom: 1px solid rgba(255,255,255,.15); }
+  .hdb-tab td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .hdb-tab td:first-child { font: italic 700 18px/1 var(--c-head, sans-serif); width: 56px; }
+  .hdb-tab td i { display: inline-block; width: 5px; height: 16px; margin-right: 10px; vertical-align: -3px; }
+  .hdb-tab tr.fl td:nth-child(4) { color: #c77dff; font-weight: 700; }
+  .hdb-vorf { margin-top: 14px; font-size: 13px; color: #d9d4d6; max-height: 160px; overflow: auto; }
+  .hdb-vorf small { display: block; font: 700 11px/1 var(--b-font); letter-spacing: .14em; text-transform: uppercase; color: #b9b2b5; margin-bottom: 6px; }
+  .hdb-vorf b { color: #7cc4ff; font-weight: 600; margin-right: 6px; }
+  .hdb-fuss { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .hdb-fuss button { font: 600 15px/1 var(--c-head, sans-serif); letter-spacing: .04em; text-transform: uppercase; padding: 10px 14px; border-radius: 0; cursor: pointer; }
+  .hdb-liste { display: flex; flex-direction: column; gap: 6px; }
+  .hdb-eintrag { display: flex; gap: 6px; }
+  .hdb-eintrag > button:first-child { flex: 1; text-align: left; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border-radius: 0; cursor: pointer; }
+  .hdb-eintrag > button:first-child span { font-size: 13px; color: #b9b2b5; }
+  .hdb-weg { width: 44px; border-radius: 0; cursor: pointer; }
+  .hdb-leer { color: #b9b2b5; }
   /* Skip the race intro (98t-hd-intro-skip.js) */
   .hd-intro-skip { position: fixed; z-index: 9500; left: 50%; bottom: 72px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 10px;
     padding: 12px 22px; font: 700 20px/1 var(--c-head, sans-serif); letter-spacing: .05em; text-transform: uppercase; color: #fff; cursor: pointer;
@@ -16123,6 +16187,36 @@
     "Kopplung vergessen?": "Forget this pairing?",
     "Auswählen": "Select",
     "Zurückgehen": "Back",
+    "Fahrername": "Driver",
+    "Rückstand": "Gap",
+    "Reifen zum Start": "Tyres to start on",
+    "Tanken beim Boxenstopp": "Fuel at the pit stop",
+    "eigene Einstellung": "custom setup",
+    "Vor dem Start": "Pre-race setup",
+    "Reifen & Tank": "Tyres & fuel",
+    "Lenkung & Bremse": "Steering & brakes",
+    "Vor jeder Sitzung zeigen": "Show before every session",
+    "Abgebrochen": "Aborted",
+    "Als JSON exportieren": "Export as JSON",
+    "Bericht gespeichert": "Report saved",
+    "Beste (s)": "Best (s)",
+    "Datum": "Date",
+    "Gesamt (s)": "Total (s)",
+    "Gespeicherte Berichte": "Saved reports",
+    "Noch keine Berichte gespeichert.": "No reports saved yet.",
+    "Pos": "Pos",
+    "Rennbericht": "Race report",
+    "Schnellste Runde (s)": "Fastest lap (s)",
+    "Sieger": "Winner",
+    "Sitzung": "Session",
+    "Speichern nicht möglich (Speicher voll?)": "Could not save (storage full?)",
+    "Strafe (s)": "Penalty (s)",
+    "Vorfall": "Incident",
+    "Vorfälle": "Incidents",
+    "Wert": "Value",
+    "Zeit (s)": "Time (s)",
+    "Gespeicherte Rennberichte": "Saved race reports",
+    "Name des Events (leer = Event": "Event name (empty = Event",
     "Klarerer Motorklang": "Clearer engine sound",
     "Zufällig": "Random",
     "Akku 100 %": "Battery 100 %",
@@ -20245,6 +20339,36 @@
     "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
     "Auswählen": "Elegir",
     "Zurückgehen": "Atrás",
+    "Fahrername": "Piloto",
+    "Rückstand": "Diferencia",
+    "Reifen zum Start": "Neumáticos de salida",
+    "Tanken beim Boxenstopp": "Repostaje en la parada",
+    "eigene Einstellung": "ajuste propio",
+    "Vor dem Start": "Antes de la salida",
+    "Reifen & Tank": "Neumáticos y combustible",
+    "Lenkung & Bremse": "Dirección y frenos",
+    "Vor jeder Sitzung zeigen": "Mostrar antes de cada sesión",
+    "Abgebrochen": "Interrumpida",
+    "Als JSON exportieren": "Exportar como JSON",
+    "Bericht gespeichert": "Informe guardado",
+    "Beste (s)": "Mejor (s)",
+    "Datum": "Fecha",
+    "Gesamt (s)": "Total (s)",
+    "Gespeicherte Berichte": "Informes guardados",
+    "Noch keine Berichte gespeichert.": "Aún no hay informes guardados.",
+    "Pos": "Pos",
+    "Rennbericht": "Informe de carrera",
+    "Schnellste Runde (s)": "Vuelta rápida (s)",
+    "Sieger": "Ganador",
+    "Sitzung": "Sesión",
+    "Speichern nicht möglich (Speicher voll?)": "No se pudo guardar (¿almacenamiento lleno?)",
+    "Strafe (s)": "Penalización (s)",
+    "Vorfall": "Incidente",
+    "Vorfälle": "Incidentes",
+    "Wert": "Valor",
+    "Zeit (s)": "Tiempo (s)",
+    "Gespeicherte Rennberichte": "Informes de carrera guardados",
+    "Name des Events (leer = Event": "Nombre del evento (vacío = Evento",
     "Klarerer Motorklang": "Motor más nítido",
     "Zufällig": "Aleatorio",
     "Akku 100 %": "Batería 100 %",
@@ -46722,6 +46846,8 @@
     host.appendChild(img);
   }
   function raceGridAnzeigen(weiter) {
+    // v3.0: the pre-race setup screen (98w-hd-setup.js) comes before the grid board.
+    if (typeof hdSetupVorGrid === 'function' && hdSetupVorGrid(weiter)) return;
     raceGridWeiter = typeof weiter === 'function' ? weiter : null;
     const gs = $('race-gridscreen');
     if (!gs) { if (raceGridWeiter) raceGridWeiter(); return; }
@@ -47030,6 +47156,8 @@
     if (raceState !== 'idle' && raceState !== 'finished') return; // ignore while armed/racing
     if (!knockoutBereit(true)) return;
     if (!bestzeitBereit(true)) return;
+    // v3.0: the pre-race setup screen (98w-hd-setup.js) first; its Start button runs this start again.
+    if (typeof hdSetupVorStart === 'function' && hdSetupVorStart(gruenZiel, mpPlan)) return;
     // Rennuhr = Wanduhr ab hier (siehe rennUhrNullen in 15-pause.js): die Mehrspieler-Zielzeit
     // gruenZiel ist Wanduhr und wird unten direkt gegen rennZeitJetzt() gelegt.
     rennUhrNullen();
@@ -47378,6 +47506,8 @@
   function finishRace(auslaufen) {
     rennPauseBeenden();
     if (raceState === 'finished') return; // Ergebnisansage nur einmal planen.
+    // v3.0: the race summary (98v-hd-bericht.js) takes its snapshot now, before anything below resets.
+    if (typeof hdBerichtNachRennen === 'function') { try { hdBerichtNachRennen(auslaufen); } catch (e) { /* never block the finish */ } }
     rennintroStartGeneration++;
     rennintroAbbrechen();
     rennstandAbbrechen();
@@ -56972,6 +57102,7 @@
     const ev = meister.plan.events[lauf.laeuft.idx];
     if (!ev) return '';
     return t('Meisterschaft') + ' · ' + t('Event') + ' ' + (lauf.laeuft.idx + 1) + '/' + meister.plan.events.length
+      + (meister.plan.events[lauf.laeuft.idx] && meister.plan.events[lauf.laeuft.idx].name ? ' · ' + meister.plan.events[lauf.laeuft.idx].name : '')
       + (meisterIstRennen(ev) ? ' · ' + t('Startaufstellung') + ': ' + meisterAufstText(lauf.laeuft.idx) : '');
   }
 
@@ -57042,7 +57173,8 @@
     lauf.laeuft = { idx: lauf.idx, modus: f.modus, seit: Date.now() };
     meisterSpeichern();
     meisterSchliessen();
-    msMeldung(t('Meisterschaft') + ' · ' + t('Event') + ' ' + (lauf.idx + 1) + '/' + meister.plan.events.length);
+    msMeldung(t('Meisterschaft') + ' · ' + t('Event') + ' ' + (lauf.idx + 1) + '/' + meister.plan.events.length
+      + (meister.plan.events[lauf.idx] && meister.plan.events[lauf.idx].name ? ' · ' + meister.plan.events[lauf.idx].name : ''));
     if (meisterMpAndere().length && typeof mpRennenFuerAlle === 'function') {
       showTab('race');
       mpRennenFuerAlle();
@@ -57236,6 +57368,21 @@
     return '<span class="ms-wert ' + (klasse || '') + '"><span class="ms-pf" data-d="-1">◀</span><span class="ms-w">' + msEsc(text)
       + '</span><span class="ms-pf" data-d="1">▶</span></span>';
   }
+  // v3.0 BESTELLT: "In the championship creation, can you add the ability to name the event?" Optional; without a
+  // name the event is "Event N" as before.
+  function meisterEventName(i) {
+    const e = meister.plan.events[i];
+    const n = e && typeof e.name === 'string' ? e.name.trim() : '';
+    return n || (t('Event') + ' ' + (i + 1));
+  }
+  function msNameFragen(i) {
+    const e = meister.plan.events[i];
+    if (!e) return;
+    const neu = window.prompt(t('Name des Events (leer = Event') + ' ' + (i + 1) + ')', e.name || '');
+    if (neu === null) return;
+    e.name = String(neu).trim().slice(0, 40);
+    meisterSpeichern();
+  }
   function msLaeuftNoch() { return !!(meister.lauf && !meister.lauf.fertig); }
   function msZeilen() {
     const z = msLaeuftNoch() ? [{ art: 'weiter' }] : [];
@@ -57281,7 +57428,7 @@
         const e = evs[r.i], f = meisterFormat(e);
         h += '<div class="ms-ev' + sel + '" data-k="' + k + '"><i style="background:' + MEISTER_FARBEN[r.i % MEISTER_FARBEN.length] + '"></i>'
           + '<span class="ms-nr">' + (r.i + 1) + '</span><span class="ms-bild">' + msStreckeBild(e.strecke) + '</span>'
-          + '<span class="ms-name"><b>' + msEsc(meisterStreckeName(e.strecke)) + '</b><span>' + msEsc(msUnterzeile(e)) + '</span></span>'
+          + '<span class="ms-name"><b>' + msEsc(e.name && e.name.trim() ? e.name.trim() + ' · ' + meisterStreckeName(e.strecke) : meisterStreckeName(e.strecke)) + '</b><span>' + msEsc(msUnterzeile(e)) + '</span></span>'
           + msWert(t(f.name), 'f-' + f.id) + '</div>';
       } else if (r.art === 'neu') {
         h += '<button type="button" class="ms-knopf ms-neu' + sel + '" data-k="' + k + '">' + msEsc(t('+ Event hinzufügen')) + '</button>'
@@ -57313,6 +57460,7 @@
   function msDetailZeilen(i) {
     const e = meister.plan.events[i], r = meisterIstRennen(e), f = meisterFormat(e);
     return [
+      { l: 'Name', w: (e.name && e.name.trim()) || t('Event') + ' ' + (i + 1), feld: 'name' },
       { l: 'Strecke', w: meisterStreckeName(e.strecke), feld: 'strecke' },
       { l: 'Format', w: t(f.name), feld: 'format' },
       { l: 'Umfang', w: e.umfang + ' ' + t(f.einheit), feld: 'umfang' },
@@ -57358,12 +57506,12 @@
       if (meister.lauf && !meister.lauf.fertig && meister.lauf.idx > 0) h += '<p class="ms-info ms-rot">' + msEsc(t('Eine laufende Meisterschaft wird dabei beendet.')) + '</p>';
     } else {
       const i = Math.min(msEvent, meister.plan.events.length - 1), e = meister.plan.events[i];
-      h += '<h3>' + msEsc(t('Event')) + ' ' + (i + 1) + '<small>' + msEsc(t(meisterIstRennen(e) ? 'mit Punkten' : 'ohne Punkte')) + '</small></h3>';
+      h += '<h3>' + msEsc(meisterEventName(i)) + '<small>' + msEsc(t(meisterIstRennen(e) ? 'mit Punkten' : 'ohne Punkte')) + '</small></h3>';
       const dz = msDetailZeilen(i);
       dz.forEach((r, k) => {
         const sel = k === msDetail ? ' sel' : '';
         if (r.knopf) {
-          if (k === 7) h += '<div class="ms-fuss">';
+          if (k === 0 || !dz[k - 1].knopf) h += '<div class="ms-fuss">';
           const inhalt = r.zeichen ? r.zeichen
             : r.tonne ? MS_TONNE + (r.arm ? ' ' + msEsc(t('Wirklich?')) : '')
             : msEsc(t(r.l));
@@ -57420,7 +57568,7 @@
     let d = '';
     if (!lauf.fertig) {
       const ev = evs[lauf.idx];
-      d += '<span class="ms-info">' + msEsc(t('Nächstes Event')) + ' · ' + (lauf.idx + 1) + ' / ' + evs.length + '</span>'
+      d += '<span class="ms-info">' + msEsc(t('Nächstes Event')) + ' · ' + (lauf.idx + 1) + ' / ' + evs.length + (ev.name ? ' · ' + msEsc(ev.name) : '') + '</span>'
         + '<span class="ms-titel">' + msEsc(meisterStreckeName(ev.strecke)) + ' · ' + msEsc(t(meisterFormat(ev).name)) + ' ' + ev.umfang + ' ' + msEsc(t(meisterFormat(ev).einheit)) + '</span>'
         + '<span class="ms-info">' + msEsc(msUnterzeile(ev)) + '</span>';
       if (meisterIstRennen(ev)) {
@@ -57443,6 +57591,7 @@
   // ---- BEDIENUNG -----------------------------------------------------------------------------
   function msRund(v, n) { return ((v % n) + n) % n; }
   function msAendern(i, feld, d) {
+    if (feld === 'name') { msNameFragen(i); return; }
     const e = meister.plan.events[i];
     const f = meisterFormat(e);
     if (feld === 'umfang') {
@@ -57506,7 +57655,7 @@
     }
     const z = msZeilen()[msZeile];
     if (z.art === 'weiter') { msAnsicht = 'stand'; msStandFokus = 0; }
-    else if (z.art === 'ev') { msEvent = z.i; msDetail = 0; }
+    else if (z.art === 'ev') { msEvent = z.i; msDetail = 1; }   // v3.0: row 0 is the name; start on Track as before
     else if (z.art === 'neu') msNeu();
     else if (z.art === 'los') { msStarten(); return; }
     else if (z.art === 'gl') { msLinks(1); return; }
@@ -57519,7 +57668,7 @@
   function msNeu() {
     if (meister.plan.events.length >= MEISTER_MAX_EVENTS) { msMeldung(t('Höchstens 10 Events')); return; }
     meister.plan.events.push(meisterEventNeu());
-    msEvent = meister.plan.events.length - 1; msZeile = msEvent; msDetail = 0;
+    msEvent = meister.plan.events.length - 1; msZeile = msEvent; msDetail = 1;
     meisterSpeichern();
   }
   var MS_TONNE = '<svg class="ms-tonne" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
@@ -57590,6 +57739,7 @@
     msDetail = +el.getAttribute('data-d');
     if (pf) { msLinks(+pf.getAttribute('data-d')); return; }
     if (el.tagName === 'BUTTON') { msBestaetigen(); return; }
+    if (msDetail === 0) { msNameFragen(msEvent); msZeichnen(); return; }   // v3.0: the name row
     msZeichnen();
   }
   // Steuerkreuz und Tasten (aus pollGamepad, vor allen anderen Menues). true = verbraucht.
@@ -126456,6 +126606,420 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     });
   })();
   window.HYBRIDDASH_KLANG = Object.freeze({ kette: hdKlangKette, an: () => hdKlangAn });
+  // =====================================================================================
+  // Hybrid-Dash 3.0: RACE SUMMARY after a session - save and export
+  // =====================================================================================
+  //
+  // BESTELLT: "After a race session, can you add a feature that shows the race summary? With the option to save and
+  // export that data?"
+  //
+  // finishRace (70-race.js) calls hdBerichtNachRennen() once per session. It takes a SNAPSHOT right away - classified
+  // results (ovDaten, the same order as the standings and the podium), every car's lap times, the session (mode,
+  // length, weather, track code, duration, aborted or not), pit stops / penalties of player 1 and the race-control
+  // incident log - and shows it a few seconds later, after the podium has had its moment.
+  //   Save     keeps it in this browser (hybriddash.berichte.v1, newest first, at most 50); "Saved summaries" lists
+  //            them to reopen, export or delete.
+  //   CSV      one file a spreadsheet opens directly: results, then every lap of every car, then the session facts.
+  //   JSON     everything, for other tools.
+  // Not after a challenge (it shows its own result) and not while the self-test suite runs.
+  const HD_BERICHT_STORE = 'hybriddash.berichte.v1';
+  const HD_BERICHT_MAX = 50;
+  const HD_BERICHT_VERZUG_MS = 3500;
+  let hdBerichtAktuell = null, hdBerichtBox = null, hdBerichtUhr = null;
+
+  function hdBerichtEsc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
+  function hdBerichtZeit(ms) {
+    if (!(ms > 0)) return '–';
+    const s = ms / 1000, m = Math.floor(s / 60);
+    return m ? m + ':' + (s - m * 60).toFixed(3).padStart(6, '0') : s.toFixed(3) + ' s';
+  }
+  function hdBerichteLesen() { try { return JSON.parse(localStorage.getItem(HD_BERICHT_STORE) || '[]') || []; } catch (e) { return []; } }
+  function hdBerichteSchreiben(l) { try { localStorage.setItem(HD_BERICHT_STORE, JSON.stringify(l.slice(0, HD_BERICHT_MAX))); return true; } catch (e) { return false; } }
+
+  // ---- the snapshot ------------------------------------------------------------------------------------------------
+  function hdBerichtSchnappschuss(abgebrochen) {
+    let reihe = [], autos = [];
+    try { reihe = ovDaten(); autos = raceAllCars(); } catch (e) { return null; }
+    if (!autos.some((c) => c.laps && c.laps.length)) return null;   // nothing driven: no summary
+    const runden = new Map(autos.map((c) => [c.id, (c.laps || []).map((l) => l.ms)]));
+    const alleBesten = reihe.map((x) => x.beste).filter((x) => x > 0);
+    const schnellste = alleBesten.length ? Math.min(...alleBesten) : null;
+    const m = RACE_MODES[raceMode] || { label: raceMode, unit: '' };
+    let strecke = '', teile = 0;
+    try { strecke = typeof kCode === 'function' ? kCode() : ''; teile = (currentTrackTiles || []).length; } catch (e) { /* none */ }
+    let dauer = 0;
+    try { dauer = raceStartedAt ? Math.max(0, rennZeitJetzt() - raceStartedAt) : 0; } catch (e) { dauer = 0; }
+    let meisterName = '';
+    try {
+      if (typeof meister !== 'undefined' && meister.lauf && meister.lauf.laeuft) {
+        const ev = meister.plan.events[meister.lauf.laeuft.idx];
+        meisterName = t('Meisterschaft') + ' · ' + ((ev && ev.name) || (t('Event') + ' ' + (meister.lauf.laeuft.idx + 1)));
+      }
+    } catch (e) { /* no championship */ }
+    return {
+      id: Date.now().toString(36),
+      datum: new Date().toISOString(),
+      modus: raceMode, modusName: t(m.label),
+      limit: raceLimit, einheit: t(m.unit || ''),
+      wetter: raceWxStart, strecke, teile, dauerMs: dauer, abgebrochen: !!abgebrochen, meister: meisterName,
+      boxenstopps: typeof racePitDone === 'number' ? racePitDone : 0,
+      pflichtstopps: typeof racePitRequired === 'number' ? racePitRequired : 0,
+      schnellste,
+      ergebnis: reihe.map((x) => ({
+        pos: x.pos, name: x.name, farbe: x.farbe, rolle: x.rolle, id: x.id, runden: x.runden, summeMs: x.summe,
+        luecke: x.luecke, besteMs: x.beste, dnf: x.dnf, dsq: x.dsq, strafeMs: x.strafeMs,
+        zeiten: runden.get(x.id) || [],
+      })),
+      vorfaelle: (typeof hdRl !== 'undefined' && Array.isArray(hdRl.log) ? hdRl.log.slice().reverse() : []).map((v) => ({ zeit: v.zeit, text: v.text, art: v.art })),
+    };
+  }
+  // Hook from finishRace (70-race.js).
+  function hdBerichtNachRennen(auslaufen) {
+    try {
+      if (hdSuiteLaeuft()) return;
+      if (typeof challengeLaeuft === 'function' && challengeLaeuft()) return;
+    } catch (e) { /* not ready */ }
+    const b = hdBerichtSchnappschuss(auslaufen === false);
+    if (!b) return;
+    hdBerichtAktuell = b;
+    clearTimeout(hdBerichtUhr);
+    hdBerichtUhr = setTimeout(() => hdBerichtZeigen(b), HD_BERICHT_VERZUG_MS);
+  }
+
+  // ---- export --------------------------------------------------------------------------------------------------------
+  function hdBerichtDatei(name, inhalt, typ) {
+    const url = URL.createObjectURL(new Blob([inhalt], { type: typ }));
+    const a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+  function hdBerichtDateiname(b, endung) {
+    const d = b.datum.slice(0, 16).replace(/[:T]/g, '-');
+    return 'hybrid-dash-' + (b.modus || 'session') + '-' + d + '.' + endung;
+  }
+  function hdBerichtCsv(b) {
+    const qq = String.fromCharCode(34);   // the double quote, not written literally (the build's bracket check reads regexes as code)
+    const q = (v) => { const s = String(v == null ? '' : v); return (s.includes(';') || s.includes(qq) || s.includes('\n')) ? qq + s.split(qq).join(qq + qq) + qq : s; };
+    const sek = (ms) => (ms > 0 ? (ms / 1000).toFixed(3) : '');
+    const z = [];
+    z.push([t('Pos'), t('Fahrername'), t('Runden'), t('Gesamt (s)'), t('Rückstand'), t('Beste (s)'), t('Strafe (s)'), t('Status')].map(q).join(';'));
+    b.ergebnis.forEach((x) => z.push([x.pos, x.name, x.runden, sek(x.summeMs), x.luecke, sek(x.besteMs), x.strafeMs ? (x.strafeMs / 1000).toFixed(1) : '',
+      x.dsq ? 'DSQ' : x.dnf ? 'DNF' : ''].map(q).join(';')));
+    z.push('');
+    z.push([t('Fahrername'), t('Runde'), t('Zeit (s)')].map(q).join(';'));
+    b.ergebnis.forEach((x) => x.zeiten.forEach((ms, i) => z.push([x.name, i + 1, sek(ms)].map(q).join(';'))));
+    z.push('');
+    z.push([t('Sitzung'), t('Wert')].map(q).join(';'));
+    [[t('Datum'), new Date(b.datum).toLocaleString()], [t('Modus'), b.modusName], [t('Länge'), b.limit ? b.limit + ' ' + b.einheit : '∞'],
+     [t('Wetter'), b.wetter], [t('Strecke'), b.strecke ? b.strecke + ' (' + b.teile + ')' : '–'], [t('Dauer'), hdBerichtZeit(b.dauerMs)],
+     [t('Abgebrochen'), b.abgebrochen ? t('ja') : t('nein')], [t('Boxenstopps'), b.boxenstopps + ' / ' + b.pflichtstopps], [t('Schnellste Runde (s)'), sek(b.schnellste)]]
+      .concat(b.meister ? [[t('Meisterschaft'), b.meister]] : [])
+      .forEach((r) => z.push(r.map(q).join(';')));
+    if (b.vorfaelle.length) {
+      z.push('');
+      z.push([t('Zeit'), t('Vorfall')].map(q).join(';'));
+      b.vorfaelle.forEach((v) => z.push([v.zeit, v.text].map(q).join(';')));
+    }
+    return '﻿' + z.join('\r\n') + '\r\n';
+  }
+
+  // ---- the window ----------------------------------------------------------------------------------------------------
+  function hdBerichtHtml(b, gespeichert) {
+    const sieger = b.ergebnis[0];
+    const kopf = '<div class="hdb-kopf"><div><small>' + hdBerichtEsc(t('Rennbericht')) + (b.meister ? ' · ' + hdBerichtEsc(b.meister) : '') + '</small>'
+      + '<b>' + hdBerichtEsc(b.modusName) + (b.abgebrochen ? ' <span class="hdb-ab">' + hdBerichtEsc(t('abgebrochen')) + '</span>' : '') + '</b>'
+      + '<span>' + hdBerichtEsc(new Date(b.datum).toLocaleString()) + '</span></div>'
+      + '<button type="button" class="hdb-zu" data-hdb="zu" aria-label="' + hdBerichtEsc(t('Schließen')) + '">&#10005;</button></div>';
+    const fakten = [[t('Sieger'), sieger ? sieger.name : '–'], [t('Schnellste Runde'), hdBerichtZeit(b.schnellste)],
+      [t('Dauer'), hdBerichtZeit(b.dauerMs)], [t('Länge'), b.limit ? b.limit + ' ' + b.einheit : '∞'],
+      [t('Strecke'), b.strecke ? b.strecke + ' · ' + b.teile + ' ' + t('Teile') : '–'], [t('Boxenstopps'), b.boxenstopps + (b.pflichtstopps ? ' / ' + b.pflichtstopps : '')]];
+    const kacheln = '<div class="hdb-fakten">' + fakten.map(([l, w]) => '<div><small>' + hdBerichtEsc(l) + '</small><b>' + hdBerichtEsc(w) + '</b></div>').join('') + '</div>';
+    const tabelle = '<table class="hdb-tab"><thead><tr><th>' + hdBerichtEsc(t('Pos')) + '</th><th>' + hdBerichtEsc(t('Fahrername')) + '</th><th>' + hdBerichtEsc(t('Runden'))
+      + '</th><th>' + hdBerichtEsc(t('Beste')) + '</th><th>' + hdBerichtEsc(t('Rückstand')) + '</th></tr></thead><tbody>'
+      + b.ergebnis.map((x) => '<tr' + (x.besteMs && x.besteMs === b.schnellste ? ' class="fl"' : '') + '><td>' + (x.dsq ? 'DSQ' : x.dnf ? 'DNF' : 'P' + x.pos) + '</td>'
+        + '<td><i style="background:' + hdBerichtEsc(x.farbe || '#888') + '"></i>' + hdBerichtEsc(x.name) + '</td><td>' + x.runden + '</td>'
+        + '<td>' + hdBerichtZeit(x.besteMs) + '</td><td>' + hdBerichtEsc(x.luecke || '') + (x.strafeMs ? ' <small>+' + Math.round(x.strafeMs / 1000) + 's</small>' : '') + '</td></tr>').join('')
+      + '</tbody></table>';
+    const vorf = b.vorfaelle.length ? '<div class="hdb-vorf"><small>' + hdBerichtEsc(t('Vorfälle')) + '</small>'
+      + b.vorfaelle.slice(-12).map((v) => '<div><b>' + hdBerichtEsc(v.zeit) + '</b> ' + hdBerichtEsc(v.text) + '</div>').join('') + '</div>' : '';
+    const fuss = '<div class="hdb-fuss">'
+      + '<button type="button" class="primary" data-hdb="speichern"' + (gespeichert ? ' disabled' : '') + '>' + hdBerichtEsc(gespeichert ? t('Gespeichert') : t('Speichern')) + '</button>'
+      + '<button type="button" data-hdb="csv">' + hdBerichtEsc(t('Als CSV exportieren')) + '</button>'
+      + '<button type="button" data-hdb="json">' + hdBerichtEsc(t('Als JSON exportieren')) + '</button>'
+      + '<button type="button" data-hdb="liste">' + hdBerichtEsc(t('Gespeicherte Berichte')) + ' (' + hdBerichteLesen().length + ')</button></div>';
+    return '<div class="hdb-karte">' + kopf + kacheln + tabelle + vorf + fuss + '</div>';
+  }
+  function hdBerichtListeHtml() {
+    const l = hdBerichteLesen();
+    return '<div class="hdb-karte"><div class="hdb-kopf"><div><small>' + hdBerichtEsc(t('Rennbericht')) + '</small><b>' + hdBerichtEsc(t('Gespeicherte Berichte')) + '</b></div>'
+      + '<button type="button" class="hdb-zu" data-hdb="zu" aria-label="' + hdBerichtEsc(t('Schließen')) + '">&#10005;</button></div>'
+      + (l.length ? '<div class="hdb-liste">' + l.map((b) => '<div class="hdb-eintrag"><button type="button" data-hdb="oeffnen" data-id="' + hdBerichtEsc(b.id) + '"><b>'
+        + hdBerichtEsc(b.modusName) + (b.meister ? ' · ' + hdBerichtEsc(b.meister) : '') + '</b><span>' + hdBerichtEsc(new Date(b.datum).toLocaleString()) + ' · '
+        + hdBerichtEsc(t('Sieger')) + ': ' + hdBerichtEsc((b.ergebnis[0] || {}).name || '–') + '</span></button>'
+        + '<button type="button" class="hdb-weg" data-hdb="loeschen" data-id="' + hdBerichtEsc(b.id) + '" aria-label="' + hdBerichtEsc(t('Löschen')) + '">&#10005;</button></div>').join('') + '</div>'
+        : '<p class="hdb-leer">' + hdBerichtEsc(t('Noch keine Berichte gespeichert.')) + '</p>')
+      + '</div>';
+  }
+  function hdBerichtFenster() {
+    if (!hdBerichtBox) {
+      hdBerichtBox = document.createElement('div');
+      hdBerichtBox.id = 'hd-bericht'; hdBerichtBox.className = 'hd-bericht';
+      hdBerichtBox.setAttribute('role', 'dialog'); hdBerichtBox.setAttribute('aria-modal', 'true'); hdBerichtBox.setAttribute('data-i18n-skip', '');
+      document.body.appendChild(hdBerichtBox);
+      hdBerichtBox.addEventListener('click', hdBerichtKlick);
+    }
+    hdBerichtBox.hidden = false;
+    return hdBerichtBox;
+  }
+  function hdBerichtZeigen(b) {
+    if (!b) return;
+    hdBerichtAktuell = b;
+    const gespeichert = hdBerichteLesen().some((x) => x.id === b.id);
+    hdBerichtFenster().innerHTML = hdBerichtHtml(b, gespeichert);
+  }
+  function hdBerichtListeZeigen() { hdBerichtFenster().innerHTML = hdBerichtListeHtml(); }
+  function hdBerichtZu() { if (hdBerichtBox) hdBerichtBox.hidden = true; }
+  function hdBerichtKlick(e) {
+    if (e.target === hdBerichtBox) { hdBerichtZu(); return; }
+    const k = e.target.closest('[data-hdb]');
+    if (!k) return;
+    const was = k.dataset.hdb, b = hdBerichtAktuell;
+    if (was === 'zu') hdBerichtZu();
+    else if (was === 'speichern' && b) {
+      const l = hdBerichteLesen().filter((x) => x.id !== b.id);
+      l.unshift(b);
+      if (hdBerichteSchreiben(l)) { showHudToast(t('Bericht gespeichert')); hdBerichtZeigen(b); }
+      else showHudToast(t('Speichern nicht möglich (Speicher voll?)'));
+    } else if (was === 'csv' && b) hdBerichtDatei(hdBerichtDateiname(b, 'csv'), hdBerichtCsv(b), 'text/csv;charset=utf-8');
+    else if (was === 'json' && b) hdBerichtDatei(hdBerichtDateiname(b, 'json'), JSON.stringify(b, null, 2), 'application/json');
+    else if (was === 'liste') hdBerichtListeZeigen();
+    else if (was === 'oeffnen') { const x = hdBerichteLesen().find((y) => y.id === k.dataset.id); if (x) hdBerichtZeigen(x); }
+    else if (was === 'loeschen') { hdBerichteSchreiben(hdBerichteLesen().filter((y) => y.id !== k.dataset.id)); hdBerichtListeZeigen(); }
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && hdBerichtBox && !hdBerichtBox.hidden) { e.preventDefault(); e.stopPropagation(); hdBerichtZu(); } }, true);
+
+  // The saved reports are also reachable without a race: a button on the Statistics page.
+  (function hdBerichtKnopf() {
+    const seite = document.getElementById('sub-opt-stats');
+    if (!seite || document.getElementById('hd-bericht-knopf')) return;
+    const r = document.createElement('div');
+    r.className = 'opt-row opt-breit';
+    r.innerHTML = '<button type="button" id="hd-bericht-knopf">Gespeicherte Rennberichte</button>';
+    const h = seite.querySelector('h2');
+    seite.insertBefore(r, h ? h.nextSibling : seite.firstChild);
+    r.querySelector('button').addEventListener('click', hdBerichtListeZeigen);
+  })();
+
+  window.HYBRIDDASH_BERICHT = Object.freeze({
+    zeigen: () => hdBerichtZeigen(hdBerichtAktuell), liste: hdBerichtListeZeigen, gespeichert: hdBerichteLesen,
+    csv: hdBerichtCsv, _schnappschuss: hdBerichtSchnappschuss, _test: (b) => { hdBerichtAktuell = b; hdBerichtZeigen(b); },
+  });
+  // =====================================================================================
+  // Hybrid-Dash 3.0: PRE-RACE SETUP - check the car before every session
+  // =====================================================================================
+  //
+  // BESTELLT: "A pre-race set up: before each session, have a screen that allows you to double check the settings of
+  // your car, such as tyre selection, steering and other tunable things for the car."
+  //
+  // The start asks first - at the grid board (raceGridAnzeigen) or, for starts without it, in startRaceCountdown
+  // (70-race.js). When the screen is wanted it opens instead, and "Start" continues the very same start. Not shown for a multiplayer start
+  // plan, a challenge, without a Player 1 car, while the self-test suite runs, or when switched off ("Show before
+  // every session" on the screen itself).
+  //
+  // The settings are not copies: every control MIRRORS the real one in Options (same options, range and step) and
+  // writes back to it with the usual input / change events - so the presets, the per-player logic and the saving all
+  // keep working exactly as from Options. Tyres and pit fuel use the race's own state (tyres + applySurface, the pit
+  // pre-selection pitVorwahl.refuel).
+  const HD_SETUP_STORE = 'hybriddash.setup.v1';
+  const HD_SETUP_SPIEGEL = [
+    // [group, option control id]
+    ['Fahren', 'driver-assist'], ['Fahren', 'setting-gearbox'], ['Fahren', 'hd-gangstufe'], ['Fahren', 'setting-autoshift'],
+    ['Lenkung & Bremse', 'phys-steerresp'], ['Lenkung & Bremse', 'setting-steer-calib'], ['Lenkung & Bremse', 'setting-brakebias'], ['Lenkung & Bremse', 'setting-brakepower'],
+    ['Auto', 'setting-topspeed-kmh'], ['Auto', 'setting-grip'], ['Auto', 'setting-tyre-pressure'], ['Auto', 'setting-tyre-blankets'],
+  ];
+  // hdSetupFreigabe: when the screen was passed (Start pressed). The start then goes on - grid board first
+  // (raceGridAnzeigen), then the lights (startRaceCountdown); both hooks let it through for HD_SETUP_FREI_MS, and the
+  // race start uses it up, so the next session asks again.
+  const HD_SETUP_FREI_MS = 120000;
+  let hdSetupFreigabe = 0, hdSetupBox = null, hdSetupWeiter = null, hdSetupPadVorher = {};
+  function hdSetupAn() { try { return localStorage.getItem(HD_SETUP_STORE) !== 'aus'; } catch (e) { return true; } }
+  function hdSetupEsc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
+  function hdSetupNoetig(gruenZiel, mpPlan) {
+    if (!hdSetupAn() || Date.now() - hdSetupFreigabe < HD_SETUP_FREI_MS) return false;
+    try {
+      if (hdSuiteLaeuft()) return false;
+      if (mpPlan || typeof gruenZiel === 'number') return false;
+      if (typeof challengeLaeuft === 'function' && challengeLaeuft()) return false;
+      if (raceState !== 'idle' && raceState !== 'finished') return false;
+      if (!playerCar && !garage.some((c) => c && c.role === 'player')) return false;
+    } catch (e) { return false; }
+    return true;
+  }
+  // Hook from raceGridAnzeigen (the grid board comes after the setup).
+  function hdSetupVorGrid(weiter) {
+    if (!hdSetupNoetig()) return false;
+    hdSetupWeiter = () => raceGridAnzeigen(weiter);
+    hdSetupOeffnen();
+    return true;
+  }
+  // Hook from startRaceCountdown (starts that skip the grid board). Uses up the pass.
+  function hdSetupVorStart(gruenZiel, mpPlan) {
+    if (!hdSetupNoetig(gruenZiel, mpPlan)) { hdSetupFreigabe = 0; return false; }
+    hdSetupWeiter = () => startRaceCountdown(gruenZiel, mpPlan);
+    hdSetupOeffnen();
+    return true;
+  }
+
+  // ---- mirrored controls -------------------------------------------------------------------------------------------
+  function hdSetupLabel(el) {
+    const row = el.closest('.opt-row');
+    const l = row && row.querySelector('.opt-label');
+    if (!l) return el.id;
+    const c = l.cloneNode(true);
+    c.querySelectorAll('button, small, .wip-tag, .opt-info-btn, .exp-tag, .opt-info-versteckt').forEach((x) => x.remove());
+    return c.textContent.replace(/\s+/g, ' ').trim();
+  }
+  function hdSetupWertText(el) {
+    const v = document.getElementById(el.id + '-val');
+    if (v && v.textContent.trim()) return v.textContent.trim();
+    return el.value;
+  }
+  function hdSetupZeile(id) {
+    const el = document.getElementById(id);
+    if (!el || !el.closest('.opt-row')) return '';
+    const info = el.closest('.opt-row').querySelector('.opt-info-versteckt');
+    const lab = '<span class="hds-l"' + (info ? ' title="' + hdSetupEsc(info.textContent.replace(/\s+/g, ' ').trim()) + '"' : '') + '>' + hdSetupEsc(hdSetupLabel(el)) + '</span>';
+    if (el.tagName === 'SELECT') {
+      return '<label class="hds-z">' + lab + '<select data-hds="' + id + '">'
+        + [...el.options].filter((o) => !o.hidden).map((o) => '<option value="' + hdSetupEsc(o.value) + '"' + (o.selected ? ' selected' : '') + (o.disabled ? ' disabled' : '') + '>'
+          + hdSetupEsc(o.textContent.trim()) + '</option>').join('') + '</select></label>';
+    }
+    if (el.type === 'checkbox') {
+      return '<label class="hds-z">' + lab + '<span class="tgl"><input type="checkbox" data-hds="' + id + '"' + (el.checked ? ' checked' : '') + '><span></span></span></label>';
+    }
+    if (el.type === 'range') {
+      return '<label class="hds-z hds-regler">' + lab + '<span class="hds-w" data-hds-w="' + id + '">' + hdSetupEsc(hdSetupWertText(el)) + '</span>'
+        + '<input type="range" data-hds="' + id + '" min="' + el.min + '" max="' + el.max + '" step="' + (el.step || 'any') + '" value="' + el.value + '"></label>';
+    }
+    return '';
+  }
+  function hdSetupSchreiben(ctl) {
+    const el = document.getElementById(ctl.dataset.hds);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = ctl.checked; else el.value = ctl.value;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    const w = hdSetupBox && hdSetupBox.querySelector('[data-hds-w="' + el.id + '"]');
+    if (w) w.textContent = hdSetupWertText(el);
+  }
+
+  // ---- the screen ----------------------------------------------------------------------------------------------------
+  function hdSetupHtml() {
+    const car = playerCar || garage.find((c) => c && c.role === 'player') || null;
+    const name = car ? (car.alias || car.tag || garageLabel(car)) : '';
+    const nr = car && typeof hdNummer === 'function' ? hdNummer(car) : '';
+    const bild = car && typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(car, 72) : '';
+    const m = RACE_MODES[raceMode] || { label: raceMode, unit: '' };
+    const sitzung = t(m.label) + ' · ' + (raceLimit ? raceLimit + ' ' + t(m.unit || '') : '∞') + ' · '
+      + ({ dry: t('Trocken'), rain: t('Regen'), wechsel: t('Wechselhaft') }[raceWxStart] || raceWxStart);
+    // Tyres to start on, and the fuel for the pit stop.
+    const mischungen = ['weich', 'mittel', 'hart', 'regen'].filter((x) => typeof mischungErlaubt !== 'function' || mischungErlaubt(x) === x);
+    const reifen = '<div class="hds-z"><span class="hds-l">' + hdSetupEsc(t('Reifen zum Start')) + '</span><span class="hds-chips">'
+      + mischungen.map((x) => '<button type="button" data-hds-reifen="' + x + '"' + (tyres === x ? ' class="an"' : '') + ' style="--m:' + hdSetupEsc(typeof mischungFarbe === 'function' ? mischungFarbe(x) : '#888') + '">'
+        + hdSetupEsc(typeof mischungName === 'function' ? mischungName(x) : x) + '</button>').join('') + '</span></div>';
+    const tankJetzt = typeof pitVorwahlIst === 'function' ? tankZielNorm(pitVorwahlIst('refuel')) : 0;
+    const tank = '<div class="hds-z"><span class="hds-l">' + hdSetupEsc(t('Tanken beim Boxenstopp')) + '</span><span class="hds-chips">'
+      + TANK_STUFEN.map((x) => '<button type="button" data-hds-tank="' + x + '"' + (tankJetzt === x ? ' class="an"' : '') + '>' + hdSetupEsc(tankZielWort(x)) + '</button>').join('') + '</span></div>';
+    // Driving feel preset.
+    let preset = '';
+    try {
+      const keys = window.__presetKeysFahren ? window.__presetKeysFahren() : [];
+      const akt = window.__presetActive ? window.__presetActive() : null;
+      if (keys.length) preset = '<label class="hds-z"><span class="hds-l">' + hdSetupEsc(t('Fahrgefühl')) + '</span><select data-hds-preset="1">'
+        + (akt && keys.includes(akt) ? '' : '<option value="" selected>' + hdSetupEsc(t('eigene Einstellung')) + '</option>')
+        + keys.map((k) => '<option value="' + hdSetupEsc(k) + '"' + (k === akt ? ' selected' : '') + '>' + hdSetupEsc(window.__presetLabel(k)) + '</option>').join('') + '</select></label>';
+    } catch (e) { preset = ''; }
+    const gruppen = {};
+    HD_SETUP_SPIEGEL.forEach(([g, id]) => { const z = hdSetupZeile(id); if (z) (gruppen[g] = gruppen[g] || []).push(z); });
+    const gruppe = (titel, inhalt) => '<section class="hds-gruppe"><h3>' + hdSetupEsc(t(titel)) + '</h3>' + inhalt + '</section>';
+    return '<div class="hds-karte">'
+      + '<div class="hds-kopf"><span class="hds-bild">' + bild + '</span><div><small>' + hdSetupEsc(t('Vor dem Start')) + '</small>'
+      + '<b>' + (nr ? '#' + hdSetupEsc(nr) + ' ' : '') + hdSetupEsc(name) + '</b><span>' + hdSetupEsc(sitzung) + '</span></div></div>'
+      + '<div class="hds-gitter">'
+      + gruppe('Reifen & Tank', reifen + tank)
+      + gruppe('Fahren', preset + (gruppen['Fahren'] || []).join(''))
+      + gruppe('Lenkung & Bremse', (gruppen['Lenkung & Bremse'] || []).join(''))
+      + gruppe('Auto', (gruppen['Auto'] || []).join(''))
+      + '</div>'
+      + '<div class="hds-fuss"><label class="hds-immer"><input type="checkbox" data-hds-immer="1"' + (hdSetupAn() ? ' checked' : '') + '> '
+      + hdSetupEsc(t('Vor jeder Sitzung zeigen')) + '</label>'
+      + '<button type="button" data-hds-akt="zurueck">' + hdSetupEsc(t('Zurückgehen')) + '</button>'
+      + '<button type="button" class="primary" data-hds-akt="start">' + hdSetupEsc(t('Start')) + ' &#9654;</button></div></div>';
+  }
+  function hdSetupMalen() { if (hdSetupBox && !hdSetupBox.hidden) hdSetupBox.innerHTML = hdSetupHtml(); }
+  function hdSetupOeffnen() {
+    if (!hdSetupBox) {
+      hdSetupBox = document.createElement('div');
+      hdSetupBox.id = 'hd-setup'; hdSetupBox.className = 'hd-setup';
+      hdSetupBox.setAttribute('role', 'dialog'); hdSetupBox.setAttribute('aria-modal', 'true'); hdSetupBox.setAttribute('data-i18n-skip', '');
+      document.body.appendChild(hdSetupBox);
+      hdSetupBox.addEventListener('click', hdSetupKlick);
+      hdSetupBox.addEventListener('input', hdSetupEingabe);
+      hdSetupBox.addEventListener('change', hdSetupEingabe);
+    }
+    hdSetupBox.hidden = false;
+    hdSetupPadVorher = { a: true, b: true };   // a held button from the start press must be released first
+    hdSetupMalen();
+  }
+  function hdSetupZu() { if (hdSetupBox) hdSetupBox.hidden = true; hdSetupWeiter = null; }
+  function hdSetupStart() {
+    const w = hdSetupWeiter;
+    if (hdSetupBox) hdSetupBox.hidden = true;
+    hdSetupWeiter = null;
+    hdSetupFreigabe = Date.now();
+    if (w) w();
+  }
+  function hdSetupKlick(e) {
+    if (e.target === hdSetupBox) return;   // no closing by a stray click on the backdrop
+    const r = e.target.closest('[data-hds-reifen]');
+    if (r) { tyres = r.dataset.hdsReifen; mischungWunsch = null; if (typeof applySurface === 'function') applySurface(); hdSetupMalen(); return; }
+    const k = e.target.closest('[data-hds-tank]');
+    if (k) { if (typeof pitVorwahl === 'object' && pitVorwahl) pitVorwahl.refuel = Number(k.dataset.hdsTank); hdSetupMalen(); return; }
+    const a = e.target.closest('[data-hds-akt]');
+    if (a) { if (a.dataset.hdsAkt === 'start') hdSetupStart(); else hdSetupZu(); }
+  }
+  function hdSetupEingabe(e) {
+    const c = e.target;
+    if (c.dataset.hds) { hdSetupSchreiben(c); return; }
+    if (c.dataset.hdsPreset !== undefined && e.type === 'change') {
+      if (c.value && window.__applyPreset) { window.__applyPreset(c.value); setTimeout(hdSetupMalen, 50); }
+      return;
+    }
+    if (c.dataset.hdsImmer !== undefined) { try { localStorage.setItem(HD_SETUP_STORE, c.checked ? 'an' : 'aus'); } catch (err) { /* private */ } }
+  }
+  document.addEventListener('keydown', (e) => {
+    if (!hdSetupBox || hdSetupBox.hidden) return;
+    if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'checkbox' && e.key !== 'Escape') return;
+    if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); hdSetupStart(); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); hdSetupZu(); }
+  }, true);
+  // Controller: confirmation button (A / Cross) starts, B / Circle goes back - on a fresh press.
+  setInterval(() => {
+    if (!hdSetupBox || hdSetupBox.hidden) return;
+    let a = false, b = false;
+    try {
+      for (const pad of (navigator.getGamepads ? navigator.getGamepads() : [])) {
+        if (!pad) continue;
+        a = a || !!(pad.buttons[0] && pad.buttons[0].pressed);
+        b = b || !!(pad.buttons[1] && pad.buttons[1].pressed);
+      }
+    } catch (e) { return; }
+    if (a && !hdSetupPadVorher.a) hdSetupStart();
+    else if (b && !hdSetupPadVorher.b) hdSetupZu();
+    hdSetupPadVorher = { a, b };
+  }, 60);
+  if (typeof i18nOnLangChange === 'function') i18nOnLangChange(hdSetupMalen);
+  window.HYBRIDDASH_SETUP = Object.freeze({ oeffnen: () => { hdSetupWeiter = null; hdSetupOeffnen(); }, zu: hdSetupZu, an: hdSetupAn });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------
   //

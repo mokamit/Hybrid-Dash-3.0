@@ -5167,6 +5167,13 @@
   @media (prefers-reduced-motion: reduce) {
     #ampel-overlay { transition: none; }
   }
+  /* v3.0 GEMELDET: "move the off track warning to somewhere that doesn't obstruct the information behind it". Not in
+     the middle of the cockpit any more: a slim strip at the very bottom (over the address line, the one place that
+     carries nothing during a race), and the whole cockpit gets a pulsing orange edge so it is still seen at a glance. */
+  html body #race-dash #gt3-offtrack { position: fixed; left: 50%; bottom: 4px; top: auto; transform: translateX(-50%); margin: 0; z-index: 260;
+    grid-row: auto; grid-column: auto; font-size: clamp(11px, 1.1vw, 15px); letter-spacing: .14em; padding: 4px 18px; box-shadow: 0 4px 16px rgba(0,0,0,.6); }
+  html body #race-dash:has(#gt3-offtrack[data-an="1"])::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 259;
+    box-shadow: inset 0 0 0 3px #ffb26b, inset 0 0 40px rgba(255,140,40,.35); animation: abseits-puls 1.1s ease-in-out infinite; }
   /* v3.0 GEMELDET: "the starting lights are not inside the light box". The box was min(50vw, 50vh) wide but the
      lamps were sized from the width alone (6.5vw), so on a wide, short window they spilled out. Now everything is
      a share of the box's own size (--ab): 5 lamps of 15 % + 4 gaps of 3.5 % + 4 % padding each side = 97 %. */
@@ -5845,6 +5852,63 @@
   .hdav-raster button.an { border-color: var(--b-red, #e10600); box-shadow: 0 0 0 2px var(--b-red, #e10600); }
   .hdav-raster button:disabled { opacity: .28; cursor: not-allowed; }
   .hd-werkzeug { display: contents; }
+  /* Pre-race setup (98w-hd-setup.js) */
+  .hd-setup { position: fixed; inset: 0; z-index: 9150; display: grid; place-items: center; background: rgba(5,4,8,.8); padding: 16px; }
+  .hd-setup[hidden] { display: none; }
+  .hds-karte { width: min(1100px, 100%); max-height: 100%; overflow: auto; background: #120d12; border: 1px solid rgba(255,255,255,.16); border-top: 4px solid var(--c-red, #e10632);
+    box-shadow: 0 20px 60px rgba(0,0,0,.7); padding: 20px 24px; color: #f4f2f3; font-family: var(--b-font, sans-serif); }
+  .hds-kopf { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .hds-bild { width: 72px; height: 72px; flex: none; overflow: hidden; } .hds-bild svg { width: 100% !important; height: 100% !important; }
+  .hds-kopf small { display: block; font: 700 12px/1 var(--b-font); letter-spacing: .16em; color: #ff8a99; text-transform: uppercase; margin-bottom: 6px; }
+  .hds-kopf b { display: block; font: 700 clamp(26px, 3vw, 40px)/1 var(--c-head, sans-serif); text-transform: uppercase; }
+  .hds-kopf span { color: #b9b2b5; font-size: 14px; }
+  .hds-gitter { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .hds-gruppe { padding: 12px 14px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 8px; }
+  .hds-gruppe h3 { margin: 0 0 2px; font: 600 20px/1 var(--c-head, sans-serif); text-transform: uppercase; letter-spacing: .03em; }
+  .hds-z { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 10px; font-size: 14px; }
+  .hds-l { font-weight: 600; }
+  .hds-z select { max-width: 190px; font: 600 15px/1.2 var(--c-head, sans-serif); padding: 6px 8px; background: rgba(10,8,12,.8); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 0; }
+  .hds-regler input[type=range] { grid-column: 1 / -1; width: 100%; }
+  .hds-w { font-variant-numeric: tabular-nums; color: #22d3ee; font-weight: 700; }
+  .hds-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+  .hds-chips button { font: 600 14px/1 var(--c-head, sans-serif); text-transform: uppercase; padding: 7px 10px; border-radius: 0; border: 2px solid var(--m, rgba(255,255,255,.3)); background: transparent; color: #fff; cursor: pointer; }
+  .hds-chips button.an { background: var(--m, var(--c-red, #e10632)); color: #111; }
+  .hds-chips button[data-hds-tank].an { background: var(--c-red, #e10632); color: #fff; border-color: var(--c-red, #e10632); }
+  .hds-fuss { display: flex; align-items: center; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .hds-immer { margin-right: auto; color: #b9b2b5; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
+  .hds-fuss button { font: 700 18px/1 var(--c-head, sans-serif); letter-spacing: .04em; text-transform: uppercase; padding: 12px 22px; border-radius: 0; cursor: pointer; }
+  /* Race summary (98v-hd-bericht.js) */
+  .hd-bericht { position: fixed; inset: 0; z-index: 9200; display: grid; place-items: center; background: rgba(5,4,8,.78); padding: 16px; }
+  .hd-bericht[hidden] { display: none; }
+  .hdb-karte { width: min(980px, 100%); max-height: 100%; overflow: auto; background: #120d12; border: 1px solid rgba(255,255,255,.16); border-top: 4px solid var(--c-red, #e10632);
+    box-shadow: 0 20px 60px rgba(0,0,0,.7); padding: 20px 24px; color: #f4f2f3; font-family: var(--b-font, sans-serif); }
+  .hdb-kopf { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+  .hdb-kopf small { display: block; font: 700 12px/1 var(--b-font); letter-spacing: .16em; color: #ff8a99; text-transform: uppercase; margin-bottom: 6px; }
+  .hdb-kopf b { display: block; font: 700 clamp(28px, 3.4vw, 44px)/1 var(--c-head, sans-serif); text-transform: uppercase; }
+  .hdb-kopf span { color: #b9b2b5; font-size: 13px; }
+  .hdb-ab { display: inline-block; font: 700 13px/1 var(--b-font); background: #6b4a00; color: #ffd166; padding: 4px 8px; vertical-align: middle; text-transform: uppercase; }
+  .hdb-zu { all: unset; cursor: pointer; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.3); font-size: 18px; }
+  .hdb-fakten { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .hdb-fakten > div { padding: 10px 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); }
+  .hdb-fakten small { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #b9b2b5; margin-bottom: 4px; }
+  .hdb-fakten b { font: 600 18px/1.15 var(--c-head, sans-serif); overflow-wrap: anywhere; }
+  .hdb-tab { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .hdb-tab th { text-align: left; font: 700 11px/1 var(--b-font); letter-spacing: .14em; text-transform: uppercase; color: #b9b2b5; padding: 8px; border-bottom: 1px solid rgba(255,255,255,.15); }
+  .hdb-tab td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .hdb-tab td:first-child { font: italic 700 18px/1 var(--c-head, sans-serif); width: 56px; }
+  .hdb-tab td i { display: inline-block; width: 5px; height: 16px; margin-right: 10px; vertical-align: -3px; }
+  .hdb-tab tr.fl td:nth-child(4) { color: #c77dff; font-weight: 700; }
+  .hdb-vorf { margin-top: 14px; font-size: 13px; color: #d9d4d6; max-height: 160px; overflow: auto; }
+  .hdb-vorf small { display: block; font: 700 11px/1 var(--b-font); letter-spacing: .14em; text-transform: uppercase; color: #b9b2b5; margin-bottom: 6px; }
+  .hdb-vorf b { color: #7cc4ff; font-weight: 600; margin-right: 6px; }
+  .hdb-fuss { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .hdb-fuss button { font: 600 15px/1 var(--c-head, sans-serif); letter-spacing: .04em; text-transform: uppercase; padding: 10px 14px; border-radius: 0; cursor: pointer; }
+  .hdb-liste { display: flex; flex-direction: column; gap: 6px; }
+  .hdb-eintrag { display: flex; gap: 6px; }
+  .hdb-eintrag > button:first-child { flex: 1; text-align: left; display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border-radius: 0; cursor: pointer; }
+  .hdb-eintrag > button:first-child span { font-size: 13px; color: #b9b2b5; }
+  .hdb-weg { width: 44px; border-radius: 0; cursor: pointer; }
+  .hdb-leer { color: #b9b2b5; }
   /* Skip the race intro (98t-hd-intro-skip.js) */
   .hd-intro-skip { position: fixed; z-index: 9500; left: 50%; bottom: 72px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 10px;
     padding: 12px 22px; font: 700 20px/1 var(--c-head, sans-serif); letter-spacing: .05em; text-transform: uppercase; color: #fff; cursor: pointer;

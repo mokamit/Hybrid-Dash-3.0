@@ -1784,6 +1784,8 @@
     host.appendChild(img);
   }
   function raceGridAnzeigen(weiter) {
+    // v3.0: the pre-race setup screen (98w-hd-setup.js) comes before the grid board.
+    if (typeof hdSetupVorGrid === 'function' && hdSetupVorGrid(weiter)) return;
     raceGridWeiter = typeof weiter === 'function' ? weiter : null;
     const gs = $('race-gridscreen');
     if (!gs) { if (raceGridWeiter) raceGridWeiter(); return; }
@@ -2092,6 +2094,8 @@
     if (raceState !== 'idle' && raceState !== 'finished') return; // ignore while armed/racing
     if (!knockoutBereit(true)) return;
     if (!bestzeitBereit(true)) return;
+    // v3.0: the pre-race setup screen (98w-hd-setup.js) first; its Start button runs this start again.
+    if (typeof hdSetupVorStart === 'function' && hdSetupVorStart(gruenZiel, mpPlan)) return;
     // Rennuhr = Wanduhr ab hier (siehe rennUhrNullen in 15-pause.js): die Mehrspieler-Zielzeit
     // gruenZiel ist Wanduhr und wird unten direkt gegen rennZeitJetzt() gelegt.
     rennUhrNullen();
@@ -2440,6 +2444,8 @@
   function finishRace(auslaufen) {
     rennPauseBeenden();
     if (raceState === 'finished') return; // Ergebnisansage nur einmal planen.
+    // v3.0: the race summary (98v-hd-bericht.js) takes its snapshot now, before anything below resets.
+    if (typeof hdBerichtNachRennen === 'function') { try { hdBerichtNachRennen(auslaufen); } catch (e) { /* never block the finish */ } }
     rennintroStartGeneration++;
     rennintroAbbrechen();
     rennstandAbbrechen();
