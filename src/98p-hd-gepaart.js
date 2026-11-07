@@ -57,7 +57,7 @@
     const i = x.info || {};
     const farbe = (typeof CAR_COLORS !== 'undefined' && CAR_COLORS.find((f) => f.id === i.colorId)) || null;
     const hex = farbe ? farbe.hex : '#7a7a7a';
-    const modell = i.modellId && typeof carModellName === 'function' ? carModellName(i.modellId) : '';
+    const modell = i.modellId && typeof carModellWert === 'function' && carModellWert(i.modellId) && typeof carModellName === 'function' ? t(carModellName(i.modellId)) : '';
     const name = i.alias || '';
     const nr = i.nummer ? '#' + i.nummer : '';
     const titel = [nr, name].filter(Boolean).join(' ') || t('Unbenanntes Auto');
@@ -108,6 +108,21 @@
     if (!navigator.bluetooth || typeof navigator.bluetooth.requestDevice !== 'function') { showHudToast(t('Dieser Browser kann kein Web Bluetooth.')); return; }
     const name = x.info && x.info.bt;
     if (knopf) { knopf.disabled = true; knopf.textContent = t('Suche …'); }
+    // v3.0 BESTELLT: "When I click pair again, can you have it pair automatically?" In the Android app it can: the
+    // bridge reaches a remembered car by its address, no pop-up at all (bekanntesGeraet, 05-app-bruecke.js). In a
+    // browser it cannot - Chrome always shows its own pop-up for a car the site has no permission for, and no page can
+    // click it; there the pop-up holds just this one car (and the hint below the list shows how Chrome keeps the
+    // permission, after which the car shows "Connect" and needs no pop-up).
+    if (navigator.bluetooth && typeof navigator.bluetooth.bekanntesGeraet === 'function' && x.id && !/^relay-/.test(x.id)) {
+      try {
+        const dev = await navigator.bluetooth.bekanntesGeraet(x.id, name || '');
+        await garageGeraetAufnehmen(dev);
+        showHudToast(t('Verbunden') + ': ' + ((x.info && x.info.alias) || name || ''));
+        hdGepaartOeffnen();
+        if (typeof renderGarage === 'function') renderGarage();
+        return;
+      } catch (err) { log('Pairing again directly failed (' + (err && err.message) + '), opening the picker.', 'info'); }
+    }
     try {
       const dev = await navigator.bluetooth.requestDevice({
         filters: name ? [{ name }] : [{ namePrefix: 'HYBRID' }],
@@ -148,6 +163,16 @@
       + (verbindbar ? '<button type="button" class="primary" data-hdg="alle">&#10227; ' + t('Alle verbinden') + ' (' + verbindbar + ')</button>' : '')
       + '</div>'
       + '<p class="hdg-hinweis">' + t('Gepaarte Autos verbinden direkt, ohne das Auswahlfenster des Browsers. Ein neues Auto muss der Browser einmal selbst anbieten – danach steht es hier mit Modell und Farbe.') + '</p>';
+    // Browser without kept permissions: every remembered car needs the pop-up. Say how Chrome keeps them (a page cannot
+    // open chrome:// itself, so the address is copied).
+    const ohneRecht = liste.some((x) => !x.dev && !x.verbunden);
+    const app = !!(window.OMEGA_APP && window.OMEGA_APP.nativ);
+    if (ohneRecht && !app) {
+      karte.insertAdjacentHTML('beforeend', '<div class="hdg-flagge"><b>' + t('Ohne Auswahlfenster verbinden') + '</b><span>'
+        + t('Chrome merkt sich die Freigabe der Autos nur mit dieser Einstellung. Adresse kopieren, in die Adresszeile einfügen, auf „Enabled“ stellen und Chrome neu starten. Danach steht bei jedem Auto „Verbinden“ – ganz ohne Fenster, auch „Alle verbinden“.')
+        + '</span><code>chrome://flags/#enable-web-bluetooth-new-permissions-backend</code>'
+        + '<button type="button" data-hdg="flagge">' + t('Adresse kopieren') + '</button></div>');
+    }
     hdGepaartBox._liste = liste;
   }
   function hdGepaartZu() { if (hdGepaartBox) hdGepaartBox.hidden = true; }
@@ -157,6 +182,11 @@
     if (!b) return;
     const was = b.dataset.hdg;
     if (was === 'zu') { hdGepaartZu(); return; }
+    if (was === 'flagge') {
+      const adr = 'chrome://flags/#enable-web-bluetooth-new-permissions-backend';
+      try { await navigator.clipboard.writeText(adr); showHudToast(t('Adresse kopiert')); } catch (err) { window.prompt(t('Adresse kopieren'), adr); }
+      return;
+    }
     if (was === 'neu') { hdGepaartZu(); garageConnect(); return; }
     if (was === 'alle') { hdGepaartZu(); garageBekannteVerbinden($('gar-bekannte')); return; }
     const zeile = b.closest('.hdg-zeile');
