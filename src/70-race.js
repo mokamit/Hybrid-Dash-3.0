@@ -1872,6 +1872,8 @@
     // bricht Abbrechen sie ab - sonst bliebe sie auf Stillstand warten.
     if (typeof challengeAbbrechen === 'function' && typeof challengeLaeuft === 'function'
         && challengeLaeuft()) challengeAbbrechen();
+    // v3.0 GEMELDET: "when I cancel out of the race menu, it goes to the cockpit screen and not the main menu."
+    if (typeof hdZumHauptmenue === 'function') hdZumHauptmenue();
   }
   if ($('grid-start')) $('grid-start').addEventListener('click', raceGridStart);
   if ($('grid-abbrechen')) $('grid-abbrechen').addEventListener('click', raceGridAbbrechen);

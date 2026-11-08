@@ -5829,7 +5829,7 @@
   .hdhm-name .hd-flagge { margin-left: 8px; vertical-align: middle; }
   .hd-sg-name small .hd-flagge { vertical-align: -1px; }
   /* ---- Hybrid-Dash 3.0: car stats + driver style cards (98x-hd-wertungen.js) ---- */
-  .hdw-modal { z-index: 430; }
+  .hd-gepaart.hdw-modal { z-index: 9200; }   /* above the pre-race setup (9150) */
   .hdw-karte { width: min(820px, 100%); gap: 14px; }
   .hdw-titel { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 14px; padding: 12px 14px;
     background: linear-gradient(90deg, rgba(225,6,50,.22), rgba(255,255,255,.03)); border-left: 4px solid var(--f, var(--c-red, #e10632)); }
@@ -30928,6 +30928,16 @@
   // v3.0 GEMELDET: "The off track limit starts even before the session even starts. It shouldn't apply before or after
   // the race." Throttling (and its warning) only while a session runs - racing or its last lap. The self-test suite
   // keeps the old rule: its off-track checks drive without starting a session.
+  // v3.0 GEMELDET: "the race hasn't started yet, but the player car is on and can be controlled with the remote."
+  // While the pre-race setup or the grid board is open and the race has not begun, the players' cars stay where they
+  // are (no throttle, brake held). The countdown is not included: a jump start there is penalised on purpose.
+  function hdVorStartGesperrt() {
+    try {
+      if (hdSuiteLaeuft()) return false;
+      if (raceState === 'racing' || raceState === 'finishing' || raceState === 'countdown') return false;
+      return (typeof raceGridOffen === 'function' && raceGridOffen()) || (typeof hdSetupOffen === 'function' && hdSetupOffen());
+    } catch (e) { return false; }
+  }
   function hdOfftrackSitzung() {
     try { if (hdSuiteLaeuft()) return true; return raceState === 'racing' || raceState === 'finishing'; } catch (e) { return true; }
   }
@@ -31090,6 +31100,7 @@
     // bevor 70-race.js seine Konstanten angelegt hat (temporale Todeszone beim Laden).
     try {
       if (fruehstartStrafeAktiv(1)) { rawThrottle = 0; rawBrake = Math.max(rawBrake, FRUEHSTART_BREMSE); }
+      if (hdVorStartGesperrt()) { rawThrottle = 0; rawBrake = 1; }
       // Derby bei 0 % (v0.9.16): das Auto bleibt stehen - vorher wurde nur das Tempo EINMAL auf
       // null gesetzt, danach fuhr es mit dem Gas weiter.
       if (typeof derbyLaeuft !== 'undefined' && derbyLaeuft && derbyTot1) { rawThrottle = 0; rawBrake = 1; }
@@ -31241,6 +31252,7 @@
     if (offtrackGiltFuer(z.nr)) gas = Math.min(gas, OFFTRACK_GAS);
     try {
       if (fruehstartStrafeAktiv(z.nr)) { gas = 0; bremse = Math.max(bremse, FRUEHSTART_BREMSE); }
+      if (hdVorStartGesperrt()) { gas = 0; bremse = 1; }
       if (typeof derbyLaeuft !== 'undefined' && derbyLaeuft && z.derbyTot) { gas = 0; bremse = 1; }
     } catch (e) { /* beim Laden */ }
     // Und das Rumpeln, an seinen eigenen Pad. Bis v0.6.45 waere es der Pad von Spieler 1
@@ -47212,6 +47224,8 @@
     // bricht Abbrechen sie ab - sonst bliebe sie auf Stillstand warten.
     if (typeof challengeAbbrechen === 'function' && typeof challengeLaeuft === 'function'
         && challengeLaeuft()) challengeAbbrechen();
+    // v3.0 GEMELDET: "when I cancel out of the race menu, it goes to the cockpit screen and not the main menu."
+    if (typeof hdZumHauptmenue === 'function') hdZumHauptmenue();
   }
   if ($('grid-start')) $('grid-start').addEventListener('click', raceGridStart);
   if ($('grid-abbrechen')) $('grid-abbrechen').addEventListener('click', raceGridAbbrechen);
@@ -127451,6 +127465,17 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     hdSetupMalen();
   }
   function hdSetupZu() { if (hdSetupBox) hdSetupBox.hidden = true; hdSetupWeiter = null; }
+  function hdSetupOffen() { return !!(hdSetupBox && !hdSetupBox.hidden); }
+  // Cancel (button, Esc): the session does not start, so back to the main menu - not into the cockpit.
+  function hdSetupAbbrechen() { hdSetupZu(); hdZumHauptmenue(); }
+  function hdZumHauptmenue() {
+    try {
+      if (typeof hdSuiteLaeuft === 'function' && hdSuiteLaeuft()) return;
+      if (raceState === 'racing' || raceState === 'finishing' || raceState === 'countdown') return;
+      if (typeof kAktiverTab === 'function' && kAktiverTab() === 'fahren') return;
+      showTab('fahren');
+    } catch (e) { /* not ready */ }
+  }
   function hdSetupStart() {
     const w = hdSetupWeiter;
     if (hdSetupBox) hdSetupBox.hidden = true;
@@ -127472,7 +127497,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const gn = e.target.closest('[data-hds-npc]');
     if (gn) { hdSetupStufeSetzen(hdSetupNpcs().filter((c) => String(c.device.id) === gn.dataset.hdsNpc), +gn.dataset.k); hdSetupMalen(); return; }
     const a = e.target.closest('[data-hds-akt]');
-    if (a) { if (a.dataset.hdsAkt === 'start') hdSetupStart(); else hdSetupZu(); }
+    if (a) { if (a.dataset.hdsAkt === 'start') hdSetupStart(); else hdSetupAbbrechen(); }
   }
   function hdSetupEingabe(e) {
     const c = e.target;
@@ -127487,7 +127512,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (!hdSetupBox || hdSetupBox.hidden) return;
     if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'checkbox' && e.key !== 'Escape') return;
     if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); hdSetupStart(); }
-    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); hdSetupZu(); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); hdSetupAbbrechen(); }
   }, true);
   // Controller: confirmation button (A / Cross) starts, B / Circle goes back - on a fresh press.
   setInterval(() => {
@@ -127501,7 +127526,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       }
     } catch (e) { return; }
     if (a && !hdSetupPadVorher.a) hdSetupStart();
-    else if (b && !hdSetupPadVorher.b) hdSetupZu();
+    else if (b && !hdSetupPadVorher.b) hdSetupAbbrechen();
     hdSetupPadVorher = { a, b };
   }, 60);
   if (typeof i18nOnLangChange === 'function') i18nOnLangChange(hdSetupMalen);
@@ -127941,7 +127966,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     stil: hdStilWerte, charakter: hdStilCharakter, auto: hdWertAuto, fahrer: hdWertStil,
     // for tests
     _garage: () => garage, _ghostCharakter: (c) => ghostCharakter(c), _motor: () => physEngine.modell,
-    _abgleichen: hdWertMotorenAbgleichen, _offtrackSitzung: () => hdOfftrackSitzung(), _modellTempo: (c) => hdModellTempo(c) });
+    _abgleichen: hdWertMotorenAbgleichen, _vorStart: () => hdVorStartGesperrt(), _offtrackSitzung: () => hdOfftrackSitzung(), _modellTempo: (c) => hdModellTempo(c) });
   // =====================================================================================
   // Hybrid-Dash 3.0: A COUNTRY FOR EVERY DRIVER, AND NAMES THAT MATCH IT
   // =====================================================================================
