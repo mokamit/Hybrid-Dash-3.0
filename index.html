@@ -5820,6 +5820,14 @@
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
 
+  /* ---- Hybrid-Dash 3.0: countries and flags (98y-hd-laender.js) ---- */
+  .hd-flagge { display: inline-block; vertical-align: -2px; flex: none; }
+  .hd-gk-land { display: inline-flex; align-items: center; gap: 6px; font: 700 14px/1 var(--b-font, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: #d9dce2; }
+  .gar-a-land { display: flex; align-items: center; gap: 10px; }
+  .gar-a-land .gar-land-flagge { margin-left: auto; display: inline-flex; }
+  .gar-a-land select { min-width: 180px; }
+  .hdhm-name .hd-flagge { margin-left: 8px; vertical-align: middle; }
+  .hd-sg-name small .hd-flagge { vertical-align: -1px; }
   /* ---- Hybrid-Dash 3.0: car stats + driver style cards (98x-hd-wertungen.js) ---- */
   .hdw-modal { z-index: 430; }
   .hdw-karte { width: min(820px, 100%); gap: 14px; }
@@ -16257,6 +16265,15 @@
     "Kopplung vergessen?": "Forget this pairing?",
     "Auswählen": "Select",
     "Zurückgehen": "Back",
+    "Außerirdisch": "Aliens",
+    "Bremsen, blockierende Reifen, Klappern im Cockpit, Schaltpiepen und der Kontakt mit Bande oder anderen Autos. 0 % = aus.": "Brakes, locking tyres, cockpit rattle, gear beeps and contact with the barrier or other cars. 0 % = off.",
+    "Clubrennen": "Club race",
+    "Cockpit-Geräusche": "Cockpit sounds",
+    "Land": "Country",
+    "Locker": "Relaxed",
+    "NPCs auf Standard zurückgesetzt": "NPCs reset to default",
+    "Profis": "Pros",
+    "Vorlage": "Preset",
     "1.3 L Boxer-4, luftgekühlt": "1.3 L flat-4, air-cooled",
     "1.6 L Turbo-V6-Hybrid": "1.6 L turbo V6 hybrid",
     "3.0 L Biturbo-R6": "3.0 L twin-turbo inline-6",
@@ -20486,6 +20503,15 @@
     "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
     "Auswählen": "Elegir",
     "Zurückgehen": "Atrás",
+    "Außerirdisch": "Extraterrestres",
+    "Bremsen, blockierende Reifen, Klappern im Cockpit, Schaltpiepen und der Kontakt mit Bande oder anderen Autos. 0 % = aus.": "Frenos, neumáticos bloqueados, traqueteo en la cabina, pitidos de marcha y el contacto con el muro u otros coches. 0 % = apagado.",
+    "Clubrennen": "Carrera de club",
+    "Cockpit-Geräusche": "Sonidos de cabina",
+    "Land": "País",
+    "Locker": "Tranquilo",
+    "NPCs auf Standard zurückgesetzt": "NPCs restablecidos",
+    "Profis": "Profesionales",
+    "Vorlage": "Plantilla",
     "1.3 L Boxer-4, luftgekühlt": "1.3 L bóxer de 4, refrigerado por aire",
     "1.6 L Turbo-V6-Hybrid": "1.6 L V6 turbo híbrido",
     "3.0 L Biturbo-R6": "3.0 L 6 en línea biturbo",
@@ -30945,6 +30971,25 @@
     el.dataset.an = an ? '1' : '0';
     el.style.display = an ? 'block' : 'none';
   }
+
+  // v3.0 GEMELDET: "the off track from the previous race still stays on after the race, it should be switched off
+  // when going back to the main menu and reset and not carried forward." The banner was only redrawn when the car's
+  // off-track state CHANGED, so a car still off the track when the race ended kept it. Now it follows the session too,
+  // and when a session ends the off-track state of every player is reset.
+  let hdOfftrackWarSitzung = false;
+  setInterval(() => {
+    try {
+      const s = hdOfftrackSitzung();
+      if (!s && hdOfftrackWarSitzung) {
+        offtrackAktiv = false; offtrackSeit = null; offtrackWiederSeit = null;
+        if (typeof zusatzPlatz === 'function' && typeof SPIELER_MAX !== 'undefined') {
+          for (let nr = 2; nr <= SPIELER_MAX; nr++) { const a = zusatzPlatz(nr).abseits; a.aktiv = false; a.seit = null; a.wiederSeit = null; }
+        }
+      }
+      hdOfftrackWarSitzung = s;
+      offtrackAnzeige();
+    } catch (e) { /* not ready */ }
+  }, 300);
 
   // Ist das Auto neben der Bahn? Die entprellte Antwort, und ausdruecklich OHNE
   // offtrackEffekt und ohne den Bahn-Modus - das sind Fragen der Drosselung, nicht der Lage.
@@ -51260,6 +51305,7 @@
       if (bremsen) motor.state.speedKmh *= 0.3;
       if (!zwei) updateDamageFuelUI();
       if (!playCrashFx()) playCrashSound();
+      if (typeof hdKontaktKlang === 'function') hdKontaktKlang(Math.abs(motor.state.speedKmh) / Math.max(0.01, motor.config.topSpeedKmh) / 0.3, wer);
       padRumble(0.65 + 0.35 * Math.max(0, Math.min(1, Math.abs(motor.state.speedKmh) / Math.max(0.01, motor.config.topSpeedKmh))), 0.5, 260);
       return;
     }
@@ -51293,6 +51339,7 @@
     if (bremsen) motor.state.speedKmh *= 0.3;
     if (!zwei) updateDamageFuelUI();
     if (!playCrashFx()) playCrashSound(); // sample variants first, synth burst as fallback
+    if (typeof hdKontaktKlang === 'function') hdKontaktKlang(wucht, wer);   // HD 3.0: thud / bump / scrape
     // Der untere Wert liegt ueber dem alten festen (0,6 / 0,4 / 220 ms): auch ein
     // langsamer Aufprall soll deutlicher sein als bisher. Oben laeuft es auf den vollen
     // Ausschlag hinaus.
@@ -61576,6 +61623,8 @@
     // VOR dem fruehen Ausstieg: die Zusaetze gelten in beiden Tonarten, nicht nur im
     // Schleifenzweig.
     if (physicsEnabled) extrasTick(st, load);
+    // HD 3.0: brakes, lock-up, cockpit rattle, gear beeps (98z-hd-cockpitklang.js)
+    if (physicsEnabled && typeof hdCockpitKlangTick === 'function') hdCockpitKlangTick(st, load, throttleY);
 
     // DIE DREHZAHL DES MOTORS, nicht die der Physik - siehe motorDrehzahl().
     if (sampleEngine.nodes && physicsEnabled) {
@@ -65699,7 +65748,7 @@
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
         <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
-        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 52) : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
+        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 52) : ''}${typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(car, 13) + ' ' : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
           <b>${t(rolle.name)}</b>
@@ -65831,6 +65880,7 @@
       });
       zn.querySelector('button[data-act="hd-name"]').onclick = (e) => { e.stopPropagation(); if (typeof hdNeuerName === 'function') hdNeuerName(car); };
       zn.querySelector('button[data-act="color"]').onclick = (e) => { e.stopPropagation(); garFarbWahl(e.currentTarget, car); };
+      if (typeof hdLandZeile === 'function') hdLandZeile(car, zn);   // HD 3.0: country (98y-hd-laender.js)
       // Farbe, Ghost-Tempo, Charakter, Motorsound: die bisherigen Wertzeilen.
       rechts.appendChild(garageAufZeile(car));
       // Foto
@@ -121604,7 +121654,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // Hook, called at the end of setCarRole() in 90-ghosts.js.
   function hdRolleGesetzt(car, role) {
     if (role !== 'ghost' || !hd.npcNamen || !car || car.alias) return;
-    car.alias = hdZufallsName(hdBelegteNamen(car));
+    car.alias = typeof hdNameFuerAuto === 'function' ? hdNameFuerAuto(car, hdBelegteNamen(car)) : hdZufallsName(hdBelegteNamen(car));
     carRemember(car);
     log('HybridDash: new NPC driver ' + car.alias + ' in ' + hdAutoBeschreibung(car) + '.', 'info');
     showHudToast(t('Neuer Fahrer') + ': ' + car.alias);
@@ -121625,7 +121675,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
 
   // Give a car a fresh random name (the dice button in the garage).
   function hdNeuerName(car) {
-    car.alias = hdZufallsName(hdBelegteNamen(car));
+    car.alias = typeof hdNameFuerAuto === 'function' ? hdNameFuerAuto(car, hdBelegteNamen(car)) : hdZufallsName(hdBelegteNamen(car));
     carRemember(car);
     if (hd.npcAnsage && car.role === 'ghost') hdSprechen(hdSatz('fahrer', { nr: hdNummer(car), name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
     renderGarage();
@@ -121712,7 +121762,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   // ---- PHOTO PORTRAITS (v3.0) ---------------------------------------------------------------
   // BESTELLT: "Make it exactly like the reference photo" - sheets of 36 studio portraits (driver, helmet with the
   // visor down, arms crossed) that came with the requests ("I've added more reference photos for you to store").
-  // They are cut out into img/fahrer/p00-p71.jpg (240 x 240, square from the top of each portrait, so the whole
+  // They are cut out into img/fahrer/p00-p107.jpg (240 x 240, square from the top of each portrait, so the whole
   // helmet shows - "Make sure they show the full helmet") and chosen by the car colour: each portrait is labelled with its main colour and its accent colours
   // (by eye - the suit and helmet, not the backdrop). A car gets the portraits whose main colour is its own first,
   // then those that carry it as an accent; the driver's name picks one, a tap on the avatar steps to the next.
@@ -121730,6 +121780,13 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     ['schwarz'], ['lila', 'gruen'], ['weiss', 'orange', 'blau'], ['schwarz', 'orange'], ['blau', 'weiss'], ['weiss', 'orange'],
     ['rot', 'lila'], ['gruen', 'schwarz'], ['blau', 'weiss'], ['schwarz', 'gelb'], ['lila', 'schwarz', 'blau'], ['lila', 'orange'],
     ['gelb', 'schwarz'], ['gruen', 'orange'], ['weiss', 'blau'], ['rot', 'schwarz'], ['gelb', 'gruen'], ['lila', 'weiss'],
+    // third sheet (p72-p107, v3.0 BESTELLT: "Add the additional avatars to the roster")
+    ['gelb', 'lila'], ['blau'], ['rot', 'orange'], ['blau', 'gelb'], ['gruen', 'weiss'], ['lila', 'weiss'],
+    ['blau', 'lila'], ['weiss', 'orange'], ['schwarz', 'blau'], ['gruen', 'weiss'], ['gelb', 'blau'], ['orange', 'schwarz'],
+    ['rot', 'weiss', 'blau'], ['orange', 'schwarz'], ['lila', 'gelb'], ['blau', 'orange'], ['rot', 'weiss'], ['gruen', 'schwarz'],
+    ['weiss', 'blau'], ['gelb', 'schwarz'], ['gruen', 'orange'], ['lila', 'weiss'], ['lila', 'schwarz'], ['blau', 'rot'],
+    ['orange', 'schwarz'], ['gelb', 'schwarz'], ['blau', 'weiss'], ['lila', 'gelb'], ['weiss', 'rot'], ['gruen', 'weiss'],
+    ['rot', 'gelb'], ['blau', 'weiss'], ['lila', 'weiss'], ['schwarz', 'gelb'], ['weiss', 'blau'], ['gruen', 'gelb'],
   ];
   // The car colour as one of the palette names (from the hex, so it also works for a colour we do not list).
   function hdFarbKlasse(hex) {
@@ -122059,6 +122116,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     zeile.className = 'hd-gk-zeile';
     zeile.setAttribute('data-i18n-skip', '');
     zeile.innerHTML = `<span class="hd-gk-nr" style="background:${f.hex};color:${f.ink || '#fff'}">${hdNummer(car)}</span>`
+      + (typeof hdLandFlaggeFuer === 'function' ? '<span class="hd-gk-land">' + hdLandFlaggeFuer(car, 20) + '<span>' + String(hdLandName(hdLand(car))).replace(/[&<>]/g, '') + '</span></span>' : '')
       + (modell && !/^(–|-|Nicht zugeordnet|Not assigned)$/i.test(modell) ? `<span class="hd-gk-modell">${String(modell).replace(/[&<>]/g, '')}</span>` : '');
     text.appendChild(zeile);
     return box;
@@ -122277,7 +122335,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const svg = hdAvatarSvg('Mara Kovac', '#e23b3b', 0, 30, 'porsche911');
       prüfen('avatar: photo portrait in the car colour (red car -> red, blue -> blue, white -> white), same every time, another on tap',
              HD_FOTOS[rotNr].indexOf('rot') >= 0 && HD_FOTOS[blauNr].indexOf('blau') >= 0 && HD_FOTOS[weissNr].indexOf('weiss') >= 0
-             && rotNr === rot2 && rotNr !== rot3 && /img\/fahrer\/p\d\d\.jpg/.test(svg) && HD_FOTOS.length === 72,
+             && rotNr === rot2 && rotNr !== rot3 && /img\/fahrer\/p\d\d\.jpg/.test(svg) && HD_FOTOS.length === 108,
              'red ' + rotNr + ', blue ' + blauNr + ', white ' + weissNr + ', red tap ' + rot3);
       // H2: no two drivers share an avatar (garage-wide), also when one colour has fewer portraits than cars.
       {
@@ -122292,11 +122350,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
           const stabil = nach[0] !== nrs[0] && nach.slice(1).every((n, i) => n === nrs[i + 1]) && new Set(nach).size === 12;
           const rote = nrs.filter((n) => HD_FOTOS[n].indexOf('rot') >= 0).length;
           garage.length = 0; hd.fotos = {};
-          for (let i = 0; i < 80; i++) garage.push(fake('hd-av-x' + i, 'ghost', { alias: 'X', colorId: ['rot', 'blau', 'gelb', 'weiss'][i % 4] }));
+          for (let i = 0; i < 120; i++) garage.push(fake('hd-av-x' + i, 'ghost', { alias: 'X', colorId: ['rot', 'blau', 'gelb', 'weiss'][i % 4] }));
           const viele = garage.map((c) => hdFotoBelegung().get(String(c.device.id)));
-          prüfen('avatars: no two drivers share one, a tap changes only that driver - 12 red cars with repeated names get 12 different portraits (red ones first); with 80 cars all 72 are used before any repeats',
+          prüfen('avatars: no two drivers share one, a tap changes only that driver - 12 red cars with repeated names get 12 different portraits (red ones first); with 120 cars all 108 are used before any repeats',
                  new Set(nrs).size === 12 && rote >= 6 && new Set(viele).size === HD_FOTOS.length && stabil,
-                 new Set(nrs).size + ' different of 12 (' + rote + ' red); tap moves only that car: ' + stabil + '; 80 cars -> ' + new Set(viele).size + ' different');
+                 new Set(nrs).size + ' different of 12 (' + rote + ' red); tap moves only that car: ' + stabil + '; 120 cars -> ' + new Set(viele).size + ' different');
         } finally { garage.length = 0; merkG.forEach((c) => garage.push(c)); }
       }
       // I: garage label - which laptop a car is connected to (two-laptop mode only).
@@ -125226,7 +125284,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const inhalt = document.createElement('span');
       inhalt.className = 'hd-sg-inhalt'; inhalt.setAttribute('data-i18n-skip', '');
       inhalt.innerHTML = `<span class="hd-sg-nr">${esc(nr)}</span><span class="hd-sg-bild">${avatar}</span>`
-        + `<span class="hd-sg-name"><small>${esc(vor)}</small><b>${esc(nach)}</b></span>`;
+        + `<span class="hd-sg-name"><small>${typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(car, 12) + ' ' : ''}${esc(vor)}</small><b>${esc(nach)}</b></span>`;
       inhalt.appendChild(ctrl);
       row.appendChild(inhalt);
     });
@@ -126781,7 +126839,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     try { ich = playerCar && autos.includes(playerCar) ? playerCar : (autos[0] || null); } catch (e) { ich = autos[0] || null; }
     // every other car (GEMELDET: "I have 6 cars connected, but it only shows 4 avatars"); smaller when many
     const andere = autos.filter((c) => c !== ich);
-    const schl = [lang, ich ? [ich.device.id, ich.alias, ich.colorId, ich.modellId, ich.role, typeof hdNummer === 'function' ? hdNummer(ich) : ''].join(':') : '-',
+    const schl = [lang, ich ? [ich.device.id, ich.alias, ich.colorId, ich.modellId, ich.role, typeof hdNummer === 'function' ? hdNummer(ich) : '', typeof hdLand === 'function' ? hdLand(ich) : ''].join(':') : '-',
       andere.map((c) => c.device.id + ':' + c.colorId + ':' + c.alias).join(',')].join('|');
     if (schl === hdHmSchluessel && box.firstChild) return;
     hdHmSchluessel = schl;
@@ -126794,7 +126852,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       const name = ich.alias || ich.tag || garageLabel(ich);
       html += '<span class="hdhm-portrait" style="--f:' + esc(carColor(ich).hex) + '">' + portrait(ich, 330) + '</span>'
         + '<span class="hdhm-rolle">' + esc(rolle) + '</span>'
-        + '<span class="hdhm-name">' + (nr ? '<b>#' + esc(nr) + '</b>' : '') + '<span>' + esc(name) + '</span></span>';
+        + '<span class="hdhm-name">' + (nr ? '<b>#' + esc(nr) + '</b>' : '') + '<span>' + esc(name) + '</span>' + (typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(ich, 20) : '') + '</span>';
     } else {
       html += '<span class="hdhm-portrait hdhm-leer"><svg viewBox="0 0 100 100" width="120" height="120" aria-hidden="true"><path d="M50 14c-20 0-34 14-34 34v14c0 6 4 10 10 10h48c6 0 10-4 10-10V48c0-20-14-34-34-34z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M22 48h56v10H22z" fill="currentColor" opacity=".5"/><path d="M28 86h44" stroke="currentColor" stroke-width="4"/></svg></span>'
         + '<span class="hdhm-rolle">' + esc(t('Kein Auto verbunden')) + '</span>';
@@ -127190,15 +127248,65 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     return '<span class="hds-chips">' + GHOST_TEMPO_STUFEN.map((st, k) => '<button type="button" ' + attr + ' data-k="' + k + '"' + (k === aktiv ? ' class="an"' : '') + '>'
       + hdSetupEsc(st.max ? 'MAX' : t(st.label)) + '</button>').join('') + '</span>';
   }
+  // v3.0 BESTELLT: "Pre race set up for NPC, have button to reset to default or have presets option."
+  // A preset sets the difficulty of every NPC and the NPC sliders (as a share of each slider's range, so it fits
+  // whatever the range is); "Reset" puts the NPC sliders back to the app's defaults, every NPC to Medium and every
+  // driving style back to the one the car was born with.
+  const HD_SETUP_NPC_PRESETS = [
+    { id: 'locker', de: 'Locker', stufe: 0, r: { 'ghost-speed': 0.25, 'ghost-hardness': 0.2, 'ghost-curve': 0.7, 'ghost-streuung': 0.2, 'ghost-max-gerade': 0.7 }, c: { 'ghost-w-fehler': true, 'ghost-w-defend': false } },
+    { id: 'club', de: 'Clubrennen', stufe: 1, r: { 'ghost-speed': 0.45, 'ghost-hardness': 0.45, 'ghost-curve': 0.5, 'ghost-streuung': 0.4, 'ghost-max-gerade': 0.85 }, c: { 'ghost-w-fehler': true, 'ghost-w-defend': true } },
+    { id: 'profi', de: 'Profis', stufe: 2, r: { 'ghost-speed': 0.65, 'ghost-hardness': 0.7, 'ghost-curve': 0.35, 'ghost-streuung': 0.3, 'ghost-max-gerade': 1 }, c: { 'ghost-w-fehler': true, 'ghost-w-defend': true } },
+    { id: 'alien', de: 'Außerirdisch', stufe: 3, r: { 'ghost-speed': 0.85, 'ghost-hardness': 0.9, 'ghost-curve': 0.2, 'ghost-streuung': 0.15, 'ghost-max-gerade': 1 }, c: { 'ghost-w-fehler': false, 'ghost-w-defend': true } },
+  ];
+  let hdSetupNpcPreset = '';
+  function hdSetupSetzeOption(id, wert) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'checkbox') { if (el.checked === !!wert) return; el.checked = !!wert; }
+    else if (el.type === 'range') {
+      const min = +el.min || 0, max = +el.max || 1, step = +el.step || 0;
+      let v = min + wert * (max - min);
+      if (step > 0) v = Math.round((v - min) / step) * step + min;
+      el.value = String(+v.toFixed(6));
+    } else el.value = wert;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  function hdSetupNpcPresetAnwenden(id) {
+    const p = HD_SETUP_NPC_PRESETS.find((x) => x.id === id);
+    if (!p) return;
+    Object.keys(p.r).forEach((k) => hdSetupSetzeOption(k, p.r[k]));
+    Object.keys(p.c).forEach((k) => hdSetupSetzeOption(k, p.c[k]));
+    hdSetupStufeSetzen(hdSetupNpcs(), p.stufe);
+    hdSetupNpcPreset = id;
+  }
+  function hdSetupNpcZuruecksetzen() {
+    HD_SETUP_SPIEGEL.filter(([g]) => g === 'NPCs').forEach(([, id]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'checkbox') { if (el.checked === el.defaultChecked) return; el.checked = el.defaultChecked; }
+      else if (el.tagName === 'SELECT') { const o = [...el.options].find((x) => x.defaultSelected) || el.options[0]; if (!o) return; el.value = o.value; }
+      else el.value = el.defaultValue;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    hdSetupStufeSetzen(hdSetupNpcs(), 1);
+    if (typeof hdStilZuruecksetzen === 'function') hdSetupNpcs().forEach((c) => hdStilZuruecksetzen(c));
+    hdSetupNpcPreset = '';
+    showHudToast(t('NPCs auf Standard zurückgesetzt'));
+  }
   function hdSetupNpcHtml() {
     const npcs = hdSetupNpcs();
     if (!npcs.length) return '<p class="hds-leer">' + hdSetupEsc(t('Keine NPCs in der Garage – gib einem Auto die Rolle NPC.')) + '</p>';
     const alle = npcs.every((c) => hdSetupStufe(c) === hdSetupStufe(npcs[0])) ? hdSetupStufe(npcs[0]) : -1;
-    let h = '<div class="hds-z"><span class="hds-l">' + hdSetupEsc(t('Schwierigkeit für alle')) + '</span>' + hdSetupStufenChips(alle, 'data-hds-alle="1"') + '</div>';
+    let h = '<div class="hds-z hds-npc-vorlagen"><span class="hds-l">' + hdSetupEsc(t('Vorlage')) + '</span><span class="hds-chips">'
+      + HD_SETUP_NPC_PRESETS.map((p) => '<button type="button" data-hds-npcpreset="' + p.id + '"' + (hdSetupNpcPreset === p.id ? ' class="an"' : '') + '>' + hdSetupEsc(t(p.de)) + '</button>').join('')
+      + '<button type="button" class="hds-reset" data-hds-npcreset="1">&#8634; ' + hdSetupEsc(t('Standard')) + '</button></span></div>';
+    h += '<div class="hds-z"><span class="hds-l">' + hdSetupEsc(t('Schwierigkeit für alle')) + '</span>' + hdSetupStufenChips(alle, 'data-hds-alle="1"') + '</div>';
     h += '<div class="hds-npcs">' + npcs.map((c) => {
       const f = carColor(c);
       return '<div class="hds-npc" style="--f:' + hdSetupEsc(f.hex) + '"><span class="hds-npc-bild">' + (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(c, 36) : '') + '</span>'
-        + '<span class="hds-npc-name">' + hdSetupEsc(c.alias || c.tag || garageLabel(c))
+        + '<span class="hds-npc-name">' + (typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(c, 12) + ' ' : '') + hdSetupEsc(c.alias || c.tag || garageLabel(c))
         + (typeof hdStilWerte === 'function' ? '<small>' + hdSetupEsc(hdStilTyp(hdStilWerte(c)) + ' · ' + hdStilGesamt(hdStilWerte(c))) + '</small>' : '') + '</span>'
         + '<button type="button" class="hds-stil" data-hdw-stil="' + hdSetupEsc(String(c.device.id)) + '">&#x1F3AF; ' + hdSetupEsc(t('Fahrstil')) + '</button>'
         + hdSetupStufenChips(hdSetupStufe(c), 'data-hds-npc="' + hdSetupEsc(String(c.device.id)) + '"') + '</div>';
@@ -127312,7 +127420,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const gruppe = (titel, inhalt) => '<section class="hds-gruppe"><h3>' + hdSetupEsc(t(titel)) + '</h3>' + inhalt + '</section>';
     return '<div class="hds-karte">'
       + '<div class="hds-kopf"><span class="hds-bild">' + bild + '</span><div><small>' + hdSetupEsc(t('Vor dem Start')) + '</small>'
-      + '<b>' + (nr ? '#' + hdSetupEsc(nr) + ' ' : '') + hdSetupEsc(name) + '</b><span>' + hdSetupEsc(sitzung) + '</span></div>'
+      + '<b>' + (nr ? '#' + hdSetupEsc(nr) + ' ' : '') + hdSetupEsc(name) + (car && typeof hdLandFlaggeFuer === 'function' ? ' ' + hdLandFlaggeFuer(car, 22) : '') + '</b><span>' + hdSetupEsc(sitzung) + '</span></div>'
       + (car ? '<button type="button" class="hds-werte" data-hdw-auto="' + hdSetupEsc(String(car.device.id)) + '">&#x1F4CA; ' + hdSetupEsc(t('Fahrzeugwerte')) + (typeof carModellName === 'function' && carModellWert(car.modellId) ? ': ' + hdSetupEsc(t(carModellName(car.modellId))) : '') + '</button>' : '')
       + '</div>'
       + '<div class="hds-gitter">'
@@ -127356,6 +127464,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (r) { tyres = r.dataset.hdsReifen; mischungWunsch = null; if (typeof applySurface === 'function') applySurface(); hdSetupMalen(); return; }
     const k = e.target.closest('[data-hds-tank]');
     if (k) { if (typeof pitVorwahl === 'object' && pitVorwahl) pitVorwahl.refuel = Number(k.dataset.hdsTank); hdSetupMalen(); return; }
+    const np = e.target.closest('[data-hds-npcpreset]');
+    if (np) { hdSetupNpcPresetAnwenden(np.dataset.hdsNpcpreset); hdSetupMalen(); return; }
+    if (e.target.closest('[data-hds-npcreset]')) { hdSetupNpcZuruecksetzen(); hdSetupMalen(); return; }
     const ga = e.target.closest('[data-hds-alle]');
     if (ga) { hdSetupStufeSetzen(hdSetupNpcs(), +ga.dataset.k); hdSetupMalen(); return; }
     const gn = e.target.closest('[data-hds-npc]');
@@ -127571,6 +127682,13 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     w[k] = Math.round(Math.max(0, Math.min(100, +v || 0)));
     hdStilSpeichern();
   }
+  // Back to the style the car was born with (the generated one).
+  function hdStilZuruecksetzen(car) {
+    const id = hdStilId(car);
+    if (!id) return;
+    hdStilAlle()[id] = hdStilErzeugen(id);
+    hdStilSpeichern();
+  }
   function hdStilGesamt(w) { return Math.round(HD_STIL_TRAITS.reduce((s, tr) => s + w[tr.k], 0) / HD_STIL_TRAITS.length); }
   // The label under the name: the trait it is best at.
   function hdStilTyp(w) {
@@ -127719,7 +127837,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       + (liste.length > 1 && liste.includes(car) ? '<button type="button" class="k-arrow hdw-pf" data-hdw="fahrer" data-d="-1" aria-label="' + hdWertEsc(t('Vorherige')) + '">' + hdWertPfeil(-1) + '</button>' : '')
       + '<span class="hdw-bild">' + (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(car, 96) : '') + '</span>'
       + '<div class="hdw-name"><small>' + hdWertEsc(hdStilTyp(w)) + '</small><b>' + (nr ? '<em>#' + hdWertEsc(nr) + '</em> ' : '') + hdWertEsc(car.alias || car.tag || garageLabel(car)) + '</b>'
-      + '<span>' + hdWertEsc(t(carModellName(car.modellId))) + '</span></div>'
+      + '<span>' + (typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(car, 14) + ' ' + hdWertEsc(hdLandName(hdLand(car))) + ' · ' : '') + hdWertEsc(t(carModellName(car.modellId))) + '</span></div>'
       + '<div class="hdw-gesamt"><b data-hdw-gesamt>' + hdStilGesamt(w) + '</b><small>' + hdWertEsc(t('Gesamt')) + '</small></div>'
       + (liste.length > 1 && liste.includes(car) ? '<button type="button" class="k-arrow hdw-pf" data-hdw="fahrer" data-d="1" aria-label="' + hdWertEsc(t('Nächste')) + '">' + hdWertPfeil(1) + '</button>' : '')
       + '</div>';
@@ -127734,7 +127852,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     if (cmpCar) h += '<p class="hdw-leg"><span class="hdw-leg-a" style="background:' + hdWertEsc(farbe) + '"></span>' + hdWertEsc(car.alias || garageLabel(car)) + ' <span class="hdw-leg-b"></span>' + hdWertEsc(cmpCar.alias || garageLabel(cmpCar)) + ' (' + hdStilGesamt(cw) + ')</p>';
     h += '<div class="hdw-cmpwahl"><span class="hds-l">' + hdWertEsc(t('Stil')) + '</span><span class="hds-chips">'
       + HD_STIL_PRESETS.map((p) => '<button type="button" data-hdw="preset" data-id="' + p.id + '">' + hdWertEsc(t(p.de)) + '</button>').join('')
-      + '<button type="button" data-hdw="zufall">&#x1F3B2; ' + hdWertEsc(t('Zufällig')) + '</button></span></div>';
+      + '<button type="button" data-hdw="zufall">&#x1F3B2; ' + hdWertEsc(t('Zufällig')) + '</button>'
+      + '<button type="button" data-hdw="standard">&#8634; ' + hdWertEsc(t('Standard')) + '</button></span></div>';
     if (typeof GHOST_TEMPO_STUFEN !== 'undefined') {
       h += '<div class="hdw-cmpwahl"><span class="hds-l">' + hdWertEsc(t('Schwierigkeit')) + '</span><span class="hds-chips">'
         + GHOST_TEMPO_STUFEN.map((st, k) => '<button type="button" data-hdw="stufe" data-k="' + k + '"' + (k === stufe ? ' class="an"' : '') + '>' + hdWertEsc(st.max ? 'MAX' : t(st.label)) + '</button>').join('')
@@ -127787,6 +127906,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       if (p) { Object.assign(hdStilWerte(z.car), p.w); hdStilSpeichern(); }
     } else if (was === 'zufall') {
       Object.assign(hdStilWerte(z.car), hdStilErzeugen(hdStilId(z.car) + ':' + Date.now() + ':' + Math.random())); hdStilSpeichern();
+    } else if (was === 'standard') {
+      hdStilZuruecksetzen(z.car);
     } else if (was === 'stufe') {
       z.car.ghostStufe = +b.dataset.k;
       try { if (typeof carRolleMerken === 'function') carRolleMerken(z.car); renderGarage(); } catch (er) { /* not ready */ }
@@ -127821,6 +127942,437 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // for tests
     _garage: () => garage, _ghostCharakter: (c) => ghostCharakter(c), _motor: () => physEngine.modell,
     _abgleichen: hdWertMotorenAbgleichen, _offtrackSitzung: () => hdOfftrackSitzung(), _modellTempo: (c) => hdModellTempo(c) });
+  // =====================================================================================
+  // Hybrid-Dash 3.0: A COUNTRY FOR EVERY DRIVER, AND NAMES THAT MATCH IT
+  // =====================================================================================
+  //
+  // BESTELLT: "Have more diverse international names, and also have a feature, where each NPC and player is
+  // assigned a country. So the name should culturally match their country."
+  //
+  // 47 countries, each with its own pool of given names and family names (common names of that country; the famous
+  // racing names of each country are left out, so a random pair does not name a real driver). A new NPC first gets a
+  // country - drawn so the field stays mixed - and then a name from that country's pool. Players get the country of
+  // the browser's region. The country is stored per car (device id) in hybriddash.land.v1, chosen in the garage, and
+  // shown as a flag (drawn here as SVG: Windows does not draw flag emoji) on the garage, the grid board, the driver
+  // card, the pre-race setup and the main menu. Country names come from the browser (Intl.DisplayNames), in the
+  // app language.
+
+  // flag: h = horizontal stripes, v = vertical stripes (a number after a colour is its weight), plus extras.
+  const HD_LAENDER = {
+    de: { f: 'h:#000|#dd0000|#ffce00', v: ['Lukas', 'Hannah', 'Jonas', 'Lea', 'Felix', 'Marie', 'Tobias', 'Katrin', 'Moritz', 'Anja'], n: ['Becker', 'Hoffmann', 'Krüger', 'Wagner', 'Schäfer', 'Richter', 'Neumann', 'Brandt', 'Hartmann', 'Lorenz', 'Vogel'] },
+    at: { f: 'h:#c8102e|#fff|#c8102e', v: ['Florian', 'Lena', 'Matthias', 'Sophie', 'Stefan', 'Julia', 'Andreas', 'Valentina'], n: ['Gruber', 'Huber', 'Bauer', 'Pichler', 'Steiner', 'Moser', 'Hofer', 'Leitner'] },
+    ch: { f: 'ch', v: ['Luca', 'Nina', 'Reto', 'Lara', 'Samuel', 'Céline', 'Urs', 'Mia'], n: ['Meier', 'Keller', 'Brunner', 'Baumann', 'Frei', 'Gerber', 'Widmer', 'Zürcher'] },
+    nl: { f: 'h:#ae1c28|#fff|#21468b', v: ['Daan', 'Sanne', 'Bram', 'Fleur', 'Joris', 'Lotte', 'Sem', 'Iris'], n: ['de Jong', 'Bakker', 'Visser', 'Smit', 'Mulder', 'de Boer', 'Dekker', 'Hendriks'] },
+    be: { f: 'v:#000|#fdda24|#ef3340', v: ['Arne', 'Elise', 'Wout', 'Lien', 'Thibault', 'Margot', 'Senne', 'Noor'], n: ['Peeters', 'Janssens', 'Maes', 'Claes', 'Willems', 'Goossens', 'Dubois', 'Lambert'] },
+    fr: { f: 'v:#0055a4|#fff|#ef4135', v: ['Julien', 'Camille', 'Théo', 'Manon', 'Hugo', 'Léa', 'Antoine', 'Chloé', 'Mathis'], n: ['Lefèvre', 'Garnier', 'Rousseau', 'Faure', 'Mercier', 'Blanchard', 'Girard', 'Moreau', 'Duval', 'Fontaine', 'Delacroix'] },
+    it: { f: 'v:#009246|#fff|#ce2b37', v: ['Matteo', 'Giulia', 'Lorenzo', 'Chiara', 'Alessandro', 'Francesca', 'Davide', 'Sara'], n: ['Esposito', 'Romano', 'Colombo', 'Ricci', 'Greco', 'Conti', 'De Luca', 'Marchetti', 'Gallo', 'Moretti'] },
+    es: { f: 'h:#aa151b|#f1bf00 2|#aa151b', v: ['Pablo', 'Lucía', 'Javier', 'Carmen', 'Sergio', 'Marta', 'Iker', 'Elena'], n: ['García', 'Navarro', 'Morales', 'Ruiz', 'Ortega', 'Delgado', 'Castell', 'Herrera', 'Molina'] },
+    pt: { f: 'v:#046a38 2|#da291c 3;c:12,10,3.2,#ffe900', v: ['João', 'Inês', 'Tiago', 'Beatriz', 'Rui', 'Mariana', 'Duarte', 'Leonor'], n: ['Ferreira', 'Costa', 'Pereira', 'Rodrigues', 'Sousa', 'Almeida', 'Carvalho', 'Pinto'] },
+    ie: { f: 'v:#169b62|#fff|#ff883e', v: ['Cian', 'Aoife', 'Seán', 'Niamh', 'Oisín', 'Saoirse', 'Darragh', 'Róisín'], n: ['Quinn', 'Murphy', "O'Brien", 'Byrne', 'Doyle', 'Kavanagh', 'Gallagher', 'Nolan'] },
+    gb: { f: 'gb', v: ['Oliver', 'Amelia', 'Harry', 'Isla', 'George', 'Freya', 'Callum', 'Poppy', 'Alfie'], n: ['Whitlock', 'Thorne', 'Hughes', 'Bennett', 'Clarke', 'Fletcher', 'Pearce', 'Ashworth', 'Harrington'] },
+    se: { f: 'x:#006aa7,#fecc00', v: ['Erik', 'Astrid', 'Oskar', 'Linnea', 'Axel', 'Elin', 'Viktor', 'Saga'], n: ['Lindqvist', 'Nyberg', 'Strand', 'Bergström', 'Sjöberg', 'Holm', 'Ekström', 'Lundgren'] },
+    no: { f: 'x:#ba0c2f,#fff,#00205b', v: ['Magnus', 'Ingrid', 'Sindre', 'Kari', 'Eirik', 'Sigrid', 'Henrik', 'Tuva'], n: ['Halvorsen', 'Solberg', 'Haugen', 'Bakken', 'Dahl', 'Moen', 'Lie', 'Nygård'] },
+    fi: { f: 'x:#fff,#002f6c', v: ['Aleksi', 'Aino', 'Eetu', 'Venla', 'Joonas', 'Emilia', 'Lauri', 'Sanni'], n: ['Virtanen', 'Korhonen', 'Nieminen', 'Laine', 'Heikkinen', 'Koskinen', 'Lehtonen', 'Järvinen'] },
+    dk: { f: 'x:#c8102e,#fff', v: ['Mads', 'Freja', 'Rasmus', 'Ida', 'Frederik', 'Signe', 'Mikkel', 'Emma'], n: ['Lund', 'Nielsen', 'Jensen', 'Kjær', 'Dalsgaard', 'Thomsen', 'Vestergaard', 'Holm'] },
+    pl: { f: 'h:#fff|#dc143c', v: ['Jakub', 'Zuzanna', 'Kacper', 'Maja', 'Mateusz', 'Julia', 'Szymon', 'Oliwia'], n: ['Zieliński', 'Nowak', 'Wiśniewski', 'Wójcik', 'Kamiński', 'Kowalczyk', 'Mazur', 'Krawczyk'] },
+    cz: { f: 'cz', v: ['Jakub', 'Tereza', 'Ondřej', 'Eliška', 'Vojtěch', 'Klára', 'Tomáš', 'Adéla'], n: ['Novák', 'Dvořák', 'Svoboda', 'Černý', 'Procházka', 'Kučera', 'Veselý', 'Horák'] },
+    hr: { f: 'hr', v: ['Ivan', 'Lucija', 'Luka', 'Ana', 'Marko', 'Petra', 'Josip', 'Mia'], n: ['Kovač', 'Horvat', 'Babić', 'Marić', 'Jurić', 'Knežević', 'Vuković', 'Novak'] },
+    hu: { f: 'h:#ce2939|#fff|#477050', v: ['Bence', 'Réka', 'Máté', 'Dóra', 'Levente', 'Eszter', 'Ádám', 'Zsófia'], n: ['Varga', 'Nagy', 'Tóth', 'Szabó', 'Horváth', 'Kiss', 'Molnár', 'Farkas'] },
+    ua: { f: 'h:#0057b7|#ffd700', v: ['Andriy', 'Oksana', 'Taras', 'Yulia', 'Dmytro', 'Kateryna', 'Bohdan', 'Iryna'], n: ['Kovalenko', 'Bondarenko', 'Tkachenko', 'Kravchenko', 'Melnyk', 'Oliynyk', 'Polishchuk', 'Moroz'] },
+    bg: { f: 'h:#fff|#00966e|#d62612', v: ['Georgi', 'Elena', 'Dimitar', 'Mira', 'Nikolai', 'Teodora', 'Ivo', 'Raya'], n: ['Petrov', 'Ivanov', 'Georgiev', 'Dimitrov', 'Stoyanov', 'Kolev', 'Todorov', 'Nikolov'] },
+    gr: { f: 'gr', v: ['Nikos', 'Eleni', 'Giorgos', 'Sofia', 'Kostas', 'Dimitra', 'Dimitris', 'Katerina'], n: ['Georgiou', 'Nikolaidis', 'Pappas', 'Dimitriou', 'Karalis', 'Vlachos', 'Makris', 'Antoniou'] },
+    tr: { f: 'tr', v: ['Emre', 'Elif', 'Burak', 'Zeynep', 'Kerem', 'Defne', 'Mert', 'Ayşe'], n: ['Kaplan', 'Yılmaz', 'Demir', 'Şahin', 'Çelik', 'Aydın', 'Öztürk', 'Arslan'] },
+    ir: { f: 'h:#239f40|#fff|#da0000;c:15,10,2.2,#da0000', v: ['Arash', 'Shirin', 'Dariush', 'Leila', 'Kian', 'Parisa', 'Babak', 'Yasmin'], n: ['Rahimi', 'Karimi', 'Hosseini', 'Moradi', 'Tehrani', 'Jafari', 'Sadeghi', 'Azizi'] },
+    ae: { f: 'ae', v: ['Rashid', 'Mariam', 'Khalid', 'Fatima', 'Saeed', 'Aisha', 'Hamdan', 'Noura'], n: ['Al Mansoori', 'Al Hashimi', 'Al Ketbi', 'Al Nuaimi', 'Al Shamsi', 'Al Suwaidi', 'Al Dhaheri'] },
+    eg: { f: 'h:#ce1126|#fff|#000;c:15,10,2,#c09300', v: ['Omar', 'Nour', 'Karim', 'Salma', 'Youssef', 'Mariam', 'Ahmed', 'Laila'], n: ['Hassan', 'Mansour', 'Farouk', 'Saleh', 'Ibrahim', 'Nasser', 'Fathy', 'Kamal'] },
+    ma: { f: 'h:#c1272d;s:15,10,5,#006233', v: ['Yassine', 'Salma', 'Amine', 'Imane', 'Hamza', 'Khadija', 'Mehdi', 'Sara'], n: ['Benali', 'El Idrissi', 'Alaoui', 'Bennani', 'Tazi', 'Berrada', 'Chraibi', 'Fassi'] },
+    ng: { f: 'v:#008751|#fff|#008751', v: ['Chinedu', 'Adaeze', 'Emeka', 'Ngozi', 'Tunde', 'Folake', 'Ifeanyi', 'Amara'], n: ['Okafor', 'Adeyemi', 'Achebe', 'Okonkwo', 'Balogun', 'Eze', 'Nwosu', 'Adebayo'] },
+    gh: { f: 'h:#ce1126|#fcd116|#006b3f;s:15,10,3.4,#000', v: ['Kofi', 'Ama', 'Kwame', 'Akosua', 'Yaw', 'Efua', 'Kojo', 'Abena'], n: ['Mensah', 'Osei', 'Boateng', 'Asante', 'Owusu', 'Agyeman', 'Ofori', 'Darko'] },
+    ke: { f: 'h:#000 3|#fff|#bb0000 3|#fff|#006600 3;e:15,10,2.4,5,#bb0000', v: ['Brian', 'Wanjiku', 'Kevin', 'Achieng', 'Daniel', 'Njeri', 'Collins', 'Akinyi'], n: ['Kamau', 'Otieno', 'Mwangi', 'Odhiambo', 'Wafula', 'Njoroge', 'Kiprono', 'Chege'] },
+    za: { f: 'za', v: ['Thabo', 'Lerato', 'Sipho', 'Naledi', 'Pieter', 'Anika', 'Lwazi', 'Zanele'], n: ['Nkosi', 'Dlamini', 'Botha', 'Khumalo', 'Naidoo', 'Mokoena', 'Pretorius', 'Ndlovu'] },
+    in: { f: 'h:#ff9933|#fff|#138808;r:15,10,2.6,#000080', v: ['Arjun', 'Priya', 'Rohan', 'Ananya', 'Vikram', 'Kavya', 'Aditya', 'Meera'], n: ['Sharma', 'Iyer', 'Patel', 'Reddy', 'Nair', 'Menon', 'Kapoor', 'Rao'] },
+    th: { f: 'h:#a51931|#f4f5f8|#2d2a4a 2|#f4f5f8|#a51931', v: ['Krit', 'Ploy', 'Nattapong', 'Siriporn', 'Anan', 'Malee', 'Somchai', 'Kanya'], n: ['Srisuk', 'Wongsawat', 'Boonmee', 'Thongdee', 'Phromma', 'Chaiyaporn', 'Sukprasert'] },
+    vn: { f: 'h:#da251d;s:15,10,5.5,#ffff00', v: ['Minh', 'Linh', 'Huy', 'Trang', 'Duc', 'Mai', 'Khoa', 'Thao'], n: ['Nguyen', 'Tran', 'Le', 'Pham', 'Hoang', 'Phan', 'Vu', 'Dang'] },
+    id: { f: 'h:#ff0000|#fff', v: ['Budi', 'Putri', 'Rizky', 'Dewi', 'Arif', 'Sari', 'Bayu', 'Ayu'], n: ['Santoso', 'Wijaya', 'Saputra', 'Hidayat', 'Pratama', 'Kusuma', 'Siregar', 'Nugroho'] },
+    ph: { f: 'ph', v: ['Miguel', 'Andrea', 'Paolo', 'Bea', 'Carlo', 'Trisha', 'Jericho', 'Kim'], n: ['Santos', 'Reyes', 'Cruz', 'Bautista', 'Dela Cruz', 'Villanueva', 'Mendoza', 'Aquino'] },
+    jp: { f: 'h:#fff;c:15,10,6,#bc002d', v: ['Haruto', 'Yui', 'Ren', 'Sakura', 'Sota', 'Aoi', 'Daiki', 'Hina', 'Kenji'], n: ['Tanaka', 'Ishikawa', 'Watanabe', 'Yamamoto', 'Nakamura', 'Fujiwara', 'Morita', 'Shimizu', 'Kondo'] },
+    kr: { f: 'kr', v: ['Min-jun', 'Seo-yeon', 'Ji-ho', 'Ha-eun', 'Do-yun', 'Ji-woo', 'Hyun-woo', 'Su-bin'], n: ['Kim', 'Lee', 'Park', 'Choi', 'Jung', 'Kang', 'Yoon', 'Han'] },
+    cn: { f: 'h:#de2910;s:6,6,3.6,#ffde00;s:11,3,1,#ffde00;s:13,5,1,#ffde00;s:13,8,1,#ffde00;s:11,10,1,#ffde00', v: ['Wei', 'Lina', 'Hao', 'Mei', 'Jun', 'Xin', 'Yu', 'Lan'], n: ['Wang', 'Li', 'Chen', 'Liu', 'Zhang', 'Yang', 'Huang', 'Lin'] },
+    au: { f: 'au:#ffffff', v: ['Jack', 'Chloe', 'Riley', 'Matilda', 'Cooper', 'Ruby', 'Lachlan', 'Sienna'], n: ['Mitchell', 'Hayes', 'Doherty', 'Cartwright', 'Fraser', 'Bowman', 'Sutherland', 'Kelly'] },
+    nz: { f: 'au:#cc142b', v: ['Ethan', 'Aroha', 'Liam', 'Mere', 'Nikau', 'Isla', 'Tama', 'Ava'], n: ['Ngata', 'Parata', 'Wilson', 'Campbell', 'Morrison', 'Te Rangi', 'Walker', 'Paewai'] },
+    us: { f: 'us', v: ['Tyler', 'Madison', 'Austin', 'Kayla', 'Cody', 'Brooke', 'Hunter', 'Savannah', 'Mason'], n: ['Calloway', 'Whitaker', 'Brooks', 'Sullivan', 'Carter', 'Dawson', 'Holloway', 'Prescott', 'Mercer'] },
+    ca: { f: 'v:#d52b1e|#fff 2|#d52b1e;m:#d52b1e', v: ['Liam', 'Chloé', 'Tristan', 'Maëlle', 'Owen', 'Brooke', 'Mathieu', 'Avery'], n: ['Tremblay', 'Gagnon', 'Lavoie', 'MacKenzie', 'Bouchard', 'Fraser', 'Côté', 'Leblanc'] },
+    mx: { f: 'v:#006847|#fff|#ce1126;c:15,10,2.2,#8c6b3c', v: ['Santiago', 'Ximena', 'Emiliano', 'Valeria', 'Diego', 'Regina', 'Iker', 'Fernanda'], n: ['Reyes', 'Sandoval', 'Hernández', 'Guerrero', 'Mendoza', 'Castañeda', 'Vargas', 'Ibarra'] },
+    co: { f: 'h:#fcd116 2|#003893|#ce1126', v: ['Andrés', 'Valentina', 'Sebastián', 'Daniela', 'Camilo', 'Mariana', 'Esteban', 'Laura'], n: ['Restrepo', 'Gómez', 'Cárdenas', 'Ospina', 'Zapata', 'Montes', 'Arango', 'Londoño'] },
+    br: { f: 'br', v: ['Gabriel', 'Larissa', 'Thiago', 'Beatriz', 'Rafael', 'Camila', 'Lucas', 'Fernanda'], n: ['Castro', 'Oliveira', 'Souza', 'Almeida', 'Ribeiro', 'Barbosa', 'Teixeira', 'Moura'] },
+    ar: { f: 'h:#74acdf|#fff|#74acdf;c:15,10,2.2,#f6b40e', v: ['Facundo', 'Lucía', 'Tomás', 'Martina', 'Joaquín', 'Agustina', 'Nicolás', 'Micaela'], n: ['Fernández', 'Gutiérrez', 'Acosta', 'Romero', 'Medina', 'Benítez', 'Sosa', 'Giménez'] },
+    cl: { f: 'cl', v: ['Benjamín', 'Josefa', 'Vicente', 'Antonia', 'Matías', 'Catalina', 'Cristóbal', 'Florencia'], n: ['Muñoz', 'Rojas', 'Soto', 'Contreras', 'Figueroa', 'Espinoza', 'Valenzuela', 'Silva'] },
+  };
+  const HD_LAND_CODES = Object.keys(HD_LAENDER);
+  // The old name pool (v2.0): its surnames point to a country, so the NPCs named before keep a fitting flag.
+  const HD_ALT_NACHNAME_LAND = { Kovac: 'hr', Lindqvist: 'se', Moreau: 'fr', Okafor: 'ng', Tanaka: 'jp', Brandt: 'de', Castell: 'es', Novak: 'cz',
+    Reyes: 'mx', Halvorsen: 'no', Duval: 'fr', Mensah: 'gh', Petrov: 'bg', Sandoval: 'mx', Whitlock: 'gb', Ferreira: 'pt', Kaplan: 'tr',
+    Ishikawa: 'jp', Varga: 'hu', Delacroix: 'fr', Osei: 'gh', Marchetti: 'it', Nyberg: 'se', Quinn: 'ie', Rahimi: 'ir', Solberg: 'no',
+    Thorne: 'gb', Adeyemi: 'ng', Calloway: 'us', Bianchi: 'it', Strand: 'se', Morales: 'es', Hartmann: 'de', Zielinski: 'pl', Achebe: 'ng',
+    Lund: 'dk', Navarro: 'es', Castro: 'br', Fontaine: 'fr', Mbeki: 'za' };
+
+  // ---- flags as SVG (30 x 20) ------------------------------------------------------------------------------------------
+  function hdLandStern(cx, cy, r, farbe) {
+    let p = '';
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.4 : r;
+      p += (i ? 'L' : 'M') + (cx + rr * Math.cos(a)).toFixed(2) + ' ' + (cy + rr * Math.sin(a)).toFixed(2);
+    }
+    return '<path d="' + p + 'Z" fill="' + farbe + '"/>';
+  }
+  function hdLandStreifen(spec, horiz) {
+    const teile = spec.split('|').map((x) => { const [c, w] = x.trim().split(' '); return { c, w: +w || 1 }; });
+    const summe = teile.reduce((s, x) => s + x.w, 0);
+    let pos = 0, out = '';
+    for (const x of teile) {
+      const d = (horiz ? 20 : 30) * x.w / summe;
+      out += horiz ? '<rect x="0" y="' + pos.toFixed(2) + '" width="30" height="' + (d + 0.05).toFixed(2) + '" fill="' + x.c + '"/>'
+        : '<rect x="' + pos.toFixed(2) + '" y="0" width="' + (d + 0.05).toFixed(2) + '" height="20" fill="' + x.c + '"/>';
+      pos += d;
+    }
+    return out;
+  }
+  function hdUnion(w, h) {   // union flag in a w x h box at 0,0
+    return '<rect width="' + w + '" height="' + h + '" fill="#012169"/>'
+      + '<path d="M0 0L' + w + ' ' + h + 'M' + w + ' 0L0 ' + h + '" stroke="#fff" stroke-width="' + (h / 5) + '"/>'
+      + '<path d="M0 0L' + w + ' ' + h + 'M' + w + ' 0L0 ' + h + '" stroke="#c8102e" stroke-width="' + (h / 15) + '"/>'
+      + '<path d="M' + (w / 2) + ' 0V' + h + 'M0 ' + (h / 2) + 'H' + w + '" stroke="#fff" stroke-width="' + (h / 3) + '"/>'
+      + '<path d="M' + (w / 2) + ' 0V' + h + 'M0 ' + (h / 2) + 'H' + w + '" stroke="#c8102e" stroke-width="' + (h / 5) + '"/>';
+  }
+  function hdLandFlaggeInnen(code) {
+    const L = HD_LAENDER[code];
+    if (!L) return '<rect width="30" height="20" fill="#555"/>';
+    const spezial = {
+      gb: () => hdUnion(30, 20),
+      ch: () => '<rect width="30" height="20" fill="#da291c"/><path d="M13 4h4v4h4v4h-4v4h-4v-4H9V8h4z" fill="#fff"/>',
+      cz: () => hdLandStreifen('#fff|#d7141a', true) + '<path d="M0 0L15 10L0 20Z" fill="#11457e"/>',
+      gr: () => hdLandStreifen('#0d5eaf|#fff|#0d5eaf|#fff|#0d5eaf|#fff|#0d5eaf|#fff|#0d5eaf', true)
+        + '<rect width="11.1" height="11.1" fill="#0d5eaf"/><path d="M5.55 0V11.1M0 5.55H11.1" stroke="#fff" stroke-width="2.2"/>',
+      tr: () => '<rect width="30" height="20" fill="#e30a17"/><circle cx="11" cy="10" r="5" fill="#fff"/><circle cx="12.3" cy="10" r="4" fill="#e30a17"/>' + hdLandStern(17.2, 10, 2.4, '#fff'),
+      ae: () => hdLandStreifen('#00732f|#fff|#000', true) + '<rect width="8" height="20" fill="#ff0000"/>',
+      za: () => '<rect width="30" height="10" fill="#e03c31"/><rect y="10" width="30" height="10" fill="#001489"/>'
+        + '<path d="M0 0L13 10L0 20M13 10H30" stroke="#fff" stroke-width="6.6" fill="none"/><path d="M0 0L13 10L0 20M13 10H30" stroke="#007749" stroke-width="4" fill="none"/>'
+        + '<path d="M0 3.2L8.8 10L0 16.8Z" fill="#ffb81c"/><path d="M0 5L6.4 10L0 15Z" fill="#000"/>',
+      hr: () => hdLandStreifen('#ff0000|#fff|#171796', true) + '<path d="M12 5.4h6v6.2a3 3 0 0 1-6 0z" fill="#fff" stroke="#171796" stroke-width=".4"/>'
+        + [0, 1, 2, 3].map((r) => [0, 1, 2, 3].filter((c) => (r + c) % 2 === 0).map((c) => '<rect x="' + (12 + c * 1.5) + '" y="' + (5.4 + r * 1.5) + '" width="1.5" height="1.5" fill="#ff0000"/>').join('')).join(''),
+      ph: () => hdLandStreifen('#0038a8|#ce1126', true) + '<path d="M0 0L17 10L0 20Z" fill="#fff"/><circle cx="5.5" cy="10" r="2.2" fill="#fcd116"/>',
+      kr: () => '<rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="5" fill="#003478"/><path d="M10 10a5 5 0 0 1 10 0a2.5 2.5 0 0 1-5 0a2.5 2.5 0 0 0-5 0z" fill="#cd2e3a"/>'
+        + '<path d="M5 4.5l3 2M22 13.5l3 2M5 15.5l3-2M22 6.5l3-2" stroke="#000" stroke-width="1.6"/>',
+      us: () => hdLandStreifen(Array.from({ length: 13 }, (_, i) => (i % 2 ? '#fff' : '#b22234')).join('|'), true) + '<rect width="12" height="10.8" fill="#3c3b6e"/>'
+        + [2, 5, 8].map((y) => [2, 4.6, 7.2, 9.8].map((x) => '<circle cx="' + x + '" cy="' + (y + 0.4) + '" r=".55" fill="#fff"/>').join('')).join(''),
+      br: () => '<rect width="30" height="20" fill="#009c3b"/><path d="M15 2.4L27.4 10L15 17.6L2.6 10Z" fill="#ffdf00"/><circle cx="15" cy="10" r="4.4" fill="#002776"/>'
+        + '<path d="M10.8 9.2q4.2-1.2 8.4 1.4" stroke="#fff" stroke-width=".8" fill="none"/>',
+      cl: () => '<rect width="30" height="10" fill="#fff"/><rect y="10" width="30" height="10" fill="#d52b1e"/><rect width="10" height="10" fill="#0039a6"/>' + hdLandStern(5, 5, 2.6, '#fff'),
+    };
+    if (spezial[L.f]) return spezial[L.f]();
+    let out = '';
+    for (const teil of L.f.split(';')) {
+      const [art, rest] = [teil.slice(0, teil.indexOf(':')), teil.slice(teil.indexOf(':') + 1)];
+      if (art === 'h' || art === 'v') out += hdLandStreifen(rest, art === 'h');
+      else if (art === 'x') {   // Nordic cross: background, cross, optional inner cross
+        const [bg, kreuz, innen] = rest.split(',');
+        out += '<rect width="30" height="20" fill="' + bg + '"/><path d="M11 0V20M0 10H30" stroke="' + kreuz + '" stroke-width="' + (innen ? 5 : 4) + '"/>'
+          + (innen ? '<path d="M11 0V20M0 10H30" stroke="' + innen + '" stroke-width="2.4"/>' : '');
+      } else if (art === 'c') { const [x, y, r, f] = rest.split(','); out += '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + f + '"/>'; }
+      else if (art === 'r') { const [x, y, r, f] = rest.split(','); out += '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="none" stroke="' + f + '" stroke-width=".9"/>'; }
+      else if (art === 'e') { const [x, y, rx, ry, f] = rest.split(','); out += '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '" fill="' + f + '"/>'; }
+      else if (art === 's') { const [x, y, r, f] = rest.split(','); out += hdLandStern(+x, +y, +r, f); }
+      else if (art === 'm') out += '<path d="M15 4.6l1 2 1.4-.6-.4 3 1.6-1.4.6 1.2 1.6-.4-.6 1.8.8.4-2.6 2-.2 1H15.4v2.2h-.8V13.8h-1.4l-.2-1-2.6-2 .8-.4-.6-1.8 1.6.4.6-1.2L14.4 9.4l-.4-3 1.4.6z" fill="' + rest + '"/>';
+      else if (art === 'au') out += '<rect width="30" height="20" fill="#012169"/>' + hdUnion(15, 10)
+        + [[22.5, 4.2], [26, 8.4], [19.5, 9.6], [22.5, 16]].map(([x, y]) => hdLandStern(x, y, 1.3, rest)).join('') + hdLandStern(7.5, 15, 2, '#fff');
+    }
+    return out;
+  }
+  let hdLandFlaggeNr = 0;
+  function hdLandFlagge(code, hoehe) {
+    const h = hoehe || 14, w = Math.round(h * 1.5), id = 'hdfl' + (++hdLandFlaggeNr);
+    return '<svg class="hd-flagge" width="' + w + '" height="' + h + '" viewBox="0 0 30 20" role="img" aria-label="' + hdLandName(code).replace(/"/g, '') + '">'
+      + '<defs><clipPath id="' + id + '"><rect width="30" height="20" rx="2"/></clipPath></defs><g clip-path="url(#' + id + ')">' + hdLandFlaggeInnen(code) + '</g>'
+      + '<rect x=".4" y=".4" width="29.2" height="19.2" rx="2" fill="none" stroke="rgba(0,0,0,.35)" stroke-width=".8"/></svg>';
+  }
+  function hdLandName(code) {
+    try {
+      const sprache = typeof lang === 'string' ? lang : 'en';
+      return new Intl.DisplayNames([sprache], { type: 'region' }).of(String(code).toUpperCase()) || String(code).toUpperCase();
+    } catch (e) { return String(code).toUpperCase(); }
+  }
+
+  // ---- the country of a car ------------------------------------------------------------------------------------------
+  const HD_LAND_STORE = 'hybriddash.land.v1';
+  let hdLandDaten = null;
+  function hdLandAlle() {
+    if (!hdLandDaten) { try { hdLandDaten = JSON.parse(localStorage.getItem(HD_LAND_STORE) || '{}') || {}; } catch (e) { hdLandDaten = {}; } }
+    return hdLandDaten;
+  }
+  function hdLandSchreiben() { try { localStorage.setItem(HD_LAND_STORE, JSON.stringify(hdLandAlle())); } catch (e) { /* private */ } }
+  function hdLandBrowser() {
+    try {
+      const sprachen = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || '']);
+      for (const s of sprachen) { const m = /[-_]([a-z]{2})$/i.exec(s || ''); if (m && HD_LAENDER[m[1].toLowerCase()]) return m[1].toLowerCase(); }
+      const l = String(sprachen[0] || '').slice(0, 2).toLowerCase();
+      return ({ de: 'de', fr: 'fr', it: 'it', es: 'es', pt: 'pt', nl: 'nl', sv: 'se', nb: 'no', fi: 'fi', da: 'dk', pl: 'pl', cs: 'cz', hu: 'hu', tr: 'tr', ja: 'jp', ko: 'kr', zh: 'cn' })[l] || 'gb';
+    } catch (e) { return 'gb'; }
+  }
+  // The country from a name: a family name in one of the pools (old names included).
+  function hdLandAusName(name) {
+    const w = String(name || '').trim();
+    if (!w) return null;
+    const nach = w.split(/\s+/).slice(1).join(' ');
+    if (HD_ALT_NACHNAME_LAND[w.split(/\s+/).pop()]) return HD_ALT_NACHNAME_LAND[w.split(/\s+/).pop()];
+    for (const c of HD_LAND_CODES) if (nach && HD_LAENDER[c].n.includes(nach)) return c;
+    return null;
+  }
+  function hdLand(car) {
+    if (!car || !car.device) return null;
+    const id = String(car.device.id), alle = hdLandAlle();
+    if (alle[id] && HD_LAENDER[alle[id]]) return alle[id];
+    // First time: from the name if it is one of ours, players from the browser, otherwise a drawn country.
+    const code = hdLandAusName(car.alias) || (/^player/.test(car.role || '') ? hdLandBrowser() : hdLandZiehen(car));
+    alle[id] = code; hdLandSchreiben();
+    return code;
+  }
+  function hdLandSetzen(car, code) {
+    if (!car || !car.device || !HD_LAENDER[code]) return;
+    hdLandAlle()[String(car.device.id)] = code; hdLandSchreiben();
+  }
+  // A country for a new NPC: one nobody in the garage has yet, if possible - so the field is international.
+  function hdLandZiehen(car) {
+    let belegt = new Set();
+    try { garage.forEach((c) => { if (c !== car && c.device) { const x = hdLandAlle()[String(c.device.id)]; if (x) belegt.add(x); } }); } catch (e) { /* no garage */ }
+    const frei = HD_LAND_CODES.filter((c) => !belegt.has(c));
+    const pool = frei.length ? frei : HD_LAND_CODES;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  // A name from the car's country (new country for an NPC without one).
+  function hdNameFuerAuto(car, belegt) {
+    const code = (car && car.device && hdLandAlle()[String(car.device.id)]) || (car && car.device ? hdLand(car) : hdLandZiehen(car));
+    const L = HD_LAENDER[code];
+    for (let i = 0; i < 200; i++) {
+      const n = L.v[Math.floor(Math.random() * L.v.length)] + ' ' + L.n[Math.floor(Math.random() * L.n.length)];
+      if (n.length <= 18 && !(belegt && belegt.has(n.toLowerCase()))) return n;
+    }
+    return hdZufallsName(belegt || new Set());
+  }
+  // HTML bits for the other screens.
+  function hdLandFlaggeFuer(car, hoehe) { const c = hdLand(car); return c ? hdLandFlagge(c, hoehe) : ''; }
+
+  // ---- the garage row: Country (a select, so the controller can step through it with left / right) ------------------
+  function hdLandZeile(car, nach) {
+    if (!car || !car.device || !nach || !nach.parentNode) return;
+    const code = hdLand(car);
+    const z = document.createElement('div');
+    z.className = 'opt-row gk-zeile gar-a-land';
+    const namen = HD_LAND_CODES.map((c) => [c, hdLandName(c)]).sort((a, b) => a[1].localeCompare(b[1]));
+    z.innerHTML = '<span class="gk-l">' + t('Land') + '</span><span class="gar-land-flagge" data-i18n-skip>' + hdLandFlagge(code, 18) + '</span>'
+      + '<select class="gar-land-wahl" data-i18n-skip aria-label="' + t('Land') + '">'
+      + namen.map(([c, n]) => '<option value="' + c + '"' + (c === code ? ' selected' : '') + '>' + n.replace(/</g, '') + '</option>').join('') + '</select>';
+    const sel = z.querySelector('select');
+    sel.addEventListener('change', () => {
+      hdLandSetzen(car, sel.value);
+      z.querySelector('.gar-land-flagge').innerHTML = hdLandFlagge(sel.value, 18);
+      // An NPC takes a name of its new country; a player keeps the name they chose.
+      if (car.role === 'ghost' && typeof hdNeuerName === 'function') { hdNeuerName(car); return; }
+      try { renderGarage(); if (typeof renderRaceGrid === 'function') renderRaceGrid(); } catch (e) { /* not ready */ }
+    });
+    nach.parentNode.insertBefore(z, nach.nextSibling);
+  }
+  window.HYBRIDDASH_LAENDER = Object.freeze({ codes: HD_LAND_CODES, land: hdLand, setzen: hdLandSetzen, name: hdLandName, flagge: hdLandFlagge,
+    _nameFuer: (code) => { const L = HD_LAENDER[code]; return L.v[0] + ' ' + L.n[0]; }, _neuerName: (car) => hdNameFuerAuto(car) });
+  // =====================================================================================
+  // Hybrid-Dash 3.0: COCKPIT SOUNDS - brakes, lock-up, rattle, gear beeps, contact
+  // =====================================================================================
+  //
+  // BESTELLT: "Add braking sounds, cockpit noises - such as rattle and gear beeps, add contact sound when crashing
+  // with barrier or other cars and add tyre lock up noises."
+  //
+  // All synthesized with Web Audio (no new files), on top of what 80-sound.js already plays (engine, the brake-squeal
+  // sample, tyre squeal at the grip limit, shift clunk, crash samples). Driven by player 1's physics, once per engine
+  // sound tick (updateEngineSound -> hdCockpitKlangTick):
+  //   brakes     disc / pad friction: band-passed noise (2.2 kHz) plus a low rumble, with pedal x speed
+  //   lock-up    a hard stop above a third of top speed (or ABS working): a tonal screech with a fast wobble and a
+  //              hiss on top, louder in the wet
+  //   rattle     the cockpit: random clicks of band-passed noise (trim and mounts), more with speed, load and on
+  //              kerbs / off the track
+  //   gear beeps a short confirm beep on every gear change, and the shift-light beep at the rev limit
+  //   contact    on every impact (the crash detection in 70-race.js): a thud and a crack; against another car (an NPC
+  //              within reach on track) a lighter bump with a plastic clack, against the barrier a heavier hit with a
+  //              scrape. Stronger with speed.
+  // Own volume in Options > Sound ("Cockpit sounds"), 0 = off. Silent during the self-test suite.
+  const HD_CK_STORE = 'hybriddash.cockpitklang.v1';
+  let hdCkVolumen = (() => { try { const v = parseFloat(localStorage.getItem(HD_CK_STORE)); return isFinite(v) ? Math.max(0, Math.min(1, v)) : 0.6; } catch (e) { return 0.6; } })();
+  let hdCk = null;   // the nodes, built once per AudioContext
+  function hdCkAus() {
+    try { if (typeof hdSuiteLaeuft === 'function' && hdSuiteLaeuft()) return true; } catch (e) { /* not ready */ }
+    return !hdCkVolumen || typeof audioCtx === 'undefined' || !audioCtx || (typeof soundEnabled !== 'undefined' && !soundEnabled);
+  }
+  function hdCkRauschen(ctx, sek) {
+    const n = Math.floor(ctx.sampleRate * sek), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    return b;
+  }
+  function hdCkBauen() {
+    if (hdCk && hdCk.ctx === audioCtx) return hdCk;
+    const ctx = audioCtx;
+    const master = ctx.createGain(); master.gain.value = hdCkVolumen; master.connect(ctx.destination);
+    const rauschen = hdCkRauschen(ctx, 2);
+    const quelle = ctx.createBufferSource(); quelle.buffer = rauschen; quelle.loop = true; quelle.start();
+    const zweig = (typ, hz, q, ziel) => {
+      const f = ctx.createBiquadFilter(); f.type = typ; f.frequency.value = hz; f.Q.value = q;
+      const g = ctx.createGain(); g.gain.value = 0;
+      quelle.connect(f).connect(g).connect(ziel || master);
+      return g;
+    };
+    // brakes
+    const bremse = zweig('bandpass', 2200, 0.9), bremsRumpeln = zweig('bandpass', 170, 1.2);
+    // lock-up: two detuned saws with a wobble, through a band-pass, plus a hiss
+    const blockFilter = ctx.createBiquadFilter(); blockFilter.type = 'bandpass'; blockFilter.frequency.value = 1500; blockFilter.Q.value = 2.5;
+    const blockGain = ctx.createGain(); blockGain.gain.value = 0;
+    blockFilter.connect(blockGain).connect(master);
+    const wobbel = ctx.createOscillator(); wobbel.frequency.value = 13; const wobbelTiefe = ctx.createGain(); wobbelTiefe.gain.value = 45;
+    wobbel.connect(wobbelTiefe);
+    const saegen = [780, 1170].map((hz) => {
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = hz;
+      wobbelTiefe.connect(o.frequency); o.connect(blockFilter); o.start(); return o;
+    });
+    wobbel.start();
+    const blockZischen = zweig('bandpass', 3200, 1.4);
+    // rattle: two bands, the gain set at random every tick = clicks
+    const rassel = zweig('bandpass', 480, 3), surren = zweig('bandpass', 1300, 6);
+    hdCk = { ctx, master, bremse, bremsRumpeln, blockGain, blockZischen, rassel, surren, saegen, rauschen, gang: null, piepBis: 0, letzterPiep: 0 };
+    return hdCk;
+  }
+  // A short tone (gear beeps).
+  function hdCkTon(hz, dauer, laut, typ) {
+    const k = hdCkBauen(), ctx = k.ctx, t0 = ctx.currentTime;
+    const o = ctx.createOscillator(); o.type = typ || 'square'; o.frequency.value = hz;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(laut, t0 + 0.004); g.gain.setTargetAtTime(0, t0 + dauer * 0.6, dauer * 0.25);
+    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 5000;
+    o.connect(f).connect(g).connect(k.master);
+    o.start(t0); o.stop(t0 + dauer + 0.2);
+  }
+  // A burst of filtered noise (contact).
+  function hdCkStoss(typ, hz, q, laut, dauer, verzoegerung) {
+    const k = hdCkBauen(), ctx = k.ctx, t0 = ctx.currentTime + (verzoegerung || 0);
+    const s = ctx.createBufferSource(); s.buffer = k.rauschen; s.playbackRate.value = 0.8 + Math.random() * 0.4;
+    const f = ctx.createBiquadFilter(); f.type = typ; f.frequency.value = hz; f.Q.value = q;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(laut, t0 + 0.005); g.gain.setTargetAtTime(0, t0 + 0.01, dauer / 3);
+    s.connect(f).connect(g).connect(k.master);
+    s.start(t0, Math.random()); s.stop(t0 + dauer * 2 + 0.1);
+  }
+  function hdCkWumms(laut, hz) {
+    const k = hdCkBauen(), ctx = k.ctx, t0 = ctx.currentTime;
+    const o = ctx.createOscillator(); o.type = 'sine';
+    o.frequency.setValueAtTime(hz, t0); o.frequency.exponentialRampToValueAtTime(hz * 0.45, t0 + 0.18);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(laut, t0 + 0.006); g.gain.setTargetAtTime(0, t0 + 0.02, 0.07);
+    o.connect(g).connect(k.master); o.start(t0); o.stop(t0 + 0.6);
+  }
+  // Is another car right next to the player on track? (then a contact is car-to-car, not barrier)
+  function hdCkAutoDaneben() {
+    try {
+      const n = currentTrackTiles.length, ich = playerCar && ghostOrt(playerCar);
+      if (!n || ich === null || ich === undefined) return false;
+      return garage.some((c) => {
+        if (!c || c === playerCar || !c.device) return false;
+        const o = ghostOrt(c);
+        if (o === null || o === undefined) return false;
+        let d = Math.abs(o - ich) % n; d = Math.min(d, n - d);
+        return d < 0.35;
+      });
+    } catch (e) { return false; }
+  }
+  // Called from the crash handler (70-race.js) with the impact strength 0..1.
+  function hdKontaktKlang(wucht, wer) {
+    if (hdCkAus() || (wer && wer >= 2)) return;
+    const w = Math.max(0.25, Math.min(1, wucht || 0.5));
+    if (hdCkAutoDaneben()) {
+      // car-to-car: a body bump and a plastic clack, shorter
+      hdCkWumms(0.5 * w, 120);
+      hdCkStoss('bandpass', 2600, 2, 0.45 * w, 0.06);
+      hdCkStoss('bandpass', 1200, 3, 0.3 * w, 0.05, 0.05);
+    } else {
+      // barrier: a heavy thud, a crack, and the scrape along the wall
+      hdCkWumms(0.85 * w, 85);
+      hdCkStoss('lowpass', 500, 0.7, 0.7 * w, 0.12);
+      hdCkStoss('bandpass', 3000, 1.5, 0.4 * w, 0.05);
+      hdCkStoss('bandpass', 1700, 1.2, 0.22 * w, 0.35 + 0.3 * w, 0.06);
+    }
+  }
+  // Every engine sound tick (player 1).
+  function hdCockpitKlangTick(st, load, throttleY) {
+    if (hdCkAus()) { if (hdCk) hdCkStill(); return; }
+    let k;
+    try { k = hdCkBauen(); } catch (e) { return; }
+    const cfg = physEngine.config, t = k.ctx.currentTime;
+    const v = Math.max(0, Math.min(1, Math.abs(st.speedKmh) / Math.max(0.01, cfg.topSpeedKmh)));
+    const pedal = Math.max(0, -(+throttleY || 0));
+    const rollt = v > 0.04;
+    // brakes
+    const brems = rollt ? Math.min(1, pedal * 1.2) * Math.min(1, v * 1.6) : 0;
+    k.bremse.gain.setTargetAtTime(0.16 * brems, t, 0.05);
+    k.bremsRumpeln.gain.setTargetAtTime(0.22 * brems, t, 0.06);
+    // lock-up: a hard stop above a third of top speed, or ABS at work; the wet makes it come sooner
+    let nass = 0;
+    try { nass = typeof wxRainLevel === 'function' ? wxRainLevel() : 0; } catch (e) { nass = 0; }
+    const schwelle = 0.82 - 0.2 * nass;
+    let block = (pedal > schwelle && v > 0.3) ? Math.min(1, (pedal - schwelle) / (1 - schwelle + 1e-6)) * Math.min(1, (v - 0.3) / 0.3) : 0;
+    if (st.absActive) block = Math.max(block, 0.6);
+    k.blockGain.gain.setTargetAtTime(0.09 * block, t, 0.03);
+    k.blockZischen.gain.setTargetAtTime(0.12 * block, t, 0.03);
+    // rattle: random clicks, more with speed, load and off the track / on kerbs
+    let rau = 0;
+    try { rau = (typeof trackMode !== 'undefined' && trackMode === 'on' && typeof abseitsJetzt === 'function' && abseitsJetzt()) ? 1 : 0; } catch (e) { rau = 0; }
+    const basis = rollt ? (0.025 + 0.06 * v + 0.02 * (load || 0) + 0.12 * rau * v) : 0;
+    k.rassel.gain.setTargetAtTime(basis * (Math.random() < 0.35 ? 1 : 0.15), t, 0.008);
+    k.surren.gain.setTargetAtTime(basis * 0.35 * (0.5 + Math.random() * 0.5), t, 0.02);
+    // gear beeps: confirm on a change, shift-light beep at the limit
+    const gang = st.currentGear;
+    if (k.gang !== null && gang !== k.gang && rollt) hdCkTon(gang > k.gang ? 1650 : 1250, 0.045, 0.07);
+    k.gang = gang;
+    const jetzt = Date.now();
+    if ((st.rpmFrac || 0) > 0.93 && (load || 0) > 0.3 && jetzt - k.letzterPiep > 150) { k.letzterPiep = jetzt; hdCkTon(2400, 0.06, 0.05); }
+  }
+  function hdCkStill() {
+    if (!hdCk) return;
+    const t = hdCk.ctx.currentTime;
+    ['bremse', 'bremsRumpeln', 'blockGain', 'blockZischen', 'rassel', 'surren'].forEach((n) => hdCk[n].gain.setTargetAtTime(0, t, 0.05));
+  }
+  // ---- Options > Sound: "Cockpit sounds" volume ---------------------------------------------------------------------
+  function hdCkReglerBauen() {
+    const vorlage = document.getElementById('brake-volume');
+    const zeile = vorlage && vorlage.closest('.opt-row');
+    if (!zeile || document.getElementById('hd-cockpit-volume')) return;
+    const z = document.createElement('div');
+    z.className = 'opt-row';
+    z.innerHTML = '<div class="opt-label">' + t('Cockpit-Geräusche') + '<small>' + t('Bremsen, blockierende Reifen, Klappern im Cockpit, Schaltpiepen und der Kontakt mit Bande oder anderen Autos. 0 % = aus.') + '</small></div>'
+      + '<div class="opt-slider"><button type="button" data-step="-1" aria-label="' + t('weniger') + '">&minus;</button>'
+      + '<input type="range" id="hd-cockpit-volume" min="0" max="1" step="0.05" value="' + hdCkVolumen + '">'
+      + '<button type="button" data-step="1" aria-label="' + t('mehr') + '">+</button><span class="opt-val">' + Math.round(hdCkVolumen * 100) + '%</span></div>';
+    zeile.parentNode.insertBefore(z, zeile.nextSibling);
+    if (typeof optInfoEinrichten === 'function') optInfoEinrichten();   // the help text behind the (i), like every option
+    const r = z.querySelector('input'), wert = z.querySelector('.opt-val');
+    r.addEventListener('input', () => {
+      hdCkVolumen = parseFloat(r.value) || 0;
+      wert.textContent = Math.round(hdCkVolumen * 100) + '%';
+      try { localStorage.setItem(HD_CK_STORE, String(hdCkVolumen)); } catch (e) { /* private */ }
+      if (hdCk) hdCk.master.gain.setTargetAtTime(hdCkVolumen, hdCk.ctx.currentTime, 0.05);
+    });
+    r.addEventListener('change', () => { if (!hdCkAus()) { hdCkTon(1650, 0.045, 0.07); setTimeout(() => hdKontaktKlang(0.5), 120); } });
+    z.querySelectorAll('button[data-step]').forEach((b) => b.addEventListener('click', () => {
+      r.value = String(Math.max(0, Math.min(1, (parseFloat(r.value) || 0) + 0.05 * Number(b.dataset.step))));
+      r.dispatchEvent(new Event('input', { bubbles: true })); r.dispatchEvent(new Event('change', { bubbles: true }));
+    }));
+  }
+  setTimeout(hdCkReglerBauen, 0);
+  window.HYBRIDDASH_COCKPITKLANG = Object.freeze({ kontakt: hdKontaktKlang, ton: (hz) => hdCkTon(hz || 1650, 0.05, 0.07),
+    _lage: () => (hdCk ? { bremse: hdCk.bremse.gain.value, block: hdCk.blockGain.gain.value, rassel: hdCk.rassel.gain.value } : null), _tick: hdCockpitKlangTick,
+    _warum: () => ({ ctx: typeof audioCtx !== 'undefined' && !!audioCtx, an: typeof soundEnabled !== 'undefined' ? soundEnabled : null, vol: hdCkVolumen, suite: typeof hdSuiteLaeuft === 'function' ? hdSuiteLaeuft() : null }) });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------
   //

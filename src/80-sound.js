@@ -2889,6 +2889,8 @@
     // VOR dem fruehen Ausstieg: die Zusaetze gelten in beiden Tonarten, nicht nur im
     // Schleifenzweig.
     if (physicsEnabled) extrasTick(st, load);
+    // HD 3.0: brakes, lock-up, cockpit rattle, gear beeps (98z-hd-cockpitklang.js)
+    if (physicsEnabled && typeof hdCockpitKlangTick === 'function') hdCockpitKlangTick(st, load, throttleY);
 
     // DIE DREHZAHL DES MOTORS, nicht die der Physik - siehe motorDrehzahl().
     if (sampleEngine.nodes && physicsEnabled) {

@@ -3463,6 +3463,25 @@
     el.style.display = an ? 'block' : 'none';
   }
 
+  // v3.0 GEMELDET: "the off track from the previous race still stays on after the race, it should be switched off
+  // when going back to the main menu and reset and not carried forward." The banner was only redrawn when the car's
+  // off-track state CHANGED, so a car still off the track when the race ended kept it. Now it follows the session too,
+  // and when a session ends the off-track state of every player is reset.
+  let hdOfftrackWarSitzung = false;
+  setInterval(() => {
+    try {
+      const s = hdOfftrackSitzung();
+      if (!s && hdOfftrackWarSitzung) {
+        offtrackAktiv = false; offtrackSeit = null; offtrackWiederSeit = null;
+        if (typeof zusatzPlatz === 'function' && typeof SPIELER_MAX !== 'undefined') {
+          for (let nr = 2; nr <= SPIELER_MAX; nr++) { const a = zusatzPlatz(nr).abseits; a.aktiv = false; a.seit = null; a.wiederSeit = null; }
+        }
+      }
+      hdOfftrackWarSitzung = s;
+      offtrackAnzeige();
+    } catch (e) { /* not ready */ }
+  }, 300);
+
   // Ist das Auto neben der Bahn? Die entprellte Antwort, und ausdruecklich OHNE
   // offtrackEffekt und ohne den Bahn-Modus - das sind Fragen der Drosselung, nicht der Lage.
   // Die Boxengasse im Modus "Neben der Strecke" liest sie, um zu entscheiden, ob ein
