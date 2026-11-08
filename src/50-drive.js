@@ -3373,6 +3373,12 @@
   // Gerufen aus dem Meldekanal in 70-race.js (Auto 1) und aus dem Meldestrom je Auto in
   // 90-ghosts.js (Auto 2), also je Paket. `wer` ist 1, wenn nichts dasteht.
   function offtrackMelden(abseits, wer) {
+    // HD 3.0: outside a session and right after the start nothing counts (see hdOfftrackFrei).
+    if (typeof hdOfftrackFrei === 'function' && hdOfftrackFrei()) {
+      if (wer >= 2) { const a = zusatzPlatz(wer).abseits; a.aktiv = false; a.seit = null; a.wiederSeit = null; }
+      else { offtrackAktiv = false; offtrackSeit = null; offtrackWiederSeit = null; offtrackAnzeige(); }
+      return;
+    }
     const jetzt = rennZeitJetzt();
     if (wer >= 2) {
       const a = zusatzPlatz(wer).abseits;
@@ -3493,15 +3499,35 @@
   // when going back to the main menu and reset and not carried forward." The banner was only redrawn when the car's
   // off-track state CHANGED, so a car still off the track when the race ended kept it. Now it follows the session too,
   // and when a session ends the off-track state of every player is reset.
-  let hdOfftrackWarSitzung = false;
+  //
+  // v3.0 GEMELDET (again): "The off track feature is still active at the start of the race session, it should be reset
+  // and fresh at the beginning of each race." The debounce kept counting while the cars stood on the grid and under
+  // the lights (a standing car reads no track code), so it had already tripped when the race went green. Now readings
+  // outside a session do not count at all, every session STARTS with a clean state, and the first
+  // HD_OFFTRACK_GNADE_MS after the start are free (the car is pulling away and may not read the track yet).
+  const HD_OFFTRACK_GNADE_MS = 3000;
+  let hdOfftrackWarSitzung = false, hdOfftrackSitzungSeit = 0;
+  function hdOfftrackZuruecksetzen() {
+    offtrackAktiv = false; offtrackSeit = null; offtrackWiederSeit = null;
+    if (typeof zusatzPlatz === 'function' && typeof SPIELER_MAX !== 'undefined') {
+      for (let nr = 2; nr <= SPIELER_MAX; nr++) { const a = zusatzPlatz(nr).abseits; a.aktiv = false; a.seit = null; a.wiederSeit = null; }
+    }
+  }
+  // true = this reading must not count (no session, or the grace after the start)
+  function hdOfftrackFrei() {
+    try {
+      if (hdSuiteLaeuft()) return false;
+      const s = hdOfftrackSitzung();
+      if (s && !hdOfftrackWarSitzung) { hdOfftrackWarSitzung = true; hdOfftrackSitzungSeit = Date.now(); hdOfftrackZuruecksetzen(); }
+      return !s || Date.now() - hdOfftrackSitzungSeit < HD_OFFTRACK_GNADE_MS;
+    } catch (e) { return false; }
+  }
   setInterval(() => {
     try {
       const s = hdOfftrackSitzung();
-      if (!s && hdOfftrackWarSitzung) {
-        offtrackAktiv = false; offtrackSeit = null; offtrackWiederSeit = null;
-        if (typeof zusatzPlatz === 'function' && typeof SPIELER_MAX !== 'undefined') {
-          for (let nr = 2; nr <= SPIELER_MAX; nr++) { const a = zusatzPlatz(nr).abseits; a.aktiv = false; a.seit = null; a.wiederSeit = null; }
-        }
+      if (s !== hdOfftrackWarSitzung) {   // a session starts or ends: clean state either way
+        hdOfftrackZuruecksetzen();
+        if (s) hdOfftrackSitzungSeit = Date.now();
       }
       hdOfftrackWarSitzung = s;
       offtrackAnzeige();

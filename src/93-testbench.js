@@ -1437,12 +1437,24 @@
         playerCar2 = a2;
         const knopf = (i) => ({ pressed: true, value: 1 });
         const los = () => ({ pressed: false, value: 0 });
-        const pad = { axes: [0, 0, 0, 0], buttons: Array(20).fill(0).map(() => los()) };
-        pad.buttons[3] = knopf();   // headlights
-        pad.buttons[0] = knopf();   // pitstop: seit v0.8.96 Kreuz/X (bindings2.yellowflag)
-        pad.buttons[11] = knopf();  // lightflash
+        // v3.0: the buttons come from player 2's own bindings, and the two HOLD functions are held - headlights are
+        // R3 held 1 s (a tap is the flash), the pit stop request RB / R1 held 1 s (a tap steps the fuel).
+        const b2 = (typeof bindings2 === 'object' && bindings2) ? bindings2 : bindings;
+        const idx = (x) => (x && x.type === 'button' ? x.index : -1);
+        const iLicht = idx(b2.headlights), iHupe = idx(b2.lightflash);
+        const iBox = idx(b2.pitRequest && b2.pitRequest.type !== 'none' ? b2.pitRequest : b2.yellowflag);
+        const druck = (an) => { const pad = { axes: [0, 0, 0, 0], buttons: Array(20).fill(0).map(() => los()) }; an.forEach((i) => { if (i >= 0) pad.buttons[i] = knopf(); }); return pad; };
         const vorLage = (typeof boxZweiLage === 'function') ? boxZweiLage() : null;
-        pollPad2(pad);
+        const echtJetzt = performance.now;
+        let plus = 0;
+        performance.now = () => echtJetzt.call(performance) + plus;
+        try {
+          pollPad2(druck([iLicht, iBox]));            // press
+          plus = 1100; pollPad2(druck([iLicht, iBox])); // held 1 s: headlights and pit stop
+          pollPad2(druck([]));                         // let go
+          plus = 2000; pollPad2(druck([iHupe]));       // a tap on the flash button
+          plus = 2100; pollPad2(druck([]));
+        } finally { performance.now = echtJetzt; }
         return {
           lichtKippte: headlightsOn2 !== merk.head2,
           licht1Unberuehrt: headlightsOn === merk.head1,
@@ -2867,6 +2879,7 @@
     padDefaults() {
       return JSON.parse(JSON.stringify(DEFAULT_BINDINGS));
     },
+    padAktuell() { return JSON.parse(JSON.stringify(bindings)); },
 
     // ---- AUTO-VERWALTUNG: einzeln und gesammelt loeschen -----------------------------
     //

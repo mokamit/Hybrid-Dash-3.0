@@ -191,9 +191,11 @@
     if (box) {
       $('hd-sc-frage-wer').textContent = garageLabel(car) + ' · ' + hdGrundText(grund);
       const b = typeof bindings === 'object' && bindings && bindings.confirm;
-      $('hd-sc-frage-taste').textContent = (b && b.type !== 'none' ? (b.type === 'button' && b.index === 0 ? 'A' : t(bindingDescription(b))) + ' / ' : '') + 'Enter';
-      const n = $('hd-sc-frage-nein-taste'); if (n) n.textContent = (b && b.type === 'button' && b.index === 1 ? '' : 'B / ') + 'Esc';
-      const v = $('hd-sc-frage-vsc-taste'); if (v) v.textContent = (b && b.type === 'button' && b.index === 2 ? '' : 'X / ') + 'V';
+      // v3.0: the Confirmation Button (Y by default) - a tap deploys the safety car, held 1 s it calls the VSC.
+      const name = b && b.type !== 'none' ? (b.type === 'button' && b.index === 3 ? 'Y' : t(bindingDescription(b))) : '';
+      $('hd-sc-frage-taste').textContent = (name ? name + ' / ' : '') + 'Enter';
+      const n = $('hd-sc-frage-nein-taste'); if (n) n.textContent = 'B / Esc';
+      const v = $('hd-sc-frage-vsc-taste'); if (v) v.textContent = (name ? name + ' ' + t('1 s halten') + ' / ' : '') + 'V';
       box.hidden = false;
     }
     hdSprechen(hdSatz('frage', { name: hdSprechName(car, true), grund }), 25);
@@ -236,11 +238,14 @@
   // REQUESTED: Ignore on the B button (Xbox; Circle on PlayStation) too. B is upshift by
   // default, so while the prompt is open - and until B is let go after ignoring - the gearbox
   // does not see it (hdScTasteB, read by the pad loop in 90-ghosts.js).
-  // Likewise X (Xbox; Square on PlayStation) answers VSC; X is downshift by default.
-  let hdPadVorher = false;
-  const HD_B = 1, HD_X = 2;   // standard gamepad mapping: B / Circle, X / Square
-  const hdTaste = { [HD_B]: { vorher: false, gesperrt: false, tun: () => hdScIgnorieren() },
-                    [HD_X]: { vorher: false, gesperrt: false, tun: () => hdScVsc() } };
+  // v3.0 BESTELLT: "The safety car and yellow flag buttons are clashing with the gears and pit buttons ... change the
+  // Safety car button to Y and VSC to Y." The Confirmation Button (bindings.confirm, Y by default) answers both: a TAP
+  // deploys the safety car (on release), HELD 1 s it calls the Virtual Safety Car. X no longer answers VSC - it is
+  // downshift only, so the prompt can never change gear.
+  let hdPadVorher = false, hdBestAb = 0, hdBestLang = false;
+  const HD_BEST_HALTEN_MS = 1000;
+  const HD_B = 1;   // standard gamepad mapping: B / Circle
+  const hdTaste = { [HD_B]: { vorher: false, gesperrt: false, tun: () => hdScIgnorieren() } };
   function hdScTasteGesperrt(i) { const k = hdTaste[i]; return !!k && (!!hdSc.frage || k.gesperrt); }
   function hdScTasteB() { return hdScTasteGesperrt(HD_B); }
   setInterval(() => {
@@ -253,12 +258,16 @@
         for (const pad of navigator.getGamepads()) {
           if (!pad) continue;
           if (b && b.type !== 'none' && readBindingValue(pad, b) > BUTTON_CAPTURE_THRESHOLD) jetzt = true;
-          for (const i of [HD_B, HD_X]) if (i !== bestIndex && pad.buttons[i] && pad.buttons[i].pressed) gedrueckt[i] = true;
+          for (const i of [HD_B]) if (i !== bestIndex && pad.buttons[i] && pad.buttons[i].pressed) gedrueckt[i] = true;
         }
       }
     } catch (e) { /* no gamepad API */ }
-    if (jetzt && !hdPadVorher && hdSc.frage) hdScBestaetigen();
-    for (const i of [HD_B, HD_X]) {
+    if (hdSc.frage) {
+      if (jetzt && !hdPadVorher) { hdBestAb = performance.now(); hdBestLang = false; }
+      if (jetzt && hdBestAb && !hdBestLang && performance.now() - hdBestAb >= HD_BEST_HALTEN_MS) { hdBestLang = true; hdBestAb = 0; hdScVsc(); }
+      if (!jetzt && hdPadVorher && hdBestAb) { hdBestAb = 0; if (!hdBestLang) hdScBestaetigen(); }
+    } else hdBestAb = 0;
+    for (const i of [HD_B]) {
       const k = hdTaste[i], an = !!gedrueckt[i];
       if (an && !k.vorher && hdSc.frage) { k.tun(); k.gesperrt = true; }
       if (!an) k.gesperrt = false;
@@ -1012,8 +1021,9 @@
       flagTasteTick(true);
       prüfen('prompt open: the button does nothing else', flagState === 'green' && pitState === 'off', 'flag ' + flagState + ', pit ' + pitState);
       flagTasteTick(false); prevYellowFlag = merkPrev;
-      prüfen('Confirmation Button is in the mapping, default A / Cross', DEFAULT_BINDINGS.confirm && DEFAULT_BINDINGS.confirm.index === 0
-             && BIND_ACTION_LABELS.confirm === 'Bestätigungstaste' && t('Bestätigungstaste') === (lang === 'de' ? 'Bestätigungstaste' : lang === 'en' ? 'Confirmation Button' : t('Bestätigungstaste')),
+      // v3.0: the safety-car button is Y / Triangle (tap = SC, hold 1 s = VSC), clear of A (yellow flag) and X / B (gears).
+      prüfen('Confirmation Button is in the mapping, default Y / Triangle (tap SC, hold VSC)', DEFAULT_BINDINGS.confirm && DEFAULT_BINDINGS.confirm.index === 3
+             && BIND_ACTION_LABELS.confirm === 'Safety Car (tippen), VSC (1 s halten)' && (lang !== 'en' || t(BIND_ACTION_LABELS.confirm) === 'Safety car (tap), VSC (hold 1 s)'),
              JSON.stringify(DEFAULT_BINDINGS.confirm));
       reset();
 

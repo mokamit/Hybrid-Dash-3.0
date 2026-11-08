@@ -1683,6 +1683,9 @@
       // HybridDash: the automatic pit stop is a 1 s HOLD on the tyre-select button (a tap stays
       // tyre select, fired on release) - a deliberate pair, like tap/hold on the flag button.
       if (n === 'autobox') continue;
+      // v3.0: the same tap / hold pairs - headlights are R3 HELD (a tap is the light flash), the pit stop request is
+      // RB / R1 HELD (a tap steps the fuel).
+      if (n === 'headlights' || n === 'pitRequest') continue;
       const k = schluessel(vorgabe[n]);
       if (!k) continue;
       zaehler.set(k, (zaehler.get(k) || []).concat(n));
@@ -3433,7 +3436,9 @@
       if (OMEGA_TEST.flagLage().gesperrt) schlecht.push('c: Sperre steht noch');
       OMEGA_TEST.flagTaste(false);
       schritte++;
-      if (boxen !== 2) schlecht.push('Kreuz getippt gab ' + boxen + ' Boxenstopps statt 2');
+      // v3.0: with a pit stop button of its own (pitRequest, RB / R1 held - the default) a tap on Kreuz requests none.
+      const sollBoxen = (bindings.pitRequest && bindings.pitRequest.type !== 'none') ? 0 : 2;
+      if (boxen !== sollBoxen) schlecht.push('Kreuz getippt gab ' + boxen + ' Boxenstopps statt ' + sollBoxen);
     } catch (e) {
       schlecht.push('Ausnahme: ' + e.message);
     } finally {
@@ -21534,7 +21539,7 @@
       const neu = loadBindings();
       if (!neu.racestart || neu.racestart.index !== 0) f.push('Rennstart auf Kreuz geht beim Laden verloren');
       if (!neu.yellowflag || neu.yellowflag.index !== 2) f.push('gelbe Flagge auf Quadrat geht beim Laden verloren');
-      const keys = Object.keys(BIND_ACTION_LABELS).filter((n) => n !== 'autobox').map((n) => bindingKey(neu[n])).filter(Boolean);   // HybridDash: autobox shares LB by design
+      const keys = Object.keys(BIND_ACTION_LABELS).filter((n) => !['autobox', 'headlights', 'pitRequest'].includes(n)).map((n) => bindingKey(neu[n])).filter(Boolean);   // HybridDash: autobox shares LB, headlights R3 and pitRequest RB by design (tap / hold)
       if (new Set(keys).size !== keys.length) f.push('Doppelbelegung gespeichert');
       const zweimal = loadBindings();
       if (JSON.stringify(zweimal) !== JSON.stringify(neu)) f.push('zweites Laden aendert die Belegung');
