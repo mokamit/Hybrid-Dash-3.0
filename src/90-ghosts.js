@@ -23,7 +23,9 @@
     throttle: { type: 'button', index: 7, label: 'Rechter Trigger (R2 / RT)' },
     brake: { type: 'button', index: 6, label: 'Linker Trigger (L2 / LT)' },
     steering: { type: 'axis', index: 0, invert: false, label: 'Linker Stick (X-Achse)' },
-    downshift: { type: 'button', index: 2, label: 'Quadrat (PS) / X (Xbox)' },
+    // v3.0 BESTELLT: "I want A to be shift down and B to be shift up." The yellow flag moved from A to X (held 1 s).
+    // In the menus A stays select and X stays the quick change - see fahrKontext in pollGamepad().
+    downshift: { type: 'button', index: 0, label: 'Kreuz (PS) / A (Xbox)' },
     upshift: { type: 'button', index: 1, label: 'Kreis (PS) / B (Xbox)' },
     // ---- DIE SCHIRMTASTEN SIND JETZT BELEGBAR ------------------------------------
     //
@@ -84,7 +86,7 @@
     // Bedeutungen ist mitten im Rennen die falsche Sorte Ueberraschung.
     // v3.0: A is the yellow flag ALONE (held 1 s). The pit stop request that a tap on A used to make moved to RB / R1
     // held 1 s (pitRequest below) - a tap that requests a pit stop sat right next to the button the yellow flag needs.
-    yellowflag: { type: 'button', index: 0, label: 'Kreuz (PS) / A (Xbox), 1 s halten' },
+    yellowflag: { type: 'button', index: 2, label: 'Quadrat (PS) / X (Xbox), 1 s halten' },
     pitRequest: { type: 'button', index: 5, label: 'R1 (PS) / RB (Xbox), 1 s halten' },
     // RENNSTART HAT AB WERK KEINE TASTE, und das ist eine Entscheidung ueber Folgen:
     // ein Rennen zu starten oder abzubrechen ist der eingreifendste Knopf der ganzen App -
@@ -161,7 +163,7 @@
   // (alte Werksbelegungen aus der Zeit vor v0.5) greifen nur bei einer Belegung ohne Marke,
   // also hoechstens einmal; die Einzeltasten-Regeln entfallen ganz - sie trafen seit
   // Wochen nur noch eigene Wahl.
-  const BINDINGS_V = 3;
+  const BINDINGS_V = 4;
   function migrateBindings(b) {
     if (b && b.__v >= BINDINGS_V) return b;
     const ist = (x, i) => x && x.type === 'button' && x.index === i;
@@ -171,6 +173,15 @@
       if (ist(b.headlights, 3)) b.headlights = { ...DEFAULT_BINDINGS.headlights };
       if (ist(b.confirm, 0)) b.confirm = { ...DEFAULT_BINDINGS.confirm };
       if (!b.pitRequest) b.pitRequest = { ...DEFAULT_BINDINGS.pitRequest };
+    }
+    // v4: shift down on A, the yellow flag on X - again only for buttons still on their old factory default.
+    if ((b.__v || 0) < 4) {
+      if (ist(b.downshift, 2) && ist(b.yellowflag, 0)) {
+        b.downshift = { ...DEFAULT_BINDINGS.downshift };
+        b.yellowflag = { ...DEFAULT_BINDINGS.yellowflag };
+      } else if (ist(b.downshift, 2) && !(b.yellowflag && b.yellowflag.type === 'button' && b.yellowflag.index !== 0)) {
+        b.downshift = { ...DEFAULT_BINDINGS.downshift };
+      }
     }
     if (b.__v >= 2) { b.__v = BINDINGS_V; return b; }
     if (ist(b.pitstop, 4) && ist(b.trackview, 9)) {
@@ -13106,7 +13117,13 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Flanke wird auch dann gemerkt, wenn der Editor sie verbraucht, sonst bestaetigt
       // ein gehaltener Knopf jeden Takt erneut, weil flagTasteTick() (und mit ihr
       // prevYellowFlag) diesen Takt ja gar nicht laeuft.
-      const yellowflagNow = readBindingValue(pad, bindings.yellowflag) > BUTTON_CAPTURE_THRESHOLD;
+      // v3.0: A = shift down, X held = yellow flag - but only while DRIVING (the cockpit's main screen, nothing open).
+      // In the menus, on the grid board, in info boxes, the editor and the pit minigame A stays select (Cross) and X the
+      // quick change (Square), the physical roles the menus are built on.
+      const fahrKontext = !konsoleMenue() && !optInfoOffen() && !(typeof raceGridOffen === 'function' && raceGridOffen())
+        && !(typeof pitSpielAktiv === 'function' && pitSpielAktiv()) && !document.body.classList.contains('track-fs')
+        && !!cockpitScreenIst() && cockpitScreenIst().id === 'main';
+      const yellowflagNow = fahrKontext ? readBindingValue(pad, bindings.yellowflag) > BUTTON_CAPTURE_THRESHOLD : padButtonPressed(pad, 0);
       if (yellowflagNow && !prevYellowFlag && trackEditorPad('confirm')) {
         prevYellowFlag = yellowflagNow;
       } else {
@@ -13122,8 +13139,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       prevResetCar = resetNow;
 
       // HybridDash: X answers VSC in the safety-car prompt; it must not shift down at the same time.
-      const downshiftNow = readBindingValue(pad, bindings.downshift) > BUTTON_CAPTURE_THRESHOLD
-        && !(typeof hdScTasteGesperrt === 'function' && bindings.downshift && bindings.downshift.index === 2 && hdScTasteGesperrt(2));
+      const downshiftNow = fahrKontext ? readBindingValue(pad, bindings.downshift) > BUTTON_CAPTURE_THRESHOLD : padButtonPressed(pad, 2);
       // HybridDash: B ignores the safety-car prompt; it must not shift up at the same time.
       const upshiftNow = readBindingValue(pad, bindings.upshift) > BUTTON_CAPTURE_THRESHOLD
         && !(typeof hdScTasteB === 'function' && bindings.upshift && bindings.upshift.index === 1 && hdScTasteB());

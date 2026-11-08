@@ -805,7 +805,7 @@
       }
     }
     if (f.phase === 'hdRaus') {
-      if (now - f.at >= HD_ZIEL_RAUS_MS) {
+      if (now - f.at >= (typeof hdZielRausMs === 'function' ? hdZielRausMs() : HD_ZIEL_RAUS_MS)) {   // v3.0: adjustable 1-5 s
         g.finish = null;
         stopGhost(car);
         log(garageLabel(car) + ': off the track, parked.', 'info');
@@ -838,7 +838,7 @@
       const raus = gesendet[0];
       ok('finish drive-off: on the 2nd piece turns to the outside and speeds up (wheel angle, no track bytes)',
          car.ghost.finish.phase === 'hdRaus' && raus && !raus.spur && Math.sign(raus.steer) === car.ghost.finish.seite && raus.gas > formationPace(), JSON.stringify(raus));
-      car.ghost.finish.at -= HD_ZIEL_RAUS_MS + 10; hdZielAbfahrtTick(car);
+      car.ghost.finish.at -= (typeof hdZielRausMs === 'function' ? hdZielRausMs() : HD_ZIEL_RAUS_MS) + 10; hdZielAbfahrtTick(car);
       ok('finish drive-off: after 1.5 s it stops off the track', !car.ghost.finish && gestoppt === 1, 'stopped ' + gestoppt);
     } catch (e) {
       ok('finish drive-off self-test ran', false, String(e && e.stack || e));

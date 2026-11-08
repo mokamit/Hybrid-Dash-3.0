@@ -246,7 +246,10 @@
   const HD_BEST_HALTEN_MS = 1000;
   const HD_B = 1;   // standard gamepad mapping: B / Circle
   const hdTaste = { [HD_B]: { vorher: false, gesperrt: false, tun: () => hdScIgnorieren() } };
-  function hdScTasteGesperrt(i) { const k = hdTaste[i]; return !!k && (!!hdSc.frage || k.gesperrt); }
+  function hdScTasteGesperrt(i) {
+    if (i === HD_B && typeof hdRotTasteB === 'function' && hdRotTasteB()) return true;   // the red-flag prompt answers on B too
+    const k = hdTaste[i]; return !!k && (!!hdSc.frage || k.gesperrt);
+  }
   function hdScTasteB() { return hdScTasteGesperrt(HD_B); }
   setInterval(() => {
     let jetzt = false;
