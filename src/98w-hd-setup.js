@@ -23,7 +23,7 @@
     // v3.0 BESTELLT: "In the pre-race set up screen, have settings to adjust NPC settings too. Like their difficulty, top
     // speed..." - the main ones from Options > NPCs (all of them stay there).
     ['NPCs', 'ghost-speed'], ['NPCs', 'ghost-max-gerade'], ['NPCs', 'ghost-hardness'], ['NPCs', 'ghost-curve'], ['NPCs', 'ghost-streuung'],
-    ['NPCs', 'ghost-w-fehler'], ['NPCs', 'ghost-w-defend'], ['NPCs', 'ghost-pit'],
+    ['NPCs', 'ghost-w-fehler'], ['NPCs', 'ghost-w-defend'], ['NPCs', 'ghost-pit'], ['NPCs', 'hd-ziel-raus'],
   ];
   // Difficulty per NPC car = its pace level (GHOST_TEMPO_STUFEN, the same as "NPC pace" in the garage card).
   function hdSetupNpcs() { try { return garage.filter((c) => c && c.device && c.role === 'ghost'); } catch (e) { return []; } }

@@ -538,6 +538,9 @@
   .hd-sc-frage { position: fixed; left: 50%; top: 14%; transform: translateX(-50%); z-index: 9200;
                  width: min(460px, calc(100vw - 32px)); }
   .hd-sc-frage[hidden] { display: none; }
+  .hd-rot-frage .hd-sc-frage-karte { background: #1c0508; color: #ffe1e4; border-color: #ff2d43; }
+  .hd-rot-frage .hd-sc-frage-titel { color: #ff4d5f; }
+  .hd-rot-frage .hd-sc-frage-knoepfe button.hd-rot-ja { background: #e10632; border-color: #e10632; color: #fff; font-weight: 700; }
   .hd-sc-frage-karte { background: #1a1405; color: #fff6d6; border: 2px solid #ffd23f; border-radius: 10px;
                        padding: 14px 16px; display: grid; gap: 8px; box-shadow: 0 10px 40px rgba(0,0,0,.6);
                        animation: hd-sc-puls 1s ease-in-out infinite alternate; }
@@ -11162,6 +11165,17 @@
       </div>
     </div>
   </div>
+  <!-- Hybrid-Dash 3.0: red flag suggestion (98za-hd-rotflagge.js) -->
+  <div class="hd-sc-frage hd-rot-frage" id="hd-rot-frage" hidden role="alertdialog" aria-labelledby="hd-rot-frage-titel">
+    <div class="hd-sc-frage-karte">
+      <b class="hd-sc-frage-titel" id="hd-rot-frage-titel">Rote Flagge zeigen?</b>
+      <span class="hd-sc-frage-wer" id="hd-rot-frage-wer" data-i18n-skip></span>
+      <div class="hd-sc-frage-knoepfe">
+        <button type="button" class="primary hd-rot-ja" id="hd-rot-frage-ja">Rote Flagge <small data-i18n-skip>Y / Enter</small></button>
+        <button type="button" id="hd-rot-frage-nein">Ignorieren <small data-i18n-skip>B / Esc</small></button>
+      </div>
+    </div>
+  </div>
   <!-- HybridDash 2.0: two-laptop mode (98j-hd-relay.js). English only, like the codes it shows. -->
   <div class="hd-relay" id="hd-relay" hidden data-i18n-skip role="dialog" aria-label="Two-laptop mode">
     <div class="hdr-karte">
@@ -11404,6 +11418,10 @@
         <label class="tgl"><input type="checkbox" id="hd-sc-fragen" checked><span></span></label></div>
       <div class="opt-row hd-row"><div class="opt-label">Safety Car nach<small>Wie lange ein Auto neben der Strecke stehen oder stillstehen muss.</small></div>
         <span class="hd-slider"><input type="range" id="hd-auto-sc-sek" min="1" max="10" step="0.5" value="3"><b id="hd-auto-sc-sek-wert" data-i18n-skip>3.0 s</b></span></div>
+      <div class="opt-row hd-row"><div class="opt-label">Rote Flagge vorschlagen<span class="hd-tag">HybridDash</span><small>Stehen mehr als die H&auml;lfte der Autos neben der Strecke oder nach einem Unfall, oder fliegen drei Autos innerhalb von f&uuml;nf Sekunden ab (Massenunfall), fragt die App, ob die rote Flagge gezeigt werden soll. Y / Dreieck (oder Enter) zeigt sie, B (oder Esc) ignoriert.</small></div>
+        <label class="tgl"><input type="checkbox" id="hd-rot-vorschlag" checked><span></span></label></div>
+      <div class="opt-row hd-row"><div class="opt-label">NPC-Auslauf nach dem Ziel<span class="hd-tag">HybridDash</span><small>Nach der Zielflagge fahren die NPCs zwei Teile weiter, lenken nach au&szlig;en und geben so lange Gas, bevor sie stehen bleiben.</small></div>
+        <span class="hd-slider"><input type="range" id="hd-ziel-raus" min="1" max="5" step="0.5" value="1.5"><b id="hd-ziel-raus-val" data-i18n-skip>1.5 s</b></span></div>
       <div class="opt-row hd-row"><div class="opt-label">Boxenbegrenzer nach automatischem Boxenstopp<span class="hd-tag">HybridDash</span><small>So lange f&auml;hrt dein Auto nach dem automatischen Boxenstopp noch selbst am Rand mit Boxentempo, bevor du wieder steuerst. Den automatischen Boxenstopp startest du, indem du L1 / LB 1 s h&auml;ltst; halte die Taste, bis das Auto an seiner Pit Box ist &ndash; loslassen bricht ab (kurz tippen w&auml;hlt weiter die Reifen; die Taste l&auml;sst sich unter Optionen &rarr; Controller &auml;ndern).</small></div>
         <span class="hd-slider"><input type="range" id="hd-autobox-sek" min="0" max="10" step="0.5" value="2"><b id="hd-autobox-sek-wert" data-i18n-skip>2.0 s</b></span></div>
       <div class="opt-row hd-row"><div class="opt-label">Zuf&auml;llige NPC-Fahrernamen<span class="hd-tag">HybridDash</span><small>Ein Auto ohne Namen bekommt beim ersten Mal als NPC einen zuf&auml;lligen Fahrernamen.</small></div>

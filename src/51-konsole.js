@@ -1055,6 +1055,8 @@
       return;
     }
     if (e.target && e.target.closest && e.target.closest('input[type="text"], input[type="number"], textarea, select')) return;
+    // HD 3.0: an open safety-car / red-flag prompt answers Enter and Esc itself (98i / 98za).
+    if ((typeof hdRotFrageOffen === 'function' && hdRotFrageOffen()) || (typeof hdScFrageOffen === 'function' && hdScFrageOffen())) return;
     // Der Meisterschaftsschirm hat seine eigene Tastatur (73-meisterschaft.js).
     if (typeof meisterOffen === 'function' && meisterOffen() && !kFrageOffen) return;
     // Reaktionstest der Studie (98f-studie.js): jede Taste ist dort ein Druck.
