@@ -39,7 +39,10 @@
     // gilt fuer sie auch das Loeschen - eine leere Belegung heisst "gar nicht belegt".
     schirmZurueck: { type: 'button', index: 14, label: 'Steuerkreuz links' },
     schirmVor: { type: 'button', index: 15, label: 'Steuerkreuz rechts' },
-    headlights: { type: 'button', index: 3, label: 'Dreieck (PS) / Y (Xbox)' },
+    // v3.0 BESTELLT: "The safety car and yellow flag buttons are clashing with the gears and pit buttons ... change the
+    // Safety car button to Y." Y is the safety-car button now; the headlights moved to R3 HELD 1 s (a tap on R3 is
+    // still the light flash - the two share the button like LB shares tyres and the automatic pit stop).
+    headlights: { type: 'button', index: 11, label: 'R3 (rechten Stick drücken), 1 s halten' },
     lightflash: { type: 'button', index: 11, label: 'R3 (rechten Stick drücken)' },
     // Boxenstopp auf Start/Options, Streckenansicht auf die linke Schulter.
     //
@@ -79,7 +82,10 @@
     // Damit liegt die gelbe Flagge ALLEIN auf ihrer Taste. Vorher teilte sie sich Quadrat mit
     // dem Runterschalten, unterschieden nur durch die Haltedauer - eine Taste mit zwei
     // Bedeutungen ist mitten im Rennen die falsche Sorte Ueberraschung.
+    // v3.0: A is the yellow flag ALONE (held 1 s). The pit stop request that a tap on A used to make moved to RB / R1
+    // held 1 s (pitRequest below) - a tap that requests a pit stop sat right next to the button the yellow flag needs.
     yellowflag: { type: 'button', index: 0, label: 'Kreuz (PS) / A (Xbox), 1 s halten' },
+    pitRequest: { type: 'button', index: 5, label: 'R1 (PS) / RB (Xbox), 1 s halten' },
     // RENNSTART HAT AB WERK KEINE TASTE, und das ist eine Entscheidung ueber Folgen:
     // ein Rennen zu starten oder abzubrechen ist der eingreifendste Knopf der ganzen App -
     // er wirft eine laufende Wertung weg. Ein Knopf mit dieser Folge gehoert nicht dorthin,
@@ -111,7 +117,9 @@
     // confirm button. It shares the button with pit stop / yellow flag ON PURPOSE (defaults
     // may share, see resolveBindingCollisions): while the prompt is open, flagTasteTick()
     // hands the button to the prompt only.
-    confirm: { type: 'button', index: 0, label: 'Kreuz (PS) / A (Xbox)' },
+    // v3.0: on Y / Triangle - a tap deploys the safety car, holding 1 s calls the Virtual Safety Car (98i-hybriddash.js).
+    // It was A (pit stop / yellow flag) with VSC on X (downshift): the prompt and the driving buttons clashed.
+    confirm: { type: 'button', index: 3, label: 'Dreieck (PS) / Y (Xbox)' },
     // HybridDash: automatic pit stop (hold 1 s) - the car drives itself to its Pit Box.
     // REQUESTED on LB (Xbox) / L1 (PlayStation), the tyre-select button, ON PURPOSE shared like
     // the yellow flag: a short tap still cycles the tyres (on release), holding 1 s starts the stop.
@@ -121,17 +129,18 @@
     pause: 'Pause / Fortsetzen',
     throttle: 'Gas', brake: 'Bremse', steering: 'Lenkung',
     downshift: 'Runterschalten', upshift: 'Hochschalten',
-    headlights: 'Licht an/aus', lightflash: 'Lichthupe', pitstop: 'Menü (Cockpit ↔ Fahren)',
+    headlights: 'Licht an/aus (1 s halten)', lightflash: 'Lichthupe', pitstop: 'Menü (Cockpit ↔ Fahren)',
     schirmZurueck: 'Cockpit-Schirm zurück', schirmVor: 'Cockpit-Schirm vor',
     racestart: 'Rennen starten / abbrechen',
     tyreSelect: 'Reifenwahl weiter',
     fuelSelect: 'Tankmenge weiter',
-    yellowflag: 'Boxenstopp (tippen), gelbe Flagge (1 s halten)',
+    yellowflag: 'Gelbe Flagge (1 s halten)',
+    pitRequest: 'Boxenstopp anfordern (1 s halten)',
     trackReadMode: 'Bahn-Lesemodus umschalten',
     trackview: 'Streckenansicht',
     fullscreenToggle: 'Vollbild umschalten',
     resetcar: 'Auto zurücksetzen',
-    confirm: 'Bestätigungstaste',
+    confirm: 'Safety Car (tippen), VSC (1 s halten)',
     autobox: 'Automatischer Boxenstopp (1 s halten)',
   };
 
@@ -152,10 +161,18 @@
   // (alte Werksbelegungen aus der Zeit vor v0.5) greifen nur bei einer Belegung ohne Marke,
   // also hoechstens einmal; die Einzeltasten-Regeln entfallen ganz - sie trafen seit
   // Wochen nur noch eigene Wahl.
-  const BINDINGS_V = 2;
+  const BINDINGS_V = 3;
   function migrateBindings(b) {
     if (b && b.__v >= BINDINGS_V) return b;
     const ist = (x, i) => x && x.type === 'button' && x.index === i;
+    // v3 (Hybrid-Dash 3.0): the safety-car button moved to Y and the headlights to R3 held. Only buttons still on
+    // their OLD factory default move - a button someone assigned themselves stays where they put it.
+    if ((b.__v || 0) < 3) {
+      if (ist(b.headlights, 3)) b.headlights = { ...DEFAULT_BINDINGS.headlights };
+      if (ist(b.confirm, 0)) b.confirm = { ...DEFAULT_BINDINGS.confirm };
+      if (!b.pitRequest) b.pitRequest = { ...DEFAULT_BINDINGS.pitRequest };
+    }
+    if (b.__v >= 2) { b.__v = BINDINGS_V; return b; }
     if (ist(b.pitstop, 4) && ist(b.trackview, 9)) {
       b.pitstop = { ...DEFAULT_BINDINGS.pitstop };
       b.trackview = { ...DEFAULT_BINDINGS.trackview };
@@ -919,6 +936,16 @@
   const DPAD = { up: 12, down: 13, left: 14, right: 15 };
   const prevDpad = { up: false, down: false, left: false, right: false };
   let prevLightFlash = false, prevPitstop = false, prevTrackReadMode = false;
+  // v3.0: tap / hold on shared buttons - R3 (flash / headlights) and RB (fuel / pit stop request); Y for menus.
+  let r3Ab = 0, r3Lang = false, fuelAb = 0, fuelLang = false, pitTasteAb = 0, pitTasteLang = false, prevPitTaste = false, prevYTaste = false;
+  const HD_HALTEN_MS = 1000;
+  function hdTasteGleich(a, b) { const ka = bindingKey(a); return !!ka && ka === bindingKey(b); }
+  function hdLichtUmschalten() {
+    headlightsOn = !headlightsOn;
+    const cb = $('dash-head-toggle');
+    if (cb) cb.checked = headlightsOn;
+    showHudToast(headlightsOn ? 'Licht an' : 'Licht aus');
+  }
   let prevRaceStart = false, prevTrackView = false, prevResetCar = false;
   let gridPadVorher = false;
 
@@ -6464,7 +6491,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       }
       if (!flagNow && prevYellowFlag) {
         flagHoldRelease(false);
-        if (!padFlagFired && padKreuzSeit !== null && rennZeitJetzt() - padKreuzSeit < FLAG_HOLD_MS) requestPitStop();
+        // v3.0: a tap requests a pit stop only if no pit stop button is mapped (default: RB / R1 held, see pitRequest).
+        const eigenerPitKnopf = typeof bindings === 'object' && bindings.pitRequest && bindings.pitRequest.type !== 'none';
+        if (!eigenerPitKnopf && !padFlagFired && padKreuzSeit !== null && rennZeitJetzt() - padKreuzSeit < FLAG_HOLD_MS) requestPitStop();
         padKreuzSeit = null;
       }
     }
@@ -12722,25 +12751,40 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     // Auto vor IHM, und ein gemeinsamer Zustand liesse Spieler 1s Knopf auch Auto 2s
     // Licht blitzen lassen.
     const flashNow2 = readBindingValue(pad, z.bindings.lightflash) > BUTTON_CAPTURE_THRESHOLD;
-    if (flashNow2 && !pv.flash) flashVon(z);
+    const headNow2 = readBindingValue(pad, z.bindings.headlights) > BUTTON_CAPTURE_THRESHOLD;
+    const lichtUm2 = () => { z.licht = !z.licht; showHudToast('P' + z.nr + ': ' + (z.licht ? t('Licht an') : t('Licht aus'))); };
+    // v3.0: same R3 sharing as player 1 - tap = flash, held 1 s = headlights.
+    if (hdTasteGleich(z.bindings.lightflash, z.bindings.headlights)) {
+      if (flashNow2 && !pv.flash) { pv.r3Ab = performance.now(); pv.r3Lang = false; }
+      if (flashNow2 && pv.r3Ab && !pv.r3Lang && performance.now() - pv.r3Ab >= HD_HALTEN_MS) { pv.r3Lang = true; lichtUm2(); }
+      if (!flashNow2 && pv.flash && pv.r3Ab) { if (!pv.r3Lang) flashVon(z); pv.r3Ab = 0; }
+    } else {
+      if (flashNow2 && !pv.flash) flashVon(z);
+      if (headNow2 && !pv.head) lichtUm2();
+    }
     pv.flash = flashNow2;
+    pv.head = headNow2;
 
     // Licht an/aus ist jetzt SEIN EIGENES Licht (z.licht) und nicht mehr das von
     // Auto 1 - siehe die Begruendung bei z.licht in 50-drive.js. Kein Kaestchen zum
     // Mitziehen: #dash-head-toggle gehoert allein Auto 1.
-    const headNow2 = readBindingValue(pad, z.bindings.headlights) > BUTTON_CAPTURE_THRESHOLD;
-    if (headNow2 && !pv.head) {
-      z.licht = !z.licht;
-      showHudToast('P' + z.nr + ': ' + (z.licht ? t('Licht an') : t('Licht aus')));
-    }
-    pv.head = headNow2;
 
     // Boxenstopp: BESTELLT "pitbutton bei beiden auf X". Derselbe Griff wie bei Spieler 1
     // (bindings.yellowflag = Kreuz/X) - er fordert an und bricht bei erneutem Druck ab,
     // genau wie bei Spieler 1.
-    const pitstopNow2 = readBindingValue(pad, z.bindings.yellowflag) > BUTTON_CAPTURE_THRESHOLD;
-    if (pitstopNow2 && !pv.pit) boxAnfordernVon(z);
-    pv.pit = pitstopNow2;
+    // v3.0: the pit stop request moved off A to its own binding (RB / R1 held 1 s, shared with the fuel step).
+    const pitKnopf2 = z.bindings.pitRequest && z.bindings.pitRequest.type !== 'none' ? z.bindings.pitRequest : z.bindings.yellowflag;
+    const pitTeilt2 = hdTasteGleich(pitKnopf2, z.bindings.fuelSelect);
+    if (!pitTeilt2) {
+      const pitstopNow2 = readBindingValue(pad, pitKnopf2) > BUTTON_CAPTURE_THRESHOLD;
+      if (pitKnopf2 === z.bindings.yellowflag) { if (pitstopNow2 && !pv.pit) boxAnfordernVon(z); }
+      else {
+        if (pitstopNow2 && !pv.pit) { pv.pitAb = performance.now(); pv.pitLang = false; }
+        if (pitstopNow2 && pv.pitAb && !pv.pitLang && performance.now() - pv.pitAb >= HD_HALTEN_MS) { pv.pitLang = true; boxAnfordernVon(z); }
+        if (!pitstopNow2) pv.pitAb = 0;
+      }
+      pv.pit = pitstopNow2;
+    }
     // Reifen- und Tankwahl fuer Auto 2 an SEINEM Pad, dieselben Tasten wie bei Auto 1.
     if (z.bindings.tyreSelect) {
       const tyre2 = readBindingValue(pad, z.bindings.tyreSelect) > BUTTON_CAPTURE_THRESHOLD;
@@ -12749,7 +12793,11 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     }
     if (z.bindings.fuelSelect) {
       const fuel2 = readBindingValue(pad, z.bindings.fuelSelect) > BUTTON_CAPTURE_THRESHOLD;
-      if (fuel2 && !pv.fuel) tankZielWeiterVon(z);
+      if (pitTeilt2) {
+        if (fuel2 && !pv.fuel) { pv.fuelAb = performance.now(); pv.fuelLang = false; }
+        if (fuel2 && pv.fuelAb && !pv.fuelLang && performance.now() - pv.fuelAb >= HD_HALTEN_MS) { pv.fuelLang = true; boxAnfordernVon(z); }
+        if (!fuel2 && pv.fuel && pv.fuelAb) { if (!pv.fuelLang) tankZielWeiterVon(z); pv.fuelAb = 0; }
+      } else if (fuel2 && !pv.fuel) tankZielWeiterVon(z);
       pv.fuel = fuel2;
     }
   }
@@ -12907,16 +12955,25 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // Seit der rechte Stick die Kamera dreht (60d-virtuell.js): gedreht setzt dieselbe Taste
       // erst auf die Standardansicht zurueck, ungedreht schaltet sie wie bisher weiter.
       const imVf = typeof vfAktiv === 'function' && vfAktiv();
-      if (flashNow && !prevLightFlash) {
-        if (imVf) vfKameraTaste(); else triggerHeadlightFlash();
+      const imCockpit = document.querySelector('.tabpage.active') === $('tab-race');
+      const headNow = readBindingValue(pad, bindings.headlights) > BUTTON_CAPTURE_THRESHOLD;
+      // v3.0: headlights and light flash share R3 by default - tap = flash (on release), held 1 s = headlights.
+      if (imVf) {
+        if (flashNow && !prevLightFlash) vfKameraTaste();
+        r3Ab = 0;
+      } else if (hdTasteGleich(bindings.lightflash, bindings.headlights)) {
+        if (flashNow && !prevLightFlash) { r3Ab = performance.now(); r3Lang = false; }
+        if (flashNow && r3Ab && !r3Lang && performance.now() - r3Ab >= HD_HALTEN_MS) { r3Lang = true; if (imCockpit) hdLichtUmschalten(); }
+        if (!flashNow && prevLightFlash && r3Ab) { if (!r3Lang) triggerHeadlightFlash(); r3Ab = 0; }
+      } else {
+        if (flashNow && !prevLightFlash) triggerHeadlightFlash();
+        if (headNow && !prevHeadlights && imCockpit) hdLichtUmschalten();
       }
       prevLightFlash = flashNow;
       // Rechter Stick dreht in der virtuellen Fahrt die Kamera (nur unbelegte Achsen, siehe vfStickSetzen).
       if (imVf) vfStickSetzen(pad, bindings);
 
-      // Headlights on/off, edge-triggered. Drives the same checkbox the options menu uses
-      // so the two can never disagree.
-      const headNow = readBindingValue(pad, bindings.headlights) > BUTTON_CAPTURE_THRESHOLD;
+      // Headlights on/off: see the R3 block above (hdLichtUmschalten drives the same checkbox the options menu uses).
       // Dreieck: dreht im Streckeneditor die Strecke, im Cockpit das Licht, ausserhalb des
       // Cockpits (B2, v0.7) die Erklaerung der fokussierten Menuezeile. BESTELLT (Phase
       // 13, Playstation-Belegung): "Dreieck zum Drehen." Reset (die ganze Strecke
@@ -12927,17 +12984,12 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // BESTELLT: "außerhalb des cockpit screens die tastenbelegung so anpassen, dass
       // Dreieck die Infos öffnet". Der Info-Knopf ist seit B2 kein eigener
       // Navigationsschritt mehr (50b-menu-nav.js) - Dreieck oeffnet ihn jetzt direkt.
-      if (headNow && !prevHeadlights && trackEditorPad('rotate')) {
-        // consumed by the editor
-      } else if (headNow && !prevHeadlights
-                 && document.querySelector('.tabpage.active') === $('tab-race')) {
-        headlightsOn = !headlightsOn;
-        const cb = $('dash-head-toggle');
-        if (cb) cb.checked = headlightsOn;
-        showHudToast(headlightsOn ? 'Licht an' : 'Licht aus');
-      } else if (headNow && !prevHeadlights) {
-        menuNavOpenInfo();
-      }
+      // v3.0: Y / Triangle (the confirm button) keeps those two jobs outside the cockpit - rotate in the editor, the
+      // info of the focused row in the menus. In the cockpit it is the safety-car button (98i-hybriddash.js).
+      const yNow = readBindingValue(pad, bindings.confirm) > BUTTON_CAPTURE_THRESHOLD;
+      const scFrage = typeof hdScFrageOffen === 'function' && hdScFrageOffen();
+      if (yNow && !prevYTaste && !scFrage && !trackEditorPad('rotate') && !imCockpit) menuNavOpenInfo();
+      prevYTaste = yNow;
       prevHeadlights = headNow;
 
       // BESTELLT (v0.7): "Select Taste fuers Aendern des Bahn-Lesemodus statt des
@@ -12993,9 +13045,25 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       }
       prevTyreSelect = tyreNow;
 
+      // v3.0: RB / R1 also carries the pit stop request, held 1 s; a short tap still steps the fuel (on release).
       const fuelNow = readBindingValue(pad, bindings.fuelSelect) > BUTTON_CAPTURE_THRESHOLD;
-      if (fuelNow && !prevFuelSelect) { if (trackEditorPad('next')) { /* Editor */ } else if (konsoleMenue()) konsoleReiterSchritt(1); else pitVorwahlSchalten('refuel'); }
+      const pitTeilt = hdTasteGleich(bindings.pitRequest, bindings.fuelSelect);
+      if (fuelNow && !prevFuelSelect) {
+        if (trackEditorPad('next')) { /* Editor */ } else if (konsoleMenue()) konsoleReiterSchritt(1);
+        else if (pitTeilt) { fuelAb = performance.now(); fuelLang = false; }
+        else pitVorwahlSchalten('refuel');
+      }
+      if (fuelNow && fuelAb && !fuelLang && performance.now() - fuelAb >= HD_HALTEN_MS) { fuelLang = true; requestPitStop(); }
+      if (!fuelNow && prevFuelSelect && fuelAb) { if (!fuelLang) pitVorwahlSchalten('refuel'); fuelAb = 0; }
       prevFuelSelect = fuelNow;
+      // The pit stop request on a button of its own (re-mapped): also held 1 s.
+      if (!pitTeilt && bindings.pitRequest && bindings.pitRequest.type !== 'none') {
+        const pitNow = readBindingValue(pad, bindings.pitRequest) > BUTTON_CAPTURE_THRESHOLD;
+        if (pitNow && !prevPitTaste) { pitTasteAb = performance.now(); pitTasteLang = false; }
+        if (pitNow && pitTasteAb && !pitTasteLang && performance.now() - pitTasteAb >= HD_HALTEN_MS) { pitTasteLang = true; pitTasteAb = 0; if (!konsoleMenue()) requestPitStop(); }
+        if (!pitNow) pitTasteAb = 0;
+        prevPitTaste = pitNow;
+      }
 
       // L3: Vollbild umschalten - im Cockpit race-fs, im Streckeneditor track-fs. Nach
       // dem aktiven TAB entschieden und nicht nach der Kachel, damit ein Druck ausserhalb
