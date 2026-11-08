@@ -3416,8 +3416,14 @@
     return abseitsJetzt();
   }
 
+  // v3.0 GEMELDET: "The off track limit starts even before the session even starts. It shouldn't apply before or after
+  // the race." Throttling (and its warning) only while a session runs - racing or its last lap. The self-test suite
+  // keeps the old rule: its off-track checks drive without starting a session.
+  function hdOfftrackSitzung() {
+    try { if (hdSuiteLaeuft()) return true; return raceState === 'racing' || raceState === 'finishing'; } catch (e) { return true; }
+  }
   function offtrackGiltFuer(wer) {
-    return offtrackEffekt && abseitsJetztFuer(wer);
+    return offtrackEffekt && hdOfftrackSitzung() && abseitsJetztFuer(wer);
   }
 
   function abseitsZaehlerFuer(wer) {
@@ -3441,7 +3447,7 @@
   }
 
   function offtrackGilt() {
-    return offtrackEffekt && abseitsJetzt();
+    return offtrackEffekt && hdOfftrackSitzung() && abseitsJetzt();
   }
 
   function offtrackAnzeige() {

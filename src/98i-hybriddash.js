@@ -808,6 +808,21 @@
       showHudToast(t('Akku kalibriert') + ': ' + garageLabel(car) + ' = 100 %');
       if (typeof renderGarage === 'function') renderGarage();
     };
+    // v3.0: the model's stat card and the NPC's driving style (98x-hd-wertungen.js) - a row of their own, so up/down
+    // reaches them (a row that wraps onto a second line is one step for up/down).
+    if (z.parentNode && typeof hdWertAuto === 'function') {
+      const z2 = document.createElement('div');
+      z2.className = 'opt-row opt-breit gar-a-aktion hd-werkzeug-reihe hdw-reihe';
+      const k2 = (w, icon, text, title, fn) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.dataset.w = w; b.title = title;
+        b.innerHTML = '<span class="hdw-i" aria-hidden="true">' + icon + '</span><span>' + text + '</span>';
+        b.onclick = fn; z2.appendChild(b);
+      };
+      k2('werte', '&#x1F4CA;', t('Fahrzeugwerte'), t('Werte des Modells, mit Vergleich'), () => hdWertAuto(car));
+      if (car.role === 'ghost') k2('stil', '&#x1F3AF;', t('Fahrstil'), t('Fahrstil dieses NPC ansehen und einstellen'), () => hdWertStil(car));
+      z.parentNode.insertBefore(z2, z.nextSibling);
+    }
     return z;
   }
   // v3.0: the garage's "Driver and Car Settings" header as a race-weekend grid card - large portrait, the name

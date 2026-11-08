@@ -5820,6 +5820,61 @@
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
 
+  /* ---- Hybrid-Dash 3.0: car stats + driver style cards (98x-hd-wertungen.js) ---- */
+  .hdw-modal { z-index: 430; }
+  .hdw-karte { width: min(820px, 100%); gap: 14px; }
+  .hdw-titel { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 14px; padding: 12px 14px;
+    background: linear-gradient(90deg, rgba(225,6,50,.22), rgba(255,255,255,.03)); border-left: 4px solid var(--f, var(--c-red, #e10632)); }
+  .hdw-titel.hdw-fahrer { grid-template-columns: auto auto minmax(0, 1fr) auto auto; }
+  .hdw-pf { width: 42px; height: 42px; padding: 0; display: grid; place-items: center; color: #fff; }
+  .hdw-name { min-width: 0; display: flex; flex-direction: column; }
+  .hdw-name small { font: 800 12px/1.2 var(--b-font, sans-serif); letter-spacing: .16em; text-transform: uppercase; color: #ff8a99; }
+  .hdw-name b { font: italic 900 clamp(24px, 3.2vw, 36px)/1.05 var(--c-head, var(--b-font, sans-serif)); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hdw-name b em { font-style: inherit; color: var(--f, #ff8a99); }
+  .hdw-name span { font-size: 14px; color: #c9ccd3; }
+  .hdw-gesamt { display: flex; flex-direction: column; align-items: center; min-width: 74px; padding: 6px 10px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.18); }
+  .hdw-gesamt b { font: italic 900 38px/1 var(--c-head, var(--b-font, sans-serif)); font-variant-numeric: tabular-nums; }
+  .hdw-gesamt small { font: 800 10px/1.2 var(--b-font, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: #a8adb8; }
+  .hdw-bild { width: 84px; height: 84px; overflow: hidden; flex: none; } .hdw-bild svg { width: 100% !important; height: 100% !important; display: block; }
+  .hdw-balken { display: flex; flex-direction: column; gap: 10px; }
+  .hdw-zeile { display: grid; grid-template-columns: minmax(130px, 200px) 44px 44px minmax(0, 1fr); align-items: center; gap: 10px; }
+  .hdw-l { font: 800 14px/1.1 var(--b-font, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: #e6e7ea; }
+  .hdw-n { font: italic 900 22px/1 var(--c-head, var(--b-font, sans-serif)); text-align: right; font-variant-numeric: tabular-nums; }
+  .hdw-d { font: 800 13px/1 var(--b-font, sans-serif); font-style: normal; color: #a8adb8; }
+  .hdw-d.plus { color: #3ddc84; } .hdw-d.minus { color: #ff5a6e; }
+  .hdw-zeile:not(:has(.hdw-d)) .hdw-bar { grid-column: 3 / 5; }
+  .hdw-bar { position: relative; height: 16px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 calc(10% - 2px), transparent calc(10% - 2px) 10%); border: 1px solid rgba(255,255,255,.12); }
+  .hdw-fill { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, var(--hdw-f, var(--c-red, #e10632)), color-mix(in srgb, var(--hdw-f, #e10632) 60%, #fff)); transition: width .25s; }
+  .hdw-cmp { position: absolute; left: 0; bottom: -7px; height: 4px; background: #9aa3b2; }
+  .hdw-bar input[type=range] { position: absolute; inset: -6px 0; width: 100%; height: calc(100% + 12px); margin: 0; opacity: 0; cursor: ew-resize; }
+  .hdw-stil .hdw-bar { height: 18px; }
+  .hdw-stil .hdw-zeile:hover .hdw-bar, .hdw-stil .hdw-bar:focus-within { outline: 2px solid rgba(255,255,255,.5); }
+  .hdw-leg { margin: 0; font-size: 13px; color: #c9ccd3; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .hdw-leg span { display: inline-block; width: 22px; height: 8px; }
+  .hdw-leg-a { background: var(--c-red, #e10632); margin-left: 0; } .hdw-leg-b { background: #9aa3b2; height: 4px !important; margin-left: 12px; }
+  .hdw-specs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .hdw-specs > div { padding: 8px 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .hdw-specs > div.breit { grid-column: span 2; }
+  .hdw-specs small { font: 800 10.5px/1.2 var(--b-font, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #a8adb8; }
+  .hdw-specs b { font: 700 17px/1.2 var(--b-font, sans-serif); font-variant-numeric: tabular-nums; }
+  .hdw-wirkung { margin: 0; font-size: 13.5px; color: #d9dce2; }
+  .hdw-cmpwahl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .hdw-cmpwahl .hds-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .hdw-cmpwahl .hds-chips button { padding: 5px 11px; font-size: 13px; }
+  .hdw-cmpwahl .hds-chips button.an { background: var(--c-red, #e10632); border-color: var(--c-red, #e10632); color: #fff; }
+  .hdw-cmpwahl .hds-l { font: 800 12px/1 var(--b-font, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #a8adb8; min-width: 120px; }
+  .hdw-schalter { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; margin-left: auto; }
+  .hdw-ok { color: #3ddc84; font-weight: 700; align-self: center; }
+  .hdw-quellen { font-size: 12.5px; color: #a8adb8; } .hdw-quellen summary { cursor: pointer; } .hdw-quellen ul { margin: 6px 0; padding-left: 18px; }
+  .hd-werkzeug-reihe button[data-w="werte"], .hd-werkzeug-reihe button[data-w="stil"] { white-space: nowrap; }
+  .hds-npc-name small { display: block; font-size: 11.5px; color: #a8adb8; font-weight: 600; letter-spacing: .04em; }
+  .hds-stil, .hds-werte { padding: 5px 10px; font-size: 12.5px; white-space: nowrap; }
+  .hds-kopf .hds-werte { margin-left: auto; }
+  @media (max-width: 620px) {
+    .hdw-zeile { grid-template-columns: minmax(0, 1fr) 40px 40px; } .hdw-bar { grid-column: 1 / -1 !important; }
+    .hdw-specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hdw-titel, .hdw-titel.hdw-fahrer { grid-template-columns: auto minmax(0, 1fr) auto; } .hdw-bild, .hdw-gesamt { display: none; }
+  }
   /* ---- Hybrid-Dash 3.0: paired-cars picker, avatar picker, car tools (98p-hd-gepaart.js, 98i) ---- */
   .hd-gepaart { position: fixed; inset: 0; z-index: 400; display: grid; place-items: center; padding: 20px; background: rgba(4,4,8,.72); }
   .hd-gepaart[hidden] { display: none; }
@@ -5881,7 +5936,7 @@
   .hds-npc-gruppe { grid-column: span 2; }
   @media (max-width: 760px) { .hds-npc-gruppe { grid-column: auto; } }
   .hds-npcs { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; padding-right: 4px; }
-  .hds-npc { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 4px 6px; border-left: 4px solid var(--f, #888); background: rgba(255,255,255,.03); }
+  .hds-npc { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 4px 6px; border-left: 4px solid var(--f, #888); background: rgba(255,255,255,.03); }
   .hds-npc-bild { width: 36px; height: 36px; overflow: hidden; } .hds-npc-bild svg { width: 100% !important; height: 100% !important; }
   .hds-npc-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hds-npc .hds-chips button { padding: 5px 8px; font-size: 12px; }
@@ -5937,6 +5992,7 @@
   html body .hd-werkzeug-reihe > button > span:last-child { overflow: hidden; text-overflow: ellipsis; }
   html body .hd-werkzeug-reihe .hdw-i { font-size: 15px; line-height: 1; }
   @media (max-width: 700px) { html body .hd-werkzeug-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+  html body .hd-werkzeug-reihe.hdw-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; margin-top: -4px !important; }
 
   /* ---- Hybrid-Dash 3.0: app logo in the header, banner at the very top of the main menu ---- */
   header#k-kopf .hdr-logo .hd-logo-bild { display: block; height: 26px; width: auto; }

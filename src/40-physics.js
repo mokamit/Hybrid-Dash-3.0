@@ -156,6 +156,8 @@
 
   class CarreraPhysicsEngine {
     constructor() {
+      // Hybrid-Dash 3.0: Fahrzeugmodell-Faktoren (98x-hd-wertungen.js setzt sie je Auto). Alle 1 = unveraendert.
+      this.modell = { top: 1, accel: 1, brake: 1, grip: 1 };
       // ---- WEM GEHOERT DIESE INSTANZ? --------------------------------------------------
       //
       // GEMELDET: "Gamepad 2 hat nichts zu tun, vibriert aber mit, wenn Gamepad 1
@@ -1078,7 +1080,7 @@
       const lenk = this.state.dampedSteering;
       const quer = Math.abs(lenk) * kmhAnteil * cfg.corneringLoad
                    / Math.max(0.1, cfg.pacejkaGrenze);
-      const grip = Math.max(0.2, (st.tyreGrip === undefined ? 1 : st.tyreGrip) * cfg.gripScale);
+      const grip = Math.max(0.2, (st.tyreGrip === undefined ? 1 : st.tyreGrip) * cfg.gripScale) * ((this.modell && this.modell.grip) || 1);
       // v1.1.3: die entlastete Vorderachse (vorn > 1, unter Gas) zaehlt hier nicht mehr - sie
       // liess uV ueber 1 springen. Die Gas-Seite kommt stetig ueber pacGasFaktor (siehe config).
       // Die belastete (Bremse, vorn < 1) bleibt.
@@ -1217,7 +1219,7 @@
         const d = (st.tyreTempC - cfg.tyreOptimalC) / 12;
         reifen *= 1 + cfg.granTempOpt * Math.min(1, cfg.tyreEffect) * Math.exp(-d * d);
       }
-      const grip = Math.max(0.2, Math.max(0.3, reifen) * cfg.gripScale) * aero * (cfg.granGripPlus || 1);
+      const grip = Math.max(0.2, Math.max(0.3, reifen) * cfg.gripScale) * aero * (cfg.granGripPlus || 1) * ((this.modell && this.modell.grip) || 1);
       const vorn = Math.max(cfg.granVornMin, Math.min(1, cfg.loadFrontStatic / Math.max(0.05, st.loadFront)));
       const hinten = Math.max(0.6, Math.min(cfg.granHintenMax, (1 - cfg.loadFrontStatic) / Math.max(0.05, 1 - st.loadFront)));
       // DEGRESSIVE Lastempfindlichkeit: der Reibwert sinkt mit der Radlast, mu = mu0*(1-k*(l-1))
@@ -1639,7 +1641,7 @@
 
     accelScale() {
       const c = this.config;
-      return (c.topSpeedKmh / c.accelScaleBasisS) * c.accelerationFactor * c.accelCalibration;
+      return (c.topSpeedKmh / c.accelScaleBasisS) * c.accelerationFactor * c.accelCalibration * ((this.modell && this.modell.accel) || 1);
     }
 
     gearBand(i) {
@@ -1961,14 +1963,14 @@
         const gasF = cfg.pacejka ? 1 : pacGasFaktor(cfg, Math.max(0, st.longUse) * (1 - vFrac * vFrac));
         const ziel = Math.max(0.12 * (1 - wet),
           Math.min(cfg.lenkLastMax, Math.sqrt(Math.max(0, capL * capL - useL * useL))) * gasF)
-          * frontAxle * surfSteer * luft * st.tyreGrip;
+          * frontAxle * surfSteer * luft * st.tyreGrip * ((this.modell && this.modell.grip) || 1);
         const aG = 1 - Math.exp(-dt / Math.max(0.01, cfg.lenkGlattTau));
         st.steerGrip = st.steerGripGlatt === undefined ? ziel : st.steerGrip + (ziel - st.steerGrip) * aG;
         st.steerGripGlatt = st.steerGrip;
       } else {
         st.steerGrip = (Math.max(0.12 * (1 - wet), Math.min(1,
           Math.sqrt(Math.max(0, frontCap * frontCap - frontUse * frontUse))))
-          + trailBonus) * st.tyreGrip;   // cold or worn tyres will not turn the car either
+          + trailBonus) * st.tyreGrip * ((this.modell && this.modell.grip) || 1);   // cold or worn tyres will not turn the car either
         st.steerGripGlatt = undefined;
       }
       // v1.0.45: Referenz-Grip fuer die Kalibrierung. Das ist der statische, "normale" Grip
@@ -2199,7 +2201,8 @@
           // Luftwiderstand haben mit der Bremsscheibe nichts zu tun.
           accel = -(resist + (cfg.brakeDecelBase + cfg.brakeDecelAero * uB)
                              * inputs.brake * st.gripLong * surf * dive
-                             * st.tyreGrip * (1 - st.brakeFade) / st.massFactor);
+                             * st.tyreGrip * (1 - st.brakeFade) / st.massFactor
+                             * ((this.modell && this.modell.brake) || 1));
           // ABS is now only an indicator plus a haptic pulse. Modulating the byte here
           // would reintroduce precisely the stutter that took so long to remove.
           if (inputs.brake > 0.8 && st.speedKmh > cfg.topSpeedKmh * 0.15) {
@@ -2240,7 +2243,7 @@
         //     `else if (accel > 0) accel = 0` fired whenever speed was under the ceiling,
         //     which without a limiter (speedLimitFactor 1, ceiling = topSpeedKmh) is ALWAYS,
         //     so every positive acceleration was zeroed and the car never moved from 0.
-        const ceiling = cfg.topSpeedKmh * cfg.speedLimitFactor;
+        const ceiling = cfg.topSpeedKmh * cfg.speedLimitFactor * Math.min(1, (this.modell && this.modell.top) || 1);
         if (st.speedKmh > ceiling) {
           const eased = st.speedKmh + Math.min(accel, -cfg.pitLimiterDecel) * dt;
           st.speedKmh = Math.max(ceiling, eased); // never undershoot the cap on the way down

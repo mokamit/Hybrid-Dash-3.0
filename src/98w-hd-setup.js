@@ -44,7 +44,9 @@
     h += '<div class="hds-npcs">' + npcs.map((c) => {
       const f = carColor(c);
       return '<div class="hds-npc" style="--f:' + hdSetupEsc(f.hex) + '"><span class="hds-npc-bild">' + (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(c, 36) : '') + '</span>'
-        + '<span class="hds-npc-name">' + hdSetupEsc(c.alias || c.tag || garageLabel(c)) + '</span>'
+        + '<span class="hds-npc-name">' + hdSetupEsc(c.alias || c.tag || garageLabel(c))
+        + (typeof hdStilWerte === 'function' ? '<small>' + hdSetupEsc(hdStilTyp(hdStilWerte(c)) + ' · ' + hdStilGesamt(hdStilWerte(c))) + '</small>' : '') + '</span>'
+        + '<button type="button" class="hds-stil" data-hdw-stil="' + hdSetupEsc(String(c.device.id)) + '">&#x1F3AF; ' + hdSetupEsc(t('Fahrstil')) + '</button>'
         + hdSetupStufenChips(hdSetupStufe(c), 'data-hds-npc="' + hdSetupEsc(String(c.device.id)) + '"') + '</div>';
     }).join('') + '</div>';
     return h;
@@ -156,7 +158,9 @@
     const gruppe = (titel, inhalt) => '<section class="hds-gruppe"><h3>' + hdSetupEsc(t(titel)) + '</h3>' + inhalt + '</section>';
     return '<div class="hds-karte">'
       + '<div class="hds-kopf"><span class="hds-bild">' + bild + '</span><div><small>' + hdSetupEsc(t('Vor dem Start')) + '</small>'
-      + '<b>' + (nr ? '#' + hdSetupEsc(nr) + ' ' : '') + hdSetupEsc(name) + '</b><span>' + hdSetupEsc(sitzung) + '</span></div></div>'
+      + '<b>' + (nr ? '#' + hdSetupEsc(nr) + ' ' : '') + hdSetupEsc(name) + '</b><span>' + hdSetupEsc(sitzung) + '</span></div>'
+      + (car ? '<button type="button" class="hds-werte" data-hdw-auto="' + hdSetupEsc(String(car.device.id)) + '">&#x1F4CA; ' + hdSetupEsc(t('Fahrzeugwerte')) + (typeof carModellName === 'function' && carModellWert(car.modellId) ? ': ' + hdSetupEsc(t(carModellName(car.modellId))) : '') + '</button>' : '')
+      + '</div>'
       + '<div class="hds-gitter">'
       + gruppe('Reifen & Tank', reifen + tank)
       + gruppe('Fahren', preset + (gruppen['Fahren'] || []).join(''))
