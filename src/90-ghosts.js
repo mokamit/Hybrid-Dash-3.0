@@ -5641,7 +5641,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     //
     // KEIN ghostCharakter(g) hier: diese Funktion bekommt den GHOST-Satz und nicht das
     // Auto, und sie laeuft aus dem Literal heraus, in dem der Satz gerade entsteht.
-    const versatz = (ghostCfg.charakter && g.charakter) ? (g.charakter.pitVersatz || 0) : 0;
+    const versatz = ((ghostCfg.charakter && g.charakter) ? (g.charakter.pitVersatz || 0) : 0)
+      + (typeof hdStilPitFuerGhost === 'function' ? hdStilPitFuerGhost(g) : 0);   // HD 3.0: tyre / fuel management
     const zufall = Math.floor(Math.random() * (hi - lo + 1));
     g.pitFaellig = (g.laps || 0) + Math.max(1, lo + zufall + versatz);
   }
@@ -8132,9 +8133,15 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   const CHARAKTER_EINS = { angriff: 1, verteidigung: 1, fehler: 1, kurvenAbzug: 1,
                            pitVersatz: 0 };
   function ghostCharakter(car) {
-    if (!ghostCfg.charakter) return CHARAKTER_EINS;
     const g = car && car.ghost;
-    return (g && g.charakter) ? g.charakter : CHARAKTER_EINS;
+    const zufall = (ghostCfg.charakter && g && g.charakter) ? g.charakter : null;
+    // Hybrid-Dash 3.0: the NPC's own driving style (98x-hd-wertungen.js) is the base; the per-race dice vary around it.
+    const stil = typeof hdStilCharakter === 'function' ? hdStilCharakter(car) : null;
+    if (!stil) return zufall || CHARAKTER_EINS;
+    if (!zufall) return stil;
+    return { angriff: stil.angriff * zufall.angriff, verteidigung: stil.verteidigung * zufall.verteidigung,
+             fehler: stil.fehler * zufall.fehler, kurvenAbzug: stil.kurvenAbzug * zufall.kurvenAbzug,
+             pitVersatz: (stil.pitVersatz || 0) + (zufall.pitVersatz || 0), regen: stil.regen };
   }
 
   // ====================================================================================
@@ -8954,7 +8961,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
           const h = ghostHinterMir(car);
           return !!(h && h.gap <= SPICE_BLAU_REICHWEITE);
         })();
-        const fehlerFaktor = (1 + 0.8 * nass)
+        const fehlerFaktor = (1 + 0.8 * nass * (typeof hdStilRegen === 'function' ? hdStilRegen(car) : 1))
                            * (reifenPassen(car) ? 1 : 1.5)
                            * (druck ? 1.3 : 1);
         if (Math.random() < SPICE_MISTAKE_P * ghostCharakter(car).fehler * fehlerFaktor) {
@@ -10940,6 +10947,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // v0.9.56: die Ghost-Presets (Einfach/Mittel/Schnell) ersetzen die feine Prozentzahl.
       // Die Stufe aendert nur das Geradentempo, in der Kurve gilt immer das Mittel-Tempo.
       let target = ghostStufeFaktor(car);
+      // Hybrid-Dash 3.0: the car model (98x-hd-wertungen.js) - an F1 car is quicker than a GT3, a Beetle slower.
+      if (typeof hdModellTempo === 'function') target = Math.min(1, target * hdModellTempo(car));
       // Der gelernte Tempofaktor. Er steht VOR der gelben Flagge, damit das Limit unter
       // Gelb wirklich das Limit ist: ein lernender Ghost darf sich nicht ueber eine
       // Neutralisierung hinwegsetzen.
@@ -11939,7 +11948,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const griffSoll = soll.dry + (soll.rain - soll.dry) * nass;
     // Die abgenommene Grundlinie: nass kostet 0,85, trocken nichts. Ueber dieselbe Rampe,
     // damit auch dieser Teil nicht springt.
-    const basis = 1 + (GHOST_REGEN_TEMPO - 1) * nass;
+    const basis = 1 + (GHOST_REGEN_TEMPO - 1) * nass * (typeof hdStilRegen === 'function' ? hdStilRegen(car) : 1);
     // Und darauf das Verhaeltnis der Griffe. Bei passenden Reifen ist es genau 1, der
     // bekannte Fall bleibt also unberuehrt.
     return basis * Math.sqrt(Math.max(0.05, griff) / Math.max(1e-6, griffSoll));

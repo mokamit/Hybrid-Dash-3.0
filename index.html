@@ -5820,6 +5820,61 @@
   #race-ovscreen td, #race-ovscreen .ov-zeit, .ov-zeit, .k-zeit { font-variant-numeric: tabular-nums; }
   #race-ovscreen tbody td:first-child, .ov-pos { font-style: italic; font-weight: 900; }
 
+  /* ---- Hybrid-Dash 3.0: car stats + driver style cards (98x-hd-wertungen.js) ---- */
+  .hdw-modal { z-index: 430; }
+  .hdw-karte { width: min(820px, 100%); gap: 14px; }
+  .hdw-titel { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 14px; padding: 12px 14px;
+    background: linear-gradient(90deg, rgba(225,6,50,.22), rgba(255,255,255,.03)); border-left: 4px solid var(--f, var(--c-red, #e10632)); }
+  .hdw-titel.hdw-fahrer { grid-template-columns: auto auto minmax(0, 1fr) auto auto; }
+  .hdw-pf { width: 42px; height: 42px; padding: 0; display: grid; place-items: center; color: #fff; }
+  .hdw-name { min-width: 0; display: flex; flex-direction: column; }
+  .hdw-name small { font: 800 12px/1.2 var(--b-font, sans-serif); letter-spacing: .16em; text-transform: uppercase; color: #ff8a99; }
+  .hdw-name b { font: italic 900 clamp(24px, 3.2vw, 36px)/1.05 var(--c-head, var(--b-font, sans-serif)); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hdw-name b em { font-style: inherit; color: var(--f, #ff8a99); }
+  .hdw-name span { font-size: 14px; color: #c9ccd3; }
+  .hdw-gesamt { display: flex; flex-direction: column; align-items: center; min-width: 74px; padding: 6px 10px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.18); }
+  .hdw-gesamt b { font: italic 900 38px/1 var(--c-head, var(--b-font, sans-serif)); font-variant-numeric: tabular-nums; }
+  .hdw-gesamt small { font: 800 10px/1.2 var(--b-font, sans-serif); letter-spacing: .14em; text-transform: uppercase; color: #a8adb8; }
+  .hdw-bild { width: 84px; height: 84px; overflow: hidden; flex: none; } .hdw-bild svg { width: 100% !important; height: 100% !important; display: block; }
+  .hdw-balken { display: flex; flex-direction: column; gap: 10px; }
+  .hdw-zeile { display: grid; grid-template-columns: minmax(130px, 200px) 44px 44px minmax(0, 1fr); align-items: center; gap: 10px; }
+  .hdw-l { font: 800 14px/1.1 var(--b-font, sans-serif); letter-spacing: .06em; text-transform: uppercase; color: #e6e7ea; }
+  .hdw-n { font: italic 900 22px/1 var(--c-head, var(--b-font, sans-serif)); text-align: right; font-variant-numeric: tabular-nums; }
+  .hdw-d { font: 800 13px/1 var(--b-font, sans-serif); font-style: normal; color: #a8adb8; }
+  .hdw-d.plus { color: #3ddc84; } .hdw-d.minus { color: #ff5a6e; }
+  .hdw-zeile:not(:has(.hdw-d)) .hdw-bar { grid-column: 3 / 5; }
+  .hdw-bar { position: relative; height: 16px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 calc(10% - 2px), transparent calc(10% - 2px) 10%); border: 1px solid rgba(255,255,255,.12); }
+  .hdw-fill { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, var(--hdw-f, var(--c-red, #e10632)), color-mix(in srgb, var(--hdw-f, #e10632) 60%, #fff)); transition: width .25s; }
+  .hdw-cmp { position: absolute; left: 0; bottom: -7px; height: 4px; background: #9aa3b2; }
+  .hdw-bar input[type=range] { position: absolute; inset: -6px 0; width: 100%; height: calc(100% + 12px); margin: 0; opacity: 0; cursor: ew-resize; }
+  .hdw-stil .hdw-bar { height: 18px; }
+  .hdw-stil .hdw-zeile:hover .hdw-bar, .hdw-stil .hdw-bar:focus-within { outline: 2px solid rgba(255,255,255,.5); }
+  .hdw-leg { margin: 0; font-size: 13px; color: #c9ccd3; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .hdw-leg span { display: inline-block; width: 22px; height: 8px; }
+  .hdw-leg-a { background: var(--c-red, #e10632); margin-left: 0; } .hdw-leg-b { background: #9aa3b2; height: 4px !important; margin-left: 12px; }
+  .hdw-specs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .hdw-specs > div { padding: 8px 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .hdw-specs > div.breit { grid-column: span 2; }
+  .hdw-specs small { font: 800 10.5px/1.2 var(--b-font, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #a8adb8; }
+  .hdw-specs b { font: 700 17px/1.2 var(--b-font, sans-serif); font-variant-numeric: tabular-nums; }
+  .hdw-wirkung { margin: 0; font-size: 13.5px; color: #d9dce2; }
+  .hdw-cmpwahl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .hdw-cmpwahl .hds-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .hdw-cmpwahl .hds-chips button { padding: 5px 11px; font-size: 13px; }
+  .hdw-cmpwahl .hds-chips button.an { background: var(--c-red, #e10632); border-color: var(--c-red, #e10632); color: #fff; }
+  .hdw-cmpwahl .hds-l { font: 800 12px/1 var(--b-font, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #a8adb8; min-width: 120px; }
+  .hdw-schalter { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; margin-left: auto; }
+  .hdw-ok { color: #3ddc84; font-weight: 700; align-self: center; }
+  .hdw-quellen { font-size: 12.5px; color: #a8adb8; } .hdw-quellen summary { cursor: pointer; } .hdw-quellen ul { margin: 6px 0; padding-left: 18px; }
+  .hd-werkzeug-reihe button[data-w="werte"], .hd-werkzeug-reihe button[data-w="stil"] { white-space: nowrap; }
+  .hds-npc-name small { display: block; font-size: 11.5px; color: #a8adb8; font-weight: 600; letter-spacing: .04em; }
+  .hds-stil, .hds-werte { padding: 5px 10px; font-size: 12.5px; white-space: nowrap; }
+  .hds-kopf .hds-werte { margin-left: auto; }
+  @media (max-width: 620px) {
+    .hdw-zeile { grid-template-columns: minmax(0, 1fr) 40px 40px; } .hdw-bar { grid-column: 1 / -1 !important; }
+    .hdw-specs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hdw-titel, .hdw-titel.hdw-fahrer { grid-template-columns: auto minmax(0, 1fr) auto; } .hdw-bild, .hdw-gesamt { display: none; }
+  }
   /* ---- Hybrid-Dash 3.0: paired-cars picker, avatar picker, car tools (98p-hd-gepaart.js, 98i) ---- */
   .hd-gepaart { position: fixed; inset: 0; z-index: 400; display: grid; place-items: center; padding: 20px; background: rgba(4,4,8,.72); }
   .hd-gepaart[hidden] { display: none; }
@@ -5881,7 +5936,7 @@
   .hds-npc-gruppe { grid-column: span 2; }
   @media (max-width: 760px) { .hds-npc-gruppe { grid-column: auto; } }
   .hds-npcs { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; padding-right: 4px; }
-  .hds-npc { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 4px 6px; border-left: 4px solid var(--f, #888); background: rgba(255,255,255,.03); }
+  .hds-npc { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 4px 6px; border-left: 4px solid var(--f, #888); background: rgba(255,255,255,.03); }
   .hds-npc-bild { width: 36px; height: 36px; overflow: hidden; } .hds-npc-bild svg { width: 100% !important; height: 100% !important; }
   .hds-npc-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hds-npc .hds-chips button { padding: 5px 8px; font-size: 12px; }
@@ -5937,6 +5992,7 @@
   html body .hd-werkzeug-reihe > button > span:last-child { overflow: hidden; text-overflow: ellipsis; }
   html body .hd-werkzeug-reihe .hdw-i { font-size: 15px; line-height: 1; }
   @media (max-width: 700px) { html body .hd-werkzeug-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+  html body .hd-werkzeug-reihe.hdw-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; margin-top: -4px !important; }
 
   /* ---- Hybrid-Dash 3.0: app logo in the header, banner at the very top of the main menu ---- */
   header#k-kopf .hdr-logo .hd-logo-bild { display: block; height: 26px; width: auto; }
@@ -16201,6 +16257,74 @@
     "Kopplung vergessen?": "Forget this pairing?",
     "Auswählen": "Select",
     "Zurückgehen": "Back",
+    "1.3 L Boxer-4, luftgekühlt": "1.3 L flat-4, air-cooled",
+    "1.6 L Turbo-V6-Hybrid": "1.6 L turbo V6 hybrid",
+    "3.0 L Biturbo-R6": "3.0 L twin-turbo inline-6",
+    "3.0 L Biturbo-V6": "3.0 L twin-turbo V6",
+    "4.0 L Biturbo-V8": "4.0 L twin-turbo V8",
+    "4.2 L Boxer-6, Saugmotor": "4.2 L flat-6, naturally aspirated",
+    "5.2 L V10, Saugmotor": "5.2 L V10, naturally aspirated",
+    "5.4 L V8, Saugmotor": "5.4 L V8, naturally aspirated",
+    "6.2 L V8, Saugmotor": "6.2 L V8, naturally aspirated",
+    "Angreifer": "Attacker",
+    "Ausgewogen": "Balanced",
+    "Dieses Auto fährt gerade nicht als NPC – der Stil wird gespeichert und gilt, sobald es die Rolle NPC hat.": "This car is not driving as an NPC right now – the style is saved and applies as soon as it has the NPC role.",
+    "Fahrstil dieses NPC ansehen und einstellen": "View and adjust this NPC's driving style",
+    "Fahrzeugwerte": "Car stats",
+    "Fehlerlos": "Flawless",
+    "Frontmittelmotor, Heckantrieb": "Front-mid engine, rear-wheel drive",
+    "Für dieses Auto übernehmen": "Use for this car",
+    "Gesamt": "Overall",
+    "Gewicht": "Weight",
+    "Gilt, sobald dieses Auto als NPC fährt. Regler ziehen oder einen Stil wählen – gespeichert wird sofort.": "Applies whenever this car drives as an NPC. Drag a bar or pick a style – it is saved straight away.",
+    "Heckmotor, Heckantrieb": "Rear engine, rear-wheel drive",
+    "Höchstgeschwindigkeit": "Top speed",
+    "Im Spiel": "In game",
+    "Keins": "None",
+    "Klassiker": "Classic",
+    "Konstanz": "Consistency",
+    "Konstanz: wie selten Verbremser und Fehler passieren.": "Consistency: how rarely it locks up or makes mistakes.",
+    "Kurvengrip": "Cornering grip",
+    "Kurvenkünstler": "Corner artist",
+    "Kurvenmut": "Cornering",
+    "Kurvenmut: wie wenig Tempo in Kurven abgegeben wird.": "Cornering: how little speed it gives away in corners.",
+    "Leistung": "Power",
+    "Mittelmotor, Heckantrieb": "Mid engine, rear-wheel drive",
+    "Mittelmotor, Heckantrieb, Ground-Effect": "Mid engine, rear-wheel drive, ground effect",
+    "Modell beeinflusst die Fahrleistung": "Car model affects performance",
+    "Modell von": "Model of",
+    "Motor": "Engine",
+    "Neuling": "Rookie",
+    "PS je Tonne": "HP per tonne",
+    "Quellen und Schätzwerte": "Sources and estimates",
+    "Red Bull RB20 (Formel 1)": "Red Bull RB20 (Formula 1)",
+    "Regenfahren": "Wet weather",
+    "Regenfahren: wie viel Tempo und wie viele Fehler Regen kostet.": "Wet weather: how much pace and how many mistakes rain costs it.",
+    "Regenkönig": "Rain master",
+    "Reifen- und Spritmanagement: längere Stints, später an die Box.": "Tyre and fuel management: longer stints, later pit stops.",
+    "Reifenflüsterer": "Tyre whisperer",
+    "Reifenmanagement": "Tyre management",
+    "Schwierigkeit": "Difficulty",
+    "Spitze": "Top speed",
+    "Spritmanagement": "Fuel management",
+    "Spritsparer": "Fuel saver",
+    "Stil": "Style",
+    "Stratege": "Strategist",
+    "VW Käfer 1300": "VW Beetle 1300",
+    "Vergleichen mit": "Compare with",
+    "Verteidigen: wie oft die angegriffene Seite gedeckt wird.": "Defending: how often it covers the side being attacked.",
+    "Verteidiger": "Defender",
+    "Was die Werte bewirken": "What the values do",
+    "Werte des Modells, mit Vergleich": "The model's stats, with comparison",
+    "Überholen": "Overtaking",
+    "Überholen: wie oft ein Überholmanöver angesetzt wird.": "Overtaking: how often it goes for a pass.",
+    "„~“ = geschätzt: kein verlässlicher veröffentlichter Wert. Handling und Bremsen sind Bewertungen aus Bauart, Gewicht und Aerodynamik.": "“~” = estimate: no reliable published figure. Handling and braking are ratings from layout, weight and aerodynamics.",
+    "GT3 BoP 2024 (SRO / IMSA): BMW M4 GT3 1265 kg, Ferrari 296 GT3 1275 kg, Mercedes-AMG GT3 1285 kg, Porsche 911 GT3 R 1250 kg": "GT3 BoP 2024 (SRO / IMSA): BMW M4 GT3 1265 kg, Ferrari 296 GT3 1275 kg, Mercedes-AMG GT3 1285 kg, Porsche 911 GT3 R 1250 kg",
+    "Porsche Motorsport: 911 GT3 R (992) bis 565 PS": "Porsche Motorsport: 911 GT3 R (992) up to 565 hp",
+    "Audi Sport customer racing: R8 LMS GT3 evo II bis 585 PS, 1235 kg": "Audi Sport customer racing: R8 LMS GT3 evo II up to 585 hp, 1235 kg",
+    "McLaren 720S GT3 Evo: 541 PS (Automobilista 2 Fahrzeugdaten)": "McLaren 720S GT3 Evo: 541 hp (Automobilista 2 car data)",
+    "Red Bull RB20: ca. 1000 PS, 798 kg Mindestgewicht (FIA)": "Red Bull RB20: approx. 1000 hp, 798 kg minimum weight (FIA)",
+    "VW Käfer 1300: 44 PS, ca. 800 kg, 120 km/h": "VW Beetle 1300: 44 hp, approx. 800 kg, 120 km/h",
     "Schwierigkeit für alle": "Difficulty for all",
     "Keine NPCs in der Garage – gib einem Auto die Rolle NPC.": "No NPCs in the garage – give a car the NPC role.",
     "Ohne Auswahlfenster verbinden": "Connect without the pop-up",
@@ -20362,6 +20486,74 @@
     "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
     "Auswählen": "Elegir",
     "Zurückgehen": "Atrás",
+    "1.3 L Boxer-4, luftgekühlt": "1.3 L bóxer de 4, refrigerado por aire",
+    "1.6 L Turbo-V6-Hybrid": "1.6 L V6 turbo híbrido",
+    "3.0 L Biturbo-R6": "3.0 L 6 en línea biturbo",
+    "3.0 L Biturbo-V6": "3.0 L V6 biturbo",
+    "4.0 L Biturbo-V8": "4.0 L V8 biturbo",
+    "4.2 L Boxer-6, Saugmotor": "4.2 L bóxer de 6, atmosférico",
+    "5.2 L V10, Saugmotor": "5.2 L V10, atmosférico",
+    "5.4 L V8, Saugmotor": "5.4 L V8, atmosférico",
+    "6.2 L V8, Saugmotor": "6.2 L V8, atmosférico",
+    "Angreifer": "Atacante",
+    "Ausgewogen": "Equilibrado",
+    "Dieses Auto fährt gerade nicht als NPC – der Stil wird gespeichert und gilt, sobald es die Rolle NPC hat.": "Este coche no conduce ahora como NPC: el estilo se guarda y se aplica en cuanto tenga el rol NPC.",
+    "Fahrstil dieses NPC ansehen und einstellen": "Ver y ajustar el estilo de conducción de este NPC",
+    "Fahrzeugwerte": "Estadísticas del coche",
+    "Fehlerlos": "Impecable",
+    "Frontmittelmotor, Heckantrieb": "Motor delantero central, tracción trasera",
+    "Für dieses Auto übernehmen": "Usar para este coche",
+    "Gesamt": "General",
+    "Gewicht": "Peso",
+    "Gilt, sobald dieses Auto als NPC fährt. Regler ziehen oder einen Stil wählen – gespeichert wird sofort.": "Se aplica cuando este coche conduce como NPC. Arrastra una barra o elige un estilo: se guarda al instante.",
+    "Heckmotor, Heckantrieb": "Motor trasero, tracción trasera",
+    "Höchstgeschwindigkeit": "Velocidad máxima",
+    "Im Spiel": "En el juego",
+    "Keins": "Ninguno",
+    "Klassiker": "Clásico",
+    "Konstanz": "Constancia",
+    "Konstanz: wie selten Verbremser und Fehler passieren.": "Constancia: lo poco que se pasa de frenada o comete errores.",
+    "Kurvengrip": "Agarre en curva",
+    "Kurvenkünstler": "Artista de las curvas",
+    "Kurvenmut": "Paso por curva",
+    "Kurvenmut: wie wenig Tempo in Kurven abgegeben wird.": "Paso por curva: cuánta poca velocidad pierde en las curvas.",
+    "Leistung": "Potencia",
+    "Mittelmotor, Heckantrieb": "Motor central, tracción trasera",
+    "Mittelmotor, Heckantrieb, Ground-Effect": "Motor central, tracción trasera, efecto suelo",
+    "Modell beeinflusst die Fahrleistung": "El modelo influye en el rendimiento",
+    "Modell von": "Modelo de",
+    "Motor": "Motor",
+    "Neuling": "Novato",
+    "PS je Tonne": "CV por tonelada",
+    "Quellen und Schätzwerte": "Fuentes y estimaciones",
+    "Red Bull RB20 (Formel 1)": "Red Bull RB20 (Fórmula 1)",
+    "Regenfahren": "Lluvia",
+    "Regenfahren: wie viel Tempo und wie viele Fehler Regen kostet.": "Lluvia: cuánto ritmo y cuántos errores le cuesta la lluvia.",
+    "Regenkönig": "Rey de la lluvia",
+    "Reifen- und Spritmanagement: längere Stints, später an die Box.": "Gestión de neumáticos y combustible: stints más largos, parada más tarde.",
+    "Reifenflüsterer": "Susurrador de neumáticos",
+    "Reifenmanagement": "Gestión de neumáticos",
+    "Schwierigkeit": "Dificultad",
+    "Spitze": "Punta",
+    "Spritmanagement": "Gestión de combustible",
+    "Spritsparer": "Ahorrador",
+    "Stil": "Estilo",
+    "Stratege": "Estratega",
+    "VW Käfer 1300": "VW Escarabajo 1300",
+    "Vergleichen mit": "Comparar con",
+    "Verteidigen: wie oft die angegriffene Seite gedeckt wird.": "Defensa: con qué frecuencia cubre el lado atacado.",
+    "Verteidiger": "Defensor",
+    "Was die Werte bewirken": "Qué hacen los valores",
+    "Werte des Modells, mit Vergleich": "Estadísticas del modelo, con comparación",
+    "Überholen": "Adelantar",
+    "Überholen: wie oft ein Überholmanöver angesetzt wird.": "Adelantar: con qué frecuencia intenta un adelantamiento.",
+    "„~“ = geschätzt: kein verlässlicher veröffentlichter Wert. Handling und Bremsen sind Bewertungen aus Bauart, Gewicht und Aerodynamik.": "«~» = estimación: no hay cifra publicada fiable. Manejo y frenos son valoraciones según arquitectura, peso y aerodinámica.",
+    "GT3 BoP 2024 (SRO / IMSA): BMW M4 GT3 1265 kg, Ferrari 296 GT3 1275 kg, Mercedes-AMG GT3 1285 kg, Porsche 911 GT3 R 1250 kg": "BoP GT3 2024 (SRO / IMSA): BMW M4 GT3 1265 kg, Ferrari 296 GT3 1275 kg, Mercedes-AMG GT3 1285 kg, Porsche 911 GT3 R 1250 kg",
+    "Porsche Motorsport: 911 GT3 R (992) bis 565 PS": "Porsche Motorsport: 911 GT3 R (992) hasta 565 CV",
+    "Audi Sport customer racing: R8 LMS GT3 evo II bis 585 PS, 1235 kg": "Audi Sport customer racing: R8 LMS GT3 evo II hasta 585 CV, 1235 kg",
+    "McLaren 720S GT3 Evo: 541 PS (Automobilista 2 Fahrzeugdaten)": "McLaren 720S GT3 Evo: 541 CV (datos de Automobilista 2)",
+    "Red Bull RB20: ca. 1000 PS, 798 kg Mindestgewicht (FIA)": "Red Bull RB20: aprox. 1000 CV, 798 kg de peso mínimo (FIA)",
+    "VW Käfer 1300: 44 PS, ca. 800 kg, 120 km/h": "VW Escarabajo 1300: 44 CV, aprox. 800 kg, 120 km/h",
     "Schwierigkeit für alle": "Dificultad para todos",
     "Keine NPCs in der Garage – gib einem Auto die Rolle NPC.": "No hay NPCs en el garaje: asigna a un coche el rol NPC.",
     "Ohne Auswahlfenster verbinden": "Conectar sin la ventana",
@@ -24447,6 +24639,8 @@
 
   class CarreraPhysicsEngine {
     constructor() {
+      // Hybrid-Dash 3.0: Fahrzeugmodell-Faktoren (98x-hd-wertungen.js setzt sie je Auto). Alle 1 = unveraendert.
+      this.modell = { top: 1, accel: 1, brake: 1, grip: 1 };
       // ---- WEM GEHOERT DIESE INSTANZ? --------------------------------------------------
       //
       // GEMELDET: "Gamepad 2 hat nichts zu tun, vibriert aber mit, wenn Gamepad 1
@@ -25369,7 +25563,7 @@
       const lenk = this.state.dampedSteering;
       const quer = Math.abs(lenk) * kmhAnteil * cfg.corneringLoad
                    / Math.max(0.1, cfg.pacejkaGrenze);
-      const grip = Math.max(0.2, (st.tyreGrip === undefined ? 1 : st.tyreGrip) * cfg.gripScale);
+      const grip = Math.max(0.2, (st.tyreGrip === undefined ? 1 : st.tyreGrip) * cfg.gripScale) * ((this.modell && this.modell.grip) || 1);
       // v1.1.3: die entlastete Vorderachse (vorn > 1, unter Gas) zaehlt hier nicht mehr - sie
       // liess uV ueber 1 springen. Die Gas-Seite kommt stetig ueber pacGasFaktor (siehe config).
       // Die belastete (Bremse, vorn < 1) bleibt.
@@ -25508,7 +25702,7 @@
         const d = (st.tyreTempC - cfg.tyreOptimalC) / 12;
         reifen *= 1 + cfg.granTempOpt * Math.min(1, cfg.tyreEffect) * Math.exp(-d * d);
       }
-      const grip = Math.max(0.2, Math.max(0.3, reifen) * cfg.gripScale) * aero * (cfg.granGripPlus || 1);
+      const grip = Math.max(0.2, Math.max(0.3, reifen) * cfg.gripScale) * aero * (cfg.granGripPlus || 1) * ((this.modell && this.modell.grip) || 1);
       const vorn = Math.max(cfg.granVornMin, Math.min(1, cfg.loadFrontStatic / Math.max(0.05, st.loadFront)));
       const hinten = Math.max(0.6, Math.min(cfg.granHintenMax, (1 - cfg.loadFrontStatic) / Math.max(0.05, 1 - st.loadFront)));
       // DEGRESSIVE Lastempfindlichkeit: der Reibwert sinkt mit der Radlast, mu = mu0*(1-k*(l-1))
@@ -25930,7 +26124,7 @@
 
     accelScale() {
       const c = this.config;
-      return (c.topSpeedKmh / c.accelScaleBasisS) * c.accelerationFactor * c.accelCalibration;
+      return (c.topSpeedKmh / c.accelScaleBasisS) * c.accelerationFactor * c.accelCalibration * ((this.modell && this.modell.accel) || 1);
     }
 
     gearBand(i) {
@@ -26252,14 +26446,14 @@
         const gasF = cfg.pacejka ? 1 : pacGasFaktor(cfg, Math.max(0, st.longUse) * (1 - vFrac * vFrac));
         const ziel = Math.max(0.12 * (1 - wet),
           Math.min(cfg.lenkLastMax, Math.sqrt(Math.max(0, capL * capL - useL * useL))) * gasF)
-          * frontAxle * surfSteer * luft * st.tyreGrip;
+          * frontAxle * surfSteer * luft * st.tyreGrip * ((this.modell && this.modell.grip) || 1);
         const aG = 1 - Math.exp(-dt / Math.max(0.01, cfg.lenkGlattTau));
         st.steerGrip = st.steerGripGlatt === undefined ? ziel : st.steerGrip + (ziel - st.steerGrip) * aG;
         st.steerGripGlatt = st.steerGrip;
       } else {
         st.steerGrip = (Math.max(0.12 * (1 - wet), Math.min(1,
           Math.sqrt(Math.max(0, frontCap * frontCap - frontUse * frontUse))))
-          + trailBonus) * st.tyreGrip;   // cold or worn tyres will not turn the car either
+          + trailBonus) * st.tyreGrip * ((this.modell && this.modell.grip) || 1);   // cold or worn tyres will not turn the car either
         st.steerGripGlatt = undefined;
       }
       // v1.0.45: Referenz-Grip fuer die Kalibrierung. Das ist der statische, "normale" Grip
@@ -26490,7 +26684,8 @@
           // Luftwiderstand haben mit der Bremsscheibe nichts zu tun.
           accel = -(resist + (cfg.brakeDecelBase + cfg.brakeDecelAero * uB)
                              * inputs.brake * st.gripLong * surf * dive
-                             * st.tyreGrip * (1 - st.brakeFade) / st.massFactor);
+                             * st.tyreGrip * (1 - st.brakeFade) / st.massFactor
+                             * ((this.modell && this.modell.brake) || 1));
           // ABS is now only an indicator plus a haptic pulse. Modulating the byte here
           // would reintroduce precisely the stutter that took so long to remove.
           if (inputs.brake > 0.8 && st.speedKmh > cfg.topSpeedKmh * 0.15) {
@@ -26531,7 +26726,7 @@
         //     `else if (accel > 0) accel = 0` fired whenever speed was under the ceiling,
         //     which without a limiter (speedLimitFactor 1, ceiling = topSpeedKmh) is ALWAYS,
         //     so every positive acceleration was zeroed and the car never moved from 0.
-        const ceiling = cfg.topSpeedKmh * cfg.speedLimitFactor;
+        const ceiling = cfg.topSpeedKmh * cfg.speedLimitFactor * Math.min(1, (this.modell && this.modell.top) || 1);
         if (st.speedKmh > ceiling) {
           const eased = st.speedKmh + Math.min(accel, -cfg.pitLimiterDecel) * dt;
           st.speedKmh = Math.max(ceiling, eased); // never undershoot the cap on the way down
@@ -30704,8 +30899,14 @@
     return abseitsJetzt();
   }
 
+  // v3.0 GEMELDET: "The off track limit starts even before the session even starts. It shouldn't apply before or after
+  // the race." Throttling (and its warning) only while a session runs - racing or its last lap. The self-test suite
+  // keeps the old rule: its off-track checks drive without starting a session.
+  function hdOfftrackSitzung() {
+    try { if (hdSuiteLaeuft()) return true; return raceState === 'racing' || raceState === 'finishing'; } catch (e) { return true; }
+  }
   function offtrackGiltFuer(wer) {
-    return offtrackEffekt && abseitsJetztFuer(wer);
+    return offtrackEffekt && hdOfftrackSitzung() && abseitsJetztFuer(wer);
   }
 
   function abseitsZaehlerFuer(wer) {
@@ -30729,7 +30930,7 @@
   }
 
   function offtrackGilt() {
-    return offtrackEffekt && abseitsJetzt();
+    return offtrackEffekt && hdOfftrackSitzung() && abseitsJetzt();
   }
 
   function offtrackAnzeige() {
@@ -68930,7 +69131,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     //
     // KEIN ghostCharakter(g) hier: diese Funktion bekommt den GHOST-Satz und nicht das
     // Auto, und sie laeuft aus dem Literal heraus, in dem der Satz gerade entsteht.
-    const versatz = (ghostCfg.charakter && g.charakter) ? (g.charakter.pitVersatz || 0) : 0;
+    const versatz = ((ghostCfg.charakter && g.charakter) ? (g.charakter.pitVersatz || 0) : 0)
+      + (typeof hdStilPitFuerGhost === 'function' ? hdStilPitFuerGhost(g) : 0);   // HD 3.0: tyre / fuel management
     const zufall = Math.floor(Math.random() * (hi - lo + 1));
     g.pitFaellig = (g.laps || 0) + Math.max(1, lo + zufall + versatz);
   }
@@ -71421,9 +71623,15 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   const CHARAKTER_EINS = { angriff: 1, verteidigung: 1, fehler: 1, kurvenAbzug: 1,
                            pitVersatz: 0 };
   function ghostCharakter(car) {
-    if (!ghostCfg.charakter) return CHARAKTER_EINS;
     const g = car && car.ghost;
-    return (g && g.charakter) ? g.charakter : CHARAKTER_EINS;
+    const zufall = (ghostCfg.charakter && g && g.charakter) ? g.charakter : null;
+    // Hybrid-Dash 3.0: the NPC's own driving style (98x-hd-wertungen.js) is the base; the per-race dice vary around it.
+    const stil = typeof hdStilCharakter === 'function' ? hdStilCharakter(car) : null;
+    if (!stil) return zufall || CHARAKTER_EINS;
+    if (!zufall) return stil;
+    return { angriff: stil.angriff * zufall.angriff, verteidigung: stil.verteidigung * zufall.verteidigung,
+             fehler: stil.fehler * zufall.fehler, kurvenAbzug: stil.kurvenAbzug * zufall.kurvenAbzug,
+             pitVersatz: (stil.pitVersatz || 0) + (zufall.pitVersatz || 0), regen: stil.regen };
   }
 
   // ====================================================================================
@@ -72243,7 +72451,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
           const h = ghostHinterMir(car);
           return !!(h && h.gap <= SPICE_BLAU_REICHWEITE);
         })();
-        const fehlerFaktor = (1 + 0.8 * nass)
+        const fehlerFaktor = (1 + 0.8 * nass * (typeof hdStilRegen === 'function' ? hdStilRegen(car) : 1))
                            * (reifenPassen(car) ? 1 : 1.5)
                            * (druck ? 1.3 : 1);
         if (Math.random() < SPICE_MISTAKE_P * ghostCharakter(car).fehler * fehlerFaktor) {
@@ -74229,6 +74437,8 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       // v0.9.56: die Ghost-Presets (Einfach/Mittel/Schnell) ersetzen die feine Prozentzahl.
       // Die Stufe aendert nur das Geradentempo, in der Kurve gilt immer das Mittel-Tempo.
       let target = ghostStufeFaktor(car);
+      // Hybrid-Dash 3.0: the car model (98x-hd-wertungen.js) - an F1 car is quicker than a GT3, a Beetle slower.
+      if (typeof hdModellTempo === 'function') target = Math.min(1, target * hdModellTempo(car));
       // Der gelernte Tempofaktor. Er steht VOR der gelben Flagge, damit das Limit unter
       // Gelb wirklich das Limit ist: ein lernender Ghost darf sich nicht ueber eine
       // Neutralisierung hinwegsetzen.
@@ -75228,7 +75438,7 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const griffSoll = soll.dry + (soll.rain - soll.dry) * nass;
     // Die abgenommene Grundlinie: nass kostet 0,85, trocken nichts. Ueber dieselbe Rampe,
     // damit auch dieser Teil nicht springt.
-    const basis = 1 + (GHOST_REGEN_TEMPO - 1) * nass;
+    const basis = 1 + (GHOST_REGEN_TEMPO - 1) * nass * (typeof hdStilRegen === 'function' ? hdStilRegen(car) : 1);
     // Und darauf das Verhaeltnis der Griffe. Bei passenden Reifen ist es genau 1, der
     // bekannte Fall bleibt also unberuehrt.
     return basis * Math.sqrt(Math.max(0.05, griff) / Math.max(1e-6, griffSoll));
@@ -121812,6 +122022,21 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
       showHudToast(t('Akku kalibriert') + ': ' + garageLabel(car) + ' = 100 %');
       if (typeof renderGarage === 'function') renderGarage();
     };
+    // v3.0: the model's stat card and the NPC's driving style (98x-hd-wertungen.js) - a row of their own, so up/down
+    // reaches them (a row that wraps onto a second line is one step for up/down).
+    if (z.parentNode && typeof hdWertAuto === 'function') {
+      const z2 = document.createElement('div');
+      z2.className = 'opt-row opt-breit gar-a-aktion hd-werkzeug-reihe hdw-reihe';
+      const k2 = (w, icon, text, title, fn) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.dataset.w = w; b.title = title;
+        b.innerHTML = '<span class="hdw-i" aria-hidden="true">' + icon + '</span><span>' + text + '</span>';
+        b.onclick = fn; z2.appendChild(b);
+      };
+      k2('werte', '&#x1F4CA;', t('Fahrzeugwerte'), t('Werte des Modells, mit Vergleich'), () => hdWertAuto(car));
+      if (car.role === 'ghost') k2('stil', '&#x1F3AF;', t('Fahrstil'), t('Fahrstil dieses NPC ansehen und einstellen'), () => hdWertStil(car));
+      z.parentNode.insertBefore(z2, z.nextSibling);
+    }
     return z;
   }
   // v3.0: the garage's "Driver and Car Settings" header as a race-weekend grid card - large portrait, the name
@@ -126973,7 +127198,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     h += '<div class="hds-npcs">' + npcs.map((c) => {
       const f = carColor(c);
       return '<div class="hds-npc" style="--f:' + hdSetupEsc(f.hex) + '"><span class="hds-npc-bild">' + (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(c, 36) : '') + '</span>'
-        + '<span class="hds-npc-name">' + hdSetupEsc(c.alias || c.tag || garageLabel(c)) + '</span>'
+        + '<span class="hds-npc-name">' + hdSetupEsc(c.alias || c.tag || garageLabel(c))
+        + (typeof hdStilWerte === 'function' ? '<small>' + hdSetupEsc(hdStilTyp(hdStilWerte(c)) + ' · ' + hdStilGesamt(hdStilWerte(c))) + '</small>' : '') + '</span>'
+        + '<button type="button" class="hds-stil" data-hdw-stil="' + hdSetupEsc(String(c.device.id)) + '">&#x1F3AF; ' + hdSetupEsc(t('Fahrstil')) + '</button>'
         + hdSetupStufenChips(hdSetupStufe(c), 'data-hds-npc="' + hdSetupEsc(String(c.device.id)) + '"') + '</div>';
     }).join('') + '</div>';
     return h;
@@ -127085,7 +127312,9 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
     const gruppe = (titel, inhalt) => '<section class="hds-gruppe"><h3>' + hdSetupEsc(t(titel)) + '</h3>' + inhalt + '</section>';
     return '<div class="hds-karte">'
       + '<div class="hds-kopf"><span class="hds-bild">' + bild + '</span><div><small>' + hdSetupEsc(t('Vor dem Start')) + '</small>'
-      + '<b>' + (nr ? '#' + hdSetupEsc(nr) + ' ' : '') + hdSetupEsc(name) + '</b><span>' + hdSetupEsc(sitzung) + '</span></div></div>'
+      + '<b>' + (nr ? '#' + hdSetupEsc(nr) + ' ' : '') + hdSetupEsc(name) + '</b><span>' + hdSetupEsc(sitzung) + '</span></div>'
+      + (car ? '<button type="button" class="hds-werte" data-hdw-auto="' + hdSetupEsc(String(car.device.id)) + '">&#x1F4CA; ' + hdSetupEsc(t('Fahrzeugwerte')) + (typeof carModellName === 'function' && carModellWert(car.modellId) ? ': ' + hdSetupEsc(t(carModellName(car.modellId))) : '') + '</button>' : '')
+      + '</div>'
       + '<div class="hds-gitter">'
       + gruppe('Reifen & Tank', reifen + tank)
       + gruppe('Fahren', preset + (gruppen['Fahren'] || []).join(''))
@@ -127166,6 +127395,432 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   }, 60);
   if (typeof i18nOnLangChange === 'function') i18nOnLangChange(hdSetupMalen);
   window.HYBRIDDASH_SETUP = Object.freeze({ oeffnen: () => { hdSetupWeiter = null; hdSetupOeffnen(); }, zu: hdSetupZu, an: hdSetupAn });
+  // =====================================================================================
+  // Hybrid-Dash 3.0: CAR MODEL STATS (from the real cars) AND NPC DRIVING STYLES
+  // =====================================================================================
+  //
+  // BESTELLT: "Do the different car make and model have different statistics? If not, I want you to do the research
+  // and make the car make and models have different statistics based on their real world counter parts ... I want to
+  // see this graphically ... and maybe a way to compare it with other models. I want each NPC to have different
+  // driving styles, that can also be manually adjusted if needed. and show this graphically too."
+  //
+  // Until now CAR_MODELLE (90-ghosts.js) was a name only. Here every model gets the figures of the race car it stands
+  // for (the Carrera cars are GT3 / F1 liveries), four 0-100 ratings derived from them, and four BOUNDED factors the
+  // physics engine multiplies in (engine.modell, 40-physics.js: acceleration, top-speed ceiling, cornering grip,
+  // braking). GT3 cars are balance-of-performance cars in real life, so they stay within a few per cent of each other;
+  // the F1 car and the Beetle are the outliers. The option sliders keep working on top: the factors are a separate
+  // layer, all 1 for "not assigned", and off during the self-test suite.
+  //
+  // Figures: power and weight from the 2024 GT3 balance-of-performance sheets and the manufacturers where found; the
+  // ones marked "~" are estimates (no reliable published figure), see HD_MODELL_QUELLEN.
+
+  const HD_MODELL_SPECS = {
+    bmw:         { real: 'BMW M4 GT3', klasse: 'GT3', ps: 590, kg: 1265, kmh: 290, motor: '3.0 L Biturbo-R6', layout: 'Frontmittelmotor, Heckantrieb', handling: 72, bremsen: 74, schaetz: ['ps', 'kmh'] },
+    porsche911:  { real: 'Porsche 911 GT3 R (992)', klasse: 'GT3', ps: 565, kg: 1250, kmh: 290, motor: '4.2 L Boxer-6, Saugmotor', layout: 'Heckmotor, Heckantrieb', handling: 74, bremsen: 77, schaetz: ['kmh'] },
+    fordmustang: { real: 'Ford Mustang GT3', klasse: 'GT3', ps: 500, kg: 1300, kmh: 285, motor: '5.4 L V8, Saugmotor', layout: 'Frontmittelmotor, Heckantrieb', handling: 68, bremsen: 70, schaetz: ['ps', 'kg', 'kmh'] },
+    ferrari:     { real: 'Ferrari 296 GT3', klasse: 'GT3', ps: 600, kg: 1275, kmh: 290, motor: '3.0 L Biturbo-V6', layout: 'Mittelmotor, Heckantrieb', handling: 76, bremsen: 75, schaetz: ['ps', 'kmh'] },
+    audi:        { real: 'Audi R8 LMS GT3 evo II', klasse: 'GT3', ps: 585, kg: 1235, kmh: 285, motor: '5.2 L V10, Saugmotor', layout: 'Mittelmotor, Heckantrieb', handling: 75, bremsen: 74, schaetz: [] },
+    mclaren:     { real: 'McLaren 720S GT3 Evo', klasse: 'GT3', ps: 541, kg: 1330, kmh: 290, motor: '4.0 L Biturbo-V8', layout: 'Mittelmotor, Heckantrieb', handling: 77, bremsen: 73, schaetz: ['kg', 'kmh'] },
+    mercedes:    { real: 'Mercedes-AMG GT3 Evo', klasse: 'GT3', ps: 550, kg: 1285, kmh: 285, motor: '6.2 L V8, Saugmotor', layout: 'Frontmittelmotor, Heckantrieb', handling: 71, bremsen: 73, schaetz: ['ps', 'kmh'] },
+    redbull:     { real: 'Red Bull RB20 (Formel 1)', klasse: 'F1', ps: 1000, kg: 798, kmh: 350, motor: '1.6 L Turbo-V6-Hybrid', layout: 'Mittelmotor, Heckantrieb, Ground-Effect', handling: 100, bremsen: 100, schaetz: ['ps'] },
+    vwkaefer:    { real: 'VW Käfer 1300', klasse: 'Klassiker', ps: 44, kg: 800, kmh: 120, motor: '1.3 L Boxer-4, luftgekühlt', layout: 'Heckmotor, Heckantrieb', handling: 18, bremsen: 12, schaetz: [] },
+  };
+  const HD_MODELL_QUELLEN = [
+    'GT3 BoP 2024 (SRO / IMSA): BMW M4 GT3 1265 kg, Ferrari 296 GT3 1275 kg, Mercedes-AMG GT3 1285 kg, Porsche 911 GT3 R 1250 kg',
+    'Porsche Motorsport: 911 GT3 R (992) bis 565 PS',
+    'Audi Sport customer racing: R8 LMS GT3 evo II bis 585 PS, 1235 kg',
+    'McLaren 720S GT3 Evo: 541 PS (Automobilista 2 Fahrzeugdaten)',
+    'Red Bull RB20: ca. 1000 PS, 798 kg Mindestgewicht (FIA)',
+    'VW Käfer 1300: 44 PS, ca. 800 kg, 120 km/h',
+  ];
+  // Reference = an average GT3 car: its factors are 1.
+  const HD_REF = { accel: 70, top: 75, handling: 73, bremsen: 74 };
+  function hdWertRating(id) {
+    const s = HD_MODELL_SPECS[id];
+    if (!s) return null;
+    const pw = s.ps / s.kg * 1000;            // PS per tonne
+    const accel = Math.round(Math.max(0, Math.min(100, 100 * (Math.log(pw) - Math.log(40)) / (Math.log(1300) - Math.log(40)))));
+    const top = Math.round(Math.max(0, Math.min(100, (s.kmh - 80) / (360 - 80) * 100)));
+    const r = { accel, top, handling: s.handling, bremsen: s.bremsen, pw: Math.round(pw) };
+    r.gesamt = Math.round((r.accel + r.top + r.handling + r.bremsen) / 4);
+    return r;
+  }
+  function hdWertFaktoren(id) {
+    const r = hdWertRating(id);
+    if (!r) return { top: 1, accel: 1, brake: 1, grip: 1 };
+    const f = (wert, ref, k, lo, hi) => +Math.max(lo, Math.min(hi, 1 + (wert - ref) / 100 * k)).toFixed(3);
+    return {
+      accel: f(r.accel, HD_REF.accel, 1.0, 0.75, 1.15),
+      top: f(r.top, HD_REF.top, 0.6, 0.8, 1.12),
+      grip: f(r.handling, HD_REF.handling, 0.6, 0.85, 1.08),
+      brake: f(r.bremsen, HD_REF.bremsen, 0.8, 0.8, 1.1),
+    };
+  }
+  const HD_WERT_AN_STORE = 'hybriddash.modellwirkung';
+  function hdWertWirkungAn() { try { return localStorage.getItem(HD_WERT_AN_STORE) !== 'aus'; } catch (e) { return true; } }
+  function hdWertNeutral() {
+    try { if (typeof hdSuiteLaeuft === 'function' && hdSuiteLaeuft()) return true; } catch (e) { /* not ready */ }
+    return !hdWertWirkungAn();
+  }
+  function hdWertFuerAuto(car) {
+    if (!car || hdWertNeutral()) return { top: 1, accel: 1, brake: 1, grip: 1 };
+    return hdWertFaktoren(typeof carModellWert === 'function' ? carModellWert(car.modellId) : '');
+  }
+  // The NPC's target pace (a share of full speed) for this model: straights from top speed and acceleration, corners
+  // from grip. Called from the ghost driver (90-ghosts.js) right after the difficulty.
+  function hdModellTempo(car) {
+    const f = hdWertFuerAuto(car);
+    if (f.top === 1 && f.accel === 1 && f.grip === 1) return 1;
+    let x;
+    try { x = ghostTurnOf(car.tileCode) !== 0 ? Math.sqrt(f.grip) : Math.sqrt(f.top * f.accel); } catch (e) { x = 1; }
+    return Math.max(0.82, Math.min(1.08, x));
+  }
+  // Every engine gets the factors of the car it drives: players 1-3 and every NPC.
+  function hdWertMotorSetzen(motor, car) {
+    if (!motor) return;
+    const f = hdWertFuerAuto(car);
+    const m = motor.modell || (motor.modell = { top: 1, accel: 1, brake: 1, grip: 1 });
+    m.top = f.top; m.accel = f.accel; m.brake = f.brake; m.grip = f.grip;
+  }
+  function hdWertMotorenAbgleichen() {
+    try {
+      if (typeof physEngine !== 'undefined') hdWertMotorSetzen(physEngine, playerCar || garage.find((c) => c && c.role === 'player') || null);
+      if (typeof physEngine2 !== 'undefined') hdWertMotorSetzen(physEngine2, typeof playerCar2 !== 'undefined' ? playerCar2 : null);
+      if (typeof zusatzPlatz === 'function' && typeof SPIELER_MAX !== 'undefined') {
+        for (let nr = 3; nr <= SPIELER_MAX; nr++) { const z = zusatzPlatz(nr); if (z && z.car) hdWertMotorSetzen(z.motor, z.car); }
+      }
+      for (const c of garage) if (c && c.ghost && c.ghost.engine) hdWertMotorSetzen(c.ghost.engine, c);
+    } catch (e) { /* not ready */ }
+  }
+  setInterval(hdWertMotorenAbgleichen, 500);
+
+  // =====================================================================================
+  // NPC DRIVING STYLE: seven traits, 0-100, per car (device id), stored; generated once per car so every NPC differs
+  // =====================================================================================
+  //
+  // Each trait turns an EXISTING behaviour knob of the ghost driver (see ghostCharakter in 90-ghosts.js):
+  //   Overtaking      -> how often it launches a pass             (angriff 0.5 .. 1.5)
+  //   Defending       -> how often it covers the attacked side     (verteidigung 0.5 .. 1.5)
+  //   Consistency     -> how often it makes a mistake              (fehler 1.5 .. 0.5)
+  //   Cornering       -> how much speed it gives away in corners   (kurvenAbzug 1.2 .. 0.8)
+  //   Tyre / Fuel mgmt-> how long its stints are                   (pit window -2 .. +2 laps)
+  //   Wet weather     -> how much pace and how many mistakes rain costs it (x1.4 .. x0.6)
+  // The old per-race random "driver character" switch still works and varies around this base.
+  const HD_STIL_STORE = 'hybriddash.fahrstil.v1';
+  const HD_STIL_TRAITS = [
+    { k: 'ueberholen', de: 'Überholen' },
+    { k: 'verteidigen', de: 'Verteidigen' },
+    { k: 'konstanz', de: 'Konstanz' },
+    { k: 'kurven', de: 'Kurvenmut' },
+    { k: 'reifen', de: 'Reifenmanagement' },
+    { k: 'sprit', de: 'Spritmanagement' },
+    { k: 'regen', de: 'Regenfahren' },
+  ];
+  const HD_STIL_PRESETS = [
+    { id: 'ausgewogen', de: 'Ausgewogen', w: { ueberholen: 60, verteidigen: 60, konstanz: 60, kurven: 60, reifen: 60, sprit: 60, regen: 60 } },
+    { id: 'angreifer', de: 'Angreifer', w: { ueberholen: 92, verteidigen: 55, konstanz: 42, kurven: 85, reifen: 38, sprit: 45, regen: 60 } },
+    { id: 'verteidiger', de: 'Verteidiger', w: { ueberholen: 48, verteidigen: 94, konstanz: 78, kurven: 55, reifen: 70, sprit: 62, regen: 55 } },
+    { id: 'stratege', de: 'Stratege', w: { ueberholen: 55, verteidigen: 62, konstanz: 86, kurven: 50, reifen: 93, sprit: 90, regen: 58 } },
+    { id: 'regen', de: 'Regenkönig', w: { ueberholen: 66, verteidigen: 60, konstanz: 64, kurven: 66, reifen: 60, sprit: 55, regen: 96 } },
+    { id: 'rookie', de: 'Neuling', w: { ueberholen: 38, verteidigen: 32, konstanz: 28, kurven: 40, reifen: 35, sprit: 40, regen: 30 } },
+  ];
+  let hdStilDaten = null, hdStilVersion = 1;
+  const hdStilCache = new Map();
+  function hdStilAlle() {
+    if (!hdStilDaten) { try { hdStilDaten = JSON.parse(localStorage.getItem(HD_STIL_STORE) || '{}') || {}; } catch (e) { hdStilDaten = {}; } }
+    return hdStilDaten;
+  }
+  function hdStilSpeichern() {
+    hdStilVersion++;
+    try { localStorage.setItem(HD_STIL_STORE, JSON.stringify(hdStilAlle())); } catch (e) { /* private */ }
+  }
+  // A generated style: seeded from the device id, so the same car always starts with the same driver.
+  function hdStilErzeugen(seedText) {
+    let h = 2166136261;
+    for (const ch of String(seedText)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+    let a = h | 0;
+    const rnd = () => {   // mulberry32
+      a = (a + 0x6D2B79F5) | 0;
+      let x = Math.imul(a ^ (a >>> 15), 1 | a);
+      x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
+    for (let i = 0; i < 4; i++) rnd();
+    const w = {};
+    for (const tr of HD_STIL_TRAITS) w[tr.k] = 52 + ((rnd() + rnd()) / 2 - 0.5) * 60;
+    // A signature: one trait the driver is known for, one it is weak at - so every NPC reads differently.
+    const stark = HD_STIL_TRAITS[Math.floor(rnd() * HD_STIL_TRAITS.length)].k;
+    let schwach = HD_STIL_TRAITS[Math.floor(rnd() * HD_STIL_TRAITS.length)].k;
+    if (schwach === stark) schwach = HD_STIL_TRAITS[(HD_STIL_TRAITS.findIndex((x) => x.k === stark) + 3) % HD_STIL_TRAITS.length].k;
+    w[stark] += 28; w[schwach] -= 22;
+    for (const tr of HD_STIL_TRAITS) w[tr.k] = Math.round(Math.max(12, Math.min(97, w[tr.k])));
+    return w;
+  }
+  function hdStilId(car) { return car && car.device ? String(car.device.id) : ''; }
+  function hdStilWerte(car) {
+    const id = hdStilId(car);
+    if (!id) return hdStilErzeugen('leer');
+    const alle = hdStilAlle();
+    if (!alle[id]) { alle[id] = hdStilErzeugen(id); hdStilSpeichern(); }
+    const w = alle[id];
+    for (const tr of HD_STIL_TRAITS) if (typeof w[tr.k] !== 'number') w[tr.k] = 50;
+    return w;
+  }
+  function hdStilSetzen(car, k, v) {
+    const w = hdStilWerte(car);
+    w[k] = Math.round(Math.max(0, Math.min(100, +v || 0)));
+    hdStilSpeichern();
+  }
+  function hdStilGesamt(w) { return Math.round(HD_STIL_TRAITS.reduce((s, tr) => s + w[tr.k], 0) / HD_STIL_TRAITS.length); }
+  // The label under the name: the trait it is best at.
+  function hdStilTyp(w) {
+    const p = HD_STIL_PRESETS.find((x) => HD_STIL_TRAITS.every((tr) => x.w[tr.k] === w[tr.k]));
+    if (p) return t(p.de);
+    const best = HD_STIL_TRAITS.slice().sort((a, b) => w[b.k] - w[a.k])[0];
+    return ({ ueberholen: t('Angreifer'), verteidigen: t('Verteidiger'), konstanz: t('Fehlerlos'), kurven: t('Kurvenkünstler'),
+      reifen: t('Reifenflüsterer'), sprit: t('Spritsparer'), regen: t('Regenkönig') })[best.k];
+  }
+  function hdStilAus(car) {
+    if (!car || car.role !== 'ghost' || !car.device) return true;
+    try { if (typeof hdSuiteLaeuft === 'function' && hdSuiteLaeuft()) return true; } catch (e) { /* not ready */ }
+    return false;
+  }
+  // The style as ghost-character factors (cached: ghostCharakter runs every tick for every NPC).
+  function hdStilCharakter(car) {
+    if (hdStilAus(car)) return null;
+    const id = hdStilId(car);
+    const c = hdStilCache.get(id);
+    if (c && c.v === hdStilVersion) return c.ch;
+    const w = hdStilWerte(car);
+    const d = (k) => (w[k] - 50) / 50;
+    const ch = {
+      angriff: +(1 + 0.5 * d('ueberholen')).toFixed(3),
+      verteidigung: +(1 + 0.5 * d('verteidigen')).toFixed(3),
+      fehler: +(1 - 0.5 * d('konstanz')).toFixed(3),
+      kurvenAbzug: +(1 - 0.2 * d('kurven')).toFixed(3),
+      pitVersatz: Math.max(-2, Math.min(2, Math.round(1.2 * d('reifen') + 0.8 * d('sprit')))),
+      regen: +(1 - 0.4 * d('regen')).toFixed(3),
+    };
+    hdStilCache.set(id, { v: hdStilVersion, ch });
+    return ch;
+  }
+  function hdStilRegen(car) { const ch = hdStilCharakter(car); return ch ? ch.regen : 1; }
+  function hdStilPitFuerGhost(g) {
+    try { const car = garage.find((c) => c && c.ghost === g); const ch = hdStilCharakter(car); return ch ? ch.pitVersatz : 0; } catch (e) { return 0; }
+  }
+
+  // =====================================================================================
+  // THE CARDS: car stats (with compare) and driver style (editable), one modal
+  // =====================================================================================
+  let hdWertBox = null, hdWertZustand = null;
+  function hdWertEsc(x) { return String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
+  function hdWertModelle() { return CAR_MODELLE.filter((m) => m.id && HD_MODELL_SPECS[m.id]); }
+  function hdWertBoxBauen() {
+    if (hdWertBox) return;
+    hdWertBox = document.createElement('div');
+    hdWertBox.id = 'hd-wert'; hdWertBox.className = 'hd-gepaart hdw-modal'; hdWertBox.setAttribute('role', 'dialog');
+    hdWertBox.setAttribute('aria-modal', 'true'); hdWertBox.setAttribute('data-i18n-skip', '');
+    hdWertBox.hidden = true;
+    document.body.appendChild(hdWertBox);
+    hdWertBox.addEventListener('click', hdWertKlick);
+    hdWertBox.addEventListener('input', hdWertEingabe);
+    // Letting go of a bar: redraw once, so the comparison differences follow.
+    hdWertBox.addEventListener('change', (e) => { if (e.target.closest('[data-hdw-trait]')) { hdWertMalen(); try { hdSetupMalen(); } catch (er) { /* not open */ } } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && hdWertBox && !hdWertBox.hidden) hdWertZu(); });
+  }
+  function hdWertZu() { if (hdWertBox) hdWertBox.hidden = true; hdWertZustand = null; }
+  function hdWertKopf(titel) {
+    return '<div class="hdg-kopf"><b>' + hdWertEsc(titel) + '</b><button type="button" class="hdg-zu" data-hdw="zu" aria-label="' + hdWertEsc(t('Schließen')) + '">&#10005;</button></div>';
+  }
+  // One stat bar; with a comparison value a second, thin bar under it and the difference.
+  function hdWertBalken(label, wert, vergleich, farbe) {
+    const diff = vergleich == null ? '' : (wert === vergleich ? '<i class="hdw-d">=</i>'
+      : '<i class="hdw-d ' + (wert > vergleich ? 'plus' : 'minus') + '">' + (wert > vergleich ? '+' : '−') + Math.abs(wert - vergleich) + '</i>');
+    return '<div class="hdw-zeile"><span class="hdw-l">' + hdWertEsc(label) + '</span><b class="hdw-n">' + wert + '</b>' + diff
+      + '<span class="hdw-bar"><span class="hdw-fill" style="width:' + wert + '%' + (farbe ? ';--hdw-f:' + farbe : '') + '"></span>'
+      + (vergleich == null ? '' : '<span class="hdw-cmp" style="width:' + vergleich + '%"></span>') + '</span></div>';
+  }
+  function hdWertPfeil(D) { return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="' + (D < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+  function hdWertZahl(s, k, text) { return (s.schaetz || []).includes(k) ? '~' + text : text; }
+  // ---- car stats ----------------------------------------------------------------------------------------------------
+  function hdWertAuto(car, modellId) {
+    hdWertBoxBauen();
+    const liste = hdWertModelle();
+    let id = modellId || (car && typeof carModellWert === 'function' ? carModellWert(car.modellId) : '') || '';
+    if (!HD_MODELL_SPECS[id]) id = liste[0].id;
+    hdWertZustand = { art: 'auto', car: car || null, id, cmp: (hdWertZustand && hdWertZustand.art === 'auto') ? hdWertZustand.cmp : '' };
+    hdWertMalen();
+  }
+  function hdWertAutoHtml() {
+    const z = hdWertZustand, s = HD_MODELL_SPECS[z.id], r = hdWertRating(z.id), f = hdWertFaktoren(z.id);
+    const cmpR = z.cmp && z.cmp !== z.id ? hdWertRating(z.cmp) : null;
+    const name = t(carModellName(z.id));
+    const farbe = z.car ? carColor(z.car).hex : '';
+    const pz = (x) => (x >= 1 ? '+' : '−') + Math.abs(Math.round((x - 1) * 100)) + ' %';
+    const auf = z.car ? (typeof carModellWert === 'function' ? carModellWert(z.car.modellId) : '') : '';
+    let h = hdWertKopf(t('Fahrzeugwerte'));
+    h += '<div class="hdw-titel"><button type="button" class="k-arrow hdw-pf" data-hdw="modell" data-d="-1" aria-label="' + hdWertEsc(t('Vorherige')) + '">' + hdWertPfeil(-1) + '</button>'
+      + '<div class="hdw-name"><small>' + hdWertEsc(t(s.klasse)) + '</small><b>' + hdWertEsc(name) + '</b><span>' + hdWertEsc(t(s.real)) + '</span></div>'
+      + '<div class="hdw-gesamt"><b>' + r.gesamt + '</b><small>' + hdWertEsc(t('Gesamt')) + '</small></div>'
+      + '<button type="button" class="k-arrow hdw-pf" data-hdw="modell" data-d="1" aria-label="' + hdWertEsc(t('Nächste')) + '">' + hdWertPfeil(1) + '</button></div>';
+    h += '<div class="hdw-balken">'
+      + hdWertBalken(t('Beschleunigung'), r.accel, cmpR && cmpR.accel, farbe)
+      + hdWertBalken(t('Höchstgeschwindigkeit'), r.top, cmpR && cmpR.top, farbe)
+      + hdWertBalken(t('Handling'), r.handling, cmpR && cmpR.handling, farbe)
+      + hdWertBalken(t('Bremsen'), r.bremsen, cmpR && cmpR.bremsen, farbe)
+      + '</div>';
+    if (cmpR) h += '<p class="hdw-leg"><span class="hdw-leg-a"></span>' + hdWertEsc(name) + ' <span class="hdw-leg-b"></span>' + hdWertEsc(t(carModellName(z.cmp))) + ' (' + cmpR.gesamt + ')</p>';
+    h += '<div class="hdw-specs">'
+      + '<div><small>' + hdWertEsc(t('Leistung')) + '</small><b>' + hdWertZahl(s, 'ps', s.ps + ' PS') + '</b></div>'
+      + '<div><small>' + hdWertEsc(t('Gewicht')) + '</small><b>' + hdWertZahl(s, 'kg', s.kg + ' kg') + '</b></div>'
+      + '<div><small>' + hdWertEsc(t('PS je Tonne')) + '</small><b>' + r.pw + '</b></div>'
+      + '<div><small>' + hdWertEsc(t('Spitze')) + '</small><b>' + hdWertZahl(s, 'kmh', s.kmh + ' km/h') + '</b></div>'
+      + '<div class="breit"><small>' + hdWertEsc(t('Motor')) + '</small><b>' + hdWertEsc(t(s.motor)) + '</b></div>'
+      + '<div class="breit"><small>' + hdWertEsc(t('Bauart')) + '</small><b>' + hdWertEsc(t(s.layout)) + '</b></div>'
+      + '</div>';
+    h += '<p class="hdw-wirkung"><b>' + hdWertEsc(t('Im Spiel')) + ':</b> ' + hdWertEsc(t('Beschleunigung')) + ' ' + pz(f.accel)
+      + ' · ' + hdWertEsc(t('Spitze')) + ' ' + pz(Math.min(1, f.top)) + ' · ' + hdWertEsc(t('Kurvengrip')) + ' ' + pz(f.grip)
+      + ' · ' + hdWertEsc(t('Bremsen')) + ' ' + pz(f.brake) + (hdWertWirkungAn() ? '' : ' <i>(' + hdWertEsc(t('aus')) + ')</i>') + '</p>';
+    h += '<div class="hdw-cmpwahl"><span class="hds-l">' + hdWertEsc(t('Vergleichen mit')) + '</span><span class="hds-chips">'
+      + '<button type="button" data-hdw="cmp" data-id=""' + (!z.cmp ? ' class="an"' : '') + '>' + hdWertEsc(t('Keins')) + '</button>'
+      + hdWertModelle().filter((m) => m.id !== z.id).map((m) => '<button type="button" data-hdw="cmp" data-id="' + m.id + '"' + (z.cmp === m.id ? ' class="an"' : '') + '>' + hdWertEsc(t(m.name)) + '</button>').join('')
+      + '</span></div>';
+    h += '<div class="hdg-fuss">';
+    if (z.car) {
+      h += auf === z.id ? '<span class="hdw-ok">&#10003; ' + hdWertEsc(t('Modell von')) + ' ' + hdWertEsc(z.car.alias || garageLabel(z.car)) + '</span>'
+        : '<button type="button" class="primary" data-hdw="nehmen">' + hdWertEsc(t('Für dieses Auto übernehmen')) + ': ' + hdWertEsc(z.car.alias || garageLabel(z.car)) + '</button>';
+    }
+    h += '<label class="hdw-schalter"><input type="checkbox" data-hdw="wirkung"' + (hdWertWirkungAn() ? ' checked' : '') + '> ' + hdWertEsc(t('Modell beeinflusst die Fahrleistung')) + '</label></div>';
+    h += '<details class="hdw-quellen"><summary>' + hdWertEsc(t('Quellen und Schätzwerte')) + '</summary><ul>'
+      + HD_MODELL_QUELLEN.map((q) => '<li>' + hdWertEsc(t(q)) + '</li>').join('') + '</ul><p>' + hdWertEsc(t('„~“ = geschätzt: kein verlässlicher veröffentlichter Wert. Handling und Bremsen sind Bewertungen aus Bauart, Gewicht und Aerodynamik.')) + '</p></details>';
+    return h;
+  }
+  // ---- driver style ---------------------------------------------------------------------------------------------------
+  function hdWertStilListe() {
+    try { return garage.filter((c) => c && c.device && c.role === 'ghost'); } catch (e) { return []; }
+  }
+  function hdWertStil(car) {
+    if (!car) { car = hdWertStilListe()[0]; if (!car) return; }
+    hdWertBoxBauen();
+    hdWertZustand = { art: 'stil', car, cmp: '' };
+    hdWertMalen();
+  }
+  function hdWertStilHtml() {
+    const z = hdWertZustand, car = z.car, w = hdStilWerte(car);
+    const andere = hdWertStilListe().filter((c) => c !== car);
+    const cmpCar = z.cmp ? andere.find((c) => hdStilId(c) === z.cmp) : null;
+    const cw = cmpCar ? hdStilWerte(cmpCar) : null;
+    const farbe = carColor(car).hex;
+    const nr = typeof hdNummer === 'function' ? hdNummer(car) : '';
+    const stufe = car.ghostStufe === undefined || car.ghostStufe === null ? 1 : car.ghostStufe;
+    const liste = hdWertStilListe();
+    let h = hdWertKopf(t('Fahrstil'));
+    h += '<div class="hdw-titel hdw-fahrer" style="--f:' + hdWertEsc(farbe) + '">'
+      + (liste.length > 1 && liste.includes(car) ? '<button type="button" class="k-arrow hdw-pf" data-hdw="fahrer" data-d="-1" aria-label="' + hdWertEsc(t('Vorherige')) + '">' + hdWertPfeil(-1) + '</button>' : '')
+      + '<span class="hdw-bild">' + (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(car, 96) : '') + '</span>'
+      + '<div class="hdw-name"><small>' + hdWertEsc(hdStilTyp(w)) + '</small><b>' + (nr ? '<em>#' + hdWertEsc(nr) + '</em> ' : '') + hdWertEsc(car.alias || car.tag || garageLabel(car)) + '</b>'
+      + '<span>' + hdWertEsc(t(carModellName(car.modellId))) + '</span></div>'
+      + '<div class="hdw-gesamt"><b data-hdw-gesamt>' + hdStilGesamt(w) + '</b><small>' + hdWertEsc(t('Gesamt')) + '</small></div>'
+      + (liste.length > 1 && liste.includes(car) ? '<button type="button" class="k-arrow hdw-pf" data-hdw="fahrer" data-d="1" aria-label="' + hdWertEsc(t('Nächste')) + '">' + hdWertPfeil(1) + '</button>' : '')
+      + '</div>';
+    h += '<div class="hdw-balken hdw-stil">' + HD_STIL_TRAITS.map((tr) => {
+      const v = w[tr.k], c = cw ? cw[tr.k] : null;
+      const diff = c == null ? '' : (v === c ? '<i class="hdw-d">=</i>' : '<i class="hdw-d ' + (v > c ? 'plus' : 'minus') + '">' + (v > c ? '+' : '−') + Math.abs(v - c) + '</i>');
+      return '<div class="hdw-zeile"><span class="hdw-l">' + hdWertEsc(t(tr.de)) + '</span><b class="hdw-n" data-hdw-n="' + tr.k + '">' + v + '</b>' + diff
+        + '<span class="hdw-bar"><span class="hdw-fill" data-hdw-fill="' + tr.k + '" style="width:' + v + '%;--hdw-f:' + hdWertEsc(farbe) + '"></span>'
+        + (c == null ? '' : '<span class="hdw-cmp" style="width:' + c + '%"></span>')
+        + '<input type="range" min="0" max="100" step="1" value="' + v + '" data-hdw-trait="' + tr.k + '" aria-label="' + hdWertEsc(t(tr.de)) + '"></span></div>';
+    }).join('') + '</div>';
+    if (cmpCar) h += '<p class="hdw-leg"><span class="hdw-leg-a" style="background:' + hdWertEsc(farbe) + '"></span>' + hdWertEsc(car.alias || garageLabel(car)) + ' <span class="hdw-leg-b"></span>' + hdWertEsc(cmpCar.alias || garageLabel(cmpCar)) + ' (' + hdStilGesamt(cw) + ')</p>';
+    h += '<div class="hdw-cmpwahl"><span class="hds-l">' + hdWertEsc(t('Stil')) + '</span><span class="hds-chips">'
+      + HD_STIL_PRESETS.map((p) => '<button type="button" data-hdw="preset" data-id="' + p.id + '">' + hdWertEsc(t(p.de)) + '</button>').join('')
+      + '<button type="button" data-hdw="zufall">&#x1F3B2; ' + hdWertEsc(t('Zufällig')) + '</button></span></div>';
+    if (typeof GHOST_TEMPO_STUFEN !== 'undefined') {
+      h += '<div class="hdw-cmpwahl"><span class="hds-l">' + hdWertEsc(t('Schwierigkeit')) + '</span><span class="hds-chips">'
+        + GHOST_TEMPO_STUFEN.map((st, k) => '<button type="button" data-hdw="stufe" data-k="' + k + '"' + (k === stufe ? ' class="an"' : '') + '>' + hdWertEsc(st.max ? 'MAX' : t(st.label)) + '</button>').join('')
+        + '</span></div>';
+    }
+    if (andere.length) {
+      h += '<div class="hdw-cmpwahl"><span class="hds-l">' + hdWertEsc(t('Vergleichen mit')) + '</span><span class="hds-chips">'
+        + '<button type="button" data-hdw="cmpf" data-id=""' + (!z.cmp ? ' class="an"' : '') + '>' + hdWertEsc(t('Keins')) + '</button>'
+        + andere.map((c) => '<button type="button" data-hdw="cmpf" data-id="' + hdWertEsc(hdStilId(c)) + '"' + (z.cmp === hdStilId(c) ? ' class="an"' : '') + '>' + hdWertEsc(c.alias || garageLabel(c)) + '</button>').join('')
+        + '</span></div>';
+    }
+    h += '<p class="hdg-hinweis">' + hdWertEsc(car.role === 'ghost' ? t('Gilt, sobald dieses Auto als NPC fährt. Regler ziehen oder einen Stil wählen – gespeichert wird sofort.')
+      : t('Dieses Auto fährt gerade nicht als NPC – der Stil wird gespeichert und gilt, sobald es die Rolle NPC hat.')) + '</p>';
+    h += '<details class="hdw-quellen"><summary>' + hdWertEsc(t('Was die Werte bewirken')) + '</summary><ul>'
+      + '<li>' + hdWertEsc(t('Überholen: wie oft ein Überholmanöver angesetzt wird.')) + '</li>'
+      + '<li>' + hdWertEsc(t('Verteidigen: wie oft die angegriffene Seite gedeckt wird.')) + '</li>'
+      + '<li>' + hdWertEsc(t('Konstanz: wie selten Verbremser und Fehler passieren.')) + '</li>'
+      + '<li>' + hdWertEsc(t('Kurvenmut: wie wenig Tempo in Kurven abgegeben wird.')) + '</li>'
+      + '<li>' + hdWertEsc(t('Reifen- und Spritmanagement: längere Stints, später an die Box.')) + '</li>'
+      + '<li>' + hdWertEsc(t('Regenfahren: wie viel Tempo und wie viele Fehler Regen kostet.')) + '</li></ul></details>';
+    return h;
+  }
+  function hdWertMalen() {
+    if (!hdWertBox || !hdWertZustand) return;
+    hdWertBox.innerHTML = '<div class="hdg-karte hdw-karte">' + (hdWertZustand.art === 'auto' ? hdWertAutoHtml() : hdWertStilHtml()) + '</div>';
+    hdWertBox.hidden = false;
+  }
+  function hdWertKlick(e) {
+    if (e.target === hdWertBox) { hdWertZu(); return; }
+    const b = e.target.closest('[data-hdw]');
+    if (!b || !hdWertZustand) return;
+    const z = hdWertZustand, was = b.dataset.hdw;
+    if (was === 'zu') { hdWertZu(); return; }
+    if (was === 'wirkung') { try { localStorage.setItem(HD_WERT_AN_STORE, b.checked ? 'an' : 'aus'); } catch (er) { /* private */ } hdWertMotorenAbgleichen(); hdWertMalen(); return; }
+    if (was === 'modell') {
+      const l = hdWertModelle(), i = l.findIndex((m) => m.id === z.id);
+      z.id = l[(i + Number(b.dataset.d) + l.length) % l.length].id;
+      if (z.cmp === z.id) z.cmp = '';
+    } else if (was === 'cmp') { z.cmp = b.dataset.id || ''; }
+    else if (was === 'nehmen' && z.car) {
+      z.car.modellId = z.id;
+      try { carRemember(z.car); renderGarage(); renderRaceGrid(); } catch (er) { /* not ready */ }
+      hdWertMotorenAbgleichen();
+    } else if (was === 'fahrer') {
+      const l = hdWertStilListe(), i = l.indexOf(z.car);
+      z.car = l[(i + Number(b.dataset.d) + l.length) % l.length]; z.cmp = '';
+    } else if (was === 'cmpf') { z.cmp = b.dataset.id || ''; }
+    else if (was === 'preset') {
+      const p = HD_STIL_PRESETS.find((x) => x.id === b.dataset.id);
+      if (p) { Object.assign(hdStilWerte(z.car), p.w); hdStilSpeichern(); }
+    } else if (was === 'zufall') {
+      Object.assign(hdStilWerte(z.car), hdStilErzeugen(hdStilId(z.car) + ':' + Date.now() + ':' + Math.random())); hdStilSpeichern();
+    } else if (was === 'stufe') {
+      z.car.ghostStufe = +b.dataset.k;
+      try { if (typeof carRolleMerken === 'function') carRolleMerken(z.car); renderGarage(); } catch (er) { /* not ready */ }
+    } else return;
+    hdWertMalen();
+    try { if (typeof hdSetupMalen === 'function') hdSetupMalen(); } catch (er) { /* not open */ }
+  }
+  // Dragging a trait: update its number, bar and the overall without redrawing (the drag would end).
+  function hdWertEingabe(e) {
+    const r = e.target.closest('[data-hdw-trait]');
+    if (!r || !hdWertZustand || hdWertZustand.art !== 'stil') return;
+    const k = r.dataset.hdwTrait;
+    hdStilSetzen(hdWertZustand.car, k, r.value);
+    const w = hdStilWerte(hdWertZustand.car);
+    const n = hdWertBox.querySelector('[data-hdw-n="' + k + '"]'); if (n) n.textContent = w[k];
+    const f = hdWertBox.querySelector('[data-hdw-fill="' + k + '"]'); if (f) f.style.width = w[k] + '%';
+    const g = hdWertBox.querySelector('[data-hdw-gesamt]'); if (g) g.textContent = hdStilGesamt(w);
+    const typ = hdWertBox.querySelector('.hdw-fahrer .hdw-name small'); if (typ) typ.textContent = hdStilTyp(w);
+  }
+  // Buttons elsewhere (pre-race setup) open the cards by device id.
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('[data-hdw-auto],[data-hdw-stil]');
+    if (!a) return;
+    const id = a.dataset.hdwAuto || a.dataset.hdwStil;
+    let car = null;
+    try { car = garage.find((c) => c && c.device && String(c.device.id) === id) || null; } catch (er) { car = null; }
+    e.stopPropagation();
+    if (a.dataset.hdwStil !== undefined) { if (car) hdWertStil(car); } else hdWertAuto(car);
+  }, true);
+  window.HYBRIDDASH_WERTE = Object.freeze({ specs: HD_MODELL_SPECS, rating: hdWertRating, faktoren: hdWertFaktoren,
+    stil: hdStilWerte, charakter: hdStilCharakter, auto: hdWertAuto, fahrer: hdWertStil,
+    // for tests
+    _garage: () => garage, _ghostCharakter: (c) => ghostCharakter(c), _motor: () => physEngine.modell,
+    _abgleichen: hdWertMotorenAbgleichen, _offtrackSitzung: () => hdOfftrackSitzung(), _modellTempo: (c) => hdModellTempo(c) });
 
   // ---- ENDE DES GEMEINSAMEN GUELTIGKEITSBEREICHS --------------------------------
   //
