@@ -6386,7 +6386,8 @@
   body.k-menue header#k-kopf::after { display: none; }
   /* FESTE MENUE-LEISTE: beim Scrollen durch Optionen (oder jedes andere Menue) bleiben die Reiter oben
      stehen. Der Inhalt laeuft darunter weg; der Hintergrund ist deshalb fast deckend. */
-  body.k-menue header#k-kopf { position: sticky; top: 0; z-index: 64; background: rgba(8,8,11,.97); }
+  body.k-menue > #hd-banner { position: sticky; top: 0; z-index: 65; background: rgba(8,8,11,.97); }
+  body.k-menue header#k-kopf { position: sticky; top: var(--hd-banner-h, 0px); z-index: 64; background: rgba(8,8,11,.97); }
   body.k-menue:not(.k-kacheln) > #hd-banner .hd-banner-knoepfe { display: none; }
   @media (min-width: 900px) {
     body.k-menue #k-status, body.k-menue #hd-lang { position: fixed; top: 22px; z-index: 70; }

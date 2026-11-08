@@ -135,3 +135,16 @@
   setInterval(() => { try { if (kAktiverTab() === 'fahren') hdHmFahrer(); } catch (e) { /* not ready */ } }, 1000);
   if (typeof i18nOnLangChange === 'function') i18nOnLangChange(() => { hdHmSchluessel = ''; hdHmFahrer(); });
   window.HYBRIDDASH_HAUPTMENUE = Object.freeze({ malen: () => { hdHmSchluessel = ''; hdHauptmenue(); } });
+
+// FESTE KOPFZEILE IN MENUES: Logo-Leiste (#hd-banner) und Reiterleiste (#k-kopf) bleiben beim Scrollen oben.
+// Die Reiterleiste klebt unter der Logo-Leiste; ihre Hoehe wird hier gemessen (schwankt mit Breite und Sprache).
+// Die Leiste entsteht erst beim Aufbau (98l-hd-ui.js) und kann ihre Hoehe aendern - darum alle 400 ms nachsehen.
+// Das ist billig (eine Hoehe lesen) und funktioniert ohne Beobachter, die in manchen Browsern nicht feuern.
+setInterval(() => {
+  try {
+    const b = document.getElementById('hd-banner');
+    if (!b) return;
+    const v = b.offsetHeight + 'px';
+    if (document.documentElement.style.getPropertyValue('--hd-banner-h') !== v) document.documentElement.style.setProperty('--hd-banner-h', v);
+  } catch (e) { /* beim Laden */ }
+}, 400);

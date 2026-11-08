@@ -6386,7 +6386,8 @@
   body.k-menue header#k-kopf::after { display: none; }
   /* FESTE MENUE-LEISTE: beim Scrollen durch Optionen (oder jedes andere Menue) bleiben die Reiter oben
      stehen. Der Inhalt laeuft darunter weg; der Hintergrund ist deshalb fast deckend. */
-  body.k-menue header#k-kopf { position: sticky; top: 0; z-index: 64; background: rgba(8,8,11,.97); }
+  body.k-menue > #hd-banner { position: sticky; top: 0; z-index: 65; background: rgba(8,8,11,.97); }
+  body.k-menue header#k-kopf { position: sticky; top: var(--hd-banner-h, 0px); z-index: 64; background: rgba(8,8,11,.97); }
   body.k-menue:not(.k-kacheln) > #hd-banner .hd-banner-knoepfe { display: none; }
   @media (min-width: 900px) {
     body.k-menue #k-status, body.k-menue #hd-lang { position: fixed; top: 22px; z-index: 70; }
@@ -127137,6 +127138,19 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   setInterval(() => { try { if (kAktiverTab() === 'fahren') hdHmFahrer(); } catch (e) { /* not ready */ } }, 1000);
   if (typeof i18nOnLangChange === 'function') i18nOnLangChange(() => { hdHmSchluessel = ''; hdHmFahrer(); });
   window.HYBRIDDASH_HAUPTMENUE = Object.freeze({ malen: () => { hdHmSchluessel = ''; hdHauptmenue(); } });
+
+// FESTE KOPFZEILE IN MENUES: Logo-Leiste (#hd-banner) und Reiterleiste (#k-kopf) bleiben beim Scrollen oben.
+// Die Reiterleiste klebt unter der Logo-Leiste; ihre Hoehe wird hier gemessen (schwankt mit Breite und Sprache).
+// Die Leiste entsteht erst beim Aufbau (98l-hd-ui.js) und kann ihre Hoehe aendern - darum alle 400 ms nachsehen.
+// Das ist billig (eine Hoehe lesen) und funktioniert ohne Beobachter, die in manchen Browsern nicht feuern.
+setInterval(() => {
+  try {
+    const b = document.getElementById('hd-banner');
+    if (!b) return;
+    const v = b.offsetHeight + 'px';
+    if (document.documentElement.style.getPropertyValue('--hd-banner-h') !== v) document.documentElement.style.setProperty('--hd-banner-h', v);
+  } catch (e) { /* beim Laden */ }
+}, 400);
   // =====================================================================================
   // Hybrid-Dash 3.0: SKIP THE START-OF-SESSION ANNOUNCEMENTS
   // =====================================================================================
