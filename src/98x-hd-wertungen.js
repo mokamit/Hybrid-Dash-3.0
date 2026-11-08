@@ -433,4 +433,4 @@
     stil: hdStilWerte, charakter: hdStilCharakter, auto: hdWertAuto, fahrer: hdWertStil,
     // for tests
     _garage: () => garage, _ghostCharakter: (c) => ghostCharakter(c), _motor: () => physEngine.modell,
-    _abgleichen: hdWertMotorenAbgleichen, _vorStart: () => hdVorStartGesperrt(), _offtrackSitzung: () => hdOfftrackSitzung(), _modellTempo: (c) => hdModellTempo(c) });
+    _abgleichen: hdWertMotorenAbgleichen, _vorStart: () => hdVorStartGesperrt(), _menue: () => hdMenueGesperrt(), _offtrackSitzung: () => hdOfftrackSitzung(), _modellTempo: (c) => hdModellTempo(c) });

@@ -510,8 +510,14 @@
   function hdChipAuffrischen() {
     const st = $('k-status'), alt = $('hd-relay-chip');
     if (!st) return;
-    if (alt) alt.remove();
-    hdRelayChip(st);
+    // v3.0 GEMELDET: "the icons keep flipping and switching positions" - the chip was removed and appended at the
+    // END, behind the mute button, every time it refreshed. Now it takes its old place (or goes before the mute).
+    const tmp = document.createElement('span');
+    hdRelayChip(tmp);
+    const neu = tmp.firstChild;
+    if (!neu) return;
+    if (alt && alt.parentNode === st) alt.replaceWith(neu);
+    else { if (alt) alt.remove(); st.insertBefore(neu, $('hd-stumm-knopf') && $('hd-stumm-knopf').parentNode === st ? $('hd-stumm-knopf') : null); }
   }
   function hdRelayOeffnen(rolle) {
     const box = $('hd-relay');

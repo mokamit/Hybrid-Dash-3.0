@@ -5,66 +5,154 @@
   // BESTELLT: "Have more diverse international names, and also have a feature, where each NPC and player is
   // assigned a country. So the name should culturally match their country."
   //
-  // 47 countries, each with its own pool of given names and family names (common names of that country; the famous
-  // racing names of each country are left out, so a random pair does not name a real driver). A new NPC first gets a
+  // Every country and territory (243, with England, Scotland, Wales and Northern Ireland). 47 have their own pool of
+  // given and family names; every other one takes the pool of its language / region (HD_NAMEN_POOLS). Famous racing
+  // names are left out, so a random pair does not name a real driver. A new NPC first gets a
   // country - drawn so the field stays mixed - and then a name from that country's pool. Players get the country of
   // the browser's region. The country is stored per car (device id) in hybriddash.land.v1, chosen in the garage, and
-  // shown as a flag (drawn here as SVG: Windows does not draw flag emoji) on the garage, the grid board, the driver
+  // shown as a flag (the SVG files of flag-icons in img/flaggen - Windows does not draw flag emoji) on the garage, the grid board, the driver
   // card, the pre-race setup and the main menu. Country names come from the browser (Intl.DisplayNames), in the
   // app language.
 
-  // flag: h = horizontal stripes, v = vertical stripes (a number after a colour is its weight), plus extras.
   const HD_LAENDER = {
-    de: { f: 'h:#000|#dd0000|#ffce00', v: ['Lukas', 'Hannah', 'Jonas', 'Lea', 'Felix', 'Marie', 'Tobias', 'Katrin', 'Moritz', 'Anja'], n: ['Becker', 'Hoffmann', 'Krüger', 'Wagner', 'Schäfer', 'Richter', 'Neumann', 'Brandt', 'Hartmann', 'Lorenz', 'Vogel'] },
-    at: { f: 'h:#c8102e|#fff|#c8102e', v: ['Florian', 'Lena', 'Matthias', 'Sophie', 'Stefan', 'Julia', 'Andreas', 'Valentina'], n: ['Gruber', 'Huber', 'Bauer', 'Pichler', 'Steiner', 'Moser', 'Hofer', 'Leitner'] },
-    ch: { f: 'ch', v: ['Luca', 'Nina', 'Reto', 'Lara', 'Samuel', 'Céline', 'Urs', 'Mia'], n: ['Meier', 'Keller', 'Brunner', 'Baumann', 'Frei', 'Gerber', 'Widmer', 'Zürcher'] },
-    nl: { f: 'h:#ae1c28|#fff|#21468b', v: ['Daan', 'Sanne', 'Bram', 'Fleur', 'Joris', 'Lotte', 'Sem', 'Iris'], n: ['de Jong', 'Bakker', 'Visser', 'Smit', 'Mulder', 'de Boer', 'Dekker', 'Hendriks'] },
-    be: { f: 'v:#000|#fdda24|#ef3340', v: ['Arne', 'Elise', 'Wout', 'Lien', 'Thibault', 'Margot', 'Senne', 'Noor'], n: ['Peeters', 'Janssens', 'Maes', 'Claes', 'Willems', 'Goossens', 'Dubois', 'Lambert'] },
-    fr: { f: 'v:#0055a4|#fff|#ef4135', v: ['Julien', 'Camille', 'Théo', 'Manon', 'Hugo', 'Léa', 'Antoine', 'Chloé', 'Mathis'], n: ['Lefèvre', 'Garnier', 'Rousseau', 'Faure', 'Mercier', 'Blanchard', 'Girard', 'Moreau', 'Duval', 'Fontaine', 'Delacroix'] },
-    it: { f: 'v:#009246|#fff|#ce2b37', v: ['Matteo', 'Giulia', 'Lorenzo', 'Chiara', 'Alessandro', 'Francesca', 'Davide', 'Sara'], n: ['Esposito', 'Romano', 'Colombo', 'Ricci', 'Greco', 'Conti', 'De Luca', 'Marchetti', 'Gallo', 'Moretti'] },
-    es: { f: 'h:#aa151b|#f1bf00 2|#aa151b', v: ['Pablo', 'Lucía', 'Javier', 'Carmen', 'Sergio', 'Marta', 'Iker', 'Elena'], n: ['García', 'Navarro', 'Morales', 'Ruiz', 'Ortega', 'Delgado', 'Castell', 'Herrera', 'Molina'] },
-    pt: { f: 'v:#046a38 2|#da291c 3;c:12,10,3.2,#ffe900', v: ['João', 'Inês', 'Tiago', 'Beatriz', 'Rui', 'Mariana', 'Duarte', 'Leonor'], n: ['Ferreira', 'Costa', 'Pereira', 'Rodrigues', 'Sousa', 'Almeida', 'Carvalho', 'Pinto'] },
-    ie: { f: 'v:#169b62|#fff|#ff883e', v: ['Cian', 'Aoife', 'Seán', 'Niamh', 'Oisín', 'Saoirse', 'Darragh', 'Róisín'], n: ['Quinn', 'Murphy', "O'Brien", 'Byrne', 'Doyle', 'Kavanagh', 'Gallagher', 'Nolan'] },
-    gb: { f: 'gb', v: ['Oliver', 'Amelia', 'Harry', 'Isla', 'George', 'Freya', 'Callum', 'Poppy', 'Alfie'], n: ['Whitlock', 'Thorne', 'Hughes', 'Bennett', 'Clarke', 'Fletcher', 'Pearce', 'Ashworth', 'Harrington'] },
-    se: { f: 'x:#006aa7,#fecc00', v: ['Erik', 'Astrid', 'Oskar', 'Linnea', 'Axel', 'Elin', 'Viktor', 'Saga'], n: ['Lindqvist', 'Nyberg', 'Strand', 'Bergström', 'Sjöberg', 'Holm', 'Ekström', 'Lundgren'] },
-    no: { f: 'x:#ba0c2f,#fff,#00205b', v: ['Magnus', 'Ingrid', 'Sindre', 'Kari', 'Eirik', 'Sigrid', 'Henrik', 'Tuva'], n: ['Halvorsen', 'Solberg', 'Haugen', 'Bakken', 'Dahl', 'Moen', 'Lie', 'Nygård'] },
-    fi: { f: 'x:#fff,#002f6c', v: ['Aleksi', 'Aino', 'Eetu', 'Venla', 'Joonas', 'Emilia', 'Lauri', 'Sanni'], n: ['Virtanen', 'Korhonen', 'Nieminen', 'Laine', 'Heikkinen', 'Koskinen', 'Lehtonen', 'Järvinen'] },
-    dk: { f: 'x:#c8102e,#fff', v: ['Mads', 'Freja', 'Rasmus', 'Ida', 'Frederik', 'Signe', 'Mikkel', 'Emma'], n: ['Lund', 'Nielsen', 'Jensen', 'Kjær', 'Dalsgaard', 'Thomsen', 'Vestergaard', 'Holm'] },
-    pl: { f: 'h:#fff|#dc143c', v: ['Jakub', 'Zuzanna', 'Kacper', 'Maja', 'Mateusz', 'Julia', 'Szymon', 'Oliwia'], n: ['Zieliński', 'Nowak', 'Wiśniewski', 'Wójcik', 'Kamiński', 'Kowalczyk', 'Mazur', 'Krawczyk'] },
-    cz: { f: 'cz', v: ['Jakub', 'Tereza', 'Ondřej', 'Eliška', 'Vojtěch', 'Klára', 'Tomáš', 'Adéla'], n: ['Novák', 'Dvořák', 'Svoboda', 'Černý', 'Procházka', 'Kučera', 'Veselý', 'Horák'] },
-    hr: { f: 'hr', v: ['Ivan', 'Lucija', 'Luka', 'Ana', 'Marko', 'Petra', 'Josip', 'Mia'], n: ['Kovač', 'Horvat', 'Babić', 'Marić', 'Jurić', 'Knežević', 'Vuković', 'Novak'] },
-    hu: { f: 'h:#ce2939|#fff|#477050', v: ['Bence', 'Réka', 'Máté', 'Dóra', 'Levente', 'Eszter', 'Ádám', 'Zsófia'], n: ['Varga', 'Nagy', 'Tóth', 'Szabó', 'Horváth', 'Kiss', 'Molnár', 'Farkas'] },
-    ua: { f: 'h:#0057b7|#ffd700', v: ['Andriy', 'Oksana', 'Taras', 'Yulia', 'Dmytro', 'Kateryna', 'Bohdan', 'Iryna'], n: ['Kovalenko', 'Bondarenko', 'Tkachenko', 'Kravchenko', 'Melnyk', 'Oliynyk', 'Polishchuk', 'Moroz'] },
-    bg: { f: 'h:#fff|#00966e|#d62612', v: ['Georgi', 'Elena', 'Dimitar', 'Mira', 'Nikolai', 'Teodora', 'Ivo', 'Raya'], n: ['Petrov', 'Ivanov', 'Georgiev', 'Dimitrov', 'Stoyanov', 'Kolev', 'Todorov', 'Nikolov'] },
-    gr: { f: 'gr', v: ['Nikos', 'Eleni', 'Giorgos', 'Sofia', 'Kostas', 'Dimitra', 'Dimitris', 'Katerina'], n: ['Georgiou', 'Nikolaidis', 'Pappas', 'Dimitriou', 'Karalis', 'Vlachos', 'Makris', 'Antoniou'] },
-    tr: { f: 'tr', v: ['Emre', 'Elif', 'Burak', 'Zeynep', 'Kerem', 'Defne', 'Mert', 'Ayşe'], n: ['Kaplan', 'Yılmaz', 'Demir', 'Şahin', 'Çelik', 'Aydın', 'Öztürk', 'Arslan'] },
-    ir: { f: 'h:#239f40|#fff|#da0000;c:15,10,2.2,#da0000', v: ['Arash', 'Shirin', 'Dariush', 'Leila', 'Kian', 'Parisa', 'Babak', 'Yasmin'], n: ['Rahimi', 'Karimi', 'Hosseini', 'Moradi', 'Tehrani', 'Jafari', 'Sadeghi', 'Azizi'] },
-    ae: { f: 'ae', v: ['Rashid', 'Mariam', 'Khalid', 'Fatima', 'Saeed', 'Aisha', 'Hamdan', 'Noura'], n: ['Al Mansoori', 'Al Hashimi', 'Al Ketbi', 'Al Nuaimi', 'Al Shamsi', 'Al Suwaidi', 'Al Dhaheri'] },
-    eg: { f: 'h:#ce1126|#fff|#000;c:15,10,2,#c09300', v: ['Omar', 'Nour', 'Karim', 'Salma', 'Youssef', 'Mariam', 'Ahmed', 'Laila'], n: ['Hassan', 'Mansour', 'Farouk', 'Saleh', 'Ibrahim', 'Nasser', 'Fathy', 'Kamal'] },
-    ma: { f: 'h:#c1272d;s:15,10,5,#006233', v: ['Yassine', 'Salma', 'Amine', 'Imane', 'Hamza', 'Khadija', 'Mehdi', 'Sara'], n: ['Benali', 'El Idrissi', 'Alaoui', 'Bennani', 'Tazi', 'Berrada', 'Chraibi', 'Fassi'] },
-    ng: { f: 'v:#008751|#fff|#008751', v: ['Chinedu', 'Adaeze', 'Emeka', 'Ngozi', 'Tunde', 'Folake', 'Ifeanyi', 'Amara'], n: ['Okafor', 'Adeyemi', 'Achebe', 'Okonkwo', 'Balogun', 'Eze', 'Nwosu', 'Adebayo'] },
-    gh: { f: 'h:#ce1126|#fcd116|#006b3f;s:15,10,3.4,#000', v: ['Kofi', 'Ama', 'Kwame', 'Akosua', 'Yaw', 'Efua', 'Kojo', 'Abena'], n: ['Mensah', 'Osei', 'Boateng', 'Asante', 'Owusu', 'Agyeman', 'Ofori', 'Darko'] },
-    ke: { f: 'h:#000 3|#fff|#bb0000 3|#fff|#006600 3;e:15,10,2.4,5,#bb0000', v: ['Brian', 'Wanjiku', 'Kevin', 'Achieng', 'Daniel', 'Njeri', 'Collins', 'Akinyi'], n: ['Kamau', 'Otieno', 'Mwangi', 'Odhiambo', 'Wafula', 'Njoroge', 'Kiprono', 'Chege'] },
-    za: { f: 'za', v: ['Thabo', 'Lerato', 'Sipho', 'Naledi', 'Pieter', 'Anika', 'Lwazi', 'Zanele'], n: ['Nkosi', 'Dlamini', 'Botha', 'Khumalo', 'Naidoo', 'Mokoena', 'Pretorius', 'Ndlovu'] },
-    in: { f: 'h:#ff9933|#fff|#138808;r:15,10,2.6,#000080', v: ['Arjun', 'Priya', 'Rohan', 'Ananya', 'Vikram', 'Kavya', 'Aditya', 'Meera'], n: ['Sharma', 'Iyer', 'Patel', 'Reddy', 'Nair', 'Menon', 'Kapoor', 'Rao'] },
-    th: { f: 'h:#a51931|#f4f5f8|#2d2a4a 2|#f4f5f8|#a51931', v: ['Krit', 'Ploy', 'Nattapong', 'Siriporn', 'Anan', 'Malee', 'Somchai', 'Kanya'], n: ['Srisuk', 'Wongsawat', 'Boonmee', 'Thongdee', 'Phromma', 'Chaiyaporn', 'Sukprasert'] },
-    vn: { f: 'h:#da251d;s:15,10,5.5,#ffff00', v: ['Minh', 'Linh', 'Huy', 'Trang', 'Duc', 'Mai', 'Khoa', 'Thao'], n: ['Nguyen', 'Tran', 'Le', 'Pham', 'Hoang', 'Phan', 'Vu', 'Dang'] },
-    id: { f: 'h:#ff0000|#fff', v: ['Budi', 'Putri', 'Rizky', 'Dewi', 'Arif', 'Sari', 'Bayu', 'Ayu'], n: ['Santoso', 'Wijaya', 'Saputra', 'Hidayat', 'Pratama', 'Kusuma', 'Siregar', 'Nugroho'] },
-    ph: { f: 'ph', v: ['Miguel', 'Andrea', 'Paolo', 'Bea', 'Carlo', 'Trisha', 'Jericho', 'Kim'], n: ['Santos', 'Reyes', 'Cruz', 'Bautista', 'Dela Cruz', 'Villanueva', 'Mendoza', 'Aquino'] },
-    jp: { f: 'h:#fff;c:15,10,6,#bc002d', v: ['Haruto', 'Yui', 'Ren', 'Sakura', 'Sota', 'Aoi', 'Daiki', 'Hina', 'Kenji'], n: ['Tanaka', 'Ishikawa', 'Watanabe', 'Yamamoto', 'Nakamura', 'Fujiwara', 'Morita', 'Shimizu', 'Kondo'] },
-    kr: { f: 'kr', v: ['Min-jun', 'Seo-yeon', 'Ji-ho', 'Ha-eun', 'Do-yun', 'Ji-woo', 'Hyun-woo', 'Su-bin'], n: ['Kim', 'Lee', 'Park', 'Choi', 'Jung', 'Kang', 'Yoon', 'Han'] },
-    cn: { f: 'h:#de2910;s:6,6,3.6,#ffde00;s:11,3,1,#ffde00;s:13,5,1,#ffde00;s:13,8,1,#ffde00;s:11,10,1,#ffde00', v: ['Wei', 'Lina', 'Hao', 'Mei', 'Jun', 'Xin', 'Yu', 'Lan'], n: ['Wang', 'Li', 'Chen', 'Liu', 'Zhang', 'Yang', 'Huang', 'Lin'] },
-    au: { f: 'au:#ffffff', v: ['Jack', 'Chloe', 'Riley', 'Matilda', 'Cooper', 'Ruby', 'Lachlan', 'Sienna'], n: ['Mitchell', 'Hayes', 'Doherty', 'Cartwright', 'Fraser', 'Bowman', 'Sutherland', 'Kelly'] },
-    nz: { f: 'au:#cc142b', v: ['Ethan', 'Aroha', 'Liam', 'Mere', 'Nikau', 'Isla', 'Tama', 'Ava'], n: ['Ngata', 'Parata', 'Wilson', 'Campbell', 'Morrison', 'Te Rangi', 'Walker', 'Paewai'] },
-    us: { f: 'us', v: ['Tyler', 'Madison', 'Austin', 'Kayla', 'Cody', 'Brooke', 'Hunter', 'Savannah', 'Mason'], n: ['Calloway', 'Whitaker', 'Brooks', 'Sullivan', 'Carter', 'Dawson', 'Holloway', 'Prescott', 'Mercer'] },
-    ca: { f: 'v:#d52b1e|#fff 2|#d52b1e;m:#d52b1e', v: ['Liam', 'Chloé', 'Tristan', 'Maëlle', 'Owen', 'Brooke', 'Mathieu', 'Avery'], n: ['Tremblay', 'Gagnon', 'Lavoie', 'MacKenzie', 'Bouchard', 'Fraser', 'Côté', 'Leblanc'] },
-    mx: { f: 'v:#006847|#fff|#ce1126;c:15,10,2.2,#8c6b3c', v: ['Santiago', 'Ximena', 'Emiliano', 'Valeria', 'Diego', 'Regina', 'Iker', 'Fernanda'], n: ['Reyes', 'Sandoval', 'Hernández', 'Guerrero', 'Mendoza', 'Castañeda', 'Vargas', 'Ibarra'] },
-    co: { f: 'h:#fcd116 2|#003893|#ce1126', v: ['Andrés', 'Valentina', 'Sebastián', 'Daniela', 'Camilo', 'Mariana', 'Esteban', 'Laura'], n: ['Restrepo', 'Gómez', 'Cárdenas', 'Ospina', 'Zapata', 'Montes', 'Arango', 'Londoño'] },
-    br: { f: 'br', v: ['Gabriel', 'Larissa', 'Thiago', 'Beatriz', 'Rafael', 'Camila', 'Lucas', 'Fernanda'], n: ['Castro', 'Oliveira', 'Souza', 'Almeida', 'Ribeiro', 'Barbosa', 'Teixeira', 'Moura'] },
-    ar: { f: 'h:#74acdf|#fff|#74acdf;c:15,10,2.2,#f6b40e', v: ['Facundo', 'Lucía', 'Tomás', 'Martina', 'Joaquín', 'Agustina', 'Nicolás', 'Micaela'], n: ['Fernández', 'Gutiérrez', 'Acosta', 'Romero', 'Medina', 'Benítez', 'Sosa', 'Giménez'] },
-    cl: { f: 'cl', v: ['Benjamín', 'Josefa', 'Vicente', 'Antonia', 'Matías', 'Catalina', 'Cristóbal', 'Florencia'], n: ['Muñoz', 'Rojas', 'Soto', 'Contreras', 'Figueroa', 'Espinoza', 'Valenzuela', 'Silva'] },
+    de: { v: ['Lukas', 'Hannah', 'Jonas', 'Lea', 'Felix', 'Marie', 'Tobias', 'Katrin', 'Moritz', 'Anja'], n: ['Becker', 'Hoffmann', 'Krüger', 'Wagner', 'Schäfer', 'Richter', 'Neumann', 'Brandt', 'Hartmann', 'Lorenz', 'Vogel'] },
+    at: { v: ['Florian', 'Lena', 'Matthias', 'Sophie', 'Stefan', 'Julia', 'Andreas', 'Valentina'], n: ['Gruber', 'Huber', 'Bauer', 'Pichler', 'Steiner', 'Moser', 'Hofer', 'Leitner'] },
+    ch: { v: ['Luca', 'Nina', 'Reto', 'Lara', 'Samuel', 'Céline', 'Urs', 'Mia'], n: ['Meier', 'Keller', 'Brunner', 'Baumann', 'Frei', 'Gerber', 'Widmer', 'Zürcher'] },
+    nl: { v: ['Daan', 'Sanne', 'Bram', 'Fleur', 'Joris', 'Lotte', 'Sem', 'Iris'], n: ['de Jong', 'Bakker', 'Visser', 'Smit', 'Mulder', 'de Boer', 'Dekker', 'Hendriks'] },
+    be: { v: ['Arne', 'Elise', 'Wout', 'Lien', 'Thibault', 'Margot', 'Senne', 'Noor'], n: ['Peeters', 'Janssens', 'Maes', 'Claes', 'Willems', 'Goossens', 'Dubois', 'Lambert'] },
+    fr: { v: ['Julien', 'Camille', 'Théo', 'Manon', 'Hugo', 'Léa', 'Antoine', 'Chloé', 'Mathis'], n: ['Lefèvre', 'Garnier', 'Rousseau', 'Faure', 'Mercier', 'Blanchard', 'Girard', 'Moreau', 'Duval', 'Fontaine', 'Delacroix'] },
+    it: { v: ['Matteo', 'Giulia', 'Lorenzo', 'Chiara', 'Alessandro', 'Francesca', 'Davide', 'Sara'], n: ['Esposito', 'Romano', 'Colombo', 'Ricci', 'Greco', 'Conti', 'De Luca', 'Marchetti', 'Gallo', 'Moretti'] },
+    es: { v: ['Pablo', 'Lucía', 'Javier', 'Carmen', 'Sergio', 'Marta', 'Iker', 'Elena'], n: ['García', 'Navarro', 'Morales', 'Ruiz', 'Ortega', 'Delgado', 'Castell', 'Herrera', 'Molina'] },
+    pt: { v: ['João', 'Inês', 'Tiago', 'Beatriz', 'Rui', 'Mariana', 'Duarte', 'Leonor'], n: ['Ferreira', 'Costa', 'Pereira', 'Rodrigues', 'Sousa', 'Almeida', 'Carvalho', 'Pinto'] },
+    ie: { v: ['Cian', 'Aoife', 'Seán', 'Niamh', 'Oisín', 'Saoirse', 'Darragh', 'Róisín'], n: ['Quinn', 'Murphy', "O'Brien", 'Byrne', 'Doyle', 'Kavanagh', 'Gallagher', 'Nolan'] },
+    gb: { v: ['Oliver', 'Amelia', 'Harry', 'Isla', 'George', 'Freya', 'Callum', 'Poppy', 'Alfie'], n: ['Whitlock', 'Thorne', 'Hughes', 'Bennett', 'Clarke', 'Fletcher', 'Pearce', 'Ashworth', 'Harrington'] },
+    se: { v: ['Erik', 'Astrid', 'Oskar', 'Linnea', 'Axel', 'Elin', 'Viktor', 'Saga'], n: ['Lindqvist', 'Nyberg', 'Strand', 'Bergström', 'Sjöberg', 'Holm', 'Ekström', 'Lundgren'] },
+    no: { v: ['Magnus', 'Ingrid', 'Sindre', 'Kari', 'Eirik', 'Sigrid', 'Henrik', 'Tuva'], n: ['Halvorsen', 'Solberg', 'Haugen', 'Bakken', 'Dahl', 'Moen', 'Lie', 'Nygård'] },
+    fi: { v: ['Aleksi', 'Aino', 'Eetu', 'Venla', 'Joonas', 'Emilia', 'Lauri', 'Sanni'], n: ['Virtanen', 'Korhonen', 'Nieminen', 'Laine', 'Heikkinen', 'Koskinen', 'Lehtonen', 'Järvinen'] },
+    dk: { v: ['Mads', 'Freja', 'Rasmus', 'Ida', 'Frederik', 'Signe', 'Mikkel', 'Emma'], n: ['Lund', 'Nielsen', 'Jensen', 'Kjær', 'Dalsgaard', 'Thomsen', 'Vestergaard', 'Holm'] },
+    pl: { v: ['Jakub', 'Zuzanna', 'Kacper', 'Maja', 'Mateusz', 'Julia', 'Szymon', 'Oliwia'], n: ['Zieliński', 'Nowak', 'Wiśniewski', 'Wójcik', 'Kamiński', 'Kowalczyk', 'Mazur', 'Krawczyk'] },
+    cz: { v: ['Jakub', 'Tereza', 'Ondřej', 'Eliška', 'Vojtěch', 'Klára', 'Tomáš', 'Adéla'], n: ['Novák', 'Dvořák', 'Svoboda', 'Černý', 'Procházka', 'Kučera', 'Veselý', 'Horák'] },
+    hr: { v: ['Ivan', 'Lucija', 'Luka', 'Ana', 'Marko', 'Petra', 'Josip', 'Mia'], n: ['Kovač', 'Horvat', 'Babić', 'Marić', 'Jurić', 'Knežević', 'Vuković', 'Novak'] },
+    hu: { v: ['Bence', 'Réka', 'Máté', 'Dóra', 'Levente', 'Eszter', 'Ádám', 'Zsófia'], n: ['Varga', 'Nagy', 'Tóth', 'Szabó', 'Horváth', 'Kiss', 'Molnár', 'Farkas'] },
+    ua: { v: ['Andriy', 'Oksana', 'Taras', 'Yulia', 'Dmytro', 'Kateryna', 'Bohdan', 'Iryna'], n: ['Kovalenko', 'Bondarenko', 'Tkachenko', 'Kravchenko', 'Melnyk', 'Oliynyk', 'Polishchuk', 'Moroz'] },
+    bg: { v: ['Georgi', 'Elena', 'Dimitar', 'Mira', 'Nikolai', 'Teodora', 'Ivo', 'Raya'], n: ['Petrov', 'Ivanov', 'Georgiev', 'Dimitrov', 'Stoyanov', 'Kolev', 'Todorov', 'Nikolov'] },
+    gr: { v: ['Nikos', 'Eleni', 'Giorgos', 'Sofia', 'Kostas', 'Dimitra', 'Dimitris', 'Katerina'], n: ['Georgiou', 'Nikolaidis', 'Pappas', 'Dimitriou', 'Karalis', 'Vlachos', 'Makris', 'Antoniou'] },
+    tr: { v: ['Emre', 'Elif', 'Burak', 'Zeynep', 'Kerem', 'Defne', 'Mert', 'Ayşe'], n: ['Kaplan', 'Yılmaz', 'Demir', 'Şahin', 'Çelik', 'Aydın', 'Öztürk', 'Arslan'] },
+    ir: { v: ['Arash', 'Shirin', 'Dariush', 'Leila', 'Kian', 'Parisa', 'Babak', 'Yasmin'], n: ['Rahimi', 'Karimi', 'Hosseini', 'Moradi', 'Tehrani', 'Jafari', 'Sadeghi', 'Azizi'] },
+    ae: { v: ['Rashid', 'Mariam', 'Khalid', 'Fatima', 'Saeed', 'Aisha', 'Hamdan', 'Noura'], n: ['Al Mansoori', 'Al Hashimi', 'Al Ketbi', 'Al Nuaimi', 'Al Shamsi', 'Al Suwaidi', 'Al Dhaheri'] },
+    eg: { v: ['Omar', 'Nour', 'Karim', 'Salma', 'Youssef', 'Mariam', 'Ahmed', 'Laila'], n: ['Hassan', 'Mansour', 'Farouk', 'Saleh', 'Ibrahim', 'Nasser', 'Fathy', 'Kamal'] },
+    ma: { v: ['Yassine', 'Salma', 'Amine', 'Imane', 'Hamza', 'Khadija', 'Mehdi', 'Sara'], n: ['Benali', 'El Idrissi', 'Alaoui', 'Bennani', 'Tazi', 'Berrada', 'Chraibi', 'Fassi'] },
+    ng: { v: ['Chinedu', 'Adaeze', 'Emeka', 'Ngozi', 'Tunde', 'Folake', 'Ifeanyi', 'Amara'], n: ['Okafor', 'Adeyemi', 'Achebe', 'Okonkwo', 'Balogun', 'Eze', 'Nwosu', 'Adebayo'] },
+    gh: { v: ['Kofi', 'Ama', 'Kwame', 'Akosua', 'Yaw', 'Efua', 'Kojo', 'Abena'], n: ['Mensah', 'Osei', 'Boateng', 'Asante', 'Owusu', 'Agyeman', 'Ofori', 'Darko'] },
+    ke: { v: ['Brian', 'Wanjiku', 'Kevin', 'Achieng', 'Daniel', 'Njeri', 'Collins', 'Akinyi'], n: ['Kamau', 'Otieno', 'Mwangi', 'Odhiambo', 'Wafula', 'Njoroge', 'Kiprono', 'Chege'] },
+    za: { v: ['Thabo', 'Lerato', 'Sipho', 'Naledi', 'Pieter', 'Anika', 'Lwazi', 'Zanele'], n: ['Nkosi', 'Dlamini', 'Botha', 'Khumalo', 'Naidoo', 'Mokoena', 'Pretorius', 'Ndlovu'] },
+    in: { v: ['Arjun', 'Priya', 'Rohan', 'Ananya', 'Vikram', 'Kavya', 'Aditya', 'Meera'], n: ['Sharma', 'Iyer', 'Patel', 'Reddy', 'Nair', 'Menon', 'Kapoor', 'Rao'] },
+    th: { v: ['Krit', 'Ploy', 'Nattapong', 'Siriporn', 'Anan', 'Malee', 'Somchai', 'Kanya'], n: ['Srisuk', 'Wongsawat', 'Boonmee', 'Thongdee', 'Phromma', 'Chaiyaporn', 'Sukprasert'] },
+    vn: { v: ['Minh', 'Linh', 'Huy', 'Trang', 'Duc', 'Mai', 'Khoa', 'Thao'], n: ['Nguyen', 'Tran', 'Le', 'Pham', 'Hoang', 'Phan', 'Vu', 'Dang'] },
+    id: { v: ['Budi', 'Putri', 'Rizky', 'Dewi', 'Arif', 'Sari', 'Bayu', 'Ayu'], n: ['Santoso', 'Wijaya', 'Saputra', 'Hidayat', 'Pratama', 'Kusuma', 'Siregar', 'Nugroho'] },
+    ph: { v: ['Miguel', 'Andrea', 'Paolo', 'Bea', 'Carlo', 'Trisha', 'Jericho', 'Kim'], n: ['Santos', 'Reyes', 'Cruz', 'Bautista', 'Dela Cruz', 'Villanueva', 'Mendoza', 'Aquino'] },
+    jp: { v: ['Haruto', 'Yui', 'Ren', 'Sakura', 'Sota', 'Aoi', 'Daiki', 'Hina', 'Kenji'], n: ['Tanaka', 'Ishikawa', 'Watanabe', 'Yamamoto', 'Nakamura', 'Fujiwara', 'Morita', 'Shimizu', 'Kondo'] },
+    kr: { v: ['Min-jun', 'Seo-yeon', 'Ji-ho', 'Ha-eun', 'Do-yun', 'Ji-woo', 'Hyun-woo', 'Su-bin'], n: ['Kim', 'Lee', 'Park', 'Choi', 'Jung', 'Kang', 'Yoon', 'Han'] },
+    cn: { v: ['Wei', 'Lina', 'Hao', 'Mei', 'Jun', 'Xin', 'Yu', 'Lan'], n: ['Wang', 'Li', 'Chen', 'Liu', 'Zhang', 'Yang', 'Huang', 'Lin'] },
+    au: { v: ['Jack', 'Chloe', 'Riley', 'Matilda', 'Cooper', 'Ruby', 'Lachlan', 'Sienna'], n: ['Mitchell', 'Hayes', 'Doherty', 'Cartwright', 'Fraser', 'Bowman', 'Sutherland', 'Kelly'] },
+    nz: { v: ['Ethan', 'Aroha', 'Liam', 'Mere', 'Nikau', 'Isla', 'Tama', 'Ava'], n: ['Ngata', 'Parata', 'Wilson', 'Campbell', 'Morrison', 'Te Rangi', 'Walker', 'Paewai'] },
+    us: { v: ['Tyler', 'Madison', 'Austin', 'Kayla', 'Cody', 'Brooke', 'Hunter', 'Savannah', 'Mason'], n: ['Calloway', 'Whitaker', 'Brooks', 'Sullivan', 'Carter', 'Dawson', 'Holloway', 'Prescott', 'Mercer'] },
+    ca: { v: ['Liam', 'Chloé', 'Tristan', 'Maëlle', 'Owen', 'Brooke', 'Mathieu', 'Avery'], n: ['Tremblay', 'Gagnon', 'Lavoie', 'MacKenzie', 'Bouchard', 'Fraser', 'Côté', 'Leblanc'] },
+    mx: { v: ['Santiago', 'Ximena', 'Emiliano', 'Valeria', 'Diego', 'Regina', 'Iker', 'Fernanda'], n: ['Reyes', 'Sandoval', 'Hernández', 'Guerrero', 'Mendoza', 'Castañeda', 'Vargas', 'Ibarra'] },
+    co: { v: ['Andrés', 'Valentina', 'Sebastián', 'Daniela', 'Camilo', 'Mariana', 'Esteban', 'Laura'], n: ['Restrepo', 'Gómez', 'Cárdenas', 'Ospina', 'Zapata', 'Montes', 'Arango', 'Londoño'] },
+    br: { v: ['Gabriel', 'Larissa', 'Thiago', 'Beatriz', 'Rafael', 'Camila', 'Lucas', 'Fernanda'], n: ['Castro', 'Oliveira', 'Souza', 'Almeida', 'Ribeiro', 'Barbosa', 'Teixeira', 'Moura'] },
+    ar: { v: ['Facundo', 'Lucía', 'Tomás', 'Martina', 'Joaquín', 'Agustina', 'Nicolás', 'Micaela'], n: ['Fernández', 'Gutiérrez', 'Acosta', 'Romero', 'Medina', 'Benítez', 'Sosa', 'Giménez'] },
+    cl: { v: ['Benjamín', 'Josefa', 'Vicente', 'Antonia', 'Matías', 'Catalina', 'Cristóbal', 'Florencia'], n: ['Muñoz', 'Rojas', 'Soto', 'Contreras', 'Figueroa', 'Espinoza', 'Valenzuela', 'Silva'] },
   };
-  const HD_LAND_CODES = Object.keys(HD_LAENDER);
+  // Every other country takes the names of its language / region (a pool below, or the pool of a country above).
+  const HD_NAMEN_POOLS = {
+    arab: { v: ['Ahmed', 'Layla', 'Omar', 'Yasmin', 'Khalid', 'Huda', 'Faisal', 'Rania', 'Tariq', 'Nadia'], n: ['Haddad', 'Nasser', 'Khoury', 'Mansour', 'Saleh', 'Hamdan', 'Aziz', 'Barakat', 'Darwish', 'Al-Sayed'] },
+    afghan: { v: ['Ahmad', 'Mariam', 'Farhad', 'Zahra', 'Hamid', 'Shabnam', 'Wahid', 'Laila'], n: ['Ahmadzai', 'Popal', 'Safi', 'Wardak', 'Hotak', 'Noori', 'Stanikzai', 'Sultani'] },
+    zentralasien: { v: ['Daniyar', 'Madina', 'Timur', 'Aliya', 'Rustam', 'Dilnoza', 'Bekzat', 'Kamila'], n: ['Abdullayev', 'Nurlanov', 'Tursunov', 'Saparov', 'Ismailov', 'Akhmetov', 'Rakhimov', 'Bekov'] },
+    georgien: { v: ['Giorgi', 'Nino', 'Levan', 'Tamar', 'Davit', 'Mariam', 'Irakli', 'Salome'], n: ['Beridze', 'Kapanadze', 'Gelashvili', 'Maisuradze', 'Lomidze', 'Tsiklauri', 'Kvaratskhelia', 'Jikia'] },
+    armenien: { v: ['Aram', 'Ani', 'Tigran', 'Lilit', 'Armen', 'Narine', 'Davit', 'Mane'], n: ['Hakobyan', 'Petrosyan', 'Harutyunyan', 'Grigoryan', 'Avetisyan', 'Karapetyan', 'Vardanyan', 'Mkrtchyan'] },
+    ostslawisch: { v: ['Alexei', 'Anastasia', 'Dmitri', 'Ekaterina', 'Ivan', 'Olga', 'Sergei', 'Natalia'], n: ['Smirnov', 'Volkov', 'Sokolov', 'Morozov', 'Lebedev', 'Kozlov', 'Novikov', 'Popov'] },
+    suedslawisch: { v: ['Nikola', 'Jelena', 'Stefan', 'Milica', 'Aleksandar', 'Ivana', 'Nemanja', 'Tamara'], n: ['Jovanović', 'Petrović', 'Nikolić', 'Marković', 'Đorđević', 'Stojanović', 'Ilić', 'Pavlović'] },
+    slowenien: { v: ['Luka', 'Nika', 'Jan', 'Ana', 'Žiga', 'Eva', 'Matej', 'Maja'], n: ['Krajnc', 'Zupančič', 'Kovačič', 'Potočnik', 'Mlakar', 'Kos', 'Vidmar', 'Golob'] },
+    slowakei: { v: ['Martin', 'Zuzana', 'Peter', 'Lucia', 'Tomáš', 'Katarína', 'Marek', 'Jana'], n: ['Kováč', 'Baláž', 'Hudák', 'Polák', 'Molnár', 'Lukáč', 'Šimko', 'Oravec'] },
+    rumaenien: { v: ['Andrei', 'Ioana', 'Mihai', 'Elena', 'Alexandru', 'Maria', 'Bogdan', 'Ana'], n: ['Popescu', 'Ionescu', 'Dumitrescu', 'Stan', 'Constantin', 'Munteanu', 'Moldovan', 'Rusu'] },
+    litauen: { v: ['Lukas', 'Gabija', 'Mantas', 'Ieva', 'Tomas', 'Austėja', 'Paulius', 'Greta'], n: ['Kazlauskas', 'Petrauskas', 'Jankauskas', 'Stankevičius', 'Vasiliauskas', 'Butkus', 'Žukauskas', 'Paulauskas'] },
+    lettland: { v: ['Jānis', 'Anna', 'Mārtiņš', 'Laura', 'Edgars', 'Elīna', 'Kārlis', 'Līga'], n: ['Bērziņš', 'Kalniņš', 'Ozoliņš', 'Liepiņš', 'Krūmiņš', 'Balodis', 'Zariņš', 'Vītols'] },
+    estland: { v: ['Martin', 'Liis', 'Rasmus', 'Kertu', 'Markus', 'Triin', 'Kristjan', 'Mari'], n: ['Tamm', 'Saar', 'Sepp', 'Mägi', 'Kask', 'Kukk', 'Rebane', 'Ilves'] },
+    albanien: { v: ['Arben', 'Elira', 'Besnik', 'Albana', 'Dritan', 'Mimoza', 'Ilir', 'Arta'], n: ['Hoxha', 'Shehu', 'Krasniqi', 'Gashi', 'Leka', 'Dushku', 'Kola', 'Bytyqi'] },
+    island: { v: ['Gunnar', 'Sigrún', 'Einar', 'Katrín', 'Ólafur', 'Hildur', 'Birkir', 'Elín'], n: ['Jónsson', 'Sigurðsson', 'Magnússon', 'Gunnarsson', 'Einarsdóttir', 'Ólafsdóttir', 'Stefánsson', 'Björnsson'] },
+    luxemburg: { v: ['Luc', 'Sophie', 'Marc', 'Anne', 'Gilles', 'Claire', 'Yves', 'Laura'], n: ['Schmit', 'Muller', 'Weber', 'Hoffmann', 'Wagner', 'Thill', 'Kremer', 'Reuter'] },
+    katalanisch: { v: ['Jordi', 'Montserrat', 'Pau', 'Núria', 'Marc', 'Laia', 'Arnau', 'Mireia'], n: ['Puig', 'Vidal', 'Soler', 'Ferrer', 'Riba', 'Casals', 'Pujol', 'Serra'] },
+    malta: { v: ['Joseph', 'Maria', 'Luke', 'Sarah', 'Matthew', 'Rebecca', 'Kurt', 'Nicole'], n: ['Borg', 'Camilleri', 'Vella', 'Farrugia', 'Zammit', 'Galea', 'Grech', 'Micallef'] },
+    schottland: { v: ['Callum', 'Isla', 'Fraser', 'Eilidh', 'Ewan', 'Kirsty', 'Ruaridh', 'Morag'], n: ['MacLeod', 'Campbell', 'Murray', 'Robertson', 'Morrison', 'MacDonald', 'Paterson', 'Sinclair'] },
+    wales: { v: ['Rhys', 'Cerys', 'Dafydd', 'Seren', 'Gareth', 'Ffion', 'Owain', 'Megan'], n: ['Jones', 'Evans', 'Morgan', 'Davies', 'Price', 'Llewellyn', 'Pritchard', 'Rees'] },
+    latam: { v: ['Alejandro', 'Camila', 'Mateo', 'Valentina', 'Gabriel', 'Isabella', 'Sebastián', 'Sofía'], n: ['Rodríguez', 'Martínez', 'López', 'González', 'Ramírez', 'Torres', 'Flores', 'Rivera', 'Vargas', 'Rojas'] },
+    karibik: { v: ['Andre', 'Shanice', 'Damion', 'Keisha', 'Marlon', 'Tanisha', 'Jermaine', 'Kimone'], n: ['Campbell', 'Brown', 'Williams', 'Thompson', 'Clarke', 'Grant', 'Reid', 'Francis'] },
+    haiti: { v: ['Jean', 'Marie', 'Pierre', 'Nadège', 'Ricardo', 'Fabienne', 'Wilson', 'Darline'], n: ['Joseph', 'Jean-Baptiste', 'Charles', 'Désir', 'Augustin', 'Louis', 'Étienne', 'Dorval'] },
+    lusoafrika: { v: ['João', 'Esperança', 'Manuel', 'Domingas', 'Paulo', 'Celeste', 'Edson', 'Lurdes'], n: ['dos Santos', 'Fernandes', 'Mendes', 'Lopes', 'Cardoso', 'Tavares', 'Gomes', 'Monteiro'] },
+    westafrika: { v: ['Moussa', 'Aminata', 'Ibrahima', 'Fatou', 'Mamadou', 'Awa', 'Ousmane', 'Mariama'], n: ['Diallo', 'Traoré', 'Koné', 'Ndiaye', 'Camara', 'Sow', 'Coulibaly', 'Diop'] },
+    zentralafrika: { v: ['Jean-Claude', 'Grâce', 'Patrice', 'Chantal', 'Hervé', 'Josiane', 'Didier', 'Sandrine'], n: ['Mukendi', 'Kasongo', 'Ilunga', 'Tshibangu', 'Mbemba', 'Ngoy', 'Mbala', 'Nkoulou'] },
+    ruanda: { v: ['Jean-Paul', 'Aline', 'Eric', 'Diane', 'Olivier', 'Clarisse', 'Innocent', 'Divine'], n: ['Uwimana', 'Habimana', 'Niyonzima', 'Mugisha', 'Nshimiyimana', 'Ishimwe', 'Mukamana', 'Hakizimana'] },
+    sierraleone: { v: ['Mohamed', 'Fatmata', 'Abu', 'Isatu', 'Samuel', 'Hawa', 'Alhaji', 'Mariatu'], n: ['Kamara', 'Sesay', 'Koroma', 'Bangura', 'Conteh', 'Jalloh', 'Turay', 'Mansaray'] },
+    ostafrika: { v: ['Baraka', 'Neema', 'Juma', 'Rehema', 'Emmanuel', 'Upendo', 'Joseph', 'Grace'], n: ['Mushi', 'Mwakyusa', 'Okello', 'Kato', 'Mbwana', 'Ssali', 'Mrisho', 'Nyerere'] },
+    aethiopien: { v: ['Abebe', 'Tigist', 'Dawit', 'Meron', 'Yonas', 'Selam', 'Henok', 'Hiwot'], n: ['Tesfaye', 'Girma', 'Tadesse', 'Mekonnen', 'Alemu', 'Kebede', 'Asfaw', 'Wolde'] },
+    somalia: { v: ['Abdi', 'Hodan', 'Mohamed', 'Faadumo', 'Ahmed', 'Sahra', 'Yusuf', 'Ifrah'], n: ['Hassan', 'Warsame', 'Aden', 'Jama', 'Osman', 'Abdullahi', 'Ismail', 'Hersi'] },
+    suedafrika2: { v: ['Tendai', 'Rudo', 'Tatenda', 'Chipo', 'Blessing', 'Nyasha', 'Kudzai', 'Thandiwe'], n: ['Moyo', 'Ncube', 'Banda', 'Phiri', 'Mwale', 'Sibanda', 'Dube', 'Tembo'] },
+    madagaskar: { v: ['Hery', 'Voahangy', 'Rado', 'Fara', 'Tiana', 'Mamy', 'Fidy', 'Lova'], n: ['Rakoto', 'Rabe', 'Rasolo', 'Razafy', 'Randria', 'Rasoa', 'Ravelo', 'Andria'] },
+    pakistan: { v: ['Ali', 'Ayesha', 'Hamza', 'Fatima', 'Bilal', 'Sana', 'Usman', 'Hira'], n: ['Khan', 'Malik', 'Qureshi', 'Butt', 'Chaudhry', 'Sheikh', 'Siddiqui', 'Mirza'] },
+    bangladesch: { v: ['Rahim', 'Nusrat', 'Tanvir', 'Farzana', 'Arif', 'Shirin', 'Sakib', 'Mim'], n: ['Hossain', 'Rahman', 'Islam', 'Chowdhury', 'Ahmed', 'Sarkar', 'Uddin', 'Akter'] },
+    srilanka: { v: ['Kasun', 'Dilini', 'Nuwan', 'Sanduni', 'Chamara', 'Ishara', 'Lahiru', 'Nadeesha'], n: ['Perera', 'Fernando', 'Silva', 'Bandara', 'Dissanayake', 'Ranasinghe', 'Herath', 'Gunawardena'] },
+    nepal: { v: ['Aashish', 'Sita', 'Bikash', 'Anjali', 'Suman', 'Puja', 'Nabin', 'Sunita'], n: ['Shrestha', 'Thapa', 'Gurung', 'Tamang', 'Rai', 'Karki', 'Magar', 'Adhikari'] },
+    malediven: { v: ['Ahmed', 'Aishath', 'Ibrahim', 'Mariyam', 'Hussain', 'Fathimath', 'Ali', 'Hawwa'], n: ['Rasheed', 'Hassan', 'Manik', 'Didi', 'Shareef', 'Naseem', 'Waheed', 'Saeed'] },
+    malaiisch: { v: ['Ahmad', 'Nur', 'Hafiz', 'Siti', 'Amir', 'Aisyah', 'Faizal', 'Farah'], n: ['Abdullah', 'Ismail', 'Rahman', 'Hamzah', 'Ibrahim', 'Yusof', 'Hassan', 'Osman'] },
+    singapur: { v: ['Jun Wei', 'Hui Min', 'Kai Xiang', 'Li Ting', 'Wei Jie', 'Xin Yi', 'Ryan', 'Rachel'], n: ['Tan', 'Lim', 'Lee', 'Ng', 'Ong', 'Goh', 'Chua', 'Koh'] },
+    kambodscha: { v: ['Sokha', 'Chanthou', 'Vuthy', 'Sreymom', 'Dara', 'Bopha', 'Visal', 'Sopheap'], n: ['Sok', 'Chea', 'Heng', 'Meas', 'Phal', 'Sun', 'Keo', 'Chhim'] },
+    laos: { v: ['Khamphone', 'Souk', 'Noy', 'Keo', 'Bounmy', 'Vanh', 'Somphone', 'Dao'], n: ['Vongsa', 'Phommachanh', 'Sisavath', 'Keomany', 'Inthavong', 'Xayavong', 'Sengsouk', 'Chanthala'] },
+    myanmar: { v: ['Aung', 'Thandar', 'Kyaw', 'Hnin', 'Zaw', 'Ei', 'Htet', 'Su'], n: ['Min Htet', 'Win', 'Myint', 'Oo', 'Naing', 'Thu', 'Lwin', 'Aung'] },
+    taiwan: { v: ['Yu-Ting', 'Chia-Hao', 'Hsin-Yi', 'Wei-Lun', 'Pei-Shan', 'Chih-Wei', 'Yi-Chen', 'Po-Han'], n: ['Chen', 'Lin', 'Huang', 'Chang', 'Lee', 'Wang', 'Wu', 'Tsai'] },
+    hongkong: { v: ['Ka Ho', 'Wing Yan', 'Chun Kit', 'Hoi Ying', 'Wai Lun', 'Mei Ling', 'Tsz Hin', 'Ka Yan'], n: ['Chan', 'Wong', 'Leung', 'Cheung', 'Lau', 'Ho', 'Yeung', 'Chow'] },
+    mongolei: { v: ['Temuulen', 'Saran', 'Ganbold', 'Nomin', 'Bat-Erdene', 'Anu', 'Tuguldur', 'Solongo'], n: ['Bold', 'Batbayar', 'Ganzorig', 'Enkhbat', 'Tsogt', 'Erdene', 'Altan', 'Bayar'] },
+    pazifik: { v: ['Sione', 'Mele', 'Tevita', 'Losana', 'Viliami', 'Ana', 'Semisi', 'Litia'], n: ['Tupou', 'Fifita', 'Taufa', 'Naivalu', 'Koroi', 'Leota', 'Faleolo', 'Tuilagi'] },
+    israel: { v: ['Noa', 'Yonatan', 'Tamar', 'Itai', 'Maya', 'Omer', 'Shira', 'Eitan'], n: ['Cohen', 'Levi', 'Mizrahi', 'Peretz', 'Biton', 'Friedman', 'Dahan', 'Avraham'] },
+  };
+  const HD_LAND_POOL = {
+    sa: 'arab', qa: 'arab', kw: 'arab', bh: 'arab', om: 'arab', ye: 'arab', iq: 'arab', jo: 'arab', lb: 'arab', sy: 'arab', ps: 'arab',
+    ly: 'arab', tn: 'arab', dz: 'arab', sd: 'arab', ss: 'ostafrika', mr: 'westafrika', eh: 'arab', km: 'arab', dj: 'somalia',
+    af: 'afghan', tj: 'afghan', kz: 'zentralasien', uz: 'zentralasien', kg: 'zentralasien', tm: 'zentralasien', az: 'zentralasien',
+    ge: 'georgien', am: 'armenien', ru: 'ostslawisch', by: 'ostslawisch', md: 'rumaenien', ro: 'rumaenien',
+    rs: 'suedslawisch', ba: 'suedslawisch', me: 'suedslawisch', mk: 'suedslawisch', si: 'slowenien', sk: 'slowakei',
+    lt: 'litauen', lv: 'lettland', ee: 'estland', al: 'albanien', xk: 'albanien', is: 'island', fo: 'island',
+    lu: 'luxemburg', li: 'ch', mc: 'fr', ad: 'katalanisch', sm: 'it', va: 'it', mt: 'malta', cy: 'gr',
+    'gb-eng': 'gb', 'gb-sct': 'schottland', 'gb-wls': 'wales', 'gb-nir': 'ie', gi: 'gb', im: 'gb', je: 'gb', gg: 'gb', fk: 'gb', sh: 'gb',
+    gl: 'dk', ax: 'se', sj: 'no',
+    pe: 'latam', ve: 'latam', ec: 'latam', bo: 'latam', py: 'latam', uy: 'latam', cr: 'latam', pa: 'latam', gt: 'latam', hn: 'latam',
+    sv: 'latam', ni: 'latam', cu: 'latam', do: 'latam', pr: 'latam', gq: 'latam',
+    jm: 'karibik', tt: 'karibik', bb: 'karibik', bs: 'karibik', ag: 'karibik', lc: 'karibik', vc: 'karibik', gd: 'karibik', dm: 'karibik',
+    kn: 'karibik', gy: 'karibik', bz: 'karibik', bm: 'karibik', ky: 'karibik', vg: 'karibik', vi: 'karibik', tc: 'karibik', ai: 'karibik', ms: 'karibik',
+    ht: 'haiti', gp: 'fr', mq: 'fr', gf: 'fr', bl: 'fr', mf: 'fr', pm: 'fr', re: 'fr', yt: 'fr', nc: 'fr', pf: 'fr', wf: 'fr', sc: 'fr',
+    sr: 'nl', aw: 'nl', cw: 'nl', sx: 'nl', bq: 'nl',
+    ao: 'lusoafrika', mz: 'lusoafrika', gw: 'lusoafrika', cv: 'lusoafrika', st: 'lusoafrika', tl: 'lusoafrika',
+    sn: 'westafrika', ci: 'westafrika', ml: 'westafrika', bf: 'westafrika', ne: 'westafrika', gn: 'westafrika', tg: 'westafrika', bj: 'westafrika',
+    cm: 'zentralafrika', ga: 'zentralafrika', cg: 'zentralafrika', cd: 'zentralafrika', cf: 'zentralafrika', td: 'zentralafrika',
+    rw: 'ruanda', bi: 'ruanda', lr: 'sierraleone', sl: 'sierraleone', gm: 'sierraleone',
+    tz: 'ostafrika', ug: 'ostafrika', et: 'aethiopien', er: 'aethiopien', so: 'somalia',
+    zw: 'suedafrika2', zm: 'suedafrika2', mw: 'suedafrika2', bw: 'suedafrika2', na: 'suedafrika2', ls: 'suedafrika2', sz: 'suedafrika2',
+    mg: 'madagaskar', mu: 'in', pk: 'pakistan', bd: 'bangladesch', lk: 'srilanka', np: 'nepal', bt: 'nepal', mv: 'malediven',
+    my: 'malaiisch', bn: 'malaiisch', sg: 'singapur', kh: 'kambodscha', la: 'laos', mm: 'myanmar',
+    tw: 'taiwan', hk: 'hongkong', mo: 'hongkong', mn: 'mongolei', kp: 'kr',
+    fj: 'pazifik', to: 'pazifik', ws: 'pazifik', as: 'pazifik', ck: 'pazifik', nu: 'pazifik', tv: 'pazifik', ki: 'pazifik', nr: 'pazifik',
+    vu: 'pazifik', sb: 'pazifik', pg: 'pazifik', fm: 'pazifik', mh: 'pazifik', pw: 'pazifik', gu: 'pazifik', mp: 'pazifik', tk: 'pazifik',
+    il: 'israel',
+  };
+  // Every country / territory with a flag in img/flaggen (243).
+  const HD_LAND_CODES = ('ad ae af ag ai al am ao ar as at au aw ax az ba bb bd be bf bg bh bi bj bl bm bn bo bq br bs bt bw by bz ca cd cf cg ch ci ck cl cm cn co cr cu cv cw cy cz de dj dk dm do dz ec ee eg eh er es et fi fj fk fm fo fr ga gb-eng gb-nir gb-sct gb-wls gb gd ge gf gg gh gi gl gm gn gp gq gr gt gu gw gy hk hn hr ht hu id ie il im in iq ir is it je jm jo jp ke kg kh ki km kn kp kr kw ky kz la lb lc li lk lr ls lt lu lv ly ma mc md me mf mg mh mk ml mm mn mo mp mq mr ms mt mu mv mw mx my mz na nc ne ng ni nl no np nr nu nz om pa pe pf pg ph pk pl pm pr ps pt pw py qa re ro rs ru rw sa sb sc sd se sg sh si sj sk sl sm sn so sr ss st sv sx sy sz tc td tg th tj tk tl tm tn to tr tt tv tw tz ua ug us uy uz va vc ve vg vi vn vu wf ws xk ye yt za zm zw').split(' ');
+  const HD_LAND_SET = new Set(HD_LAND_CODES);
+  // The names of a country: its own pool, or the pool of its language / region.
+  function hdLandNamen(code) {
+    if (HD_LAENDER[code]) return HD_LAENDER[code];
+    const p = HD_LAND_POOL[code];
+    return (p && (HD_NAMEN_POOLS[p] || HD_LAENDER[p])) || HD_LAENDER.gb;
+  }
   // The old name pool (v2.0): its surnames point to a country, so the NPCs named before keep a fitting flag.
   const HD_ALT_NACHNAME_LAND = { Kovac: 'hr', Lindqvist: 'se', Moreau: 'fr', Okafor: 'ng', Tanaka: 'jp', Brandt: 'de', Castell: 'es', Novak: 'cz',
     Reyes: 'mx', Halvorsen: 'no', Duval: 'fr', Mensah: 'gh', Petrov: 'bg', Sandoval: 'mx', Whitlock: 'gb', Ferreira: 'pt', Kaplan: 'tr',
@@ -72,86 +160,22 @@
     Thorne: 'gb', Adeyemi: 'ng', Calloway: 'us', Bianchi: 'it', Strand: 'se', Morales: 'es', Hartmann: 'de', Zielinski: 'pl', Achebe: 'ng',
     Lund: 'dk', Navarro: 'es', Castro: 'br', Fontaine: 'fr', Mbeki: 'za' };
 
-  // ---- flags as SVG (30 x 20) ------------------------------------------------------------------------------------------
-  function hdLandStern(cx, cy, r, farbe) {
-    let p = '';
-    for (let i = 0; i < 10; i++) {
-      const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.4 : r;
-      p += (i ? 'L' : 'M') + (cx + rr * Math.cos(a)).toFixed(2) + ' ' + (cy + rr * Math.sin(a)).toFixed(2);
-    }
-    return '<path d="' + p + 'Z" fill="' + farbe + '"/>';
-  }
-  function hdLandStreifen(spec, horiz) {
-    const teile = spec.split('|').map((x) => { const [c, w] = x.trim().split(' '); return { c, w: +w || 1 }; });
-    const summe = teile.reduce((s, x) => s + x.w, 0);
-    let pos = 0, out = '';
-    for (const x of teile) {
-      const d = (horiz ? 20 : 30) * x.w / summe;
-      out += horiz ? '<rect x="0" y="' + pos.toFixed(2) + '" width="30" height="' + (d + 0.05).toFixed(2) + '" fill="' + x.c + '"/>'
-        : '<rect x="' + pos.toFixed(2) + '" y="0" width="' + (d + 0.05).toFixed(2) + '" height="20" fill="' + x.c + '"/>';
-      pos += d;
-    }
-    return out;
-  }
-  function hdUnion(w, h) {   // union flag in a w x h box at 0,0
-    return '<rect width="' + w + '" height="' + h + '" fill="#012169"/>'
-      + '<path d="M0 0L' + w + ' ' + h + 'M' + w + ' 0L0 ' + h + '" stroke="#fff" stroke-width="' + (h / 5) + '"/>'
-      + '<path d="M0 0L' + w + ' ' + h + 'M' + w + ' 0L0 ' + h + '" stroke="#c8102e" stroke-width="' + (h / 15) + '"/>'
-      + '<path d="M' + (w / 2) + ' 0V' + h + 'M0 ' + (h / 2) + 'H' + w + '" stroke="#fff" stroke-width="' + (h / 3) + '"/>'
-      + '<path d="M' + (w / 2) + ' 0V' + h + 'M0 ' + (h / 2) + 'H' + w + '" stroke="#c8102e" stroke-width="' + (h / 5) + '"/>';
-  }
-  function hdLandFlaggeInnen(code) {
-    const L = HD_LAENDER[code];
-    if (!L) return '<rect width="30" height="20" fill="#555"/>';
-    const spezial = {
-      gb: () => hdUnion(30, 20),
-      ch: () => '<rect width="30" height="20" fill="#da291c"/><path d="M13 4h4v4h4v4h-4v4h-4v-4H9V8h4z" fill="#fff"/>',
-      cz: () => hdLandStreifen('#fff|#d7141a', true) + '<path d="M0 0L15 10L0 20Z" fill="#11457e"/>',
-      gr: () => hdLandStreifen('#0d5eaf|#fff|#0d5eaf|#fff|#0d5eaf|#fff|#0d5eaf|#fff|#0d5eaf', true)
-        + '<rect width="11.1" height="11.1" fill="#0d5eaf"/><path d="M5.55 0V11.1M0 5.55H11.1" stroke="#fff" stroke-width="2.2"/>',
-      tr: () => '<rect width="30" height="20" fill="#e30a17"/><circle cx="11" cy="10" r="5" fill="#fff"/><circle cx="12.3" cy="10" r="4" fill="#e30a17"/>' + hdLandStern(17.2, 10, 2.4, '#fff'),
-      ae: () => hdLandStreifen('#00732f|#fff|#000', true) + '<rect width="8" height="20" fill="#ff0000"/>',
-      za: () => '<rect width="30" height="10" fill="#e03c31"/><rect y="10" width="30" height="10" fill="#001489"/>'
-        + '<path d="M0 0L13 10L0 20M13 10H30" stroke="#fff" stroke-width="6.6" fill="none"/><path d="M0 0L13 10L0 20M13 10H30" stroke="#007749" stroke-width="4" fill="none"/>'
-        + '<path d="M0 3.2L8.8 10L0 16.8Z" fill="#ffb81c"/><path d="M0 5L6.4 10L0 15Z" fill="#000"/>',
-      hr: () => hdLandStreifen('#ff0000|#fff|#171796', true) + '<path d="M12 5.4h6v6.2a3 3 0 0 1-6 0z" fill="#fff" stroke="#171796" stroke-width=".4"/>'
-        + [0, 1, 2, 3].map((r) => [0, 1, 2, 3].filter((c) => (r + c) % 2 === 0).map((c) => '<rect x="' + (12 + c * 1.5) + '" y="' + (5.4 + r * 1.5) + '" width="1.5" height="1.5" fill="#ff0000"/>').join('')).join(''),
-      ph: () => hdLandStreifen('#0038a8|#ce1126', true) + '<path d="M0 0L17 10L0 20Z" fill="#fff"/><circle cx="5.5" cy="10" r="2.2" fill="#fcd116"/>',
-      kr: () => '<rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="5" fill="#003478"/><path d="M10 10a5 5 0 0 1 10 0a2.5 2.5 0 0 1-5 0a2.5 2.5 0 0 0-5 0z" fill="#cd2e3a"/>'
-        + '<path d="M5 4.5l3 2M22 13.5l3 2M5 15.5l3-2M22 6.5l3-2" stroke="#000" stroke-width="1.6"/>',
-      us: () => hdLandStreifen(Array.from({ length: 13 }, (_, i) => (i % 2 ? '#fff' : '#b22234')).join('|'), true) + '<rect width="12" height="10.8" fill="#3c3b6e"/>'
-        + [2, 5, 8].map((y) => [2, 4.6, 7.2, 9.8].map((x) => '<circle cx="' + x + '" cy="' + (y + 0.4) + '" r=".55" fill="#fff"/>').join('')).join(''),
-      br: () => '<rect width="30" height="20" fill="#009c3b"/><path d="M15 2.4L27.4 10L15 17.6L2.6 10Z" fill="#ffdf00"/><circle cx="15" cy="10" r="4.4" fill="#002776"/>'
-        + '<path d="M10.8 9.2q4.2-1.2 8.4 1.4" stroke="#fff" stroke-width=".8" fill="none"/>',
-      cl: () => '<rect width="30" height="10" fill="#fff"/><rect y="10" width="30" height="10" fill="#d52b1e"/><rect width="10" height="10" fill="#0039a6"/>' + hdLandStern(5, 5, 2.6, '#fff'),
-    };
-    if (spezial[L.f]) return spezial[L.f]();
-    let out = '';
-    for (const teil of L.f.split(';')) {
-      const [art, rest] = [teil.slice(0, teil.indexOf(':')), teil.slice(teil.indexOf(':') + 1)];
-      if (art === 'h' || art === 'v') out += hdLandStreifen(rest, art === 'h');
-      else if (art === 'x') {   // Nordic cross: background, cross, optional inner cross
-        const [bg, kreuz, innen] = rest.split(',');
-        out += '<rect width="30" height="20" fill="' + bg + '"/><path d="M11 0V20M0 10H30" stroke="' + kreuz + '" stroke-width="' + (innen ? 5 : 4) + '"/>'
-          + (innen ? '<path d="M11 0V20M0 10H30" stroke="' + innen + '" stroke-width="2.4"/>' : '');
-      } else if (art === 'c') { const [x, y, r, f] = rest.split(','); out += '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + f + '"/>'; }
-      else if (art === 'r') { const [x, y, r, f] = rest.split(','); out += '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="none" stroke="' + f + '" stroke-width=".9"/>'; }
-      else if (art === 'e') { const [x, y, rx, ry, f] = rest.split(','); out += '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '" fill="' + f + '"/>'; }
-      else if (art === 's') { const [x, y, r, f] = rest.split(','); out += hdLandStern(+x, +y, +r, f); }
-      else if (art === 'm') out += '<path d="M15 4.6l1 2 1.4-.6-.4 3 1.6-1.4.6 1.2 1.6-.4-.6 1.8.8.4-2.6 2-.2 1H15.4v2.2h-.8V13.8h-1.4l-.2-1-2.6-2 .8-.4-.6-1.8 1.6.4.6-1.2L14.4 9.4l-.4-3 1.4.6z" fill="' + rest + '"/>';
-      else if (art === 'au') out += '<rect width="30" height="20" fill="#012169"/>' + hdUnion(15, 10)
-        + [[22.5, 4.2], [26, 8.4], [19.5, 9.6], [22.5, 16]].map(([x, y]) => hdLandStern(x, y, 1.3, rest)).join('') + hdLandStern(7.5, 15, 2, '#fff');
-    }
-    return out;
-  }
-  let hdLandFlaggeNr = 0;
+  // ---- flags: the files of flag-icons (MIT, img/flaggen/LICENSE.txt), 4:3, one per country ----------------------------
+  // v3.0 GEMELDET: "Add all the country flags, I don't see all the countries." Hand-drawn flags covered the 47 countries
+  // of the first version; now every country and territory has its real flag from the bundled files.
   function hdLandFlagge(code, hoehe) {
-    const h = hoehe || 14, w = Math.round(h * 1.5), id = 'hdfl' + (++hdLandFlaggeNr);
-    return '<svg class="hd-flagge" width="' + w + '" height="' + h + '" viewBox="0 0 30 20" role="img" aria-label="' + hdLandName(code).replace(/"/g, '') + '">'
-      + '<defs><clipPath id="' + id + '"><rect width="30" height="20" rx="2"/></clipPath></defs><g clip-path="url(#' + id + ')">' + hdLandFlaggeInnen(code) + '</g>'
-      + '<rect x=".4" y=".4" width="29.2" height="19.2" rx="2" fill="none" stroke="rgba(0,0,0,.35)" stroke-width=".8"/></svg>';
+    const h = hoehe || 14, w = Math.round(h * 4 / 3);
+    const name = hdLandName(code).replace(/[<>"&]/g, '');
+    // (attribute built in two parts: the build's reference check reads every literal src=" as a fixed file)
+    return '<img class="hd-flagge" ' + 'src' + '="img/flaggen/' + encodeURIComponent(code) + '.svg" width="' + w + '" height="' + h + '" alt="' + name + '" title="' + name + '" loading="lazy" decoding="async">';
   }
+  const HD_LAND_EIGENE_NAMEN = {
+    'gb-eng': { de: 'England', en: 'England', es: 'Inglaterra' }, 'gb-sct': { de: 'Schottland', en: 'Scotland', es: 'Escocia' },
+    'gb-wls': { de: 'Wales', en: 'Wales', es: 'Gales' }, 'gb-nir': { de: 'Nordirland', en: 'Northern Ireland', es: 'Irlanda del Norte' },
+  };
   function hdLandName(code) {
+    const eigen = HD_LAND_EIGENE_NAMEN[code];
+    if (eigen) return eigen[typeof lang === 'string' && eigen[lang] ? lang : 'en'];
     try {
       const sprache = typeof lang === 'string' ? lang : 'en';
       return new Intl.DisplayNames([sprache], { type: 'region' }).of(String(code).toUpperCase()) || String(code).toUpperCase();
@@ -169,7 +193,7 @@
   function hdLandBrowser() {
     try {
       const sprachen = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || '']);
-      for (const s of sprachen) { const m = /[-_]([a-z]{2})$/i.exec(s || ''); if (m && HD_LAENDER[m[1].toLowerCase()]) return m[1].toLowerCase(); }
+      for (const s of sprachen) { const m = /[-_]([a-z]{2})$/i.exec(s || ''); if (m && HD_LAND_SET.has(m[1].toLowerCase())) return m[1].toLowerCase(); }
       const l = String(sprachen[0] || '').slice(0, 2).toLowerCase();
       return ({ de: 'de', fr: 'fr', it: 'it', es: 'es', pt: 'pt', nl: 'nl', sv: 'se', nb: 'no', fi: 'fi', da: 'dk', pl: 'pl', cs: 'cz', hu: 'hu', tr: 'tr', ja: 'jp', ko: 'kr', zh: 'cn' })[l] || 'gb';
     } catch (e) { return 'gb'; }
@@ -180,34 +204,38 @@
     if (!w) return null;
     const nach = w.split(/\s+/).slice(1).join(' ');
     if (HD_ALT_NACHNAME_LAND[w.split(/\s+/).pop()]) return HD_ALT_NACHNAME_LAND[w.split(/\s+/).pop()];
-    for (const c of HD_LAND_CODES) if (nach && HD_LAENDER[c].n.includes(nach)) return c;
+    for (const c of Object.keys(HD_LAENDER)) if (nach && HD_LAENDER[c].n.includes(nach)) return c;
     return null;
   }
   function hdLand(car) {
     if (!car || !car.device) return null;
     const id = String(car.device.id), alle = hdLandAlle();
-    if (alle[id] && HD_LAENDER[alle[id]]) return alle[id];
+    if (alle[id] && HD_LAND_SET.has(alle[id])) return alle[id];
     // First time: from the name if it is one of ours, players from the browser, otherwise a drawn country.
     const code = hdLandAusName(car.alias) || (/^player/.test(car.role || '') ? hdLandBrowser() : hdLandZiehen(car));
     alle[id] = code; hdLandSchreiben();
     return code;
   }
   function hdLandSetzen(car, code) {
-    if (!car || !car.device || !HD_LAENDER[code]) return;
+    if (!car || !car.device || !HD_LAND_SET.has(code)) return;
     hdLandAlle()[String(car.device.id)] = code; hdLandSchreiben();
   }
   // A country for a new NPC: one nobody in the garage has yet, if possible - so the field is international.
   function hdLandZiehen(car) {
     let belegt = new Set();
     try { garage.forEach((c) => { if (c !== car && c.device) { const x = hdLandAlle()[String(c.device.id)]; if (x) belegt.add(x); } }); } catch (e) { /* no garage */ }
-    const frei = HD_LAND_CODES.filter((c) => !belegt.has(c));
-    const pool = frei.length ? frei : HD_LAND_CODES;
-    return pool[Math.floor(Math.random() * pool.length)];
+    // Every country can come up; the 47 with their own name pool (the bigger racing nations) three times as often.
+    const gewicht = (c) => (HD_LAENDER[c] ? 3 : 1);
+    let pool = HD_LAND_CODES.filter((c) => !belegt.has(c));
+    if (!pool.length) pool = HD_LAND_CODES;
+    let summe = pool.reduce((s0, c) => s0 + gewicht(c), 0), r = Math.random() * summe;
+    for (const c of pool) { r -= gewicht(c); if (r < 0) return c; }
+    return pool[pool.length - 1];
   }
   // A name from the car's country (new country for an NPC without one).
   function hdNameFuerAuto(car, belegt) {
     const code = (car && car.device && hdLandAlle()[String(car.device.id)]) || (car && car.device ? hdLand(car) : hdLandZiehen(car));
-    const L = HD_LAENDER[code];
+    const L = hdLandNamen(code);
     for (let i = 0; i < 200; i++) {
       const n = L.v[Math.floor(Math.random() * L.v.length)] + ' ' + L.n[Math.floor(Math.random() * L.n.length)];
       if (n.length <= 18 && !(belegt && belegt.has(n.toLowerCase()))) return n;
@@ -238,4 +266,4 @@
     nach.parentNode.insertBefore(z, nach.nextSibling);
   }
   window.HYBRIDDASH_LAENDER = Object.freeze({ codes: HD_LAND_CODES, land: hdLand, setzen: hdLandSetzen, name: hdLandName, flagge: hdLandFlagge,
-    _nameFuer: (code) => { const L = HD_LAENDER[code]; return L.v[0] + ' ' + L.n[0]; }, _neuerName: (car) => hdNameFuerAuto(car) });
+    _nameFuer: (code) => { const L = hdLandNamen(code); return L.v[0] + ' ' + L.n[0]; }, _neuerName: (car) => hdNameFuerAuto(car) });

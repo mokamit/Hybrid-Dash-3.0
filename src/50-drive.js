@@ -3429,6 +3429,22 @@
       return (typeof raceGridOffen === 'function' && raceGridOffen()) || (typeof hdSetupOffen === 'function' && hdSetupOffen());
     } catch (e) { return false; }
   }
+  // v3.0 GEMELDET: "After I close the race, the player controller is still on and I can still hear the car's engine.
+  // After I close the race windows and return back to the main menu, I don't need control of the car again."
+  // In the menus (every tab but the cockpit) and with no session running, the players' cars are held and their engine
+  // falls silent at once. Not while driving virtually, in the tutorial or on a learning lap.
+  function hdMenueGesperrt() {
+    try {
+      if (hdSuiteLaeuft()) return false;
+      if (raceState === 'racing' || raceState === 'finishing' || raceState === 'countdown') return false;
+      if (typeof vfAktiv === 'function' && vfAktiv()) return false;
+      if (typeof tutLaeuft === 'function' && tutLaeuft()) return false;
+      if (typeof learn !== 'undefined' && learn && learn.started) return false;
+      const tab = typeof kAktiverTab === 'function' ? kAktiverTab() : 'race';
+      return !!tab && tab !== 'race';
+    } catch (e) { return false; }
+  }
+  function hdFahrenGesperrt() { return hdVorStartGesperrt() || hdMenueGesperrt(); }
   function hdOfftrackSitzung() {
     try { if (hdSuiteLaeuft()) return true; return raceState === 'racing' || raceState === 'finishing'; } catch (e) { return true; }
   }
@@ -3591,7 +3607,7 @@
     // bevor 70-race.js seine Konstanten angelegt hat (temporale Todeszone beim Laden).
     try {
       if (fruehstartStrafeAktiv(1)) { rawThrottle = 0; rawBrake = Math.max(rawBrake, FRUEHSTART_BREMSE); }
-      if (hdVorStartGesperrt()) { rawThrottle = 0; rawBrake = 1; }
+      if (hdFahrenGesperrt()) { rawThrottle = 0; rawBrake = 1; }
       // Derby bei 0 % (v0.9.16): das Auto bleibt stehen - vorher wurde nur das Tempo EINMAL auf
       // null gesetzt, danach fuhr es mit dem Gas weiter.
       if (typeof derbyLaeuft !== 'undefined' && derbyLaeuft && derbyTot1) { rawThrottle = 0; rawBrake = 1; }
@@ -3743,7 +3759,7 @@
     if (offtrackGiltFuer(z.nr)) gas = Math.min(gas, OFFTRACK_GAS);
     try {
       if (fruehstartStrafeAktiv(z.nr)) { gas = 0; bremse = Math.max(bremse, FRUEHSTART_BREMSE); }
-      if (hdVorStartGesperrt()) { gas = 0; bremse = 1; }
+      if (hdFahrenGesperrt()) { gas = 0; bremse = 1; }
       if (typeof derbyLaeuft !== 'undefined' && derbyLaeuft && z.derbyTot) { gas = 0; bremse = 1; }
     } catch (e) { /* beim Laden */ }
     // Und das Rumpeln, an seinen eigenen Pad. Bis v0.6.45 waere es der Pad von Spieler 1

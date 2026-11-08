@@ -2864,7 +2864,9 @@
     const now = Date.now();
     if (busy) engineIdleSince = null;
     else if (engineIdleSince === null) engineIdleSince = now;
-    const silent = !busy && engineIdleSince !== null && now - engineIdleSince > 4000;
+    let silent = !busy && engineIdleSince !== null && now - engineIdleSince > 4000;
+    // HD 3.0: back in the menus with no session running - the engine is off, not idling.
+    if (typeof hdMenueGesperrt === 'function' && hdMenueGesperrt()) silent = true;
 
     // Sample engine takes over when a car is loaded and playing; the oscillator path below
     // stays intact as the fallback for the synthetic profiles and for missing audio/.

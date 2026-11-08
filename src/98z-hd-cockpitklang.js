@@ -23,6 +23,7 @@
   let hdCk = null;   // the nodes, built once per AudioContext
   function hdCkAus() {
     try { if (typeof hdSuiteLaeuft === 'function' && hdSuiteLaeuft()) return true; } catch (e) { /* not ready */ }
+    if (typeof hdMenueGesperrt === 'function' && hdMenueGesperrt()) return true;
     return !hdCkVolumen || typeof audioCtx === 'undefined' || !audioCtx || (typeof soundEnabled !== 'undefined' && !soundEnabled);
   }
   function hdCkRauschen(ctx, sek) {
