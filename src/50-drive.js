@@ -3419,6 +3419,16 @@
   // v3.0 GEMELDET: "The off track limit starts even before the session even starts. It shouldn't apply before or after
   // the race." Throttling (and its warning) only while a session runs - racing or its last lap. The self-test suite
   // keeps the old rule: its off-track checks drive without starting a session.
+  // v3.0 GEMELDET: "the race hasn't started yet, but the player car is on and can be controlled with the remote."
+  // While the pre-race setup or the grid board is open and the race has not begun, the players' cars stay where they
+  // are (no throttle, brake held). The countdown is not included: a jump start there is penalised on purpose.
+  function hdVorStartGesperrt() {
+    try {
+      if (hdSuiteLaeuft()) return false;
+      if (raceState === 'racing' || raceState === 'finishing' || raceState === 'countdown') return false;
+      return (typeof raceGridOffen === 'function' && raceGridOffen()) || (typeof hdSetupOffen === 'function' && hdSetupOffen());
+    } catch (e) { return false; }
+  }
   function hdOfftrackSitzung() {
     try { if (hdSuiteLaeuft()) return true; return raceState === 'racing' || raceState === 'finishing'; } catch (e) { return true; }
   }
@@ -3581,6 +3591,7 @@
     // bevor 70-race.js seine Konstanten angelegt hat (temporale Todeszone beim Laden).
     try {
       if (fruehstartStrafeAktiv(1)) { rawThrottle = 0; rawBrake = Math.max(rawBrake, FRUEHSTART_BREMSE); }
+      if (hdVorStartGesperrt()) { rawThrottle = 0; rawBrake = 1; }
       // Derby bei 0 % (v0.9.16): das Auto bleibt stehen - vorher wurde nur das Tempo EINMAL auf
       // null gesetzt, danach fuhr es mit dem Gas weiter.
       if (typeof derbyLaeuft !== 'undefined' && derbyLaeuft && derbyTot1) { rawThrottle = 0; rawBrake = 1; }
@@ -3732,6 +3743,7 @@
     if (offtrackGiltFuer(z.nr)) gas = Math.min(gas, OFFTRACK_GAS);
     try {
       if (fruehstartStrafeAktiv(z.nr)) { gas = 0; bremse = Math.max(bremse, FRUEHSTART_BREMSE); }
+      if (hdVorStartGesperrt()) { gas = 0; bremse = 1; }
       if (typeof derbyLaeuft !== 'undefined' && derbyLaeuft && z.derbyTot) { gas = 0; bremse = 1; }
     } catch (e) { /* beim Laden */ }
     // Und das Rumpeln, an seinen eigenen Pad. Bis v0.6.45 waere es der Pad von Spieler 1

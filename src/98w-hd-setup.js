@@ -239,6 +239,17 @@
     hdSetupMalen();
   }
   function hdSetupZu() { if (hdSetupBox) hdSetupBox.hidden = true; hdSetupWeiter = null; }
+  function hdSetupOffen() { return !!(hdSetupBox && !hdSetupBox.hidden); }
+  // Cancel (button, Esc): the session does not start, so back to the main menu - not into the cockpit.
+  function hdSetupAbbrechen() { hdSetupZu(); hdZumHauptmenue(); }
+  function hdZumHauptmenue() {
+    try {
+      if (typeof hdSuiteLaeuft === 'function' && hdSuiteLaeuft()) return;
+      if (raceState === 'racing' || raceState === 'finishing' || raceState === 'countdown') return;
+      if (typeof kAktiverTab === 'function' && kAktiverTab() === 'fahren') return;
+      showTab('fahren');
+    } catch (e) { /* not ready */ }
+  }
   function hdSetupStart() {
     const w = hdSetupWeiter;
     if (hdSetupBox) hdSetupBox.hidden = true;
@@ -260,7 +271,7 @@
     const gn = e.target.closest('[data-hds-npc]');
     if (gn) { hdSetupStufeSetzen(hdSetupNpcs().filter((c) => String(c.device.id) === gn.dataset.hdsNpc), +gn.dataset.k); hdSetupMalen(); return; }
     const a = e.target.closest('[data-hds-akt]');
-    if (a) { if (a.dataset.hdsAkt === 'start') hdSetupStart(); else hdSetupZu(); }
+    if (a) { if (a.dataset.hdsAkt === 'start') hdSetupStart(); else hdSetupAbbrechen(); }
   }
   function hdSetupEingabe(e) {
     const c = e.target;
@@ -275,7 +286,7 @@
     if (!hdSetupBox || hdSetupBox.hidden) return;
     if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'checkbox' && e.key !== 'Escape') return;
     if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); hdSetupStart(); }
-    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); hdSetupZu(); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); hdSetupAbbrechen(); }
   }, true);
   // Controller: confirmation button (A / Cross) starts, B / Circle goes back - on a fresh press.
   setInterval(() => {
@@ -289,7 +300,7 @@
       }
     } catch (e) { return; }
     if (a && !hdSetupPadVorher.a) hdSetupStart();
-    else if (b && !hdSetupPadVorher.b) hdSetupZu();
+    else if (b && !hdSetupPadVorher.b) hdSetupAbbrechen();
     hdSetupPadVorher = { a, b };
   }, 60);
   if (typeof i18nOnLangChange === 'function') i18nOnLangChange(hdSetupMalen);
