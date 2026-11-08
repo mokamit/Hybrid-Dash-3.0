@@ -174,6 +174,13 @@
     w[k] = Math.round(Math.max(0, Math.min(100, +v || 0)));
     hdStilSpeichern();
   }
+  // Back to the style the car was born with (the generated one).
+  function hdStilZuruecksetzen(car) {
+    const id = hdStilId(car);
+    if (!id) return;
+    hdStilAlle()[id] = hdStilErzeugen(id);
+    hdStilSpeichern();
+  }
   function hdStilGesamt(w) { return Math.round(HD_STIL_TRAITS.reduce((s, tr) => s + w[tr.k], 0) / HD_STIL_TRAITS.length); }
   // The label under the name: the trait it is best at.
   function hdStilTyp(w) {
@@ -322,7 +329,7 @@
       + (liste.length > 1 && liste.includes(car) ? '<button type="button" class="k-arrow hdw-pf" data-hdw="fahrer" data-d="-1" aria-label="' + hdWertEsc(t('Vorherige')) + '">' + hdWertPfeil(-1) + '</button>' : '')
       + '<span class="hdw-bild">' + (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(car, 96) : '') + '</span>'
       + '<div class="hdw-name"><small>' + hdWertEsc(hdStilTyp(w)) + '</small><b>' + (nr ? '<em>#' + hdWertEsc(nr) + '</em> ' : '') + hdWertEsc(car.alias || car.tag || garageLabel(car)) + '</b>'
-      + '<span>' + hdWertEsc(t(carModellName(car.modellId))) + '</span></div>'
+      + '<span>' + (typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(car, 14) + ' ' + hdWertEsc(hdLandName(hdLand(car))) + ' · ' : '') + hdWertEsc(t(carModellName(car.modellId))) + '</span></div>'
       + '<div class="hdw-gesamt"><b data-hdw-gesamt>' + hdStilGesamt(w) + '</b><small>' + hdWertEsc(t('Gesamt')) + '</small></div>'
       + (liste.length > 1 && liste.includes(car) ? '<button type="button" class="k-arrow hdw-pf" data-hdw="fahrer" data-d="1" aria-label="' + hdWertEsc(t('Nächste')) + '">' + hdWertPfeil(1) + '</button>' : '')
       + '</div>';
@@ -337,7 +344,8 @@
     if (cmpCar) h += '<p class="hdw-leg"><span class="hdw-leg-a" style="background:' + hdWertEsc(farbe) + '"></span>' + hdWertEsc(car.alias || garageLabel(car)) + ' <span class="hdw-leg-b"></span>' + hdWertEsc(cmpCar.alias || garageLabel(cmpCar)) + ' (' + hdStilGesamt(cw) + ')</p>';
     h += '<div class="hdw-cmpwahl"><span class="hds-l">' + hdWertEsc(t('Stil')) + '</span><span class="hds-chips">'
       + HD_STIL_PRESETS.map((p) => '<button type="button" data-hdw="preset" data-id="' + p.id + '">' + hdWertEsc(t(p.de)) + '</button>').join('')
-      + '<button type="button" data-hdw="zufall">&#x1F3B2; ' + hdWertEsc(t('Zufällig')) + '</button></span></div>';
+      + '<button type="button" data-hdw="zufall">&#x1F3B2; ' + hdWertEsc(t('Zufällig')) + '</button>'
+      + '<button type="button" data-hdw="standard">&#8634; ' + hdWertEsc(t('Standard')) + '</button></span></div>';
     if (typeof GHOST_TEMPO_STUFEN !== 'undefined') {
       h += '<div class="hdw-cmpwahl"><span class="hds-l">' + hdWertEsc(t('Schwierigkeit')) + '</span><span class="hds-chips">'
         + GHOST_TEMPO_STUFEN.map((st, k) => '<button type="button" data-hdw="stufe" data-k="' + k + '"' + (k === stufe ? ' class="an"' : '') + '>' + hdWertEsc(st.max ? 'MAX' : t(st.label)) + '</button>').join('')
@@ -390,6 +398,8 @@
       if (p) { Object.assign(hdStilWerte(z.car), p.w); hdStilSpeichern(); }
     } else if (was === 'zufall') {
       Object.assign(hdStilWerte(z.car), hdStilErzeugen(hdStilId(z.car) + ':' + Date.now() + ':' + Math.random())); hdStilSpeichern();
+    } else if (was === 'standard') {
+      hdStilZuruecksetzen(z.car);
     } else if (was === 'stufe') {
       z.car.ghostStufe = +b.dataset.k;
       try { if (typeof carRolleMerken === 'function') carRolleMerken(z.car); renderGarage(); } catch (er) { /* not ready */ }

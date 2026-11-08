@@ -390,7 +390,7 @@
   // Hook, called at the end of setCarRole() in 90-ghosts.js.
   function hdRolleGesetzt(car, role) {
     if (role !== 'ghost' || !hd.npcNamen || !car || car.alias) return;
-    car.alias = hdZufallsName(hdBelegteNamen(car));
+    car.alias = typeof hdNameFuerAuto === 'function' ? hdNameFuerAuto(car, hdBelegteNamen(car)) : hdZufallsName(hdBelegteNamen(car));
     carRemember(car);
     log('HybridDash: new NPC driver ' + car.alias + ' in ' + hdAutoBeschreibung(car) + '.', 'info');
     showHudToast(t('Neuer Fahrer') + ': ' + car.alias);
@@ -411,7 +411,7 @@
 
   // Give a car a fresh random name (the dice button in the garage).
   function hdNeuerName(car) {
-    car.alias = hdZufallsName(hdBelegteNamen(car));
+    car.alias = typeof hdNameFuerAuto === 'function' ? hdNameFuerAuto(car, hdBelegteNamen(car)) : hdZufallsName(hdBelegteNamen(car));
     carRemember(car);
     if (hd.npcAnsage && car.role === 'ghost') hdSprechen(hdSatz('fahrer', { nr: hdNummer(car), name: car.alias, auto: hdAutoBeschreibung(car) }), 10);
     renderGarage();
@@ -498,7 +498,7 @@
   // ---- PHOTO PORTRAITS (v3.0) ---------------------------------------------------------------
   // BESTELLT: "Make it exactly like the reference photo" - sheets of 36 studio portraits (driver, helmet with the
   // visor down, arms crossed) that came with the requests ("I've added more reference photos for you to store").
-  // They are cut out into img/fahrer/p00-p71.jpg (240 x 240, square from the top of each portrait, so the whole
+  // They are cut out into img/fahrer/p00-p107.jpg (240 x 240, square from the top of each portrait, so the whole
   // helmet shows - "Make sure they show the full helmet") and chosen by the car colour: each portrait is labelled with its main colour and its accent colours
   // (by eye - the suit and helmet, not the backdrop). A car gets the portraits whose main colour is its own first,
   // then those that carry it as an accent; the driver's name picks one, a tap on the avatar steps to the next.
@@ -516,6 +516,13 @@
     ['schwarz'], ['lila', 'gruen'], ['weiss', 'orange', 'blau'], ['schwarz', 'orange'], ['blau', 'weiss'], ['weiss', 'orange'],
     ['rot', 'lila'], ['gruen', 'schwarz'], ['blau', 'weiss'], ['schwarz', 'gelb'], ['lila', 'schwarz', 'blau'], ['lila', 'orange'],
     ['gelb', 'schwarz'], ['gruen', 'orange'], ['weiss', 'blau'], ['rot', 'schwarz'], ['gelb', 'gruen'], ['lila', 'weiss'],
+    // third sheet (p72-p107, v3.0 BESTELLT: "Add the additional avatars to the roster")
+    ['gelb', 'lila'], ['blau'], ['rot', 'orange'], ['blau', 'gelb'], ['gruen', 'weiss'], ['lila', 'weiss'],
+    ['blau', 'lila'], ['weiss', 'orange'], ['schwarz', 'blau'], ['gruen', 'weiss'], ['gelb', 'blau'], ['orange', 'schwarz'],
+    ['rot', 'weiss', 'blau'], ['orange', 'schwarz'], ['lila', 'gelb'], ['blau', 'orange'], ['rot', 'weiss'], ['gruen', 'schwarz'],
+    ['weiss', 'blau'], ['gelb', 'schwarz'], ['gruen', 'orange'], ['lila', 'weiss'], ['lila', 'schwarz'], ['blau', 'rot'],
+    ['orange', 'schwarz'], ['gelb', 'schwarz'], ['blau', 'weiss'], ['lila', 'gelb'], ['weiss', 'rot'], ['gruen', 'weiss'],
+    ['rot', 'gelb'], ['blau', 'weiss'], ['lila', 'weiss'], ['schwarz', 'gelb'], ['weiss', 'blau'], ['gruen', 'gelb'],
   ];
   // The car colour as one of the palette names (from the hex, so it also works for a colour we do not list).
   function hdFarbKlasse(hex) {
@@ -845,6 +852,7 @@
     zeile.className = 'hd-gk-zeile';
     zeile.setAttribute('data-i18n-skip', '');
     zeile.innerHTML = `<span class="hd-gk-nr" style="background:${f.hex};color:${f.ink || '#fff'}">${hdNummer(car)}</span>`
+      + (typeof hdLandFlaggeFuer === 'function' ? '<span class="hd-gk-land">' + hdLandFlaggeFuer(car, 20) + '<span>' + String(hdLandName(hdLand(car))).replace(/[&<>]/g, '') + '</span></span>' : '')
       + (modell && !/^(–|-|Nicht zugeordnet|Not assigned)$/i.test(modell) ? `<span class="hd-gk-modell">${String(modell).replace(/[&<>]/g, '')}</span>` : '');
     text.appendChild(zeile);
     return box;
@@ -1063,7 +1071,7 @@
       const svg = hdAvatarSvg('Mara Kovac', '#e23b3b', 0, 30, 'porsche911');
       prüfen('avatar: photo portrait in the car colour (red car -> red, blue -> blue, white -> white), same every time, another on tap',
              HD_FOTOS[rotNr].indexOf('rot') >= 0 && HD_FOTOS[blauNr].indexOf('blau') >= 0 && HD_FOTOS[weissNr].indexOf('weiss') >= 0
-             && rotNr === rot2 && rotNr !== rot3 && /img\/fahrer\/p\d\d\.jpg/.test(svg) && HD_FOTOS.length === 72,
+             && rotNr === rot2 && rotNr !== rot3 && /img\/fahrer\/p\d\d\.jpg/.test(svg) && HD_FOTOS.length === 108,
              'red ' + rotNr + ', blue ' + blauNr + ', white ' + weissNr + ', red tap ' + rot3);
       // H2: no two drivers share an avatar (garage-wide), also when one colour has fewer portraits than cars.
       {
@@ -1078,11 +1086,11 @@
           const stabil = nach[0] !== nrs[0] && nach.slice(1).every((n, i) => n === nrs[i + 1]) && new Set(nach).size === 12;
           const rote = nrs.filter((n) => HD_FOTOS[n].indexOf('rot') >= 0).length;
           garage.length = 0; hd.fotos = {};
-          for (let i = 0; i < 80; i++) garage.push(fake('hd-av-x' + i, 'ghost', { alias: 'X', colorId: ['rot', 'blau', 'gelb', 'weiss'][i % 4] }));
+          for (let i = 0; i < 120; i++) garage.push(fake('hd-av-x' + i, 'ghost', { alias: 'X', colorId: ['rot', 'blau', 'gelb', 'weiss'][i % 4] }));
           const viele = garage.map((c) => hdFotoBelegung().get(String(c.device.id)));
-          prüfen('avatars: no two drivers share one, a tap changes only that driver - 12 red cars with repeated names get 12 different portraits (red ones first); with 80 cars all 72 are used before any repeats',
+          prüfen('avatars: no two drivers share one, a tap changes only that driver - 12 red cars with repeated names get 12 different portraits (red ones first); with 120 cars all 108 are used before any repeats',
                  new Set(nrs).size === 12 && rote >= 6 && new Set(viele).size === HD_FOTOS.length && stabil,
-                 new Set(nrs).size + ' different of 12 (' + rote + ' red); tap moves only that car: ' + stabil + '; 80 cars -> ' + new Set(viele).size + ' different');
+                 new Set(nrs).size + ' different of 12 (' + rote + ' red); tap moves only that car: ' + stabil + '; 120 cars -> ' + new Set(viele).size + ' different');
         } finally { garage.length = 0; merkG.forEach((c) => garage.push(c)); }
       }
       // I: garage label - which laptop a car is connected to (two-laptop mode only).

@@ -2209,7 +2209,7 @@
       row.innerHTML = `
         <i class="gk-streifen" style="background:${f.hex}"></i>
         <div class="gk-bild" style='${bild}'><span class="gk-zeichen">${car.tagChar || ''}</span></div>
-        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 52) : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
+        <div class="gk-text"><b data-i18n-skip>${typeof hdAvatarHtml === 'function' ? hdAvatarHtml(car, 52) : ''}${typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(car, 13) + ' ' : ''}${esc(name)}${typeof hdLaptopEtikett === 'function' ? hdLaptopEtikett(car) : ''}</b>
           <span class="gar-id" data-i18n-skip>${esc(car.tag || '')} &middot; ${esc(String(car.device.id).slice(0, 10))}${car.blinking ? ' &middot; ' + t('blinkt') : ''}${garAkkuText(car)}</span></div>
         <div class="gk-rolle gk-rolle-nur" data-rollen="${GAR_ROLLEN.map((r) => r.id).join(',')}" data-rolle="${rolle.id}">
           <b>${t(rolle.name)}</b>
@@ -2341,6 +2341,7 @@
       });
       zn.querySelector('button[data-act="hd-name"]').onclick = (e) => { e.stopPropagation(); if (typeof hdNeuerName === 'function') hdNeuerName(car); };
       zn.querySelector('button[data-act="color"]').onclick = (e) => { e.stopPropagation(); garFarbWahl(e.currentTarget, car); };
+      if (typeof hdLandZeile === 'function') hdLandZeile(car, zn);   // HD 3.0: country (98y-hd-laender.js)
       // Farbe, Ghost-Tempo, Charakter, Motorsound: die bisherigen Wertzeilen.
       rechts.appendChild(garageAufZeile(car));
       // Foto

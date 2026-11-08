@@ -5965,6 +5965,7 @@
       if (bremsen) motor.state.speedKmh *= 0.3;
       if (!zwei) updateDamageFuelUI();
       if (!playCrashFx()) playCrashSound();
+      if (typeof hdKontaktKlang === 'function') hdKontaktKlang(Math.abs(motor.state.speedKmh) / Math.max(0.01, motor.config.topSpeedKmh) / 0.3, wer);
       padRumble(0.65 + 0.35 * Math.max(0, Math.min(1, Math.abs(motor.state.speedKmh) / Math.max(0.01, motor.config.topSpeedKmh))), 0.5, 260);
       return;
     }
@@ -5998,6 +5999,7 @@
     if (bremsen) motor.state.speedKmh *= 0.3;
     if (!zwei) updateDamageFuelUI();
     if (!playCrashFx()) playCrashSound(); // sample variants first, synth burst as fallback
+    if (typeof hdKontaktKlang === 'function') hdKontaktKlang(wucht, wer);   // HD 3.0: thud / bump / scrape
     // Der untere Wert liegt ueber dem alten festen (0,6 / 0,4 / 220 ms): auch ein
     // langsamer Aufprall soll deutlicher sein als bisher. Oben laeuft es auf den vollen
     // Ausschlag hinaus.

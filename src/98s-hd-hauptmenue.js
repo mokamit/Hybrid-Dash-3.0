@@ -93,7 +93,7 @@
     try { ich = playerCar && autos.includes(playerCar) ? playerCar : (autos[0] || null); } catch (e) { ich = autos[0] || null; }
     // every other car (GEMELDET: "I have 6 cars connected, but it only shows 4 avatars"); smaller when many
     const andere = autos.filter((c) => c !== ich);
-    const schl = [lang, ich ? [ich.device.id, ich.alias, ich.colorId, ich.modellId, ich.role, typeof hdNummer === 'function' ? hdNummer(ich) : ''].join(':') : '-',
+    const schl = [lang, ich ? [ich.device.id, ich.alias, ich.colorId, ich.modellId, ich.role, typeof hdNummer === 'function' ? hdNummer(ich) : '', typeof hdLand === 'function' ? hdLand(ich) : ''].join(':') : '-',
       andere.map((c) => c.device.id + ':' + c.colorId + ':' + c.alias).join(',')].join('|');
     if (schl === hdHmSchluessel && box.firstChild) return;
     hdHmSchluessel = schl;
@@ -106,7 +106,7 @@
       const name = ich.alias || ich.tag || garageLabel(ich);
       html += '<span class="hdhm-portrait" style="--f:' + esc(carColor(ich).hex) + '">' + portrait(ich, 330) + '</span>'
         + '<span class="hdhm-rolle">' + esc(rolle) + '</span>'
-        + '<span class="hdhm-name">' + (nr ? '<b>#' + esc(nr) + '</b>' : '') + '<span>' + esc(name) + '</span></span>';
+        + '<span class="hdhm-name">' + (nr ? '<b>#' + esc(nr) + '</b>' : '') + '<span>' + esc(name) + '</span>' + (typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(ich, 20) : '') + '</span>';
     } else {
       html += '<span class="hdhm-portrait hdhm-leer"><svg viewBox="0 0 100 100" width="120" height="120" aria-hidden="true"><path d="M50 14c-20 0-34 14-34 34v14c0 6 4 10 10 10h48c6 0 10-4 10-10V48c0-20-14-34-34-34z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M22 48h56v10H22z" fill="currentColor" opacity=".5"/><path d="M28 86h44" stroke="currentColor" stroke-width="4"/></svg></span>'
         + '<span class="hdhm-rolle">' + esc(t('Kein Auto verbunden')) + '</span>';

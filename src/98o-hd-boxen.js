@@ -625,7 +625,7 @@
       const inhalt = document.createElement('span');
       inhalt.className = 'hd-sg-inhalt'; inhalt.setAttribute('data-i18n-skip', '');
       inhalt.innerHTML = `<span class="hd-sg-nr">${esc(nr)}</span><span class="hd-sg-bild">${avatar}</span>`
-        + `<span class="hd-sg-name"><small>${esc(vor)}</small><b>${esc(nach)}</b></span>`;
+        + `<span class="hd-sg-name"><small>${typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(car, 12) + ' ' : ''}${esc(vor)}</small><b>${esc(nach)}</b></span>`;
       inhalt.appendChild(ctrl);
       row.appendChild(inhalt);
     });

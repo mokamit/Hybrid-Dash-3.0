@@ -36,15 +36,65 @@
     return '<span class="hds-chips">' + GHOST_TEMPO_STUFEN.map((st, k) => '<button type="button" ' + attr + ' data-k="' + k + '"' + (k === aktiv ? ' class="an"' : '') + '>'
       + hdSetupEsc(st.max ? 'MAX' : t(st.label)) + '</button>').join('') + '</span>';
   }
+  // v3.0 BESTELLT: "Pre race set up for NPC, have button to reset to default or have presets option."
+  // A preset sets the difficulty of every NPC and the NPC sliders (as a share of each slider's range, so it fits
+  // whatever the range is); "Reset" puts the NPC sliders back to the app's defaults, every NPC to Medium and every
+  // driving style back to the one the car was born with.
+  const HD_SETUP_NPC_PRESETS = [
+    { id: 'locker', de: 'Locker', stufe: 0, r: { 'ghost-speed': 0.25, 'ghost-hardness': 0.2, 'ghost-curve': 0.7, 'ghost-streuung': 0.2, 'ghost-max-gerade': 0.7 }, c: { 'ghost-w-fehler': true, 'ghost-w-defend': false } },
+    { id: 'club', de: 'Clubrennen', stufe: 1, r: { 'ghost-speed': 0.45, 'ghost-hardness': 0.45, 'ghost-curve': 0.5, 'ghost-streuung': 0.4, 'ghost-max-gerade': 0.85 }, c: { 'ghost-w-fehler': true, 'ghost-w-defend': true } },
+    { id: 'profi', de: 'Profis', stufe: 2, r: { 'ghost-speed': 0.65, 'ghost-hardness': 0.7, 'ghost-curve': 0.35, 'ghost-streuung': 0.3, 'ghost-max-gerade': 1 }, c: { 'ghost-w-fehler': true, 'ghost-w-defend': true } },
+    { id: 'alien', de: 'Außerirdisch', stufe: 3, r: { 'ghost-speed': 0.85, 'ghost-hardness': 0.9, 'ghost-curve': 0.2, 'ghost-streuung': 0.15, 'ghost-max-gerade': 1 }, c: { 'ghost-w-fehler': false, 'ghost-w-defend': true } },
+  ];
+  let hdSetupNpcPreset = '';
+  function hdSetupSetzeOption(id, wert) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'checkbox') { if (el.checked === !!wert) return; el.checked = !!wert; }
+    else if (el.type === 'range') {
+      const min = +el.min || 0, max = +el.max || 1, step = +el.step || 0;
+      let v = min + wert * (max - min);
+      if (step > 0) v = Math.round((v - min) / step) * step + min;
+      el.value = String(+v.toFixed(6));
+    } else el.value = wert;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  function hdSetupNpcPresetAnwenden(id) {
+    const p = HD_SETUP_NPC_PRESETS.find((x) => x.id === id);
+    if (!p) return;
+    Object.keys(p.r).forEach((k) => hdSetupSetzeOption(k, p.r[k]));
+    Object.keys(p.c).forEach((k) => hdSetupSetzeOption(k, p.c[k]));
+    hdSetupStufeSetzen(hdSetupNpcs(), p.stufe);
+    hdSetupNpcPreset = id;
+  }
+  function hdSetupNpcZuruecksetzen() {
+    HD_SETUP_SPIEGEL.filter(([g]) => g === 'NPCs').forEach(([, id]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'checkbox') { if (el.checked === el.defaultChecked) return; el.checked = el.defaultChecked; }
+      else if (el.tagName === 'SELECT') { const o = [...el.options].find((x) => x.defaultSelected) || el.options[0]; if (!o) return; el.value = o.value; }
+      else el.value = el.defaultValue;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    hdSetupStufeSetzen(hdSetupNpcs(), 1);
+    if (typeof hdStilZuruecksetzen === 'function') hdSetupNpcs().forEach((c) => hdStilZuruecksetzen(c));
+    hdSetupNpcPreset = '';
+    showHudToast(t('NPCs auf Standard zurückgesetzt'));
+  }
   function hdSetupNpcHtml() {
     const npcs = hdSetupNpcs();
     if (!npcs.length) return '<p class="hds-leer">' + hdSetupEsc(t('Keine NPCs in der Garage – gib einem Auto die Rolle NPC.')) + '</p>';
     const alle = npcs.every((c) => hdSetupStufe(c) === hdSetupStufe(npcs[0])) ? hdSetupStufe(npcs[0]) : -1;
-    let h = '<div class="hds-z"><span class="hds-l">' + hdSetupEsc(t('Schwierigkeit für alle')) + '</span>' + hdSetupStufenChips(alle, 'data-hds-alle="1"') + '</div>';
+    let h = '<div class="hds-z hds-npc-vorlagen"><span class="hds-l">' + hdSetupEsc(t('Vorlage')) + '</span><span class="hds-chips">'
+      + HD_SETUP_NPC_PRESETS.map((p) => '<button type="button" data-hds-npcpreset="' + p.id + '"' + (hdSetupNpcPreset === p.id ? ' class="an"' : '') + '>' + hdSetupEsc(t(p.de)) + '</button>').join('')
+      + '<button type="button" class="hds-reset" data-hds-npcreset="1">&#8634; ' + hdSetupEsc(t('Standard')) + '</button></span></div>';
+    h += '<div class="hds-z"><span class="hds-l">' + hdSetupEsc(t('Schwierigkeit für alle')) + '</span>' + hdSetupStufenChips(alle, 'data-hds-alle="1"') + '</div>';
     h += '<div class="hds-npcs">' + npcs.map((c) => {
       const f = carColor(c);
       return '<div class="hds-npc" style="--f:' + hdSetupEsc(f.hex) + '"><span class="hds-npc-bild">' + (typeof hdAvatarFuerAuto === 'function' ? hdAvatarFuerAuto(c, 36) : '') + '</span>'
-        + '<span class="hds-npc-name">' + hdSetupEsc(c.alias || c.tag || garageLabel(c))
+        + '<span class="hds-npc-name">' + (typeof hdLandFlaggeFuer === 'function' ? hdLandFlaggeFuer(c, 12) + ' ' : '') + hdSetupEsc(c.alias || c.tag || garageLabel(c))
         + (typeof hdStilWerte === 'function' ? '<small>' + hdSetupEsc(hdStilTyp(hdStilWerte(c)) + ' · ' + hdStilGesamt(hdStilWerte(c))) + '</small>' : '') + '</span>'
         + '<button type="button" class="hds-stil" data-hdw-stil="' + hdSetupEsc(String(c.device.id)) + '">&#x1F3AF; ' + hdSetupEsc(t('Fahrstil')) + '</button>'
         + hdSetupStufenChips(hdSetupStufe(c), 'data-hds-npc="' + hdSetupEsc(String(c.device.id)) + '"') + '</div>';
@@ -158,7 +208,7 @@
     const gruppe = (titel, inhalt) => '<section class="hds-gruppe"><h3>' + hdSetupEsc(t(titel)) + '</h3>' + inhalt + '</section>';
     return '<div class="hds-karte">'
       + '<div class="hds-kopf"><span class="hds-bild">' + bild + '</span><div><small>' + hdSetupEsc(t('Vor dem Start')) + '</small>'
-      + '<b>' + (nr ? '#' + hdSetupEsc(nr) + ' ' : '') + hdSetupEsc(name) + '</b><span>' + hdSetupEsc(sitzung) + '</span></div>'
+      + '<b>' + (nr ? '#' + hdSetupEsc(nr) + ' ' : '') + hdSetupEsc(name) + (car && typeof hdLandFlaggeFuer === 'function' ? ' ' + hdLandFlaggeFuer(car, 22) : '') + '</b><span>' + hdSetupEsc(sitzung) + '</span></div>'
       + (car ? '<button type="button" class="hds-werte" data-hdw-auto="' + hdSetupEsc(String(car.device.id)) + '">&#x1F4CA; ' + hdSetupEsc(t('Fahrzeugwerte')) + (typeof carModellName === 'function' && carModellWert(car.modellId) ? ': ' + hdSetupEsc(t(carModellName(car.modellId))) : '') + '</button>' : '')
       + '</div>'
       + '<div class="hds-gitter">'
@@ -202,6 +252,9 @@
     if (r) { tyres = r.dataset.hdsReifen; mischungWunsch = null; if (typeof applySurface === 'function') applySurface(); hdSetupMalen(); return; }
     const k = e.target.closest('[data-hds-tank]');
     if (k) { if (typeof pitVorwahl === 'object' && pitVorwahl) pitVorwahl.refuel = Number(k.dataset.hdsTank); hdSetupMalen(); return; }
+    const np = e.target.closest('[data-hds-npcpreset]');
+    if (np) { hdSetupNpcPresetAnwenden(np.dataset.hdsNpcpreset); hdSetupMalen(); return; }
+    if (e.target.closest('[data-hds-npcreset]')) { hdSetupNpcZuruecksetzen(); hdSetupMalen(); return; }
     const ga = e.target.closest('[data-hds-alle]');
     if (ga) { hdSetupStufeSetzen(hdSetupNpcs(), +ga.dataset.k); hdSetupMalen(); return; }
     const gn = e.target.closest('[data-hds-npc]');
