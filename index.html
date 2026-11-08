@@ -31011,6 +31011,25 @@
     } catch (e) { return false; }
   }
   function hdFahrenGesperrt() { return hdVorStartGesperrt() || hdMenueGesperrt(); }
+  // v3.0 BESTELLT: "Line up automatically and/or manually" - on the grid board the player may roll his car onto
+  // its slot by hand, at a slow creep (throttle capped, brake free). The automatic line-up drives through
+  // untouched: before this the hold zeroed its throttle, so the player's car never left. The pre-race setup
+  // and the menus keep the full hold.
+  const HD_GRID_KRIECHGAS = 0.22;
+  function hdFahrenSperre(aufstellenAktiv) {
+    try {
+      if (hdMenueGesperrt()) return 'halten';
+      if (!hdVorStartGesperrt()) return null;
+      if (typeof hdSetupOffen === 'function' && hdSetupOffen()) return 'halten';
+      if (aufstellenAktiv) return null;
+      return 'kriechen';
+    } catch (e) { return 'halten'; }
+  }
+  function hdSperreAnwenden(sperre, gas, bremse) {
+    if (sperre === 'halten') return { gas: 0, bremse: 1 };
+    if (sperre === 'kriechen') return { gas: Math.min(gas, HD_GRID_KRIECHGAS), bremse };
+    return { gas, bremse };
+  }
   function hdOfftrackSitzung() {
     try { if (hdSuiteLaeuft()) return true; return raceState === 'racing' || raceState === 'finishing'; } catch (e) { return true; }
   }
@@ -31193,7 +31212,8 @@
     // bevor 70-race.js seine Konstanten angelegt hat (temporale Todeszone beim Laden).
     try {
       if (fruehstartStrafeAktiv(1)) { rawThrottle = 0; rawBrake = Math.max(rawBrake, FRUEHSTART_BREMSE); }
-      if (hdFahrenGesperrt()) { rawThrottle = 0; rawBrake = 1; }
+      const hdS = hdSperreAnwenden(hdFahrenSperre(!!(ap && ap.grund === 'aufstellen')), rawThrottle, rawBrake);
+      rawThrottle = hdS.gas; rawBrake = hdS.bremse;
       // Derby bei 0 % (v0.9.16): das Auto bleibt stehen - vorher wurde nur das Tempo EINMAL auf
       // null gesetzt, danach fuhr es mit dem Gas weiter.
       if (typeof derbyLaeuft !== 'undefined' && derbyLaeuft && derbyTot1) { rawThrottle = 0; rawBrake = 1; }
@@ -31345,7 +31365,8 @@
     if (offtrackGiltFuer(z.nr)) gas = Math.min(gas, OFFTRACK_GAS);
     try {
       if (fruehstartStrafeAktiv(z.nr)) { gas = 0; bremse = Math.max(bremse, FRUEHSTART_BREMSE); }
-      if (hdFahrenGesperrt()) { gas = 0; bremse = 1; }
+      const hdS2 = hdSperreAnwenden(hdFahrenSperre(!!(ap2 && ap2.grund === 'aufstellen')), gas, bremse);
+      gas = hdS2.gas; bremse = hdS2.bremse;
       if (typeof derbyLaeuft !== 'undefined' && derbyLaeuft && z.derbyTot) { gas = 0; bremse = 1; }
     } catch (e) { /* beim Laden */ }
     // Und das Rumpeln, an seinen eigenen Pad. Bis v0.6.45 waere es der Pad von Spieler 1
