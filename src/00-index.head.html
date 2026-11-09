@@ -285,6 +285,10 @@
   .gar-speed-reset { min-width: 32px; min-height: 32px; padding: 0 6px; font-size: 15px;
                      line-height: 1; flex: none; }
   .gar-speed-own { color: var(--info) }
+  .gar-entwurf { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; padding: 8px 10px;
+                 border: 1px solid #d9a400; border-radius: 6px; background: rgba(217, 164, 0, .12); }
+  .gar-entwurf[hidden] { display: none; }
+  .gar-entwurf-text { font-weight: 700; margin-right: auto; }
   /* Kennzeichen fuer Regler, die nachgerechnet nicht wirken. Es steht IN der Beschriftung
      und nicht als Farbe der ganzen Zeile: eine ausgegraute Zeile liest sich wie "gesperrt",
      und diese Regler sind nicht gesperrt - sie brauchen nur etwas, das fehlt. */
@@ -10878,6 +10882,12 @@
            (statt des entfernten Cockpit-Knopfs auf der Startseite). -->
       <button class="goto-tab" id="gar-to-cockpit" data-tab="race"
               style="margin-bottom:10px">Zum Cockpit &rarr;</button>
+      <!-- Speichern fuer Auto- und Fahrerwerte, die von Hand geaendert wurden (siehe garageEntwurf in 90-ghosts.js). -->
+      <div id="gar-entwurf" class="gar-entwurf" hidden>
+        <span class="gar-entwurf-text">Ungespeicherte Änderungen</span>
+        <button class="primary" id="gar-entwurf-speichern">Speichern</button>
+        <button id="gar-entwurf-verwerfen">Verwerfen</button>
+      </div>
       <div id="gar-list"></div>
       <!-- Abstimmung direkt hier waehlbar, sobald ein Auto gesteuert wird. Dieselbe
            Funktion wie in den Optionen, deshalb ziehen die Regler dort automatisch nach. -->

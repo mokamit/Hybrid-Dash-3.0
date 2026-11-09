@@ -1110,10 +1110,69 @@
     renderGarage();
     renderRaceGrid();
   }
+  // ---- GARAGE: SPEICHERN ERST AUF KNOPFDRUCK ---------------------------------------------
+  // Von Hand in der Garage geaenderte Auto- und Fahrerwerte (Name, Farbe, Modell, Nummer, Rolle,
+  // Ghost-Tempo, Fahrstil ...) bleiben in einem ENTWURF, bis "Speichern" gedrueckt wird. Was beim
+  // Verbinden automatisch abgelegt wird, geht weiter sofort in den Speicher. "Verwerfen" laedt die
+  // Seite neu: dann stimmt die Anzeige wieder mit dem Gespeicherten ueberein.
+  // Erkannt wird "von Hand" am Ereignis: Klick, Eingabe oder Aenderung innerhalb der Garage (oder des
+  // Fahrstil-Fensters). Was waehrend eines solchen Ereignisses geschrieben wird, landet im Entwurf.
+  let garageEntwurf = null;
+  let garageHandGerade = false;
+  function garageLesen(key) {
+    if (garageEntwurf && Object.prototype.hasOwnProperty.call(garageEntwurf, key)) return garageEntwurf[key];
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function garageSchreiben(key, val) {
+    if (garageHandGerade) {
+      garageEntwurf = garageEntwurf || {};
+      garageEntwurf[key] = val;
+      garageEntwurfAnzeigen();
+      return;
+    }
+    // Automatische Ablage, waehrend ein Entwurf offen ist: der Entwurf bleibt aktuell, damit Speichern
+    // nicht eine veraltete Fassung zurueckschreibt.
+    if (garageEntwurf && Object.prototype.hasOwnProperty.call(garageEntwurf, key)) garageEntwurf[key] = val;
+    try { localStorage.setItem(key, val); } catch (e) { /* voll oder privat */ }
+  }
+  function garageEntwurfAnzeigen() {
+    const leiste = $('gar-entwurf');
+    if (leiste) leiste.hidden = !garageEntwurf || !Object.keys(garageEntwurf).length;
+  }
+  function garageEntwurfSpeichern() {
+    if (!garageEntwurf) return;
+    for (const k of Object.keys(garageEntwurf)) { try { localStorage.setItem(k, garageEntwurf[k]); } catch (e) { /* voll */ } }
+    garageEntwurf = null;
+    garageEntwurfAnzeigen();
+    if (typeof renderGarage === 'function') renderGarage();
+  }
+  function garageEntwurfVerwerfen() {
+    if (!garageEntwurf) return;
+    if (!confirm(t('Verwerfen? Ungespeicherte Änderungen gehen verloren.'))) return;
+    garageEntwurf = null;
+    location.reload();
+  }
+  ['click', 'input', 'change'].forEach((ereignis) => {
+    document.addEventListener(ereignis, (e) => {
+      const ziel = e.target;
+      if (!ziel || !ziel.closest || !ziel.closest('#tab-garage, #hd-wert')) return;
+      garageHandGerade = true;
+      setTimeout(() => { garageHandGerade = false; }, 0);
+    }, true);
+  });
+  window.addEventListener('beforeunload', (e) => {
+    if (garageEntwurf && Object.keys(garageEntwurf).length) { e.preventDefault(); e.returnValue = ''; }
+  });
+  (function garageEntwurfKnoepfe() {
+    const s = $('gar-entwurf-speichern'), v = $('gar-entwurf-verwerfen');
+    if (s) s.addEventListener('click', garageEntwurfSpeichern);
+    if (v) v.addEventListener('click', garageEntwurfVerwerfen);
+  })();
+
   const CAR_STORE = 'chc.cars.v1';
 
   function carStore() {
-    try { return JSON.parse(localStorage.getItem(CAR_STORE) || '{}'); }
+    try { return JSON.parse(garageLesen(CAR_STORE) || '{}'); }
     catch (e) { return {}; }
   }
   // Gemerkt wird je GERAET, nicht je Platz in der Liste: verbindet man in anderer
@@ -1132,7 +1191,7 @@
   // Sitzung. Eigene Ablage, damit carProfilGeaendert (Name/Farbe) unberuehrt bleibt.
   const CAR_ROLLEN_STORE = 'chc.rollen.v1';
   function carRollenLesen() {
-    try { return JSON.parse(localStorage.getItem(CAR_ROLLEN_STORE) || '{}') || {}; } catch (e) { return {}; }
+    try { return JSON.parse(garageLesen(CAR_ROLLEN_STORE) || '{}') || {}; } catch (e) { return {}; }
   }
   function carRolleMerken(car) {
     if (!car || !car.device || car.sim) return;
@@ -1146,10 +1205,10 @@
       ghostMotor: car.ghostMotor || '',
       // v1.1.3: Selbstlenkung je Auto ("" = wie in Optionen).
       fahrhilfe: car.fahrhilfe || '' };
-    try { localStorage.setItem(CAR_ROLLEN_STORE, JSON.stringify(alle)); } catch (e) { /* voll */ }
+    garageSchreiben(CAR_ROLLEN_STORE, JSON.stringify(alle));
   }
   function carStoreSchreiben(all) {
-    try { localStorage.setItem(CAR_STORE, JSON.stringify(all)); } catch (e) { /* privat */ }
+    garageSchreiben(CAR_STORE, JSON.stringify(all));
   }
   function carRemember(car) {
     const all = carStore();

@@ -130,12 +130,12 @@
   let hdStilDaten = null, hdStilVersion = 1;
   const hdStilCache = new Map();
   function hdStilAlle() {
-    if (!hdStilDaten) { try { hdStilDaten = JSON.parse(localStorage.getItem(HD_STIL_STORE) || '{}') || {}; } catch (e) { hdStilDaten = {}; } }
+    if (!hdStilDaten) { try { hdStilDaten = JSON.parse(garageLesen(HD_STIL_STORE) || '{}') || {}; } catch (e) { hdStilDaten = {}; } }
     return hdStilDaten;
   }
   function hdStilSpeichern() {
     hdStilVersion++;
-    try { localStorage.setItem(HD_STIL_STORE, JSON.stringify(hdStilAlle())); } catch (e) { /* private */ }
+    garageSchreiben(HD_STIL_STORE, JSON.stringify(hdStilAlle()));
   }
   // A generated style: seeded from the device id, so the same car always starts with the same driver.
   function hdStilErzeugen(seedText) {

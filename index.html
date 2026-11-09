@@ -285,6 +285,10 @@
   .gar-speed-reset { min-width: 32px; min-height: 32px; padding: 0 6px; font-size: 15px;
                      line-height: 1; flex: none; }
   .gar-speed-own { color: var(--info) }
+  .gar-entwurf { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; padding: 8px 10px;
+                 border: 1px solid #d9a400; border-radius: 6px; background: rgba(217, 164, 0, .12); }
+  .gar-entwurf[hidden] { display: none; }
+  .gar-entwurf-text { font-weight: 700; margin-right: auto; }
   /* Kennzeichen fuer Regler, die nachgerechnet nicht wirken. Es steht IN der Beschriftung
      und nicht als Farbe der ganzen Zeile: eine ausgegraute Zeile liest sich wie "gesperrt",
      und diese Regler sind nicht gesperrt - sie brauchen nur etwas, das fehlt. */
@@ -10878,6 +10882,12 @@
            (statt des entfernten Cockpit-Knopfs auf der Startseite). -->
       <button class="goto-tab" id="gar-to-cockpit" data-tab="race"
               style="margin-bottom:10px">Zum Cockpit &rarr;</button>
+      <!-- Speichern fuer Auto- und Fahrerwerte, die von Hand geaendert wurden (siehe garageEntwurf in 90-ghosts.js). -->
+      <div id="gar-entwurf" class="gar-entwurf" hidden>
+        <span class="gar-entwurf-text">Ungespeicherte Änderungen</span>
+        <button class="primary" id="gar-entwurf-speichern">Speichern</button>
+        <button id="gar-entwurf-verwerfen">Verwerfen</button>
+      </div>
       <div id="gar-list"></div>
       <!-- Abstimmung direkt hier waehlbar, sobald ein Auto gesteuert wird. Dieselbe
            Funktion wie in den Optionen, deshalb ziehen die Regler dort automatisch nach. -->
@@ -16286,6 +16296,9 @@
     "Kopplung vergessen?": "Forget this pairing?",
     "Auswählen": "Select",
     "Zurückgehen": "Back",
+    "Ungespeicherte Änderungen": "Unsaved changes",
+    "Verwerfen": "Discard",
+    "Verwerfen? Ungespeicherte Änderungen gehen verloren.": "Discard? Unsaved changes will be lost.",
     "Quadrat (PS) / X (Xbox), 1 s halten": "Square (PS) / X (Xbox), hold 1 s",
     "Rote Flagge zeigen?": "Show the red flag?",
     "Rote Flagge": "Red flag",
@@ -20540,6 +20553,9 @@
     "Kopplung vergessen?": "¿Olvidar este emparejamiento?",
     "Auswählen": "Elegir",
     "Zurückgehen": "Atrás",
+    "Ungespeicherte Änderungen": "Cambios sin guardar",
+    "Verwerfen": "Descartar",
+    "Verwerfen? Ungespeicherte Änderungen gehen verloren.": "¿Descartar? Los cambios sin guardar se perderán.",
     "Quadrat (PS) / X (Xbox), 1 s halten": "Cuadrado (PS) / X (Xbox), mantener 1 s",
     "Rote Flagge zeigen?": "¿Mostrar bandera roja?",
     "Rote Flagge": "Bandera roja",
@@ -64784,10 +64800,69 @@
     renderGarage();
     renderRaceGrid();
   }
+  // ---- GARAGE: SPEICHERN ERST AUF KNOPFDRUCK ---------------------------------------------
+  // Von Hand in der Garage geaenderte Auto- und Fahrerwerte (Name, Farbe, Modell, Nummer, Rolle,
+  // Ghost-Tempo, Fahrstil ...) bleiben in einem ENTWURF, bis "Speichern" gedrueckt wird. Was beim
+  // Verbinden automatisch abgelegt wird, geht weiter sofort in den Speicher. "Verwerfen" laedt die
+  // Seite neu: dann stimmt die Anzeige wieder mit dem Gespeicherten ueberein.
+  // Erkannt wird "von Hand" am Ereignis: Klick, Eingabe oder Aenderung innerhalb der Garage (oder des
+  // Fahrstil-Fensters). Was waehrend eines solchen Ereignisses geschrieben wird, landet im Entwurf.
+  let garageEntwurf = null;
+  let garageHandGerade = false;
+  function garageLesen(key) {
+    if (garageEntwurf && Object.prototype.hasOwnProperty.call(garageEntwurf, key)) return garageEntwurf[key];
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function garageSchreiben(key, val) {
+    if (garageHandGerade) {
+      garageEntwurf = garageEntwurf || {};
+      garageEntwurf[key] = val;
+      garageEntwurfAnzeigen();
+      return;
+    }
+    // Automatische Ablage, waehrend ein Entwurf offen ist: der Entwurf bleibt aktuell, damit Speichern
+    // nicht eine veraltete Fassung zurueckschreibt.
+    if (garageEntwurf && Object.prototype.hasOwnProperty.call(garageEntwurf, key)) garageEntwurf[key] = val;
+    try { localStorage.setItem(key, val); } catch (e) { /* voll oder privat */ }
+  }
+  function garageEntwurfAnzeigen() {
+    const leiste = $('gar-entwurf');
+    if (leiste) leiste.hidden = !garageEntwurf || !Object.keys(garageEntwurf).length;
+  }
+  function garageEntwurfSpeichern() {
+    if (!garageEntwurf) return;
+    for (const k of Object.keys(garageEntwurf)) { try { localStorage.setItem(k, garageEntwurf[k]); } catch (e) { /* voll */ } }
+    garageEntwurf = null;
+    garageEntwurfAnzeigen();
+    if (typeof renderGarage === 'function') renderGarage();
+  }
+  function garageEntwurfVerwerfen() {
+    if (!garageEntwurf) return;
+    if (!confirm(t('Verwerfen? Ungespeicherte Änderungen gehen verloren.'))) return;
+    garageEntwurf = null;
+    location.reload();
+  }
+  ['click', 'input', 'change'].forEach((ereignis) => {
+    document.addEventListener(ereignis, (e) => {
+      const ziel = e.target;
+      if (!ziel || !ziel.closest || !ziel.closest('#tab-garage, #hd-wert')) return;
+      garageHandGerade = true;
+      setTimeout(() => { garageHandGerade = false; }, 0);
+    }, true);
+  });
+  window.addEventListener('beforeunload', (e) => {
+    if (garageEntwurf && Object.keys(garageEntwurf).length) { e.preventDefault(); e.returnValue = ''; }
+  });
+  (function garageEntwurfKnoepfe() {
+    const s = $('gar-entwurf-speichern'), v = $('gar-entwurf-verwerfen');
+    if (s) s.addEventListener('click', garageEntwurfSpeichern);
+    if (v) v.addEventListener('click', garageEntwurfVerwerfen);
+  })();
+
   const CAR_STORE = 'chc.cars.v1';
 
   function carStore() {
-    try { return JSON.parse(localStorage.getItem(CAR_STORE) || '{}'); }
+    try { return JSON.parse(garageLesen(CAR_STORE) || '{}'); }
     catch (e) { return {}; }
   }
   // Gemerkt wird je GERAET, nicht je Platz in der Liste: verbindet man in anderer
@@ -64806,7 +64881,7 @@
   // Sitzung. Eigene Ablage, damit carProfilGeaendert (Name/Farbe) unberuehrt bleibt.
   const CAR_ROLLEN_STORE = 'chc.rollen.v1';
   function carRollenLesen() {
-    try { return JSON.parse(localStorage.getItem(CAR_ROLLEN_STORE) || '{}') || {}; } catch (e) { return {}; }
+    try { return JSON.parse(garageLesen(CAR_ROLLEN_STORE) || '{}') || {}; } catch (e) { return {}; }
   }
   function carRolleMerken(car) {
     if (!car || !car.device || car.sim) return;
@@ -64820,10 +64895,10 @@
       ghostMotor: car.ghostMotor || '',
       // v1.1.3: Selbstlenkung je Auto ("" = wie in Optionen).
       fahrhilfe: car.fahrhilfe || '' };
-    try { localStorage.setItem(CAR_ROLLEN_STORE, JSON.stringify(alle)); } catch (e) { /* voll */ }
+    garageSchreiben(CAR_ROLLEN_STORE, JSON.stringify(alle));
   }
   function carStoreSchreiben(all) {
-    try { localStorage.setItem(CAR_STORE, JSON.stringify(all)); } catch (e) { /* privat */ }
+    garageSchreiben(CAR_STORE, JSON.stringify(all));
   }
   function carRemember(car) {
     const all = carStore();
@@ -127905,12 +127980,12 @@ const GHOST_GRID_MAX = 0.9;   // maximale Querlage beim Selbst-Einparken (experi
   let hdStilDaten = null, hdStilVersion = 1;
   const hdStilCache = new Map();
   function hdStilAlle() {
-    if (!hdStilDaten) { try { hdStilDaten = JSON.parse(localStorage.getItem(HD_STIL_STORE) || '{}') || {}; } catch (e) { hdStilDaten = {}; } }
+    if (!hdStilDaten) { try { hdStilDaten = JSON.parse(garageLesen(HD_STIL_STORE) || '{}') || {}; } catch (e) { hdStilDaten = {}; } }
     return hdStilDaten;
   }
   function hdStilSpeichern() {
     hdStilVersion++;
-    try { localStorage.setItem(HD_STIL_STORE, JSON.stringify(hdStilAlle())); } catch (e) { /* private */ }
+    garageSchreiben(HD_STIL_STORE, JSON.stringify(hdStilAlle()));
   }
   // A generated style: seeded from the device id, so the same car always starts with the same driver.
   function hdStilErzeugen(seedText) {
